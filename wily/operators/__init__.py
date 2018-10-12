@@ -1,5 +1,13 @@
 from collections import namedtuple
-from .mccabe import MccabeOperator
+
+
+class BaseOperator(object):
+    """Abstract Operator Class"""
+    def run(self, module, options):
+        raise NotImplementedError()
+
+
+from wily.operators.mccabe import MccabeOperator
 
 
 """Type for an operator"""
@@ -16,7 +24,21 @@ ALL_OPERATORS = {
 }
 
 
-class BaseOperator(object):
-    """Abstract Operator Class"""
-    def run(self, module, options):
-        raise NotImplementedError()
+def resolve_operator(name):
+    """
+    Get the :namedtuple:`wily.operators.Operator` for a given name
+    :param name: The name of the operator
+    :return: The operator type
+    """
+    r = [operator for operator in ALL_OPERATORS if operator.name == name.lower()]
+    if not r:
+        raise ValueError(f"Operator {name} not recognised.")
+    else:
+        return r[0]
+
+
+def resolve_operators(operators):
+    return [resolve_operator(operator) for operator in operators]
+
+
+

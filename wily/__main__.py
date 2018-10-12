@@ -1,39 +1,46 @@
 import click
-from .config import load as load_config
+import logging
+from wily.config import load as load_config
+from wily.config import DEFAULT_CONFIG_PATH
+from wily.archivers import resolve_archiver
+from wily.operators import resolve_operators
 
 
-@click.group(name="history")
+logger = logging.getLogger("wily")
+
+
+@click.group()
 @click.option('--debug/--no-debug', default=False)
+@click.option('--config', default=DEFAULT_CONFIG_PATH, help="Path to configuration file, defaults to wily.cfg")
 @click.pass_context
-def history_cli(ctx, debug):
+def cli(ctx, debug, config):
+    logging.basicConfig()
     """Commands for creating and searching through history"""
     ctx.ensure_object(dict)
-
     ctx.obj['DEBUG'] = debug
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    ctx.obj['CONFIG'] = load_config(config)
+    logging.debug(f"Loaded configuration from {config}")
 
-    ctx.obj['CONFIG'] = load_config()
 
-
-@history_cli.command()
-@click.option("--max-history", default=100, help="The maximum number of historical commits to try")
+@cli.command()
+@click.option("-h", "--max-history", default=100, help="The maximum number of historical commits to try")
 @click.pass_context
-def build():
+def build(ctx, max_history):
     """Build the complexity history log based on a version-control system"""
-    pass
+    config = ctx.obj['CONFIG']
+    logging.debug("Running build command")
+    from wily.commands.build import build
+    build(config=config, archiver=resolve_archiver(config.archiver), operators=resolve_operators(config.operators))
 
 
-@history_cli.command()
-def show():
+@cli.command()
+@click.pass_context
+def show(ctx):
     """Show the history archive in the .wily/ folder"""
-    pass
+    config = ctx.obj['CONFIG']
+    logging.debug("Running show command")
 
 
-@click.group(invoke_without_command=True)
-def run_cli():
-    pass
-
-
-cli = click.CommandCollection(sources=[history_cli, run_cli])
-
-if __name__ == '__main__':
-    cli()
+cli()

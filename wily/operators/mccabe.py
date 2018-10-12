@@ -1,4 +1,4 @@
-from . import BaseOperator
+from wily.operators import BaseOperator
 
 
 class MccabeOperator(BaseOperator):
