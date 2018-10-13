@@ -1,7 +1,7 @@
 import click
 import logging
 from wily.config import load as load_config
-from wily.config import DEFAULT_CONFIG_PATH
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_MAX_REVISIONS
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 
@@ -25,13 +25,17 @@ def cli(ctx, debug, config):
 
 
 @cli.command()
-@click.option("-h", "--max-history", default=100, help="The maximum number of historical commits to try")
+@click.option("-h", "--max-revisions", default=DEFAULT_MAX_REVISIONS, help="The maximum number of historical commits to try")
 @click.pass_context
-def build(ctx, max_history):
+def build(ctx, max_revisions):
     """Build the complexity history log based on a version-control system"""
     config = ctx.obj['CONFIG']
     logging.debug("Running build command")
     from wily.commands.build import build
+
+    if max_revisions:
+        config.max_revisions = max_revisions
+
     build(config=config, archiver=resolve_archiver(config.archiver), operators=resolve_operators(config.operators))
 
 

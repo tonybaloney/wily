@@ -4,9 +4,11 @@ Configuration of wily
 """
 
 import configparser
-from collections import namedtuple
 import pathlib
 import logging
+from dataclasses import dataclass
+from typing import Any, List
+
 
 from wily.operators import OPERATOR_MCCABE
 from wily.archivers import ARCHIVER_GIT
@@ -14,17 +16,25 @@ from wily.archivers import ARCHIVER_GIT
 logger = logging.getLogger("wily")
 
 
-WilyConfig = namedtuple("WilyConfig", "operators archiver")
+@dataclass
+class WilyConfig:
+    operators: List
+    archiver: Any
+    path: str
+    max_revisions: int
+
 
 DEFAULT_OPERATORS = {OPERATOR_MCCABE.name}
 
 DEFAULT_ARCHIVER = ARCHIVER_GIT.name
 
-DEFAULT_CONFIG = WilyConfig(operators=DEFAULT_OPERATORS, archiver=DEFAULT_ARCHIVER)
-
 DEFAULT_CONFIG_PATH = "wily.cfg"
 
 DEFAULT_CACHE_PATH = ".wily"
+
+DEFAULT_MAX_REVISIONS = 100
+
+DEFAULT_CONFIG = WilyConfig(operators=DEFAULT_OPERATORS, archiver=DEFAULT_ARCHIVER, path=".", max_revisions=DEFAULT_MAX_REVISIONS)
 
 
 def load(config_path=DEFAULT_CONFIG_PATH):
@@ -44,4 +54,8 @@ def load(config_path=DEFAULT_CONFIG_PATH):
 
     archiver = config.get(section="wily", option="archiver", fallback=DEFAULT_ARCHIVER)
 
-    return WilyConfig(operators=operators, archiver=archiver)
+    path = config.get(section="wily", option="path", fallback=".")
+
+    max_revisions = config.get(section="wily", option="max_revisions", fallback=DEFAULT_MAX_REVISIONS)
+
+    return WilyConfig(operators=operators, archiver=archiver, path=path, max_revisions=max_revisions)

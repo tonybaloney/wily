@@ -2,4 +2,6 @@ from wily.operators import BaseOperator
 
 
 class MccabeOperator(BaseOperator):
-    pass
+    def __init__(self, config):
+        pass
+

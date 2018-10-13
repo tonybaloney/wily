@@ -2,9 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wily/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/archivers/git.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/archivers/git.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/commands/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/commands/build.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/operators/mccabe.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/operators/mccabe.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,55 +20,132 @@
     <session id="-270041201">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.1" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.open.time.17" value="1" />
+          <entry key="project.open.time.5" value="1" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="md" value="1" />
-          <entry key="py" value="1" />
+          <entry key="py" value="19" />
+          <entry key="toml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Markdown" value="1" />
-          <entry key="Python" value="1" />
+          <entry key="PLAIN_TEXT" value="1" />
+          <entry key="Python" value="19" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="md" value="337" />
-          <entry key="py" value="33" />
+          <entry key="py" value="5460" />
+          <entry key="toml" value="76" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="337" />
-          <entry key="Python" value="33" />
+          <entry key="Python" value="5460" />
+          <entry key="TOML file" value="76" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="15">
-                <caret line="1" column="19" lean-forward="true" selection-start-line="1" selection-end-line="2" />
-              </first_editor>
-              <second_editor />
+        <entry file="file://$PROJECT_DIR$/pyproject.toml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="5" column="16" selection-start-line="5" selection-start-column="16" selection-end-line="5" selection-end-column="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wily/__main__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="540">
+              <caret line="36" column="44" lean-forward="true" selection-start-line="36" selection-start-column="44" selection-end-line="36" selection-end-column="44" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+                <marker date="1539468868000" expanded="true" signature="1416:1546" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wily/operators/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
+              <folding>
+                <marker date="1539308837000" expanded="true" signature="976:1045" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="23" column="68" lean-forward="true" selection-start-line="23" selection-start-column="68" selection-end-line="23" selection-end-column="68" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/wily/__init__.py">
+        <entry file="file://$PROJECT_DIR$/wily/operators/mccabe.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="1" column="96" selection-start-line="1" selection-start-column="96" selection-end-line="1" selection-end-column="96" />
+            <state relative-caret-position="90">
+              <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+              <folding>
+                <marker date="1539469244000" expanded="true" signature="77:82" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="8" column="24" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
+              <folding>
+                <element signature="e#0#20#0" expanded="true" />
+                <marker date="1539468738000" expanded="true" signature="128:137" ph="..." />
+                <marker date="1539468738000" expanded="true" signature="225:230" ph="..." />
+                <marker date="1539468738000" expanded="true" signature="225:344" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wily/archivers/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="795">
+              <caret line="53" selection-start-line="53" selection-end-line="53" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wily/config.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-107">
+              <caret line="6" selection-start-line="6" selection-end-line="6" />
+              <folding>
+                <marker date="1539469174000" expanded="true" signature="724:966" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -86,6 +167,16 @@
       <list>
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/wily/__init__.py" />
+        <option value="$PROJECT_DIR$/wily/commands/__init__.py" />
+        <option value="$PROJECT_DIR$/wily/cache.py" />
+        <option value="$PROJECT_DIR$/wily/operators/__init__.py" />
+        <option value="$PROJECT_DIR$/wily/archivers/__init__.py" />
+        <option value="$PROJECT_DIR$/wily/archivers/git.py" />
+        <option value="$PROJECT_DIR$/wily/__main__.py" />
+        <option value="$PROJECT_DIR$/pyproject.toml" />
+        <option value="$PROJECT_DIR$/wily/config.py" />
+        <option value="$PROJECT_DIR$/wily/commands/build.py" />
+        <option value="$PROJECT_DIR$/wily/operators/mccabe.py" />
       </list>
     </option>
   </component>
@@ -97,7 +188,7 @@
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="y" value="23" />
-    <option name="width" value="2560" />
+    <option name="width" value="1715" />
     <option name="height" value="1337" />
   </component>
   <component name="ProjectLevelVcsManager">
@@ -108,7 +199,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -123,6 +213,24 @@
             </path>
             <path>
               <item name="wily" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wily" type="462c0819:PsiDirectoryNode" />
+              <item name="wily" type="462c0819:PsiDirectoryNode" />
+              <item name="archivers" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wily" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wily" type="462c0819:PsiDirectoryNode" />
+              <item name="wily" type="462c0819:PsiDirectoryNode" />
+              <item name="commands" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wily" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wily" type="462c0819:PsiDirectoryNode" />
+              <item name="wily" type="462c0819:PsiDirectoryNode" />
+              <item name="operators" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wily" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
             <path>
@@ -134,6 +242,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -168,18 +277,12 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="2560" height="1337" extended-state="6" />
+    <frame x="0" y="23" width="2560" height="1349" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4994012" visible="true" weight="0.24980143" />
-      <window_info id="Structure" order="1" sideWeight="0.5005988" side_tool="true" visible="true" weight="0.24980143" />
-      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Python Console" weight="0.32931727" />
-      <window_info anchor="bottom" id="Terminal" visible="true" weight="0.32931727" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4970484" visible="true" weight="0.1731533" />
+      <window_info id="Structure" order="1" sideWeight="0.5029516" side_tool="true" visible="true" weight="0.1731533" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -187,11 +290,17 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="SciView" />
-      <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.32617342" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.32931727" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="SciView" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,7 +314,7 @@
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="15">
-            <caret line="1" column="19" lean-forward="true" selection-start-line="1" selection-end-line="2" />
+            <caret line="1" column="19" selection-start-line="1" selection-end-line="2" />
           </first_editor>
           <second_editor />
         </state>
@@ -215,6 +324,91 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="1" column="96" selection-start-line="1" selection-start-column="96" selection-end-line="1" selection-end-column="96" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/cache.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="9" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/commands/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/archivers/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="795">
+          <caret line="53" selection-start-line="53" selection-end-line="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/operators/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+          <folding>
+            <marker date="1539308837000" expanded="true" signature="976:1045" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="24" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+            <marker date="1539468738000" expanded="true" signature="128:137" ph="..." />
+            <marker date="1539468738000" expanded="true" signature="225:230" ph="..." />
+            <marker date="1539468738000" expanded="true" signature="225:344" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyproject.toml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="16" selection-start-line="5" selection-start-column="16" selection-end-line="5" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-107">
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <marker date="1539469174000" expanded="true" signature="724:966" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="36" column="44" lean-forward="true" selection-start-line="36" selection-start-column="44" selection-end-line="36" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+            <marker date="1539468868000" expanded="true" signature="1416:1546" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="23" column="68" lean-forward="true" selection-start-line="23" selection-start-column="68" selection-end-line="23" selection-end-column="68" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/operators/mccabe.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <marker date="1539469244000" expanded="true" signature="77:82" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
