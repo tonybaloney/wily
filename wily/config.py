@@ -30,6 +30,8 @@ DEFAULT_ARCHIVER = ARCHIVER_GIT.name
 
 DEFAULT_CONFIG_PATH = "wily.cfg"
 
+DEFAULT_CONFIG_SECTION = "wily"
+
 DEFAULT_CACHE_PATH = ".wily"
 
 DEFAULT_MAX_REVISIONS = 100
@@ -47,15 +49,12 @@ def load(config_path=DEFAULT_CONFIG_PATH):
         logger.debug(f"Could not locate {config_path}, using default config.")
         return DEFAULT_CONFIG
 
-    config = configparser.ConfigParser(default_section="wily")
+    config = configparser.ConfigParser(default_section=DEFAULT_CONFIG_SECTION)
     config.read(config_path)
 
-    operators = config.get(section="wily", option="operators", fallback=DEFAULT_OPERATORS)
-
-    archiver = config.get(section="wily", option="archiver", fallback=DEFAULT_ARCHIVER)
-
-    path = config.get(section="wily", option="path", fallback=".")
-
-    max_revisions = config.get(section="wily", option="max_revisions", fallback=DEFAULT_MAX_REVISIONS)
+    operators = config.get(option="operators", fallback=DEFAULT_OPERATORS)
+    archiver = config.get(option="archiver", fallback=DEFAULT_ARCHIVER)
+    path = config.get(option="path", fallback=".")
+    max_revisions = config.get(option="max_revisions", fallback=DEFAULT_MAX_REVISIONS)
 
     return WilyConfig(operators=operators, archiver=archiver, path=path, max_revisions=max_revisions)

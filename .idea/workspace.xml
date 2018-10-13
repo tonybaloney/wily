@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/__main__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wily/archivers/git.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/archivers/git.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/commands/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/commands/build.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wily/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/operators/mccabe.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/operators/mccabe.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,14 +39,14 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="md" value="337" />
-          <entry key="py" value="5460" />
+          <entry key="py" value="5858" />
           <entry key="toml" value="76" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="337" />
-          <entry key="Python" value="5460" />
+          <entry key="Python" value="5858" />
           <entry key="TOML file" value="76" />
         </counts>
       </usages-collector>
@@ -102,7 +97,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/operators/mccabe.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="90">
@@ -114,16 +109,17 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="24" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
+            <state relative-caret-position="300">
+              <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
-                <marker date="1539468738000" expanded="true" signature="128:137" ph="..." />
-                <marker date="1539468738000" expanded="true" signature="225:230" ph="..." />
-                <marker date="1539468738000" expanded="true" signature="225:344" ph="..." />
+                <marker date="1539469702000" expanded="true" signature="108:280" ph="..." />
+                <marker date="1539469702000" expanded="true" signature="344:353" ph="..." />
+                <marker date="1539469702000" expanded="true" signature="470:475" ph="..." />
+                <marker date="1539469702000" expanded="true" signature="470:842" ph="..." />
               </folding>
             </state>
           </provider>
@@ -141,10 +137,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-107">
-              <caret line="6" selection-start-line="6" selection-end-line="6" />
+            <state relative-caret-position="530">
+              <caret line="46" column="7" lean-forward="true" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
               <folding>
-                <marker date="1539469174000" expanded="true" signature="724:966" ph="..." />
+                <element signature="e#32#51#0" expanded="true" />
+                <marker date="1539469366000" expanded="true" signature="757:999" ph="..." />
               </folding>
             </state>
           </provider>
@@ -171,12 +168,12 @@
         <option value="$PROJECT_DIR$/wily/cache.py" />
         <option value="$PROJECT_DIR$/wily/operators/__init__.py" />
         <option value="$PROJECT_DIR$/wily/archivers/__init__.py" />
-        <option value="$PROJECT_DIR$/wily/archivers/git.py" />
         <option value="$PROJECT_DIR$/wily/__main__.py" />
         <option value="$PROJECT_DIR$/pyproject.toml" />
-        <option value="$PROJECT_DIR$/wily/config.py" />
         <option value="$PROJECT_DIR$/wily/commands/build.py" />
         <option value="$PROJECT_DIR$/wily/operators/mccabe.py" />
+        <option value="$PROJECT_DIR$/wily/config.py" />
+        <option value="$PROJECT_DIR$/wily/archivers/git.py" />
       </list>
     </option>
   </component>
@@ -280,7 +277,7 @@
     <frame x="0" y="23" width="2560" height="1349" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4970484" visible="true" weight="0.1731533" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4970484" visible="true" weight="0.1731533" />
       <window_info id="Structure" order="1" sideWeight="0.5029516" side_tool="true" visible="true" weight="0.1731533" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -294,7 +291,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.32617342" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.32617342" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.32931727" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -354,33 +351,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="24" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-            <marker date="1539468738000" expanded="true" signature="128:137" ph="..." />
-            <marker date="1539468738000" expanded="true" signature="225:230" ph="..." />
-            <marker date="1539468738000" expanded="true" signature="225:344" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pyproject.toml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="5" column="16" selection-start-line="5" selection-start-column="16" selection-end-line="5" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wily/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-107">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
-          <folding>
-            <marker date="1539469174000" expanded="true" signature="724:966" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -395,6 +369,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wily/operators/mccabe.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <marker date="1539469244000" expanded="true" signature="77:82" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -402,12 +386,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wily/operators/mccabe.py">
+    <entry file="file://$PROJECT_DIR$/wily/config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+        <state relative-caret-position="530">
+          <caret line="46" column="7" lean-forward="true" selection-start-line="46" selection-start-column="7" selection-end-line="46" selection-end-column="7" />
           <folding>
-            <marker date="1539469244000" expanded="true" signature="77:82" ph="..." />
+            <element signature="e#32#51#0" expanded="true" />
+            <marker date="1539469366000" expanded="true" signature="757:999" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+            <marker date="1539469702000" expanded="true" signature="108:280" ph="..." />
+            <marker date="1539469702000" expanded="true" signature="344:353" ph="..." />
+            <marker date="1539469702000" expanded="true" signature="470:475" ph="..." />
+            <marker date="1539469702000" expanded="true" signature="470:842" ph="..." />
           </folding>
         </state>
       </provider>
