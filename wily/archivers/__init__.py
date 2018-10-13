@@ -4,7 +4,7 @@ from collections import namedtuple
 class BaseArchiver(object):
     """Abstract Archiver Class"""
 
-    def log(self, path, max_revisions):
+    def revisions(self, path, max_revisions):
         """
         Get the list of revision
         :param path: the path
