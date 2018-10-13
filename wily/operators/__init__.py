@@ -17,10 +17,18 @@ Operator = namedtuple("Operator", "name cls description")
 """Mccabe Operator defined in `wily.operators.mccabe`"""
 OPERATOR_MCCABE = Operator(name="mccabe", cls=MccabeOperator, description="Number of branches via the Mccabe algorithm")
 
+OPERATOR_CYCLOMATIC = Operator(name="cyclomatic", cls=MccabeOperator, description="Cyclomatic Complexity of modules")
+
+OPERATOR_RAW = Operator(name="raw", cls=MccabeOperator, description="Raw Python statistics")
+
+OPERATOR_MAINTAINABILITY = Operator(name="maintainability", cls=MccabeOperator, description="Maintainability index (lines of code and branching)")
+
 
 """Set of all available operators"""
 ALL_OPERATORS = {
-    OPERATOR_MCCABE
+    OPERATOR_CYCLOMATIC,
+    OPERATOR_MAINTAINABILITY,
+    OPERATOR_RAW
 }
 
 

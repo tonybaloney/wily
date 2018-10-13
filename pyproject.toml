@@ -2,6 +2,7 @@
 requires = [
     "flit",
     "gitpython",
+    "radon",
     "click",
     "dataclasses; python_version == '3.6'",]
 build-backend = "flit.buildapi"
