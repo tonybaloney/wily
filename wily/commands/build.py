@@ -35,10 +35,10 @@ def build(config, archiver, operators):
     if revisions is None or len(revisions) == 0:
         logger.warning("Could not find any revisions, using HEAD")
         revisions = []  # TODO: Create a special HEAD revision to use current state
-    
+
     # Build a set of operators
     operators = [operator.cls(config) for operator in operators]
-    
+
     for revision in revisions:
         # Checkout target revision
         # TODO: Verify there aren't any non-committed files in working copy

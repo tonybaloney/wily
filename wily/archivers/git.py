@@ -5,7 +5,7 @@ from wily.archivers import BaseArchiver
 
 class DirtyGitRepositoryError(RuntimeError):
     def __init__(self, untracked_files):
-        self.untracked_files= untracked_files
+        self.untracked_files = untracked_files
         self.message = "Dirty repository, make sure you commit/stash files first"
 
 
@@ -20,8 +20,9 @@ class GitArchiver(BaseArchiver):
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
         # TODO : Determine current branch - how to handle detached head?
-        return list(self.repo.iter_commits('master', max_count=self.config.max_revisions))
+        return list(
+            self.repo.iter_commits("master", max_count=self.config.max_revisions)
+        )
 
     def checkout(self, revision, options):
         pass
-

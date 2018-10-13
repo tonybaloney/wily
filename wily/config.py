@@ -9,8 +9,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, List
 
-
-from wily.operators import OPERATOR_MCCABE
+import wily.operators as operators
 from wily.archivers import ARCHIVER_GIT
 
 logger = logging.getLogger("wily")
@@ -24,7 +23,11 @@ class WilyConfig:
     max_revisions: int
 
 
-DEFAULT_OPERATORS = {OPERATOR_MCCABE.name}
+DEFAULT_OPERATORS = {
+    operators.OPERATOR_RAW,
+    operators.OPERATOR_MAINTAINABILITY,
+    operators.OPERATOR_CYCLOMATIC,
+}
 
 DEFAULT_ARCHIVER = ARCHIVER_GIT.name
 
@@ -36,7 +39,12 @@ DEFAULT_CACHE_PATH = ".wily"
 
 DEFAULT_MAX_REVISIONS = 100
 
-DEFAULT_CONFIG = WilyConfig(operators=DEFAULT_OPERATORS, archiver=DEFAULT_ARCHIVER, path=".", max_revisions=DEFAULT_MAX_REVISIONS)
+DEFAULT_CONFIG = WilyConfig(
+    operators=DEFAULT_OPERATORS,
+    archiver=DEFAULT_ARCHIVER,
+    path=".",
+    max_revisions=DEFAULT_MAX_REVISIONS,
+)
 
 
 def load(config_path=DEFAULT_CONFIG_PATH):
@@ -57,4 +65,6 @@ def load(config_path=DEFAULT_CONFIG_PATH):
     path = config.get(option="path", fallback=".")
     max_revisions = config.get(option="max_revisions", fallback=DEFAULT_MAX_REVISIONS)
 
-    return WilyConfig(operators=operators, archiver=archiver, path=path, max_revisions=max_revisions)
+    return WilyConfig(
+        operators=operators, archiver=archiver, path=path, max_revisions=max_revisions
+    )

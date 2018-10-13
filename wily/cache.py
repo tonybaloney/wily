@@ -14,7 +14,10 @@ def exists():
     :return: Whether the .wily directory exists
     :rtype: ``boolean``
     """
-    return pathlib.Path(DEFAULT_CACHE_PATH).exists() and pathlib.Path(DEFAULT_CACHE_PATH).is_dir()
+    return (
+        pathlib.Path(DEFAULT_CACHE_PATH).exists()
+        and pathlib.Path(DEFAULT_CACHE_PATH).is_dir()
+    )
 
 
 def create():

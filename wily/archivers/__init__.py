@@ -13,7 +13,6 @@ class BaseArchiver(object):
         """
         raise NotImplementedError()
 
-
     def checkout(self, revision, options):
         """
         Checkout a specific revision
@@ -35,9 +34,7 @@ ARCHIVER_GIT = Archiver(name="git", cls=GitArchiver, description="Git archiver")
 
 
 """Set of all available archivers"""
-ALL_ARCHIVERS = {
-    ARCHIVER_GIT
-}
+ALL_ARCHIVERS = {ARCHIVER_GIT}
 
 
 def resolve_archiver(name):
