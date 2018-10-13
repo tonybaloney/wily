@@ -24,9 +24,9 @@ class WilyConfig:
 
 
 DEFAULT_OPERATORS = {
-    operators.OPERATOR_RAW,
-    operators.OPERATOR_MAINTAINABILITY,
-    operators.OPERATOR_CYCLOMATIC,
+    operators.OPERATOR_RAW.name,
+    operators.OPERATOR_MAINTAINABILITY.name,
+    operators.OPERATOR_CYCLOMATIC.name,
 }
 
 DEFAULT_ARCHIVER = ARCHIVER_GIT.name
