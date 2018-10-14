@@ -32,6 +32,7 @@ def cli(ctx, debug, config):
     "-h",
     "--max-revisions",
     default=None,
+    type=click.INT,
     help="The maximum number of historical commits to archive",
 )
 @click.option("-p", "--path", type=click.Path(resolve_path=True))
