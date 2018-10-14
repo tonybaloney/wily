@@ -43,7 +43,7 @@ def build(ctx, max_revisions, path):
     """Build the complexity history log based on a version-control system"""
     config = ctx.obj["CONFIG"]
 
-    if config['DEBUG']:
+    if ctx.obj["DEBUG"]:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
