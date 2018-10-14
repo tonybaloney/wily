@@ -8,7 +8,7 @@ from wily.operators import resolve_operators
 
 
 @click.group()
-@click.option("--debug/--no-debug", default=False)
+@click.option("--debug/--no-debug", default=False, help="Print debug information, used for development")
 @click.option(
     "--config",
     default=DEFAULT_CONFIG_PATH,
@@ -32,7 +32,7 @@ def cli(ctx, debug, config):
     "-h",
     "--max-revisions",
     default=None,
-    help="The maximum number of historical commits to try",
+    help="The maximum number of historical commits to archive",
 )
 @click.option("-p", "--path", type=click.Path(resolve_path=True))
 @click.pass_context
