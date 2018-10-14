@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wily/commands/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/commands/build.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -44,8 +45,8 @@
         <counts>
           <entry key="gitignore" value="7" />
           <entry key="md" value="2054" />
-          <entry key="py" value="12760" />
-          <entry key="toml" value="182" />
+          <entry key="py" value="12786" />
+          <entry key="toml" value="190" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
@@ -53,19 +54,19 @@
           <entry key="Ini" value="3" />
           <entry key="Markdown" value="2051" />
           <entry key="PLAIN_TEXT" value="7" />
-          <entry key="Python" value="12760" />
-          <entry key="TOML file" value="182" />
+          <entry key="Python" value="12786" />
+          <entry key="TOML file" value="190" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pyproject.toml">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="120">
-              <caret line="8" column="19" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
+              <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -151,11 +152,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="52">
-              <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+            <state relative-caret-position="660">
+              <caret line="44" column="50" selection-start-line="44" selection-start-column="50" selection-end-line="44" selection-end-column="50" />
+              <folding>
+                <element signature="e#57#85#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -194,10 +198,10 @@
         <option value="$PROJECT_DIR$/wily/commands/show.py" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/wily/commands/report.py" />
-        <option value="$PROJECT_DIR$/pyproject.toml" />
         <option value="$PROJECT_DIR$/wily/__init__.py" />
         <option value="$PROJECT_DIR$/wily/__main__.py" />
         <option value="$PROJECT_DIR$/wily/commands/build.py" />
+        <option value="$PROJECT_DIR$/pyproject.toml" />
       </list>
     </option>
   </component>
@@ -460,13 +464,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pyproject.toml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="19" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
@@ -506,8 +503,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+        <state relative-caret-position="660">
+          <caret line="44" column="50" selection-start-line="44" selection-start-column="50" selection-end-line="44" selection-end-column="50" />
+          <folding>
+            <element signature="e#57#85#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyproject.toml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
         </state>
       </provider>
     </entry>
