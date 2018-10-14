@@ -40,7 +40,7 @@
         <counts>
           <entry key="gitignore" value="7" />
           <entry key="md" value="337" />
-          <entry key="py" value="8843" />
+          <entry key="py" value="8868" />
           <entry key="toml" value="84" />
         </counts>
       </usages-collector>
@@ -48,7 +48,7 @@
         <counts>
           <entry key="Markdown" value="337" />
           <entry key="PLAIN_TEXT" value="7" />
-          <entry key="Python" value="8843" />
+          <entry key="Python" value="8868" />
           <entry key="TOML file" value="84" />
         </counts>
       </usages-collector>
@@ -73,7 +73,7 @@
         <entry file="file://$PROJECT_DIR$/wily/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="105">
-              <caret line="7" column="20" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
+              <caret line="7" column="39" selection-start-line="7" selection-start-column="39" selection-end-line="7" selection-end-column="39" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -484,7 +484,7 @@
     <entry file="file://$PROJECT_DIR$/wily/__main__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
-          <caret line="7" column="20" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
+          <caret line="7" column="39" selection-start-line="7" selection-start-column="39" selection-end-line="7" selection-end-column="39" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
