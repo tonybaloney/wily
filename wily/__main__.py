@@ -5,6 +5,7 @@ from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_MAX_REVISIONS
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 
