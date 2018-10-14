@@ -19,4 +19,4 @@ home-page = "https://github.com/tonybaloney/wily"
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 
 [tool.flit.scripts]
-wily = "wily:cli"
+wily = "wily.__main__:cli"

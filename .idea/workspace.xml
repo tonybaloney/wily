@@ -44,8 +44,8 @@
         <counts>
           <entry key="gitignore" value="7" />
           <entry key="md" value="2054" />
-          <entry key="py" value="11953" />
-          <entry key="toml" value="158" />
+          <entry key="py" value="11954" />
+          <entry key="toml" value="167" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
@@ -53,8 +53,8 @@
           <entry key="Ini" value="3" />
           <entry key="Markdown" value="2051" />
           <entry key="PLAIN_TEXT" value="7" />
-          <entry key="Python" value="11953" />
-          <entry key="TOML file" value="158" />
+          <entry key="Python" value="11954" />
+          <entry key="TOML file" value="167" />
         </counts>
       </usages-collector>
     </session>
@@ -65,7 +65,7 @@
         <entry file="file://$PROJECT_DIR$/pyproject.toml">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="315">
-              <caret line="21" column="16" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
+              <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -73,7 +73,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
+            <state relative-caret-position="-104">
               <caret line="34" column="61" selection-start-line="34" selection-start-column="61" selection-end-line="34" selection-end-column="61" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
@@ -86,7 +86,7 @@
         <entry file="file://$PROJECT_DIR$/wily/commands/show.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="496">
-              <caret line="39" lean-forward="true" selection-start-line="39" selection-end-line="39" />
+              <caret line="39" selection-start-line="39" selection-end-line="39" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -119,7 +119,7 @@
         <entry file="file://$PROJECT_DIR$/wily/config.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="135">
-              <caret line="23" column="56" lean-forward="true" selection-start-line="19" selection-start-column="4" selection-end-line="23" selection-end-column="56" />
+              <caret line="23" column="56" selection-start-line="19" selection-start-column="4" selection-end-line="23" selection-end-column="56" />
               <folding>
                 <element signature="e#32#51#0" expanded="true" />
               </folding>
@@ -320,7 +320,7 @@
     <frame x="0" y="23" width="2560" height="1349" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49605057" visible="true" weight="0.1731533" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49605057" visible="true" weight="0.1731533" />
       <window_info id="Structure" order="1" sideWeight="0.50394946" side_tool="true" visible="true" weight="0.1731533" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -334,7 +334,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.49642006" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.49642006" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.32931727" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -418,9 +418,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.wily/git/213868438ff348867d830da9736d93007e6384ac.json">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/wily/cache.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="601">
@@ -455,7 +452,7 @@
     <entry file="file://$PROJECT_DIR$/wily/config.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
-          <caret line="23" column="56" lean-forward="true" selection-start-line="19" selection-start-column="4" selection-end-line="23" selection-end-column="56" />
+          <caret line="23" column="56" selection-start-line="19" selection-start-column="4" selection-end-line="23" selection-end-column="56" />
           <folding>
             <element signature="e#32#51#0" expanded="true" />
           </folding>
@@ -472,10 +469,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-104">
+          <caret line="34" column="61" selection-start-line="34" selection-start-column="61" selection-end-line="34" selection-end-column="61" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.wily/git/213868438ff348867d830da9736d93007e6384ac.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/wily/commands/show.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="496">
-          <caret line="39" lean-forward="true" selection-start-line="39" selection-end-line="39" />
+          <caret line="39" selection-start-line="39" selection-end-line="39" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
@@ -485,17 +495,7 @@
     <entry file="file://$PROJECT_DIR$/pyproject.toml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
-          <caret line="21" column="16" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="34" column="61" selection-start-line="34" selection-start-column="61" selection-end-line="34" selection-end-column="61" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
+          <caret line="21" column="21" selection-start-line="21" selection-start-column="21" selection-end-line="21" selection-end-column="21" />
         </state>
       </provider>
     </entry>
