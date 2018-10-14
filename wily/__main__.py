@@ -71,4 +71,20 @@ def show(ctx):
     show(config=config)
 
 
+@cli.command()
+@click.argument("path", type=click.Path(resolve_path=True))
+@click.argument("metric")
+@click.pass_context
+def report(ctx, path, metric):
+    """Show the history archive in the .wily/ folder"""
+    config = ctx.obj["CONFIG"]
+
+    if not exists():
+        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+
+    from wily.commands.report import report
+
+    report(config=config, path=path, metric=metric)
+
+
 cli()
