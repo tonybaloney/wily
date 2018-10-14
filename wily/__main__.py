@@ -5,8 +5,6 @@ from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_MAX_REVISIONS
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 
-logging.basicConfig()
-
 logger = logging.getLogger(__name__)
 
 
@@ -44,6 +42,12 @@ def cli(ctx, debug, config):
 def build(ctx, max_revisions, path):
     """Build the complexity history log based on a version-control system"""
     config = ctx.obj["CONFIG"]
+
+    if config['DEBUG']:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     logging.debug("Running build command")
     from wily.commands.build import build
 

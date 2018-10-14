@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/wily/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/cache.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/__main__.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -40,7 +41,7 @@
         <counts>
           <entry key="gitignore" value="7" />
           <entry key="md" value="337" />
-          <entry key="py" value="8730" />
+          <entry key="py" value="8819" />
           <entry key="toml" value="84" />
         </counts>
       </usages-collector>
@@ -48,7 +49,7 @@
         <counts>
           <entry key="Markdown" value="337" />
           <entry key="PLAIN_TEXT" value="7" />
-          <entry key="Python" value="8730" />
+          <entry key="Python" value="8819" />
           <entry key="TOML file" value="84" />
         </counts>
       </usages-collector>
@@ -69,11 +70,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wily/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="23" selection-start-line="9" selection-end-line="10" />
+            <state relative-caret-position="245">
+              <caret line="48" column="46" selection-start-line="48" selection-start-column="46" selection-end-line="48" selection-end-column="46" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -93,7 +94,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/cache.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="555">
@@ -203,11 +204,11 @@
         <option value="$PROJECT_DIR$/wily/operators/maintainability.py" />
         <option value="$PROJECT_DIR$/wily/operators/raw.py" />
         <option value="$PROJECT_DIR$/wily/operators/cyclomatic.py" />
-        <option value="$PROJECT_DIR$/wily/__main__.py" />
         <option value="$PROJECT_DIR$/wily/commands/build.py" />
         <option value="$PROJECT_DIR$/wily/archivers/git.py" />
         <option value="$PROJECT_DIR$/wily/config.py" />
         <option value="$PROJECT_DIR$/wily/cache.py" />
+        <option value="$PROJECT_DIR$/wily/__main__.py" />
       </list>
     </option>
   </component>
@@ -316,8 +317,8 @@
     <frame x="0" y="23" width="2560" height="1349" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4970484" visible="true" weight="0.1731533" />
-      <window_info id="Structure" order="1" sideWeight="0.5029516" side_tool="true" visible="true" weight="0.1731533" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49605057" visible="true" weight="0.1731533" />
+      <window_info id="Structure" order="1" sideWeight="0.50394946" side_tool="true" visible="true" weight="0.1731533" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -330,7 +331,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.32617342" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.49642006" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.32931727" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -438,16 +439,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="23" selection-start-line="9" selection-end-line="10" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -487,6 +478,16 @@
             <element signature="e#62#76#0" expanded="true" />
             <marker date="1539479104000" expanded="true" signature="147:152" ph="..." />
             <marker date="1539479104000" expanded="true" signature="421:426" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="245">
+          <caret line="48" column="46" selection-start-line="48" selection-start-column="46" selection-end-line="48" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
