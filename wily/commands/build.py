@@ -44,7 +44,7 @@ def build(config, archiver, operators):
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
 
-    with progressbar.ProgressBar(max_value=config.max_revisions*len(operators), redirect_stdout=True) as bar:
+    with progressbar.ProgressBar(max_value=config.max_revisions*len(operators)) as bar:
         i = 0
         try:
             for revision in revisions:

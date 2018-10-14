@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/wily/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/commands/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/commands/build.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -69,11 +69,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="179">
-              <caret line="34" column="19" selection-start-line="34" selection-start-column="19" selection-end-line="34" selection-end-column="19" />
+            <state relative-caret-position="424">
+              <caret line="34" column="18" selection-start-line="34" selection-start-column="15" selection-end-line="34" selection-end-column="18" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -150,11 +150,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="245">
-              <caret line="46" column="43" selection-start-line="46" selection-start-column="43" selection-end-line="46" selection-end-column="43" />
+              <caret line="46" column="78" selection-start-line="46" selection-start-column="78" selection-end-line="46" selection-end-column="78" />
               <folding>
                 <element signature="e#57#75#0" expanded="true" />
               </folding>
@@ -198,8 +198,8 @@
         <option value="$PROJECT_DIR$/wily/commands/report.py" />
         <option value="$PROJECT_DIR$/pyproject.toml" />
         <option value="$PROJECT_DIR$/wily/__init__.py" />
-        <option value="$PROJECT_DIR$/wily/commands/build.py" />
         <option value="$PROJECT_DIR$/wily/__main__.py" />
+        <option value="$PROJECT_DIR$/wily/commands/build.py" />
       </list>
     </option>
   </component>
@@ -496,22 +496,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
+    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="245">
-          <caret line="46" column="43" selection-start-line="46" selection-start-column="43" selection-end-line="46" selection-end-column="43" />
+        <state relative-caret-position="424">
+          <caret line="34" column="18" selection-start-line="34" selection-start-column="15" selection-end-line="34" selection-end-column="18" />
           <folding>
-            <element signature="e#57#75#0" expanded="true" />
+            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wily/__main__.py">
+    <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
-          <caret line="34" column="19" selection-start-line="34" selection-start-column="19" selection-end-line="34" selection-end-column="19" />
+        <state relative-caret-position="245">
+          <caret line="46" column="78" selection-start-line="46" selection-start-column="78" selection-end-line="46" selection-end-column="78" />
           <folding>
-            <element signature="e#0#12#0" expanded="true" />
+            <element signature="e#57#75#0" expanded="true" />
           </folding>
         </state>
       </provider>
