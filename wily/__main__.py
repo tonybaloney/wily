@@ -73,11 +73,11 @@ def show(ctx):
 
 
 @cli.command()
-@click.argument("path", type=click.Path(resolve_path=True))
+@click.argument("file", type=click.Path(resolve_path=True))
 @click.argument("metric")
 @click.pass_context
-def report(ctx, path, metric):
-    """Show the history archive in the .wily/ folder"""
+def report(ctx, file, metric):
+    """Show a specific metric for a given file"""
     config = ctx.obj["CONFIG"]
 
     if not exists():
@@ -85,7 +85,7 @@ def report(ctx, path, metric):
 
     from wily.commands.report import report
 
-    report(config=config, path=path, metric=metric)
+    report(config=config, path=file, metric=metric)
 
 
 cli()

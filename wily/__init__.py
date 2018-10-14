@@ -3,7 +3,7 @@ A Python application for tracking, reporting on timing and complexity in tests a
 """
 import colorlog
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 
 _handler = colorlog.StreamHandler()
 _handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s%(message)s"))

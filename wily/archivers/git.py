@@ -6,7 +6,7 @@ from wily.archivers import BaseArchiver, Revision
 logger = logging.getLogger(__name__)
 
 
-class DirtyGitRepositoryError(RuntimeError):
+class DirtyGitRepositoryError(Exception):
     def __init__(self, untracked_files):
         self.untracked_files = untracked_files
         self.message = "Dirty repository, make sure you commit/stash files first"

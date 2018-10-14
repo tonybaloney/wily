@@ -29,7 +29,12 @@ def build(config, archiver, operators):
     logger.debug(f"Using {archiver.name} archiver module")
     archiver = archiver.cls(config)
 
-    revisions = archiver.revisions(config.path, config.max_revisions)
+    try:
+        revisions = archiver.revisions(config.path, config.max_revisions)
+    except Exception as e:
+        logger.error(f"Failed to setup archiver: '{e.message}'")
+        return
+
     logger.info(
         f"Found {len(revisions)} revisions from '{archiver.name}' archiver in {config.path}."
     )
@@ -64,6 +69,8 @@ def build(config, archiver, operators):
 
             cache.store(archiver, revision, stats)
             bar.finish()
+    except Exception as e:
+        logger.error(f"Failed to build cache: '{e.message}'")
     finally:
         # Reset the archive after every run back to the head of the branch
         archiver.finish()
