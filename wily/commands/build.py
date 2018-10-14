@@ -39,11 +39,16 @@ def build(config, archiver, operators):
     # Build a set of operators
     operators = [operator.cls(config) for operator in operators]
 
-    for revision in revisions:
-        # Checkout target revision
-        # TODO: Verify there aren't any non-committed files in working copy
+    try:
+        for revision in revisions:
+            # Checkout target revision
+            archiver.checkout(revision, config.checkout_options)
 
-        for operator in operators:
-            logging.debug(f"Running {operator} on {revision}")
-            stats = operator.run(revision, config)
+            stats = {}
+            for operator in operators:
+                logging.debug(f"Running {operator} on {revision}")
+                stats[operator.name] = operator.run(revision, config)
             cache.store(archiver, revision, stats)
+    finally:
+        # Reset the archive after every run back to the head of the branch
+        archiver.finish()

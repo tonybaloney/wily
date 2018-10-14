@@ -9,13 +9,13 @@ class BaseOperator(object):
 
 
 from wily.operators.mccabe import MccabeOperator
-
+from wily.operators.cyclomatic import CyclomaticComplexityOperator
+from wily.operators.maintainability import MaintainabilityIndexOperator
+from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator"""
 Operator = namedtuple("Operator", "name cls description")
 
-
-"""Mccabe Operator defined in `wily.operators.mccabe`"""
 OPERATOR_MCCABE = Operator(
     name="mccabe",
     cls=MccabeOperator,
@@ -24,17 +24,19 @@ OPERATOR_MCCABE = Operator(
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
-    cls=MccabeOperator,
+    cls=CyclomaticComplexityOperator,
     description="Cyclomatic Complexity of modules",
 )
 
 OPERATOR_RAW = Operator(
-    name="raw", cls=MccabeOperator, description="Raw Python statistics"
+    name="raw",
+    cls=RawMetricsOperator,
+    description="Raw Python statistics"
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
-    cls=MccabeOperator,
+    cls=MaintainabilityIndexOperator,
     description="Maintainability index (lines of code and branching)",
 )
 

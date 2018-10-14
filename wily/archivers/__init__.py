@@ -1,4 +1,5 @@
 from collections import namedtuple
+from dataclasses import dataclass
 
 
 class BaseArchiver(object):
@@ -8,18 +9,34 @@ class BaseArchiver(object):
         """
         Get the list of revision
         :param path: the path
+        :type  path: ``str``
+
         :param max_revisions: the maximum number of revisions
-        :return:
+        :type  max_revisions: ``int``
+
+        :return: A list of revisions
+        :rtype: ``list`` of :class:`Revision`
         """
         raise NotImplementedError()
 
-    def checkout(self, revision, options):
+    def checkout(self, revision, **options):
         """
         Checkout a specific revision
         :param revision: The revision identifier
+        :type  revision: :class:`Revision`
+
         :param options: Any additional options
+        :type  options: ``dict``
         """
         raise NotImplementedError()
+
+
+@dataclass
+class Revision:
+    key: str
+    author_name: str
+    author_email: str
+    revision_date: str
 
 
 from wily.archivers.git import GitArchiver

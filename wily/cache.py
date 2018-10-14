@@ -3,7 +3,7 @@ A module for working with the .wily/ cache directory
 """
 
 import pathlib
-
+import json
 from wily.config import DEFAULT_CACHE_PATH
 
 
@@ -27,3 +27,13 @@ def create():
     if exists():
         return
     pathlib.Path(DEFAULT_CACHE_PATH).mkdir()
+
+
+def store(archiver, revision, stats):
+    root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver.name
+    if not root.exists():
+        root.mkdir()
+
+    with open(root / (revision.key + ".json"), "w") as out:
+        breakpoint()
+        json.dump(out, stats, indent=2)

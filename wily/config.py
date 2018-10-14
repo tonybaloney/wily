@@ -6,7 +6,7 @@ Configuration of wily
 import configparser
 import pathlib
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, List
 
 import wily.operators as operators
@@ -21,6 +21,7 @@ class WilyConfig:
     archiver: Any
     path: str
     max_revisions: int
+    checkout_options: dict = field(default_factory=dict)
 
 
 DEFAULT_OPERATORS = {

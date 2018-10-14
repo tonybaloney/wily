@@ -1,6 +1,8 @@
 from git import Repo
+import logging
 
-from wily.archivers import BaseArchiver
+from wily.archivers import BaseArchiver, Revision
+logger = logging.getLogger("wily")
 
 
 class DirtyGitRepositoryError(RuntimeError):
@@ -10,9 +12,12 @@ class DirtyGitRepositoryError(RuntimeError):
 
 
 class GitArchiver(BaseArchiver):
+    name = "git"
+
     def __init__(self, config):
         self.repo = Repo(config.path)
         self.config = config
+        self.current_branch = self.repo.active_branch
         assert not self.repo.bare, "Not a Git repository"
 
     def revisions(self, path, max_revisions):
@@ -20,9 +25,16 @@ class GitArchiver(BaseArchiver):
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
         # TODO : Determine current branch - how to handle detached head?
-        return list(
-            self.repo.iter_commits("master", max_count=self.config.max_revisions)
-        )
+        revisions = []
+        for commit in self.repo.iter_commits(self.current_branch, max_count=self.config.max_revisions):
+            rev = Revision(key=commit.name_rev.split(" ")[0], author_name=commit.author, author_email=commit.author, revision_date=commit.committed_date)
+            revisions.append(rev)
+        return revisions
 
     def checkout(self, revision, options):
-        pass
+        rev = revision.key
+        self.repo.git.checkout(rev)
+
+    def finish(self):
+        # Make sure you checkout HEAD on the original branch when finishing
+        self.repo.git.checkout(self.current_branch)

@@ -32,11 +32,16 @@ def cli(ctx, debug, config):
 @click.option(
     "-h",
     "--max-revisions",
-    default=DEFAULT_MAX_REVISIONS,
+    default=None,
     help="The maximum number of historical commits to try",
 )
+@click.option(
+    "-p",
+    "--path",
+    type=click.Path(resolve_path=True)
+)
 @click.pass_context
-def build(ctx, max_revisions):
+def build(ctx, max_revisions, path):
     """Build the complexity history log based on a version-control system"""
     config = ctx.obj["CONFIG"]
     logging.debug("Running build command")
@@ -44,6 +49,8 @@ def build(ctx, max_revisions):
 
     if max_revisions:
         config.max_revisions = max_revisions
+    if path:
+        config.path = path
 
     build(
         config=config,
