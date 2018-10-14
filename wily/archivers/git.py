@@ -2,6 +2,7 @@ from git import Repo
 import logging
 
 from wily.archivers import BaseArchiver, Revision
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,8 +27,15 @@ class GitArchiver(BaseArchiver):
 
         # TODO : Determine current branch - how to handle detached head?
         revisions = []
-        for commit in self.repo.iter_commits(self.current_branch, max_count=self.config.max_revisions):
-            rev = Revision(key=commit.name_rev.split(" ")[0], author_name=commit.author, author_email=commit.author, revision_date=commit.committed_date)
+        for commit in self.repo.iter_commits(
+            self.current_branch, max_count=self.config.max_revisions
+        ):
+            rev = Revision(
+                key=commit.name_rev.split(" ")[0],
+                author_name=commit.author.name,
+                author_email=commit.author.email,
+                revision_date=commit.committed_date,
+            )
             revisions.append(rev)
         return revisions
 

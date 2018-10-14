@@ -1,20 +1,29 @@
-import radon.cli.harvest as harvestors
+import radon.cli.harvest as harvesters
 from radon.cli import Config
-
+from wily import logger
 from wily.operators import BaseOperator
 
 
 class MaintainabilityIndexOperator(BaseOperator):
     name = "maintainability"
     defaults = {
-        "exclude": [],
-        "ignore": ""
+        "exclude": None,
+        "ignore": None,
+        "min": "A",
+        "max": "C",
+        "multi": True,
+        "show": False,
+        "sort": False,
     }
 
     def __init__(self, config):
         # TODO : Import config from wily.cfg
-        self.harvestor = harvestors.MIHarvester(config.path, config=Config(**self.defaults))
+        logger.debug(f"Using {config.path} with {self.defaults} for MI metrics")
+
+        self.harvester = harvesters.MIHarvester(
+            [config.path], config=Config(**self.defaults)
+        )
 
     def run(self, module, options):
-        self.harvestor.run()
-        return self.harvestor.as_json()
+        logger.debug("Running raw harvester")
+        return dict(self.harvester.results)

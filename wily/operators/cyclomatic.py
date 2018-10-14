@@ -1,20 +1,30 @@
-import radon.cli.harvest as harvestors
+import radon.cli.harvest as harvesters
 from radon.cli import Config
-
+import radon
+from wily import logger
 from wily.operators import BaseOperator
 
 
 class CyclomaticComplexityOperator(BaseOperator):
     name = "cyclomatic"
     defaults = {
-        "exclude": [],
-        "ignore": ""
+        "exclude": None,
+        "ignore": None,
+        "min": "A",
+        "max": "F",
+        "no_assert": True,
+        "show_closures": False,
+        "order": radon.complexity.SCORE,
     }
 
     def __init__(self, config):
-        # TODO: Import config for harvestor from .wily.cfg
-        self.harvestor = harvestors.CCHarvester(config.path, config=Config(**self.defaults))
+        # TODO: Import config for harvester from .wily.cfg
+        logger.debug(f"Using {config.path} with {self.defaults} for CC metrics")
+
+        self.harvester = harvesters.CCHarvester(
+            [config.path], config=Config(**self.defaults)
+        )
 
     def run(self, module, options):
-        self.harvestor.run()
-        return self.harvestor.as_json()
+        logger.debug("Running CC harvester")
+        return dict(self.harvester.results)

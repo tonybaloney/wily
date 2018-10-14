@@ -29,9 +29,7 @@ OPERATOR_CYCLOMATIC = Operator(
 )
 
 OPERATOR_RAW = Operator(
-    name="raw",
-    cls=RawMetricsOperator,
-    description="Raw Python statistics"
+    name="raw", cls=RawMetricsOperator, description="Raw Python statistics"
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
