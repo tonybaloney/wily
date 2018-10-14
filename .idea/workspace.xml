@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wily/commands/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/commands/build.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -43,7 +44,7 @@
         <counts>
           <entry key="gitignore" value="7" />
           <entry key="md" value="2054" />
-          <entry key="py" value="12721" />
+          <entry key="py" value="12760" />
           <entry key="toml" value="182" />
         </counts>
       </usages-collector>
@@ -52,7 +53,7 @@
           <entry key="Ini" value="3" />
           <entry key="Markdown" value="2051" />
           <entry key="PLAIN_TEXT" value="7" />
-          <entry key="Python" value="12721" />
+          <entry key="Python" value="12760" />
           <entry key="TOML file" value="182" />
         </counts>
       </usages-collector>
@@ -153,11 +154,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="245">
-              <caret line="46" column="78" selection-start-line="46" selection-start-column="78" selection-end-line="46" selection-end-column="78" />
-              <folding>
-                <element signature="e#57#75#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="52">
+              <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
             </state>
           </provider>
         </entry>
@@ -508,11 +506,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="245">
-          <caret line="46" column="78" selection-start-line="46" selection-start-column="78" selection-end-line="46" selection-end-column="78" />
-          <folding>
-            <element signature="e#57#75#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="52">
+          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
         </state>
       </provider>
     </entry>

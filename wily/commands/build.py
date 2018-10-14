@@ -1,7 +1,7 @@
 """
 Builds a cache based on a source-control history
 """
-import progressbar
+from progress.bar import Bar
 
 from wily import logger
 import wily.cache as cache
@@ -44,27 +44,27 @@ def build(config, archiver, operators):
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
 
-    with progressbar.ProgressBar(max_value=config.max_revisions*len(operators)) as bar:
-        i = 0
-        try:
-            for revision in revisions:
-                # Checkout target revision
-                archiver.checkout(revision, config.checkout_options)
 
-                stats = {
-                    "revision": revision.key,
-                    "author_name": revision.author_name,
-                    "author_email": revision.author_email,
-                    "date": revision.revision_date,
-                    "operator_data": {},
-                }
-                for operator in operators:
-                    logger.debug(f"Running {operator.name} operator on {revision.key}")
-                    stats["operator_data"][operator.name] = operator.run(revision, config)
-                    bar.update(i)
-                    i += 1
-                cache.store(archiver, revision, stats)
+    bar = Bar('Processing', max=20)
+    try:
+        for revision in revisions:
+            # Checkout target revision
+            archiver.checkout(revision, config.checkout_options)
 
-        finally:
-            # Reset the archive after every run back to the head of the branch
-            archiver.finish()
+            stats = {
+                "revision": revision.key,
+                "author_name": revision.author_name,
+                "author_email": revision.author_email,
+                "date": revision.revision_date,
+                "operator_data": {},
+            }
+            for operator in operators:
+                logger.debug(f"Running {operator.name} operator on {revision.key}")
+                stats["operator_data"][operator.name] = operator.run(revision, config)
+                bar.next()
+
+            cache.store(archiver, revision, stats)
+            bar.finish()
+    finally:
+        # Reset the archive after every run back to the head of the branch
+        archiver.finish()
