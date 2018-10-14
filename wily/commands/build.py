@@ -61,9 +61,10 @@ def build(config, archiver, operators):
                 for operator in operators:
                     logger.debug(f"Running {operator.name} operator on {revision.key}")
                     stats["operator_data"][operator.name] = operator.run(revision, config)
+                    bar.update(i)
+                    i += 1
                 cache.store(archiver, revision, stats)
-                bar.update(i)
-                i += 1
+
         finally:
             # Reset the archive after every run back to the head of the branch
             archiver.finish()
