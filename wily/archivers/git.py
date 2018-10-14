@@ -2,7 +2,7 @@ from git import Repo
 import logging
 
 from wily.archivers import BaseArchiver, Revision
-logger = logging.getLogger("wily")
+logger = logging.getLogger(__name__)
 
 
 class DirtyGitRepositoryError(RuntimeError):

@@ -5,8 +5,9 @@ from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_MAX_REVISIONS
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 
+logging.basicConfig()
 
-logger = logging.getLogger("wily")
+logger = logging.getLogger(__name__)
 
 
 @click.group()
@@ -18,7 +19,6 @@ logger = logging.getLogger("wily")
 )
 @click.pass_context
 def cli(ctx, debug, config):
-    logging.basicConfig()
     """Commands for creating and searching through history"""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug

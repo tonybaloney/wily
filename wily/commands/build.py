@@ -4,7 +4,7 @@ Builds a cache based on a source-control history
 import wily.cache as cache
 import logging
 
-logger = logging.getLogger("wily")
+logger = logging.getLogger(__name__)
 
 
 def build(config, archiver, operators):

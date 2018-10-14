@@ -12,7 +12,7 @@ from typing import Any, List
 import wily.operators as operators
 from wily.archivers import ARCHIVER_GIT
 
-logger = logging.getLogger("wily")
+logger = logging.getLogger(__name__)
 
 
 @dataclass
