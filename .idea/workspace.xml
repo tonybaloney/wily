@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5248778f-bd90-474e-8cf6-210249f086b4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/__main__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/archivers/git.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/archivers/git.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/commands/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/commands/build.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wily/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wily/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/wily/cache.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -97,15 +93,15 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wily/cache.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="555">
-              <caret line="37" column="19" selection-start-line="37" selection-start-column="19" selection-end-line="37" selection-end-column="19" />
+              <caret line="37" selection-start-line="37" selection-end-line="37" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
-                <marker date="1539476791000" expanded="true" signature="147:152" ph="..." />
-                <marker date="1539476791000" expanded="true" signature="421:426" ph="..." />
+                <marker date="1539479104000" expanded="true" signature="147:152" ph="..." />
+                <marker date="1539479104000" expanded="true" signature="421:426" ph="..." />
               </folding>
             </state>
           </provider>
@@ -133,7 +129,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wily/config.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="171">
@@ -203,7 +199,6 @@
         <option value="$PROJECT_DIR$/wily/operators/__init__.py" />
         <option value="$PROJECT_DIR$/wily/operators/mccabe.py" />
         <option value="$PROJECT_DIR$/wily/archivers/__init__.py" />
-        <option value="$PROJECT_DIR$/wily/cache.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/wily/operators/maintainability.py" />
         <option value="$PROJECT_DIR$/wily/operators/raw.py" />
@@ -212,6 +207,7 @@
         <option value="$PROJECT_DIR$/wily/commands/build.py" />
         <option value="$PROJECT_DIR$/wily/archivers/git.py" />
         <option value="$PROJECT_DIR$/wily/config.py" />
+        <option value="$PROJECT_DIR$/wily/cache.py" />
       </list>
     </option>
   </component>
@@ -452,28 +448,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="58">
-          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
-          <folding>
-            <element signature="e#57#83#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wily/cache.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="555">
-          <caret line="37" column="19" selection-start-line="37" selection-start-column="19" selection-end-line="37" selection-end-column="19" />
-          <folding>
-            <element signature="e#62#76#0" expanded="true" />
-            <marker date="1539476791000" expanded="true" signature="147:152" ph="..." />
-            <marker date="1539476791000" expanded="true" signature="421:426" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wily/archivers/git.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -491,6 +465,28 @@
           <caret line="15" lean-forward="true" selection-start-line="15" selection-end-line="15" />
           <folding>
             <element signature="e#32#51#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/commands/build.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="58">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+          <folding>
+            <element signature="e#57#83#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wily/cache.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="555">
+          <caret line="37" selection-start-line="37" selection-end-line="37" />
+          <folding>
+            <element signature="e#62#76#0" expanded="true" />
+            <marker date="1539479104000" expanded="true" signature="147:152" ph="..." />
+            <marker date="1539479104000" expanded="true" signature="421:426" ph="..." />
           </folding>
         </state>
       </provider>

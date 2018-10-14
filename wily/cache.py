@@ -35,5 +35,4 @@ def store(archiver, revision, stats):
         root.mkdir()
 
     with open(root / (revision.key + ".json"), "w") as out:
-        breakpoint()
         json.dump(out, stats, indent=2)
