@@ -6,8 +6,7 @@ requires = [
     "click",
     "colorlog",
     "tabulate",
-    "progress
-    ",
+    "progress",
     "dataclasses; python_version == '3.6'",]
 build-backend = "flit.buildapi"
 requires-python = ">=3.6"

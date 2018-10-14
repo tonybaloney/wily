@@ -56,8 +56,13 @@ For a specific directory
 Limit the number of revisions (defaults to 50).
 
 ```console
- $ wily build --max-revisions=20
- ```
+ $ wily build --max-revisions=5 -p ../test
+Found 2 revisions from 'git' archiver in /Users/anthonyshaw/PycharmProjects/test.
+Running operators - raw,cyclomatic,maintainability
+Processing |######                          | 3/15
+Processing |############                    | 6/15
+Completed building wily history, run `wily graph` or `wily show` to see more.
+```
  
 #### `wily show`
 
@@ -78,3 +83,17 @@ Revision                                  Author        Operators
 213868438ff348867d830da9736d93007e6384ac  Anthony Shaw  cyclomatic, raw, maintainability
 6934eda7e36b975062192bfe08e8b3cc054465fd  Anthony Shaw  cyclomatic, raw, maintainability
  ```
+ 
+ 
+#### `wily report`
+
+Show a specific metric for a given file, requires that `.wily/` exists
+
+```console
+ $ wily report ../test/test.py maintainability.mi
+-----------History for maintainability.mi------------
+Revision                                  Author          maintainability.mi
+----------------------------------------  ------------  --------------------
+213868438ff348867d830da9736d93007e6384ac  Anthony Shaw                   100
+6934eda7e36b975062192bfe08e8b3cc054465fd  Anthony Shaw                   100
+```

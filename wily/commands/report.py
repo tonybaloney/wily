@@ -49,6 +49,5 @@ def report(config, path, metric):
     logger.info(
         tabulate.tabulate(
             headers=("Revision", "Author", metric), tabular_data=data,
-
         )
     )
