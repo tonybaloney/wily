@@ -104,4 +104,25 @@ def report(ctx, file, metric):
     report(config=config, path=file, metric=metric)
 
 
+@cli.command()
+@click.option("-y", "--yes", default=False, help="Skip prompt")
+@click.pass_context
+def clean(ctx, yes):
+    """Show the history archive in the .wily/ folder"""
+    config = ctx.obj["CONFIG"]
+
+    if not exists():
+        logger.error(f"Could not locate wily cache.")
+        return 0
+
+    if not yes:
+        p = input("Are you sure you want to delete wily cache? [y/N]")
+        if p.lower() != 'y':
+            return 0
+
+    from wily.cache import clean
+
+    clean(config=config)
+
+
 cli()

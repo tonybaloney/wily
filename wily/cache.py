@@ -33,6 +33,18 @@ def create():
     pathlib.Path(DEFAULT_CACHE_PATH).mkdir()
 
 
+def clean():
+    """
+    Delete a wily cache
+    """
+    if not exists():
+        logger.debug("Wily cache does not exist, skipping")
+        return
+    logger.debug("Deleting wily cache")
+    # TODO: Empty directory contents
+    pathlib.Path(DEFAULT_CACHE_PATH).rmdir()
+
+
 def store(archiver, revision, stats):
     root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver.name
     if not root.exists():
