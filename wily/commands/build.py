@@ -75,7 +75,10 @@ def build(config, archiver, operators):
         cache.store_index(archiver, index)
         bar.finish()
     except Exception as e:
-        logger.error(f"Failed to build cache: '{e.message}'")
+        if hasattr(e, "message"):
+            logger.error(f"Failed to build cache: '{e.message}'")
+        else:
+            logger.error(f"Failed to build cache: '{e}'")
     finally:
         # Reset the archive after every run back to the head of the branch
         archiver.finish()
