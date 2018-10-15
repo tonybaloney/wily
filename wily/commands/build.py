@@ -63,9 +63,8 @@ def build(config, archiver, operators):
                 "author_email": revision.author_email,
                 "date": revision.revision_date
             }
-            stats = stats_header + {
-                "operator_data": {},
-            }
+            stats = stats_header.copy()
+            stats["operator_data"] = {}
             for operator in _operators:
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
