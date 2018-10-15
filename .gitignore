@@ -102,5 +102,5 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-
+temp-plot.html
 .wily/

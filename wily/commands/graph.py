@@ -38,7 +38,7 @@ def graph(config, path, metric):
         # We have to do it backwards to get the deltas between releases
         history = cache.get_index(archiver)
         ids = [rev['revision'] for rev in history[::-1]]
-        authors = [rev['author_name'] for rev in history[::-1]]
+        labels = [f"{rev['author_name']} <br>{rev['message']}" for rev in history[::-1]]
         for rev in history[::-1]:
             revision_entry = cache.get(archiver, rev['revision'])
             try:
@@ -56,7 +56,7 @@ def graph(config, path, metric):
         mode = 'lines+markers',
         name = metric[1],
         ids = ids,
-        text = authors
+        text = labels
     )
     data = [trace0]
     plotly.offline.plot(
