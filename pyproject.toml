@@ -9,8 +9,6 @@ requires = [
     "progress",
     "dataclasses; python_version == '3.6'",]
 build-backend = "flit.buildapi"
-requires-python = ">=3.6"
-description-file = "README.md"
 
 [tool.flit.metadata]
 module = "wily"
@@ -18,6 +16,17 @@ author = "Anthony Shaw"
 author-email = "anthonyshaw@apache.org"
 home-page = "https://github.com/tonybaloney/wily"
 classifiers = ["License :: OSI Approved :: Apache Software License"]
+requires = [
+    "gitpython",
+    "radon",
+    "click",
+    "colorlog",
+    "tabulate",
+    "progress",
+    "dataclasses; python_version == '3.6'",]
+requires-python = ">=3.6"
+description-file = "README.md"
+
 
 [tool.flit.scripts]
 wily = "wily.__main__:cli"
