@@ -41,6 +41,20 @@ You can also override the path to the configuration with the `--config` flag on 
 
 The first step to using `wily` is to build a wily cache with all of the statistics of your project. 
 
+```
+Usage: wily build [OPTIONS]
+
+  Build the wily cache
+
+Options:
+  -h, --max-revisions INTEGER  The maximum number of historical commits to
+                               archive
+  -p, --path PATH              Root path to the project folder to scan
+  -t, --target PATH            Subdirectories or files to scan
+  -o, --operators TEXT         List of operators, seperated by commas
+  --help                       Show this message and exit.
+```
+
 By default, wily will assume your project folder is a `git` directory. Wily will not build a cache if the working copy is dirty (has changed files not commited).
 
 ```console
