@@ -62,6 +62,7 @@ def build(config, archiver, operators):
                 "author_name": revision.author_name,
                 "author_email": revision.author_email,
                 "date": revision.revision_date,
+                "message": revision.message,
                 "operators": _op_desc
             }
             stats = stats_header.copy()

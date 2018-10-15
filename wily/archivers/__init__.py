@@ -37,6 +37,7 @@ class Revision:
     author_name: str
     author_email: str
     revision_date: str
+    message: str
 
 
 from wily.archivers.git import GitArchiver

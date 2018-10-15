@@ -5,6 +5,7 @@ from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
 from wily.operators import resolve_metric, MetricType
 
+import plotly.offline
 import plotly.plotly as py
 import plotly.graph_objs as go
 
@@ -36,7 +37,9 @@ def graph(config, path, metric):
     for archiver in archivers:
         # We have to do it backwards to get the deltas between releases
         history = cache.get_index(archiver)
-        for rev in history:
+        ids = [rev['revision'] for rev in history[::-1]]
+        authors = [rev['author_name'] for rev in history[::-1]]
+        for rev in history[::-1]:
             revision_entry = cache.get(archiver, rev['revision'])
             try:
                 val = revision_entry["operator_data"][operator][path][key]
@@ -51,7 +54,12 @@ def graph(config, path, metric):
         x = x,
         y = y,
         mode = 'lines+markers',
-        name = metric[1]
+        name = metric[1],
+        ids = ids,
+        text = authors
     )
     data = [trace0]
-    py.iplot(data, filename='line-mode')
+    plotly.offline.plot(
+        {"data": data, 
+        "layout": go.Layout(title=f"History of {metric[1]}")}
+        , auto_open=True)

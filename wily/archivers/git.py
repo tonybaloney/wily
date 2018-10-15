@@ -25,7 +25,6 @@ class GitArchiver(BaseArchiver):
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
-        # TODO : Determine current branch - how to handle detached head?
         revisions = []
         for commit in self.repo.iter_commits(
             self.current_branch, max_count=self.config.max_revisions
@@ -35,6 +34,7 @@ class GitArchiver(BaseArchiver):
                 author_name=commit.author.name,
                 author_email=commit.author.email,
                 revision_date=commit.committed_date,
+                message=commit.message
             )
             revisions.append(rev)
         return revisions
