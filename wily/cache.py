@@ -63,7 +63,7 @@ def store_index(archiver, index):
         root.mkdir()
 
     logger.debug(f"Creating index output")
-    with open(root / "index.json", "w") as out:
+    with (root / "index.json").open("w") as out:
         out.write(json.dumps(index, indent=2))
 
 
@@ -92,7 +92,17 @@ def get_history(archiver):
     revisions = []
     for i in root.iterdir():
         if i.name.endswith(".json"):
-            with i.open() as rev_f:
+            with i.open('r') as rev_f:
                 revision_data = json.load(rev_f)
                 revisions.append(revision_data)
     return revisions
+
+
+def get_index(archiver):
+    """
+    Get the contents of the index file
+    """
+    root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver
+    with (root / "index.json").open('r') as index_f:
+        index = json.load(index_f)
+    return index

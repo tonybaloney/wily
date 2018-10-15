@@ -7,7 +7,16 @@ from wily.operators import BaseOperator
 class RawMetricsOperator(BaseOperator):
     name = "raw"
     defaults = {"exclude": None, "ignore": None, "summary": False}
-
+    metrics = (
+        ("loc", "Lines of Code", int),
+        ("lloc", "L Lines of Code", int),
+        ("sloc", "S Lines of Code", int),
+        ("comments", "Multi-line comments", int),
+        ("multi", "Multi lines", int),
+        ("blank", "blank lines", int),
+        ("single_comments", "Single comment lines", int)
+    )
+    
     def __init__(self, config):
         # TODO: Use config from wily.cfg for harvester
         logger.debug(f"Using {config.targets} with {self.defaults} for Raw metrics")

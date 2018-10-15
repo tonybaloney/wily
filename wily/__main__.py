@@ -74,7 +74,7 @@ def build(ctx, max_revisions, path, target):
 
 @cli.command()
 @click.pass_context
-def show(ctx):
+def index(ctx):
     """Show the history archive in the .wily/ folder"""
     config = ctx.obj["CONFIG"]
 
@@ -82,9 +82,9 @@ def show(ctx):
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
         return -1
 
-    from wily.commands.show import show
+    from wily.commands.index import index
 
-    show(config=config)
+    index(config=config)
 
 
 @cli.command()
@@ -92,7 +92,7 @@ def show(ctx):
 @click.argument("metric")
 @click.pass_context
 def report(ctx, file, metric):
-    """Show a specific metric for a given file"""
+    """Show a specific metric for a given file, run `wily list-metrics` for a list."""
     config = ctx.obj["CONFIG"]
 
     if not exists():
@@ -124,5 +124,19 @@ def clean(ctx, yes):
 
     clean(config=config)
 
+
+@cli.command("list-metrics")
+@click.pass_context
+def list_metrics(ctx):
+    """List the available metrics"""
+    config = ctx.obj["CONFIG"]
+
+    if not exists():
+        logger.error(f"Could not locate wily cache.")
+        return -1
+
+    from wily.commands.list_metrics import list_metrics
+
+    list_metrics()
 
 cli()

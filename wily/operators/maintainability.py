@@ -16,6 +16,11 @@ class MaintainabilityIndexOperator(BaseOperator):
         "sort": False,
     }
 
+    metrics = (
+        ("rank", "Maintainability Ranking", str),
+        ("mi", "Maintainability Index", float)
+    )
+
     def __init__(self, config):
         # TODO : Import config from wily.cfg
         logger.debug(f"Using {config.targets} with {self.defaults} for MI metrics")

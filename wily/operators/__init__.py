@@ -4,6 +4,15 @@ from collections import namedtuple
 class BaseOperator(object):
     """Abstract Operator Class"""
 
+    """Name of the operator"""
+    name = "abstract"
+
+    """Default settings"""
+    defaults = {}
+
+    """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>)"""
+    metrics = ()
+
     def run(self, module, options):
         raise NotImplementedError()
 

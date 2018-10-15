@@ -1,10 +1,12 @@
+import datetime
+
 from wily import logger
 import tabulate
 import wily.cache as cache
 from wily.config import DEFAULT_GRID_STYLE
 
 
-def show(config):
+def index(config):
     """
     Show information about the cache and runtime
     :param config: The configuration
@@ -25,18 +27,17 @@ def show(config):
     for archiver in archivers:
         history = cache.get_index(archiver)
         for rev in history:
-
             data.append(
                 (
                     rev["revision"],
                     rev["author_name"],
-                    ", ".join(rev["operators"]),
+                    datetime.date.fromtimestamp(rev["date"]).isoformat(),
                 )
             )
 
     print(
         tabulate.tabulate(
-            headers=("Revision", "Author", "Operators"), tabular_data=data,
+            headers=("Revision", "Author", "Date"), tabular_data=data,
             tablefmt=DEFAULT_GRID_STYLE
         )
     )
