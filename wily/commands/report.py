@@ -1,3 +1,9 @@
+"""
+TODO : Implement a limit on the number of records returned
+TODO : Fix float-rendering and rounding
+TODO : Fix str-type rendering
+TODO : Better error handling of wonky builds
+"""
 from wily import logger, format_date
 import tabulate
 import pathlib

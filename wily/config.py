@@ -1,6 +1,8 @@
 """
 Configuration of wily
 
+TODO : Handle operator settings
+TODO : Allow configuration of cache path (incase it needs to go in another folder)
 """
 
 import configparser

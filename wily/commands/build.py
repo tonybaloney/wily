@@ -1,5 +1,7 @@
 """
 Builds a cache based on a source-control history
+
+TODO : Compare with existing files and cache results, currently just overwrites
 """
 from progress.bar import Bar
 

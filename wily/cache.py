@@ -1,5 +1,9 @@
 """
 A module for working with the .wily/ cache directory
+
+TODO: Implement `clean` command, currently fails. Needs to do `rm -rf .wily` equivalent
+TODO: Version .wily/ cache folders?
+TODO: Validate that if wily config specifies alternative directory that all commands work
 """
 
 import pathlib

@@ -1,3 +1,9 @@
+"""
+Print information about the wily cache and what is in the index
+
+TODO : Optional flag to include commit messages in table
+
+"""
 from wily import logger, format_date
 import tabulate
 import wily.cache as cache

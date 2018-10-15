@@ -1,3 +1,9 @@
+"""
+Main command line
+
+TODO : Prompt the user for the specific metric in the graph and report commands?
+"""
+
 import click
 from wily import logger
 from wily.cache import exists

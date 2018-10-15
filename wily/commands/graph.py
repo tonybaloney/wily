@@ -1,3 +1,10 @@
+"""
+Draw graph in HTML for a specific metric
+
+
+TODO: Make X-axis relative to the timestamp of the commit
+TODO: Somehow link to the rev-hash?
+"""
 from wily import logger, format_date
 import tabulate
 import pathlib

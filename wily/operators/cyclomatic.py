@@ -1,3 +1,11 @@
+"""
+Cyclomatic complexity metric for each function/method
+
+Provided by the radon library
+
+TODO : Figure out how to deal with the list metrics for functions?
+"""
+
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 import radon
@@ -17,7 +25,6 @@ class CyclomaticComplexityOperator(BaseOperator):
         "order": radon.complexity.SCORE,
     }
 
-    # TODO : Figure out how to deal with the list metrics for functions?
     metrics = ()
 
     def __init__(self, config):
