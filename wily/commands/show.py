@@ -1,6 +1,7 @@
 from wily import logger
 import tabulate
 from wily.cache import list_archivers, get_history
+from wily.config import DEFAULT_GRID_STYLE
 
 
 def show(config):
@@ -32,8 +33,9 @@ def show(config):
                 )
             )
 
-    logger.info(
+    print(
         tabulate.tabulate(
-            headers=("Revision", "Author", "Operators"), tabular_data=data
+            headers=("Revision", "Author", "Operators"), tabular_data=data,
+            tablefmt=DEFAULT_GRID_STYLE
         )
     )

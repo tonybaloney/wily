@@ -35,18 +35,32 @@ def cli(ctx, debug, config):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.option("-p", "--path", type=click.Path(resolve_path=True))
+@click.option("-p", "--path", type=click.Path(resolve_path=True),
+    help="Root path to the project folder to scan")
+@click.option(
+    "-t",
+    "--target",
+    default=None,
+    type=click.Path(resolve_path=True),
+    multiple=True,
+    help="Subdirectories or files to scan",
+)
 @click.pass_context
-def build(ctx, max_revisions, path):
+def build(ctx, max_revisions, path, target):
     """Build the complexity history log based on a version-control system"""
     config = ctx.obj["CONFIG"]
 
     from wily.commands.build import build
 
     if max_revisions:
+        logger.debug(f"Fixing revisions to {max_revisions}")
         config.max_revisions = max_revisions
     if path:
+        logger.debug(f"Fixing path to {path}")
         config.path = path
+    if target:
+        logger.debug(f"Fixing targets to {target}")
+        config.targets = target
 
     build(
         config=config,

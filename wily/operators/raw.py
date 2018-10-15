@@ -10,9 +10,9 @@ class RawMetricsOperator(BaseOperator):
 
     def __init__(self, config):
         # TODO: Use config from wily.cfg for harvester
-        logger.debug(f"Using {config.path} with {self.defaults} for Raw metrics")
+        logger.debug(f"Using {config.targets} with {self.defaults} for Raw metrics")
         self.harvester = harvesters.RawHarvester(
-            [config.path], config=Config(**self.defaults)
+            config.targets, config=Config(**self.defaults)
         )
 
     def run(self, module, options):

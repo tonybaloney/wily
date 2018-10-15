@@ -21,8 +21,12 @@ class WilyConfig:
     archiver: Any
     path: str
     max_revisions: int
+    targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
+    def __post_init__(self):
+        if self.targets is None or '':
+            self.targets = [self.path]
 
 DEFAULT_OPERATORS = {
     operators.OPERATOR_RAW.name,
@@ -46,6 +50,8 @@ DEFAULT_CONFIG = WilyConfig(
     path=".",
     max_revisions=DEFAULT_MAX_REVISIONS,
 )
+
+DEFAULT_GRID_STYLE = 'fancy_grid'
 
 
 def load(config_path=DEFAULT_CONFIG_PATH):
