@@ -43,8 +43,6 @@ def build(config, archiver, operators):
         logger.warning("Could not find any revisions, using HEAD")
         revisions = []  # TODO: Create a special HEAD revision to use current state
 
-    # Build a set of operators
-    operators = [operator.cls(config) for operator in operators]
 
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
@@ -54,6 +52,8 @@ def build(config, archiver, operators):
         for revision in revisions:
             # Checkout target revision
             archiver.checkout(revision, config.checkout_options)
+            # Build a set of operators
+            _operators = [operator.cls(config) for operator in operators]
 
             stats = {
                 "revision": revision.key,
@@ -62,7 +62,7 @@ def build(config, archiver, operators):
                 "date": revision.revision_date,
                 "operator_data": {},
             }
-            for operator in operators:
+            for operator in _operators:
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()

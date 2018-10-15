@@ -88,7 +88,7 @@ def show(ctx):
 
 
 @cli.command()
-@click.argument("file", type=click.Path(resolve_path=True))
+@click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metric")
 @click.pass_context
 def report(ctx, file, metric):
