@@ -143,7 +143,7 @@ def clean(ctx, yes):
 
     from wily.cache import clean
 
-    clean(config=config)
+    clean()
 
 
 @cli.command("list-metrics")
