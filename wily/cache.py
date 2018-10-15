@@ -44,6 +44,17 @@ def store(archiver, revision, stats):
         out.write(json.dumps(stats, indent=2))
 
 
+def store_index(archiver, index):
+    root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver.name
+    if not root.exists():
+        logger.debug("Creating wily cache")
+        root.mkdir()
+
+    logger.debug(f"Creating index output")
+    with open(root / "index.json", "w") as out:
+        out.write(json.dumps(index, indent=2))
+
+
 def list_archivers():
     """
     List archivers with data

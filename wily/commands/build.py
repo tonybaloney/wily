@@ -47,6 +47,8 @@ def build(config, archiver, operators):
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
 
+    index = []
+
     bar = Bar('Processing', max=len(revisions)*len(operators))
     try:
         for revision in revisions:
@@ -55,20 +57,23 @@ def build(config, archiver, operators):
             # Build a set of operators
             _operators = [operator.cls(config) for operator in operators]
 
-            stats = {
+            stats_header = {
                 "revision": revision.key,
                 "author_name": revision.author_name,
                 "author_email": revision.author_email,
-                "date": revision.revision_date,
+                "date": revision.revision_date
+            }
+            stats = stats_header + {
                 "operator_data": {},
             }
             for operator in _operators:
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
-
+            index.append(stats_header)
             cache.store(archiver, revision, stats)
-            bar.finish()
+        cache.store_index(archiver, index)
+        bar.finish()
     except Exception as e:
         logger.error(f"Failed to build cache: '{e.message}'")
     finally:
