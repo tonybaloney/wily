@@ -45,8 +45,9 @@ def cli(ctx, debug, config):
     multiple=True,
     help="Subdirectories or files to scan",
 )
+@click.option("-o", "--operators", type=click.STRING, help="List of operators, seperated by commas")
 @click.pass_context
-def build(ctx, max_revisions, path, target):
+def build(ctx, max_revisions, path, target, operators):
     """Build the wily cache"""
     config = ctx.obj["CONFIG"]
 
@@ -61,6 +62,9 @@ def build(ctx, max_revisions, path, target):
     if target:
         logger.debug(f"Fixing targets to {target}")
         config.targets = target
+    if operators:
+        logger.debug(f"Fixing operators to {operators}")
+        config.operators = operators.split(',')
 
     build(
         config=config,
@@ -102,6 +106,23 @@ def report(ctx, file, metric):
     from wily.commands.report import report
     logger.debug(f"Running report on {file} for metric {metric}")
     report(config=config, path=file, metric=metric)
+
+
+@cli.command()
+@click.argument("file", type=click.Path(resolve_path=False))
+@click.argument("metric")
+@click.pass_context
+def graph(ctx, file, metric):
+    """Graph a specific metric for a given file."""
+    config = ctx.obj["CONFIG"]
+
+    if not exists():
+        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        return -1
+
+    from wily.commands.graph import graph
+    logger.debug(f"Running report on {file} for metric {metric}")
+    graph(config=config, path=file, metric=metric)
 
 
 @cli.command()
