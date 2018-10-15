@@ -1,6 +1,6 @@
 from wily import logger
 import tabulate
-from wily.cache import list_archivers, get_history
+import wily.cache as cache
 from wily.config import DEFAULT_GRID_STYLE
 
 
@@ -21,15 +21,16 @@ def show(config):
     logger.info("-----------History------------")
 
     data = []
-    archivers = list_archivers()
+    archivers = cache.list_archivers()
     for archiver in archivers:
-        history = get_history(archiver)
+        history = cache.get_index(archiver)
         for rev in history:
+
             data.append(
                 (
                     rev["revision"],
                     rev["author_name"],
-                    ", ".join(list(rev["operator_data"].keys())),
+                    ", ".join(rev["operators"]),
                 )
             )
 
