@@ -80,6 +80,7 @@ def show(ctx):
 
     if not exists():
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        return -1
 
     from wily.commands.show import show
 
@@ -96,9 +97,10 @@ def report(ctx, file, metric):
 
     if not exists():
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        return -1
 
     from wily.commands.report import report
-
+    logger.debug(f"Running report on {file} for metric {metric}")
     report(config=config, path=file, metric=metric)
 
 
