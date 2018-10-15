@@ -1,6 +1,4 @@
-import datetime
-
-from wily import logger
+from wily import logger, format_date
 import tabulate
 import wily.cache as cache
 from wily.config import DEFAULT_GRID_STYLE
@@ -31,7 +29,7 @@ def index(config):
                 (
                     rev["revision"],
                     rev["author_name"],
-                    datetime.date.fromtimestamp(rev["date"]).isoformat(),
+                    format_date(rev["date"]),
                 )
             )
 

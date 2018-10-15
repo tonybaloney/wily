@@ -1,4 +1,12 @@
 from collections import namedtuple
+from enum import Enum
+
+
+class MetricType(Enum):
+    """Type of metric, used in trends"""
+    AimLow = 1  # Low is good, high is bad
+    AimHigh = 2  # High is good, low is bad
+    Informational = 3  # Doesn't matter
 
 
 class BaseOperator(object):
@@ -10,7 +18,7 @@ class BaseOperator(object):
     """Default settings"""
     defaults = {}
 
-    """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>)"""
+    """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)"""
     metrics = ()
 
     def run(self, module, options):
@@ -72,3 +80,10 @@ def resolve_operator(name):
 
 def resolve_operators(operators):
     return [resolve_operator(operator) for operator in operators]
+
+
+def resolve_metric(metric):
+    """ Resolve metric key to a given target """
+    operator, key = metric.split('.')
+    # TODO: Handle this better!
+    return [metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key][0]

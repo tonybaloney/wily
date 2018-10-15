@@ -16,7 +16,7 @@ from wily.operators import resolve_operators
 )
 @click.pass_context
 def cli(ctx, debug, config):
-    """Commands for creating and searching through history"""
+    """Commands for creating and searching through history."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
     if debug:
@@ -47,7 +47,7 @@ def cli(ctx, debug, config):
 )
 @click.pass_context
 def build(ctx, max_revisions, path, target):
-    """Build the complexity history log based on a version-control system"""
+    """Build the wily cache"""
     config = ctx.obj["CONFIG"]
 
     from wily.commands.build import build
@@ -75,7 +75,7 @@ def build(ctx, max_revisions, path, target):
 @cli.command()
 @click.pass_context
 def index(ctx):
-    """Show the history archive in the .wily/ folder"""
+    """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists():
@@ -92,7 +92,7 @@ def index(ctx):
 @click.argument("metric")
 @click.pass_context
 def report(ctx, file, metric):
-    """Show a specific metric for a given file, run `wily list-metrics` for a list."""
+    """Show a specific metric for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists():
@@ -108,7 +108,7 @@ def report(ctx, file, metric):
 @click.option("-y", "--yes", default=False, help="Skip prompt")
 @click.pass_context
 def clean(ctx, yes):
-    """Show the history archive in the .wily/ folder"""
+    """Clear the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists():

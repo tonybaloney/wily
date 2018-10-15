@@ -106,3 +106,13 @@ def get_index(archiver):
     with (root / "index.json").open('r') as index_f:
         index = json.load(index_f)
     return index
+
+def get(archiver, revision):
+    """
+    Get the data for a given revision
+    """
+    root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver
+    # TODO : string escaping!!!
+    with (root / f"{revision}.json").open('r') as rev_f:
+        index = json.load(rev_f)
+    return index
