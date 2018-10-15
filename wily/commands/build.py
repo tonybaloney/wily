@@ -47,7 +47,7 @@ def build(config, archiver, operators):
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
 
-    bar = Bar('Processing', max=config.max_revisions*len(operators))
+    bar = Bar('Processing', max=len(revisions)*len(operators))
     try:
         for revision in revisions:
             # Checkout target revision
