@@ -100,8 +100,10 @@ def index(ctx):
 @cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metric")
+@click.option("-n", "--number", help="Number of items to show", type=click.INT)
+@click.option("--message/--no-message", default=False, help="Include git message")
 @click.pass_context
-def report(ctx, file, metric):
+def report(ctx, file, metric, number, message):
     """Show a specific metric for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -111,7 +113,7 @@ def report(ctx, file, metric):
 
     from wily.commands.report import report
     logger.debug(f"Running report on {file} for metric {metric}")
-    report(config=config, path=file, metric=metric)
+    report(config=config, path=file, metric=metric, n=number, include_message=message)
 
 
 @cli.command()

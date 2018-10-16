@@ -1,8 +1,7 @@
 """
-TODO : Implement a limit on the number of records returned
 TODO : Fix float-rendering and rounding
 TODO : Better error handling of wonky builds
-TODO : Implemented `include_message` to add the git message to the table
+TODO : Render git commit SHA as the short-hand version
 """
 from wily import logger, format_date
 import tabulate
@@ -10,6 +9,9 @@ import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
 from wily.operators import resolve_metric, MetricType
+
+""" Max number of characters of the Git commit to print """
+MAX_MESSAGE_WIDTH = 50
 
 
 def report(config, path, metric, n, include_message=False):
@@ -49,8 +51,9 @@ def report(config, path, metric, n, include_message=False):
         bad_color = 33 
 
     for archiver in archivers:
+        history = cache.get_index(archiver)[:n]
         # We have to do it backwards to get the deltas between releases
-        history = cache.get_index(archiver)[::-1]
+        history = history[::-1]
         for rev in history:
             revision_entry = cache.get(archiver, rev['revision'])
             try:
@@ -75,28 +78,37 @@ def report(config, path, metric, n, include_message=False):
                 else:
                     delta_col = f"\u001b[{bad_color}m+{delta}\u001b[0m"
 
-                data.append(
-                    (
-                        rev["revision"],
-                        rev["author_name"],
-                        format_date(rev["date"]),
-                        f"{val} ({delta_col})",
-                    )
-                )
+                k = f"{val} ({delta_col})"
             except KeyError:
-                data.append(
-                    (
-                        rev["revision"],
-                        rev["author_name"],
-                        format_date(rev["date"]),
-                        "Not found",
+                k = "Not found"
+            finally:
+                if include_message:
+                    data.append(
+                        (
+                            rev["revision"],
+                            rev['message'][:MAX_MESSAGE_WIDTH],
+                            rev["author_name"],
+                            format_date(rev["date"]),
+                            k
+                        )
                     )
-                )
-
+                else:
+                    data.append(
+                        (
+                            rev["revision"],
+                            rev["author_name"],
+                            format_date(rev["date"]),
+                            k
+                        )
+                    )
+    if include_message:
+        headers=("Revision", "Message", "Author", "Date", metric.description)
+    else:
+        headers=("Revision", "Author", "Date", metric.description)
     print(
         # But it still makes more sense to show the newest at the top, so reverse again
         tabulate.tabulate(
-            headers=("Revision", "Author", "Date", metric.decription), tabular_data=data[::-1],
+            headers=headers, tabular_data=data[::-1],
             tablefmt=DEFAULT_GRID_STYLE
         )
     )
