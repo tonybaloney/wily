@@ -2,12 +2,11 @@
 Draw graph in HTML for a specific metric
 
 
-TODO: Make X-axis relative to the timestamp of the commit
 TODO: Somehow link to the rev-hash?
 TODO: Add multiple lines for multiple files
 TODO: Add multiple lines for multiple metrics(?)
 """
-from wily import logger, format_date
+from wily import logger, format_datetime
 import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
@@ -56,7 +55,7 @@ def graph(config, path, metric):
             except KeyError:
                 y.append(0)
             finally:
-                x.append(i)
+                x.append(format_datetime(rev['date']))
                 i+=1
     # Create traces
     trace0 = go.Scatter(
@@ -65,7 +64,8 @@ def graph(config, path, metric):
         mode = 'lines+markers',
         name = metric[1],
         ids = ids,
-        text = labels
+        text = labels,
+        xcalendar='gregorian'
     )
     data = [trace0]
     plotly.offline.plot(
