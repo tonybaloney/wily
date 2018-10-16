@@ -1,20 +1,20 @@
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 from wily import logger
-from wily.operators import BaseOperator, MetricType
+from wily.operators import BaseOperator, MetricType, Metric
 
 
 class RawMetricsOperator(BaseOperator):
     name = "raw"
     defaults = {"exclude": None, "ignore": None, "summary": False}
     metrics = (
-        ("loc", "Lines of Code", int, MetricType.Informational),
-        ("lloc", "L Lines of Code", int, MetricType.Informational),
-        ("sloc", "S Lines of Code", int, MetricType.Informational),
-        ("comments", "Multi-line comments", int, MetricType.Informational),
-        ("multi", "Multi lines", int, MetricType.Informational),
-        ("blank", "blank lines", int, MetricType.Informational),
-        ("single_comments", "Single comment lines", int, MetricType.Informational)
+        Metric("loc", "Lines of Code", int, MetricType.Informational),
+        Metric("lloc", "L Lines of Code", int, MetricType.Informational),
+        Metric("sloc", "S Lines of Code", int, MetricType.Informational),
+        Metric("comments", "Multi-line comments", int, MetricType.Informational),
+        Metric("multi", "Multi lines", int, MetricType.Informational),
+        Metric("blank", "blank lines", int, MetricType.Informational),
+        Metric("single_comments", "Single comment lines", int, MetricType.Informational)
     )
     
     def __init__(self, config):

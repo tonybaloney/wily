@@ -1,7 +1,7 @@
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 from wily import logger
-from wily.operators import BaseOperator, MetricType
+from wily.operators import BaseOperator, MetricType, Metric
 
 
 class MaintainabilityIndexOperator(BaseOperator):
@@ -17,8 +17,8 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        ("rank", "Maintainability Ranking", str, MetricType.Informational),
-        ("mi", "Maintainability Index", float, MetricType.AimLow)
+        Metric("rank", "Maintainability Ranking", str, MetricType.Informational),
+        Metric("mi", "Maintainability Index", float, MetricType.AimLow)
     )
 
     def __init__(self, config):

@@ -1,8 +1,8 @@
 """
 TODO : Implement a limit on the number of records returned
 TODO : Fix float-rendering and rounding
-TODO : Fix str-type rendering
 TODO : Better error handling of wonky builds
+TODO : Implemented `include_message` to add the git message to the table
 """
 from wily import logger, format_date
 import tabulate
@@ -12,7 +12,7 @@ import wily.cache as cache
 from wily.operators import resolve_metric, MetricType
 
 
-def report(config, path, metric):
+def report(config, path, metric, n, include_message=False):
     """
     Show information about the cache and runtime
     :param config: The configuration
@@ -21,10 +21,11 @@ def report(config, path, metric):
     :param path: The path to the file
     :type  path: ``str``
 
-    :param metric: The metric to report on
-    :type  metric: The metric
+    :param metric: Name of the metric to report on
+    :type  metric: ``str``
 
-    :return:
+    :param n: Number of items to list
+    :type  n: ``int``
     """
     logger.debug("Running report command")
 
@@ -37,13 +38,13 @@ def report(config, path, metric):
     archivers = cache.list_archivers()
 
     # Set the delta colors depending on the metric type
-    if metric[3] == MetricType.AimHigh:
+    if metric.measure == MetricType.AimHigh:
         good_color = 32
         bad_color = 31
-    elif metric[3] == MetricType.AimLow:
+    elif metric.measure == MetricType.AimLow:
         good_color = 31
         bad_color = 32
-    elif metric[3] == MetricType.Informational:
+    elif metric.measure == MetricType.Informational:
         good_color = 33
         bad_color = 33 
 
@@ -56,11 +57,15 @@ def report(config, path, metric):
                 val = revision_entry["operator_data"][operator][path][key]
 
                 # Measure the difference between this value and the last
-                if last:
-                    delta=val-last
+                if metric.type in (int, float):
+                    if last:
+                        delta=val-last
+                    else:
+                        delta=0
+                    last=val
                 else:
-                    delta=0
-                last=val
+                    # TODO : Measure ranking increases/decreases for str types?
+                    delta = 0
 
                 # TODO : Format floating values nicely
                 if delta == 0:
@@ -91,7 +96,7 @@ def report(config, path, metric):
     print(
         # But it still makes more sense to show the newest at the top, so reverse again
         tabulate.tabulate(
-            headers=("Revision", "Author", "Date", metric[1]), tabular_data=data[::-1],
+            headers=("Revision", "Author", "Date", metric.decription), tabular_data=data[::-1],
             tablefmt=DEFAULT_GRID_STYLE
         )
     )

@@ -8,6 +8,8 @@ class MetricType(Enum):
     AimHigh = 2  # High is good, low is bad
     Informational = 3  # Doesn't matter
 
+Metric = namedtuple("Metric", "name description type measure")
+
 
 class BaseOperator(object):
     """Abstract Operator Class"""

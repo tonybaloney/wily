@@ -4,6 +4,8 @@ Draw graph in HTML for a specific metric
 
 TODO: Make X-axis relative to the timestamp of the commit
 TODO: Somehow link to the rev-hash?
+TODO: Add multiple lines for multiple files
+TODO: Add multiple lines for multiple metrics(?)
 """
 from wily import logger, format_date
 import tabulate
