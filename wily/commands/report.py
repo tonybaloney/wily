@@ -1,15 +1,14 @@
 """
 TODO : Better error handling of wonky builds
 """
-from wily import logger, format_date, format_revision
+from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
 from wily.operators import resolve_metric, MetricType
 
-""" Max number of characters of the Git commit to print """
-MAX_MESSAGE_WIDTH = 50
+
 
 
 def report(config, path, metric, n, include_message=False):

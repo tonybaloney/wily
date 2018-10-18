@@ -84,7 +84,8 @@ def build(ctx, max_revisions, path, target, operators):
 
 @cli.command()
 @click.pass_context
-def index(ctx):
+@click.option("--message/--no-message", default=False, help="Include revision message")
+def index(ctx, message):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
@@ -94,14 +95,14 @@ def index(ctx):
 
     from wily.commands.index import index
 
-    index(config=config)
+    index(config=config, include_message=message)
 
 
 @cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metric")
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option("--message/--no-message", default=False, help="Include git message")
+@click.option("--message/--no-message", default=False, help="Include revision message")
 @click.pass_context
 def report(ctx, file, metric, number, message):
     """Show a specific metric for a given file."""
