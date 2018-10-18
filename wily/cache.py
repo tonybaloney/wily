@@ -1,11 +1,11 @@
 """
 A module for working with the .wily/ cache directory
 
-TODO: Implement `clean` command, currently fails. Needs to do `rm -rf .wily` equivalent
 TODO: Version .wily/ cache folders?
 TODO: Validate that if wily config specifies alternative directory that all commands work
 """
 
+import shutil
 import pathlib
 import json
 from wily.config import DEFAULT_CACHE_PATH
@@ -45,8 +45,7 @@ def clean():
         logger.debug("Wily cache does not exist, skipping")
         return
     logger.debug("Deleting wily cache")
-    # TODO: Empty directory contents
-    pathlib.Path(DEFAULT_CACHE_PATH).rmdir()
+    shutil.rmtree(DEFAULT_CACHE_PATH)
 
 
 def store(archiver, revision, stats):
