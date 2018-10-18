@@ -34,7 +34,7 @@ class GitArchiver(BaseArchiver):
                 author_name=commit.author.name,
                 author_email=commit.author.email,
                 revision_date=commit.committed_date,
-                message=commit.message
+                message=commit.message,
             )
             revisions.append(rev)
         return revisions

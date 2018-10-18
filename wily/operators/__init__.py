@@ -4,9 +4,11 @@ from enum import Enum
 
 class MetricType(Enum):
     """Type of metric, used in trends"""
+
     AimLow = 1  # Low is good, high is bad
     AimHigh = 2  # High is good, low is bad
     Informational = 3  # Doesn't matter
+
 
 Metric = namedtuple("Metric", "name description type measure")
 
@@ -86,6 +88,8 @@ def resolve_operators(operators):
 
 def resolve_metric(metric):
     """ Resolve metric key to a given target """
-    operator, key = metric.split('.')
+    operator, key = metric.split(".")
     # TODO: Handle this better!
-    return [metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key][0]
+    return [
+        metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key
+    ][0]

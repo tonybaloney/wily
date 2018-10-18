@@ -16,13 +16,16 @@ logger.addHandler(_handler)
 """ Max number of characters of the Git commit to print """
 MAX_MESSAGE_WIDTH = 50
 
+
 def format_date(timestamp):
     """ Reusable timestamp -> date """
     return datetime.date.fromtimestamp(timestamp).isoformat()
 
+
 def format_datetime(timestamp):
     """ Reusable timestamp -> datetime """
     return datetime.datetime.fromtimestamp(timestamp).isoformat()
+
 
 def format_revision(sha):
     """ Return a shorter git sha """

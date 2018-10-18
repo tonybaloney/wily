@@ -12,12 +12,12 @@ import tabulate
 def list_metrics():
     for operator in ALL_OPERATORS:
         print(f"{operator.name} operator:")
-        if len(operator.cls.metrics) > 0 :
+        if len(operator.cls.metrics) > 0:
             print(
                 tabulate.tabulate(
-                    headers=("Name", "Description", "Type"), 
+                    headers=("Name", "Description", "Type"),
                     tabular_data=operator.cls.metrics,
-                    tablefmt=DEFAULT_GRID_STYLE
+                    tablefmt=DEFAULT_GRID_STYLE,
                 )
             )
         else:

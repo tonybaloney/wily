@@ -18,7 +18,7 @@ class MaintainabilityIndexOperator(BaseOperator):
 
     metrics = (
         Metric("rank", "Maintainability Ranking", str, MetricType.Informational),
-        Metric("mi", "Maintainability Index", float, MetricType.AimLow)
+        Metric("mi", "Maintainability Index", float, MetricType.AimLow),
     )
 
     def __init__(self, config):

@@ -14,7 +14,11 @@ from wily.operators import resolve_operators
 
 
 @click.group()
-@click.option("--debug/--no-debug", default=False, help="Print debug information, used for development")
+@click.option(
+    "--debug/--no-debug",
+    default=False,
+    help="Print debug information, used for development",
+)
 @click.option(
     "--config",
     default=DEFAULT_CONFIG_PATH,
@@ -41,8 +45,12 @@ def cli(ctx, debug, config):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.option("-p", "--path", type=click.Path(resolve_path=True),
-    help="Root path to the project folder to scan")
+@click.option(
+    "-p",
+    "--path",
+    type=click.Path(resolve_path=True),
+    help="Root path to the project folder to scan",
+)
 @click.option(
     "-t",
     "--target",
@@ -51,7 +59,12 @@ def cli(ctx, debug, config):
     multiple=True,
     help="Subdirectories or files to scan",
 )
-@click.option("-o", "--operators", type=click.STRING, help="List of operators, seperated by commas")
+@click.option(
+    "-o",
+    "--operators",
+    type=click.STRING,
+    help="List of operators, seperated by commas",
+)
 @click.pass_context
 def build(ctx, max_revisions, path, target, operators):
     """Build the wily cache"""
@@ -70,7 +83,7 @@ def build(ctx, max_revisions, path, target, operators):
         config.targets = target
     if operators:
         logger.debug(f"Fixing operators to {operators}")
-        config.operators = operators.split(',')
+        config.operators = operators.split(",")
 
     build(
         config=config,
@@ -113,6 +126,7 @@ def report(ctx, file, metric, number, message):
         return -1
 
     from wily.commands.report import report
+
     logger.debug(f"Running report on {file} for metric {metric}")
     report(config=config, path=file, metric=metric, n=number, include_message=message)
 
@@ -130,6 +144,7 @@ def graph(ctx, files, metric):
         return -1
 
     from wily.commands.graph import graph
+
     logger.debug(f"Running report on {files} for metric {metric}")
     graph(config=config, paths=[files], metric=metric)
 
@@ -147,7 +162,7 @@ def clean(ctx, yes):
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
-        if p.lower() != 'y':
+        if p.lower() != "y":
             return 0
 
     from wily.cache import clean
@@ -168,5 +183,6 @@ def list_metrics(ctx):
     from wily.commands.list_metrics import list_metrics
 
     list_metrics()
+
 
 cli()

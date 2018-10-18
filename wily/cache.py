@@ -96,7 +96,7 @@ def get_history(archiver):
     revisions = []
     for i in root.iterdir():
         if i.name.endswith(".json"):
-            with i.open('r') as rev_f:
+            with i.open("r") as rev_f:
                 revision_data = json.load(rev_f)
                 revisions.append(revision_data)
     return revisions
@@ -107,9 +107,10 @@ def get_index(archiver):
     Get the contents of the index file
     """
     root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver
-    with (root / "index.json").open('r') as index_f:
+    with (root / "index.json").open("r") as index_f:
         index = json.load(index_f)
     return index
+
 
 def get(archiver, revision):
     """
@@ -117,6 +118,6 @@ def get(archiver, revision):
     """
     root = pathlib.Path(DEFAULT_CACHE_PATH) / archiver
     # TODO : string escaping!!!
-    with (root / f"{revision}.json").open('r') as rev_f:
+    with (root / f"{revision}.json").open("r") as rev_f:
         index = json.load(rev_f)
     return index

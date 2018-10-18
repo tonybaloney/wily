@@ -14,9 +14,11 @@ class RawMetricsOperator(BaseOperator):
         Metric("comments", "Multi-line comments", int, MetricType.Informational),
         Metric("multi", "Multi lines", int, MetricType.Informational),
         Metric("blank", "blank lines", int, MetricType.Informational),
-        Metric("single_comments", "Single comment lines", int, MetricType.Informational)
+        Metric(
+            "single_comments", "Single comment lines", int, MetricType.Informational
+        ),
     )
-    
+
     def __init__(self, config):
         # TODO: Use config from wily.cfg for harvester
         logger.debug(f"Using {config.targets} with {self.defaults} for Raw metrics")

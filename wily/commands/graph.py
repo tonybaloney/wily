@@ -18,7 +18,6 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 
 
-
 def graph(config, paths, metric):
     """
     Graph information about the cache and runtime
@@ -36,7 +35,7 @@ def graph(config, paths, metric):
     logger.debug("Running report command")
 
     data = []
-    operator, key = metric.split('.')
+    operator, key = metric.split(".")
     metric = resolve_metric(metric)
     archivers = cache.list_archivers()
 
@@ -46,29 +45,31 @@ def graph(config, paths, metric):
         for archiver in archivers:
             # We have to do it backwards to get the deltas between releases
             history = cache.get_index(archiver)
-            ids = [rev['revision'] for rev in history[::-1]]
-            labels = [f"{rev['author_name']} <br>{rev['message']}" for rev in history[::-1]]
+            ids = [rev["revision"] for rev in history[::-1]]
+            labels = [
+                f"{rev['author_name']} <br>{rev['message']}" for rev in history[::-1]
+            ]
             for rev in history[::-1]:
-                revision_entry = cache.get(archiver, rev['revision'])
+                revision_entry = cache.get(archiver, rev["revision"])
                 try:
                     val = revision_entry["operator_data"][operator][path][key]
                     y.append(val)
                 except KeyError:
                     y.append(0)
                 finally:
-                    x.append(format_datetime(rev['date']))
+                    x.append(format_datetime(rev["date"]))
         # Create traces
         trace = go.Scatter(
-            x = x,
-            y = y,
-            mode = 'lines+markers',
-            name = f"{metric.description} for {path}",
-            ids = ids,
-            text = labels,
-            xcalendar='gregorian'
+            x=x,
+            y=y,
+            mode="lines+markers",
+            name=f"{metric.description} for {path}",
+            ids=ids,
+            text=labels,
+            xcalendar="gregorian",
         )
         data.append(trace)
     plotly.offline.plot(
-        {"data": data, 
-        "layout": go.Layout(title=f"History of {metric.description}")}
-        , auto_open=True)
+        {"data": data, "layout": go.Layout(title=f"History of {metric.description}")},
+        auto_open=True,
+    )

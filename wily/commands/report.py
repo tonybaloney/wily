@@ -9,8 +9,6 @@ import wily.cache as cache
 from wily.operators import resolve_metric, MetricType
 
 
-
-
 def report(config, path, metric, n, include_message=False):
     """
     Show information about the cache and runtime
@@ -32,7 +30,7 @@ def report(config, path, metric, n, include_message=False):
 
     data = []
     last = None
-    operator, key = metric.split('.')
+    operator, key = metric.split(".")
     metric = resolve_metric(metric)
     archivers = cache.list_archivers()
 
@@ -45,36 +43,36 @@ def report(config, path, metric, n, include_message=False):
         bad_color = 32
     elif metric.measure == MetricType.Informational:
         good_color = 33
-        bad_color = 33 
+        bad_color = 33
 
     for archiver in archivers:
         history = cache.get_index(archiver)[:n]
         # We have to do it backwards to get the deltas between releases
         history = history[::-1]
         for rev in history:
-            revision_entry = cache.get(archiver, rev['revision'])
+            revision_entry = cache.get(archiver, rev["revision"])
             try:
                 val = revision_entry["operator_data"][operator][path][key]
 
                 # Measure the difference between this value and the last
                 if metric.type in (int, float):
                     if last:
-                        delta=val-last
+                        delta = val - last
                     else:
-                        delta=0
-                    last=val
+                        delta = 0
+                    last = val
                 else:
                     # TODO : Measure ranking increases/decreases for str types?
                     delta = 0
 
                 if delta == 0:
                     delta_col = delta
-                elif delta < 0 :
+                elif delta < 0:
                     delta_col = f"\u001b[{good_color}m{delta:n}\u001b[0m"
                 else:
                     delta_col = f"\u001b[{bad_color}m+{delta:n}\u001b[0m"
 
-                if metric.type in (int, float):        
+                if metric.type in (int, float):
                     k = f"{val:n} ({delta_col})"
                 else:
                     k = f"{val}"
@@ -85,10 +83,10 @@ def report(config, path, metric, n, include_message=False):
                     data.append(
                         (
                             format_revision(rev["revision"]),
-                            rev['message'][:MAX_MESSAGE_WIDTH],
+                            rev["message"][:MAX_MESSAGE_WIDTH],
                             rev["author_name"],
                             format_date(rev["date"]),
-                            k
+                            k,
                         )
                     )
                 else:
@@ -97,17 +95,16 @@ def report(config, path, metric, n, include_message=False):
                             format_revision(rev["revision"]),
                             rev["author_name"],
                             format_date(rev["date"]),
-                            k
+                            k,
                         )
                     )
     if include_message:
-        headers=("Revision", "Message", "Author", "Date", metric.description)
+        headers = ("Revision", "Message", "Author", "Date", metric.description)
     else:
-        headers=("Revision", "Author", "Date", metric.description)
+        headers = ("Revision", "Author", "Date", metric.description)
     print(
         # But it still makes more sense to show the newest at the top, so reverse again
         tabulate.tabulate(
-            headers=headers, tabular_data=data[::-1],
-            tablefmt=DEFAULT_GRID_STYLE
+            headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
         )
     )

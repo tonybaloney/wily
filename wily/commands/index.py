@@ -53,7 +53,6 @@ def index(config, include_message=False):
         headers = ("Revision", "Author", "Date")
     print(
         tabulate.tabulate(
-            headers=headers, tabular_data=data,
-            tablefmt=DEFAULT_GRID_STYLE
+            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
         )
     )
