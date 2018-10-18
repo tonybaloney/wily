@@ -21,3 +21,7 @@ def format_date(timestamp):
 def format_datetime(timestamp):
     """ Reusable timestamp -> datetime """
     return datetime.datetime.fromtimestamp(timestamp).isoformat()
+
+def format_revision(sha):
+    """ Return a shorter git sha """
+    return sha[:7]

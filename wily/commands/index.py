@@ -4,7 +4,7 @@ Print information about the wily cache and what is in the index
 TODO : Optional flag to include commit messages in table
 
 """
-from wily import logger, format_date
+from wily import logger, format_date, format_revision
 import tabulate
 import wily.cache as cache
 from wily.config import DEFAULT_GRID_STYLE
@@ -33,7 +33,7 @@ def index(config):
         for rev in history:
             data.append(
                 (
-                    rev["revision"],
+                    format_revision(rev["revision"]),
                     rev["author_name"],
                     format_date(rev["date"]),
                 )

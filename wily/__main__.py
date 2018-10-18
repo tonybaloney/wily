@@ -117,10 +117,10 @@ def report(ctx, file, metric, number, message):
 
 
 @cli.command()
-@click.argument("file", type=click.Path(resolve_path=False))
+@click.argument("files", type=click.Path(resolve_path=False))
 @click.argument("metric")
 @click.pass_context
-def graph(ctx, file, metric):
+def graph(ctx, files, metric):
     """Graph a specific metric for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -129,8 +129,8 @@ def graph(ctx, file, metric):
         return -1
 
     from wily.commands.graph import graph
-    logger.debug(f"Running report on {file} for metric {metric}")
-    graph(config=config, path=file, metric=metric)
+    logger.debug(f"Running report on {files} for metric {metric}")
+    graph(config=config, paths=[files], metric=metric)
 
 
 @cli.command()

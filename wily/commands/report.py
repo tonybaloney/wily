@@ -1,9 +1,7 @@
 """
-TODO : Fix float-rendering and rounding
 TODO : Better error handling of wonky builds
-TODO : Render git commit SHA as the short-hand version
 """
-from wily import logger, format_date
+from wily import logger, format_date, format_revision
 import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
@@ -70,22 +68,24 @@ def report(config, path, metric, n, include_message=False):
                     # TODO : Measure ranking increases/decreases for str types?
                     delta = 0
 
-                # TODO : Format floating values nicely
                 if delta == 0:
                     delta_col = delta
                 elif delta < 0 :
-                    delta_col = f"\u001b[{good_color}m{delta}\u001b[0m"
+                    delta_col = f"\u001b[{good_color}m{delta:n}\u001b[0m"
                 else:
-                    delta_col = f"\u001b[{bad_color}m+{delta}\u001b[0m"
+                    delta_col = f"\u001b[{bad_color}m+{delta:n}\u001b[0m"
 
-                k = f"{val} ({delta_col})"
+                if metric.type in (int, float):        
+                    k = f"{val:n} ({delta_col})"
+                else:
+                    k = f"{val}"
             except KeyError:
                 k = "Not found"
             finally:
                 if include_message:
                     data.append(
                         (
-                            rev["revision"],
+                            format_revision(rev["revision"]),
                             rev['message'][:MAX_MESSAGE_WIDTH],
                             rev["author_name"],
                             format_date(rev["date"]),
@@ -95,7 +95,7 @@ def report(config, path, metric, n, include_message=False):
                 else:
                     data.append(
                         (
-                            rev["revision"],
+                            format_revision(rev["revision"]),
                             rev["author_name"],
                             format_date(rev["date"]),
                             k
