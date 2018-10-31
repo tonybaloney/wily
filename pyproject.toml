@@ -40,12 +40,14 @@ isolated_build = true
 envlist = py36, py37
 [testenv]
 passenv = CI TRAVIS TRAVIS_*
+setenv =
+    PYTHONPATH = {toxinidir}
 deps =
     pytest
     pytest-cov
     codecov
     mock
 commands =
-    pytest --cov=wily/
+    pytest --cov=wily
     codecov
 """
