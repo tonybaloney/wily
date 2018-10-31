@@ -1,7 +1,7 @@
 # wily
 A Python application for tracking, reporting on timing and complexity in tests and applications.
 
-[![Build Status](https://travis-ci.com/tonybaloney/wily.svg?branch=master)](https://travis-ci.com/tonybaloney/wily)
+[![Build Status](https://travis-ci.com/tonybaloney/wily.svg?branch=master)](https://travis-ci.com[![codecov] (https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily)
 
 
 ```
