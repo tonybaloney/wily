@@ -30,3 +30,16 @@ description-file = "README.md"
 
 [tool.flit.scripts]
 wily = "wily.__main__:cli"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = true
+envlist = py36, py37
+[testenv]
+deps =
+    pytest
+    mock
+commands =
+    pytest
+"""
