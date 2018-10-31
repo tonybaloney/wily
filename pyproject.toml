@@ -45,6 +45,6 @@ deps =
     codecov
     mock
 commands =
-    pytest --cov=./
+    pytest --cov=wily/
     codecov
 """
