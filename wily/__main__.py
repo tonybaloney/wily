@@ -150,7 +150,7 @@ def graph(ctx, files, metric):
 
 
 @cli.command()
-@click.option("-y", "--yes", default=False, help="Skip prompt")
+@click.option("-y/-p", "--yes/--prompt", default=False, help="Skip prompt")
 @click.pass_context
 def clean(ctx, yes):
     """Clear the .wily/ folder."""
