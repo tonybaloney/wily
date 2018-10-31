@@ -83,7 +83,7 @@ def build(ctx, max_revisions, path, target, operators):
         config.targets = target
     if operators:
         logger.debug(f"Fixing operators to {operators}")
-        config.operators = operators.split(",")
+        config.operators = operators.strip().split(",")
 
     build(
         config=config,
@@ -150,7 +150,7 @@ def graph(ctx, files, metric):
 
 
 @cli.command()
-@click.option("-y", "--yes", default=False, help="Skip prompt")
+@click.option("-y/-p", "--yes/--prompt", default=False, help="Skip prompt")
 @click.pass_context
 def clean(ctx, yes):
     """Clear the .wily/ folder."""
@@ -185,4 +185,5 @@ def list_metrics(ctx):
     list_metrics()
 
 
-cli()
+if __name__ == '__main__':
+    cli()

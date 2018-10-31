@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 temp-plot.html
 .wily/
+
+.idea/
+.vscode/
