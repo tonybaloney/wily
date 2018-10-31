@@ -41,7 +41,8 @@ envlist = py36, py37
 [testenv]
 deps =
     pytest
+    pytest-cov
     mock
 commands =
-    pytest
+    pytest --cov=./
 """
