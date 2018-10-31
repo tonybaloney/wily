@@ -41,7 +41,7 @@ def test_index():
     """
     Test that index calls the index command
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.commands.index.index') as index:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['index'])
@@ -54,7 +54,7 @@ def test_index_with_opts():
     """
     Test that index calls the index command with options
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.commands.index.index') as index:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['index', '--message'])
@@ -68,7 +68,7 @@ def test_index_with_no_message():
     """
     Test that index calls the index command with options
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.commands.index.index') as index:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['index', '--no-message'])
@@ -82,7 +82,7 @@ def test_report():
     """
     Test that report calls the report command
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.commands.report.report') as report:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['report', 'foo.py', 'example_metric'])
@@ -97,7 +97,7 @@ def test_report_with_opts():
     """
     Test that report calls the report command with options
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.commands.report.report') as report:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['report', 'foo.py', 'example_metric', '-n 101', '--message'])
@@ -114,7 +114,7 @@ def test_graph():
     """
     Test that graph calls the graph command
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.commands.graph.graph') as graph:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['graph', 'foo.py', 'example_metric'])
@@ -129,7 +129,7 @@ def test_clean():
     """
     Test that graph calls the graph command
     """
-    with patch('wily.cache.exists', return_value=True) as check_cache:
+    with patch('wily.__main__.exists', return_value=True) as check_cache:
         with patch('wily.cache.clean') as clean:
             runner = CliRunner()
             result = runner.invoke(main.cli, ['clean', '--yes'])

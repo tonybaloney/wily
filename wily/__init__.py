@@ -5,7 +5,7 @@ import colorlog
 import datetime
 
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 
 _handler = colorlog.StreamHandler()
 _handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s%(message)s"))
