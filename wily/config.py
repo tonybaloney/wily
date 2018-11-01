@@ -18,6 +18,9 @@ from wily.archivers import ARCHIVER_GIT
 
 logger = logging.getLogger(__name__)
 
+""" The default path name to the cache """
+DEFAULT_CACHE_PATH = ".wily"
+
 
 @dataclass
 class WilyConfig(object):
@@ -30,6 +33,7 @@ class WilyConfig(object):
     archiver: Any
     path: str
     max_revisions: int
+    cache_path: str = DEFAULT_CACHE_PATH
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
@@ -37,6 +41,7 @@ class WilyConfig(object):
         # Clone targets as a list of path
         if self.targets is None or "":
             self.targets = [self.path]
+
 
 # Default values for Wily
 
@@ -55,9 +60,6 @@ DEFAULT_CONFIG_PATH = "wily.cfg"
 
 """ The default section name in the config """
 DEFAULT_CONFIG_SECTION = "wily"
-
-""" The default path name to the cache """
-DEFAULT_CACHE_PATH = ".wily"
 
 """ The default maximum number of revisions to archiver """
 DEFAULT_MAX_REVISIONS = 100
@@ -96,8 +98,5 @@ def load(config_path=DEFAULT_CONFIG_PATH):
     max_revisions = config.get(option="max_revisions", fallback=DEFAULT_MAX_REVISIONS)
 
     return WilyConfig(
-        operators=operators, 
-        archiver=archiver, 
-        path=path, 
-        max_revisions=max_revisions
+        operators=operators, archiver=archiver, path=path, max_revisions=max_revisions
     )

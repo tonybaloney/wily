@@ -32,7 +32,7 @@ def report(config, path, metric, n, include_message=False):
     last = None
     operator, key = metric.split(".")
     metric = resolve_metric(metric)
-    archivers = cache.list_archivers()
+    archivers = cache.list_archivers(config)
 
     # Set the delta colors depending on the metric type
     if metric.measure == MetricType.AimHigh:
@@ -46,11 +46,11 @@ def report(config, path, metric, n, include_message=False):
         bad_color = 33
 
     for archiver in archivers:
-        history = cache.get_index(archiver)[:n]
+        history = cache.get_index(config, archiver)[:n]
         # We have to do it backwards to get the deltas between releases
         history = history[::-1]
         for rev in history:
-            revision_entry = cache.get(archiver, rev["revision"])
+            revision_entry = cache.get(config, archiver, rev["revision"])
             try:
                 val = revision_entry["operator_data"][operator][path][key]
 

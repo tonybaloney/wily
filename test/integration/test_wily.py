@@ -11,11 +11,8 @@ def test_build_not_git_repo(tmpdir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build", "--path", tmpdir])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
         assert result.exit_code == 1
-
-
-Repo
 
 
 def test_build_invalid_path(tmpdir):
@@ -24,7 +21,7 @@ def test_build_invalid_path(tmpdir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build", "--path", "/fo/v/a"])
+        result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build"])
         assert result.exit_code == 1
 
 
@@ -49,7 +46,7 @@ def test_build(tmpdir):
 
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build", "--path", tmpdir])
+        result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
         assert result.exit_code == 0
 
     cache_path = tmpdir / ".wily"
