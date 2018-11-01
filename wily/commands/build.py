@@ -38,7 +38,7 @@ def build(config, archiver, operators):
         return
 
     logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in {config.path}."
+        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
     )
 
     if revisions is None or len(revisions) == 0:
