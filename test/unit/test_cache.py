@@ -45,5 +45,4 @@ def test_create_when_exists(tmpdir):
     pathlib.Path(cache_path).mkdir()
     config.cache_path = str(cache_path)
     assert cache.exists(config)
-    assert str(cache.create(config)) == cache_path
-
+    assert str(cache.create(config)) == str(cache_path)
