@@ -6,6 +6,10 @@
 .. image:: _static/logo.png
    :align: center
 
+A Python application for tracking, reporting on timing and complexity in tests and applications.
+
+Wily uses git to go through each revision (commit) in a branch and run complexity and code-analysis metrics over the code. You can use this to limit your code or report on trends for complexity, length etc.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -17,9 +21,5 @@ Command Line Usage
    :prog: wily
    :show-nested:
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+"cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)

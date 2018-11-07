@@ -52,6 +52,7 @@ deps =
 commands =
     pytest --cov=wily
     codecov
+"""
 
 [tool.black]
 line-length = 88
@@ -66,4 +67,3 @@ exclude = '''
   | dist
 )/
 '''
-"""
