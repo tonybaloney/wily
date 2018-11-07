@@ -210,3 +210,8 @@ Options:
 #### `wily graph`
 
 Similar to `wily report` but instead of printing in the console, `wily` will print a graph in a browser.
+
+
+# Credits
+
+"cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)

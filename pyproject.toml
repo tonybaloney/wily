@@ -7,6 +7,8 @@ requires = [
     "colorlog",
     "tabulate",
     "plotly",
+    "sphinx",
+    "sphinx-click",
     "progress",
     "dataclasses; python_version == '3.6'",]
 build-backend = "flit.buildapi"
