@@ -119,25 +119,6 @@ def list_archivers(config):
     return result
 
 
-def get_history(config, archiver):
-    """
-    Get a list of revisions for a given archiver
-    
-    :param archiver: The name of the archiver type (e.g. 'git')
-    :type  archiver: ``str``
-
-    :return: A ``list`` of ``dict``
-    """
-    root = pathlib.Path(config.cache_path) / archiver
-    revisions = []
-    for i in root.iterdir():
-        if i.name.endswith(".json"):
-            with i.open("r") as rev_f:
-                revision_data = json.load(rev_f)
-                revisions.append(revision_data)
-    return revisions
-
-
 def get_index(config, archiver):
     """
     Get the contents of the archiver index file
