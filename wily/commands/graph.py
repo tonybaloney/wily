@@ -37,20 +37,20 @@ def graph(config, paths, metric):
     data = []
     operator, key = metric.split(".")
     metric = resolve_metric(metric)
-    archivers = cache.list_archivers()
+    archivers = cache.list_archivers(config)
 
     for path in paths:
         x = []
         y = []
         for archiver in archivers:
             # We have to do it backwards to get the deltas between releases
-            history = cache.get_index(archiver)
+            history = cache.get_index(config, archiver)
             ids = [rev["revision"] for rev in history[::-1]]
             labels = [
                 f"{rev['author_name']} <br>{rev['message']}" for rev in history[::-1]
             ]
             for rev in history[::-1]:
-                revision_entry = cache.get(archiver, rev["revision"])
+                revision_entry = cache.get(config, archiver, rev["revision"])
                 try:
                     val = revision_entry["operator_data"][operator][path][key]
                     y.append(val)

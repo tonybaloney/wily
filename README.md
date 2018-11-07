@@ -1,6 +1,10 @@
 # wily
 A Python application for tracking, reporting on timing and complexity in tests and applications.
 
+[![Build Status](https://travis-ci.com/tonybaloney/wily.svg?branch=master)](https://travis-ci.com/tonybaloney/wily)
+[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily)
+
+
 ```
 wily [a]:
 quick to think of things, having a very good understanding of situations and possibilities, 

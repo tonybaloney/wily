@@ -10,7 +10,12 @@ Welcome to wily's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+Command Line Usage
+------------------
 
+.. click:: module:parser
+   :prog: wily
+   :show-nested:
 
 Indices and tables
 ==================

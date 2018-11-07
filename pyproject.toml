@@ -41,10 +41,29 @@ legacy_tox_ini = """
 isolated_build = true
 envlist = py36, py37
 [testenv]
+passenv = CI TRAVIS TRAVIS_*
+setenv =
+    PYTHONPATH = {toxinidir}
 deps =
     pytest
     pytest-cov
+    codecov
     mock
 commands =
-    pytest --cov=./
+    pytest --cov=wily
+    codecov
+
+[tool.black]
+line-length = 88
+py36 = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
 """

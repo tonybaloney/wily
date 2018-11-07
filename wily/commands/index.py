@@ -25,9 +25,9 @@ def index(config, include_message=False):
     logger.info("-----------History------------")
 
     data = []
-    archivers = cache.list_archivers()
+    archivers = cache.list_archivers(config)
     for archiver in archivers:
-        history = cache.get_index(archiver)
+        history = cache.get_index(config, archiver)
         for rev in history:
             if include_message:
                 data.append(

@@ -23,9 +23,9 @@ def build(config, archiver, operators):
     :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
     # Check for existence of cache, else provision
-    if not cache.exists():
+    if not cache.exists(config):
         logger.debug("Wily cache not found, creating.")
-        cache.create()
+        cache.create(config)
         logger.debug("Created wily cache")
 
     logger.debug(f"Using {archiver.name} archiver module")
@@ -73,8 +73,8 @@ def build(config, archiver, operators):
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
             index.append(stats_header)
-            cache.store(archiver, revision, stats)
-        cache.store_index(archiver, index)
+            cache.store(config, archiver, revision, stats)
+        cache.store_index(config, archiver, index)
         bar.finish()
     except Exception as e:
         if hasattr(e, "message"):
