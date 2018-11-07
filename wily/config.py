@@ -92,10 +92,20 @@ def load(config_path=DEFAULT_CONFIG_PATH):
     config = configparser.ConfigParser(default_section=DEFAULT_CONFIG_SECTION)
     config.read(config_path)
 
-    operators = config.get(section=DEFAULT_CONFIG_SECTION, option="operators", fallback=DEFAULT_OPERATORS)
-    archiver = config.get(section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER)
+    operators = config.get(
+        section=DEFAULT_CONFIG_SECTION, option="operators", fallback=DEFAULT_OPERATORS
+    )
+    archiver = config.get(
+        section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER
+    )
     path = config.get(section=DEFAULT_CONFIG_SECTION, option="path", fallback=".")
-    max_revisions = int(config.get(section=DEFAULT_CONFIG_SECTION, option="max_revisions", fallback=DEFAULT_MAX_REVISIONS))
+    max_revisions = int(
+        config.get(
+            section=DEFAULT_CONFIG_SECTION,
+            option="max_revisions",
+            fallback=DEFAULT_MAX_REVISIONS,
+        )
+    )
 
     return WilyConfig(
         operators=operators, archiver=archiver, path=path, max_revisions=max_revisions
