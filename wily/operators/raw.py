@@ -8,10 +8,10 @@ class RawMetricsOperator(BaseOperator):
     name = "raw"
     defaults = {"exclude": None, "ignore": None, "summary": False}
     metrics = (
-        Metric("loc", "Lines of Code", int, MetricType.Informational),
-        Metric("lloc", "L Lines of Code", int, MetricType.Informational),
-        Metric("sloc", "S Lines of Code", int, MetricType.Informational),
-        Metric("comments", "Multi-line comments", int, MetricType.Informational),
+        Metric("loc", "Lines of Code", int, MetricType.AimLow),
+        Metric("lloc", "L Lines of Code", int, MetricType.AimLow),
+        Metric("sloc", "S Lines of Code", int, MetricType.AimLow),
+        Metric("comments", "Multi-line comments", int, MetricType.AimHigh),
         Metric("multi", "Multi lines", int, MetricType.Informational),
         Metric("blank", "blank lines", int, MetricType.Informational),
         Metric(

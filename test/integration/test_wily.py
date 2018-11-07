@@ -85,7 +85,27 @@ def test_report(builddir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py", "raw.multi"])
+        assert result.exit_code == 0, result.stdout
+
+
+def test_report_high_metric(builddir):
+    """
+    Test that report works with a build on a metric expecting high values
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py", "raw.loc"])
+        assert result.exit_code == 0, result.stdout
+
+
+def test_report_low_metric(builddir):
+    """
+    Test that report works with a build on a metric expecting high values
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py", "maintainability.mi"])
         assert result.exit_code == 0, result.stdout
 
 
