@@ -5,12 +5,12 @@ This API is not intended to be public and should not be consumed directly.
 The API in this module is for archivers and commands to work with the local cache
 
 TODO: Version .wily/ cache folders?
-TODO: Validate that if wily config specifies alternative directory
-  that all commands work
+
 """
 
 import shutil
 import pathlib
+import os.path
 import json
 from wily.archivers import ALL_ARCHIVERS
 from wily import logger
@@ -76,6 +76,17 @@ def store(config, archiver, revision, stats):
     if not root.exists():
         logger.debug("Creating wily cache")
         root.mkdir()
+
+    # fix absolute path references.
+    if config.path != ".":
+        for operator, operator_data in stats["operator_data"]:
+            new_operator_data = operator_data.copy()
+            for k, v in operator_data:
+                new_key = os.path.relpath(key, config.path)
+                del new_operator_data[k]
+                new_operator_data[new_key] = v
+            del stats["operator_data"][operator]
+            stats["operator_data"][operator] = new_operator_data
 
     logger.debug(f"Creating {revision.key} output")
     filename = root / (revision.key + ".json")
