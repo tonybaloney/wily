@@ -68,10 +68,11 @@ def store(config, archiver, revision, stats):
     :param stats: The collected data
     :type  stats: ``dict``
     
-    :return: The path to the created file
+    :return: The absolute path to the created file
     :rtype: ``str``
     """
     root = pathlib.Path(config.cache_path) / archiver.name
+
     if not root.exists():
         logger.debug("Creating wily cache")
         root.mkdir()
