@@ -26,7 +26,7 @@ def builddir(tmpdir):
 
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stdout
 
     return tmpdir
 
@@ -38,7 +38,7 @@ def test_build_not_git_repo(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
-        assert result.exit_code == 1
+        assert result.exit_code == 1, result.stdout
 
 
 def test_build_invalid_path(tmpdir):
@@ -48,7 +48,7 @@ def test_build_invalid_path(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build"])
-        assert result.exit_code == 1
+        assert result.exit_code == 1, result.stdout
 
 
 def test_build(tmpdir):
@@ -73,7 +73,7 @@ def test_build(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
 
     cache_path = tmpdir / ".wily"
     assert cache_path.exists()
@@ -86,7 +86,7 @@ def test_report(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
 
 
 def test_list_metrics(builddir):
@@ -96,7 +96,7 @@ def test_list_metrics(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", builddir, "list-metrics"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
 
 
 def test_graph(builddir):
@@ -104,5 +104,5 @@ def test_graph(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", builddir, "graph", "test.py", "raw.loc"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
     # TODO : check that report.html exists..
