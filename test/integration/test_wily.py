@@ -85,8 +85,11 @@ def test_report(builddir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py", "raw.multi"])
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "report", "test.py", "raw.multi"]
+        )
         assert result.exit_code == 0, result.stdout
+        assert "Not found" not in result.stdout
 
 
 def test_report_high_metric(builddir):
@@ -95,8 +98,11 @@ def test_report_high_metric(builddir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py", "raw.loc"])
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "report", "test.py", "raw.loc"]
+        )
         assert result.exit_code == 0, result.stdout
+        assert "Not found" not in result.stdout
 
 
 def test_report_low_metric(builddir):
@@ -105,8 +111,11 @@ def test_report_low_metric(builddir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py", "maintainability.mi"])
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "report", "test.py", "maintainability.mi"]
+        )
         assert result.exit_code == 0, result.stdout
+        assert "Not found" not in result.stdout
 
 
 def test_index(builddir):
@@ -143,5 +152,7 @@ def test_graph(builddir):
     """ Test the graph feature """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "graph", "test.py", "raw.loc"])
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "graph", "test.py", "raw.loc"]
+        )
         assert result.exit_code == 0, result.stdout
