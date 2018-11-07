@@ -113,7 +113,7 @@ def test_clean(builddir):
     """ Test the clean feature """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "clean"])
+        result = runner.invoke(main.cli, ["--path", builddir, "clean", "--yes"])
         assert result.exit_code == 0, result.stdout
     cache_path = pathlib.Path(builddir) / ".wily"
     assert not cache_path.exists()
@@ -125,6 +125,3 @@ def test_graph(builddir):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", builddir, "graph", "test.py", "raw.loc"])
         assert result.exit_code == 0, result.stdout
-
-    report_path = pathlib.Path(builddir) / "tempreport.html"
-    assert report_path.exists()
