@@ -12,10 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-sys.path.insert(0, os.path.abspath('.'))
-import wily
+
 
 # -- Project information -----------------------------------------------------
 
@@ -24,9 +21,9 @@ copyright = '2018, Anthony Shaw'
 author = 'Anthony Shaw'
 
 # The short X.Y version
-version = wily.__version__
+version = "0.7.2"
 # The full version, including alpha/beta/rc tags
-release = wily.__version__
+release = "develop"
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,6 +37,7 @@ release = wily.__version__
 # ones.
 extensions = [
     'sphinx_click.ext',
+    'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
