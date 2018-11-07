@@ -24,10 +24,9 @@ def builddir(tmpdir):
 
     index.commit("basic test", author=author, committer=committer)
 
-    with patch("wily.logger"):
-        runner = CliRunner()
-        result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
-        assert result.exit_code == 0
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
+    assert result.exit_code == 0
 
     return tmpdir
 
