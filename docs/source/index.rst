@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to wily's documentation!
-================================
+.. image:: _static/logo.png
+   :align: center
 
 .. toctree::
    :maxdepth: 2
@@ -13,7 +13,7 @@ Welcome to wily's documentation!
 Command Line Usage
 ------------------
 
-.. click:: module:parser
+.. click:: wily.__main__:cli
    :prog: wily
    :show-nested:
 
