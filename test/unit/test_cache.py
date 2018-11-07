@@ -34,3 +34,16 @@ def test_create_and_delete(tmpdir):
     assert cache.exists(config)
     cache.clean(config)
     assert not cache.exists(config)
+
+
+def test_create_when_exists(tmpdir):
+    """
+    Test that create() will continue if the folder already exists
+    """
+    config = DEFAULT_CONFIG
+    cache_path = pathlib.Path(tmpdir) / ".wily"
+    pathlib.Path(cache_path).mkdir()
+    config.cache_path = str(cache_path)
+    assert cache.exists(config)
+    assert str(cache.create(config)) == cache_path
+

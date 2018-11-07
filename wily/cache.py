@@ -38,7 +38,7 @@ def create(config):
     """
     if exists(config):
         logger.debug("Wily cache exists, skipping")
-        return
+        return config.cache_path
     logger.debug(f"Creating wily cache {config.cache_path}")
     pathlib.Path(config.cache_path).mkdir()
     return config.cache_path
