@@ -86,5 +86,24 @@ def test_report(builddir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "report"])
+        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py"])
         assert result.exit_code == 0
+
+
+def test_list_metrics(builddir):
+    """
+    Test that list-metrics works with a build
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", builddir, "list-metrics"])
+        assert result.exit_code == 0
+
+
+def test_graph(builddir):
+    """ Test the graph feature """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", builddir, "graph", "test.py", "raw.loc"])
+        assert result.exit_code == 0
+    # TODO : check that report.html exists..
