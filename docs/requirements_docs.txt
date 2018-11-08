@@ -2,3 +2,10 @@ sphinx
 sphinx-click
 click
 wily
+progress
+colorlog
+plotly
+tabulate
+dataclasses
+radon
+gitpython
