@@ -9,7 +9,7 @@ import click
 from wily import logger
 from wily.cache import exists
 from wily.config import load as load_config
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH, DEFAULT_PATH
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 

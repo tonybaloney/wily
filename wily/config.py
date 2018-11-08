@@ -64,12 +64,13 @@ DEFAULT_CONFIG_SECTION = "wily"
 """ The default maximum number of revisions to archiver """
 DEFAULT_MAX_REVISIONS = 100
 
+DEFAULT_PATH = "."
 
 """ The default configuration for Wily (if no config file exists) """
 DEFAULT_CONFIG = WilyConfig(
     operators=DEFAULT_OPERATORS,
     archiver=DEFAULT_ARCHIVER,
-    path=".",
+    path=DEFAULT_PATH,
     max_revisions=DEFAULT_MAX_REVISIONS,
 )
 
