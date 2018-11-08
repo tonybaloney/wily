@@ -25,7 +25,9 @@ def builddir(tmpdir):
     index.commit("basic test", author=author, committer=committer)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", tmpdir, "build", "--target", tmpdir]
+    )
     assert result.exit_code == 0, result.stdout
 
     return tmpdir
