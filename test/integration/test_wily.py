@@ -194,3 +194,28 @@ def test_build_no_git_history(tmpdir):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
         assert result.exit_code == 1, result.stdout
+
+
+def test_index_no_cache(tmpdir):
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", tmpdir, "index"])
+        assert result.exit_code == -1, result.stdout
+
+
+def test_report_no_cache(tmpdir):
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli, ["--path", tmpdir, "report", "test.py", "raw.loc"]
+        )
+        assert result.exit_code == -1, result.stdout
+
+
+def test_graph_no_cache(tmpdir):
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli, ["--path", tmpdir, "graph", "test.py", "raw.loc"]
+        )
+        assert result.exit_code == -1, result.stdout

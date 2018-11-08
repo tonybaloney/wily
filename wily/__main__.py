@@ -107,7 +107,7 @@ def index(ctx, message):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
-        return -1
+        exit(-1)
 
     from wily.commands.index import index
 
@@ -126,7 +126,7 @@ def report(ctx, file, metric, number, message):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
-        return -1
+        exit(-1)
 
     from wily.commands.report import report
 
@@ -144,7 +144,7 @@ def graph(ctx, files, metric):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
-        return -1
+        exit(-1)
 
     from wily.commands.graph import graph
 
@@ -161,12 +161,12 @@ def clean(ctx, yes):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache.")
-        return 0
+        exit(-1)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
         if p.lower() != "y":
-            return 0
+            exit(0)
 
     from wily.cache import clean
 
@@ -181,7 +181,7 @@ def list_metrics(ctx):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache.")
-        return -1
+        exit(-1)
 
     from wily.commands.list_metrics import list_metrics
 
