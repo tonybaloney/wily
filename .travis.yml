@@ -8,6 +8,7 @@ script:
 - tox
 before_deploy: flit build
 deploy:
+  skip_cleanup: true
   provider: pypi
   user: anthonypjshaw
   password: PYPI_PASS
