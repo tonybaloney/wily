@@ -7,7 +7,7 @@ TODO : Prompt the user for the specific metric in the graph and report commands?
 import os.path
 import click
 from wily import logger
-from wily.cache import exists
+from wily.cache import exists, get_default_metrics
 from wily.config import load as load_config
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH, DEFAULT_PATH
 from wily.archivers import resolve_archiver
@@ -116,11 +116,11 @@ def index(ctx, message):
 
 @cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
-@click.argument("metric")
+@click.option("--metrics", default=None)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
 @click.pass_context
-def report(ctx, file, metric, number, message):
+def report(ctx, file, metrics, number, message):
     """Show a specific metric for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -128,10 +128,14 @@ def report(ctx, file, metric, number, message):
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
         exit(-1)
 
+    if not metrics:
+        metrics = get_default_metrics(config)
+        logger.info(f"Using default metrics {metrics}")
+
     from wily.commands.report import report
 
-    logger.debug(f"Running report on {file} for metric {metric}")
-    report(config=config, path=file, metric=metric, n=number, include_message=message)
+    logger.debug(f"Running report on {file} for metric {metrics}")
+    report(config=config, path=file, metrics=metrics, n=number, include_message=message)
 
 
 @cli.command()
