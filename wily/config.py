@@ -62,7 +62,7 @@ DEFAULT_CONFIG_PATH = "wily.cfg"
 DEFAULT_CONFIG_SECTION = "wily"
 
 """ The default maximum number of revisions to archiver """
-DEFAULT_MAX_REVISIONS = 100
+DEFAULT_MAX_REVISIONS = 50
 
 DEFAULT_PATH = "."
 
