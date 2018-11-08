@@ -10,6 +10,8 @@ install:
 script:
 - tox
 after_script:
+- export FLIT_USERNAME
+- export FLIT_PASSWORD
 - flit build
 - flit publish
 env:
