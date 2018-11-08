@@ -104,3 +104,21 @@ def test_store_relative_paths(tmpdir):
         result = json.load(cache_item)
         assert isinstance(result, dict)
         assert "foo/bar.py" in result["operator_data"]["test"].keys()
+
+
+def test_store_index(tmpdir):
+    """
+    Test the store index
+    """
+    config = DEFAULT_CONFIG
+    cache_path = pathlib.Path(tmpdir) / ".wily"
+    target_path = pathlib.Path(tmpdir) / "foo" / "bar.py"
+    cache_path.mkdir()
+    config.cache_path = cache_path
+    config.path = tmpdir
+    _TEST_INDEX = {"k": "v"}
+    fn = cache.store_index(config, ARCHIVER_GIT, _TEST_INDEX)
+    with open(fn) as cache_item:
+        result = json.load(cache_item)
+        assert isinstance(result, dict)
+        assert result == _TEST_INDEX

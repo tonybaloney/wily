@@ -70,6 +70,8 @@ def store(config, archiver, revision, stats):
     
     :return: The absolute path to the created file
     :rtype: ``str``
+
+    :rtype: `pathlib.Path`
     """
     root = pathlib.Path(config.cache_path) / archiver.name
 
@@ -104,16 +106,19 @@ def store_index(config, archiver, index):
     
     :param index: The archiver index record
     :type  index: ``dict``
+
+    :rtype: `pathlib.Path`
     """
     root = pathlib.Path(config.cache_path) / archiver.name
 
     if not root.exists():
         root.mkdir()
         logger.debug("Created archiver directory")
-
-    with (root / "index.json").open("w") as out:
+    filename = root / "index.json"
+    with open(filename, "w") as out:
         out.write(json.dumps(index, indent=2))
-    logger.debug(f"Creating index output")
+    logger.debug(f"Created index output")
+    return filename
 
 
 def list_archivers(config):
