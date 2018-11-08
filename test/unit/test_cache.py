@@ -1,6 +1,8 @@
-from wily.config import DEFAULT_CONFIG
+from wily.config import DEFAULT_CONFIG, ARCHIVER_GIT
+from wily.archivers import Revision
 import wily.cache as cache
 import pathlib
+import json
 
 
 def test_exists(tmpdir):
@@ -57,3 +59,48 @@ def test_clean_when_not_exists(tmpdir):
     config.cache_path = str(cache_path)
     assert not cache.exists(config)
     assert cache.clean(config) is None
+
+
+def test_store_basic(tmpdir):
+    config = DEFAULT_CONFIG
+    cache_path = pathlib.Path(tmpdir) / ".wily"
+    cache_path.mkdir()
+    config.cache_path = cache_path
+    _TEST_STATS = {"test": {"test.py": {"metric1": 1}}}
+    _TEST_REVISION = Revision(
+        key="12345",
+        author_name="Anthony Shaw",
+        author_email="anthony@test.com",
+        revision_date="17/01/1990",
+        message="my changes",
+    )
+    fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+    with open(fn) as cache_item:
+        result = json.load(cache_item)
+        assert isinstance(result, dict)
+        assert result == _TEST_STATS
+
+
+def test_store_relative_paths(tmpdir):
+    """
+    Test that the store command works when absolute paths are used for the targets..
+    """
+    config = DEFAULT_CONFIG
+    cache_path = pathlib.Path(tmpdir) / ".wily"
+    target_path = pathlib.Path(tmpdir) / "foo" / "bar.py"
+    cache_path.mkdir()
+    config.cache_path = cache_path
+    config.path = tmpdir
+    _TEST_STATS = {"operator_data": {"test": {target_path: {"metric1": 1}}}}
+    _TEST_REVISION = Revision(
+        key="12345",
+        author_name="Anthony Shaw",
+        author_email="anthony@test.com",
+        revision_date="17/01/1990",
+        message="my changes",
+    )
+    fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+    with open(fn) as cache_item:
+        result = json.load(cache_item)
+        assert isinstance(result, dict)
+        assert "foo/bar.py" in result["operator_data"]["test"].keys()

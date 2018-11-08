@@ -94,7 +94,7 @@ def build(ctx, max_revisions, target, operators):
         operators=resolve_operators(config.operators),
     )
     logger.info(
-        "Completed building wily history, run `wily report` or `wily show` to see more."
+        "Completed building wily history, run `wily report` or `wily index` to see more."
     )
 
 

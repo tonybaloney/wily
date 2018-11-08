@@ -79,10 +79,10 @@ def store(config, archiver, revision, stats):
 
     # fix absolute path references.
     if config.path != ".":
-        for operator, operator_data in stats["operator_data"].items():
+        for operator, operator_data in list(stats["operator_data"].items()):
             new_operator_data = operator_data.copy()
-            for k, v in operator_data.items():
-                new_key = os.path.relpath(k, config.path)
+            for k, v in list(operator_data.items()):
+                new_key = os.path.relpath(str(k), str(config.path))
                 del new_operator_data[k]
                 new_operator_data[new_key] = v
             del stats["operator_data"][operator]
