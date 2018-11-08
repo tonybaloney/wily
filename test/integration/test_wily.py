@@ -24,6 +24,18 @@ def builddir(tmpdir):
 
     index.commit("basic test", author=author, committer=committer)
 
+    with open(tmppath / "test.py", "w") as test_txt:
+        test_txt.write("import abc\nfoo = 1")
+
+    index.add(["test.py"])
+    index.commit("add line", author=author, committer=committer)
+
+    with open(tmppath / "test.py", "w") as test_txt:
+        test_txt.write("import collections")
+
+    index.add(["test.py"])
+    index.commit("remove line", author=author, committer=committer)
+
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", tmpdir, "build", "--target", tmpdir]
@@ -91,6 +103,22 @@ def test_report(builddir):
             main.cli, ["--path", builddir, "report", "test.py", "raw.multi"]
         )
         assert result.exit_code == 0, result.stdout
+        assert "Not found" not in result.stdout
+
+
+def test_report_with_message(builddir):
+    """
+    Test that report works with a build
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli,
+            ["--path", builddir, "report", "test.py", "raw.multi", "--message"],
+        )
+        assert result.exit_code == 0, result.stdout
+        assert "basic test" in result.stdout
+        assert "remove line" in result.stdout
         assert "Not found" not in result.stdout
 
 
