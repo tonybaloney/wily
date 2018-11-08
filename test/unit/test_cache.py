@@ -66,7 +66,7 @@ def test_store_basic(tmpdir):
     cache_path = pathlib.Path(tmpdir) / ".wily"
     cache_path.mkdir()
     config.cache_path = cache_path
-    _TEST_STATS = {"test": {"test.py": {"metric1": 1}}}
+    _TEST_STATS = {"operator_data": {"test": {target_path: {"metric1": 1}}}}
     _TEST_REVISION = Revision(
         key="12345",
         author_name="Anthony Shaw",
