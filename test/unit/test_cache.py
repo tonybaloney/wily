@@ -66,6 +66,7 @@ def test_store_basic(tmpdir):
     cache_path = pathlib.Path(tmpdir) / ".wily"
     cache_path.mkdir()
     config.cache_path = cache_path
+    target_path = str(pathlib.Path(tmpdir) / "foo" / "bar.py")
     _TEST_STATS = {"operator_data": {"test": {target_path: {"metric1": 1}}}}
     _TEST_REVISION = Revision(
         key="12345",
@@ -87,7 +88,7 @@ def test_store_relative_paths(tmpdir):
     """
     config = DEFAULT_CONFIG
     cache_path = pathlib.Path(tmpdir) / ".wily"
-    target_path = pathlib.Path(tmpdir) / "foo" / "bar.py"
+    target_path = str(pathlib.Path(tmpdir) / "foo" / "bar.py")
     cache_path.mkdir()
     config.cache_path = cache_path
     config.path = tmpdir
