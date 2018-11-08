@@ -18,6 +18,7 @@ class RawMetricsOperator(BaseOperator):
             "single_comments", "Single comment lines", int, MetricType.Informational
         ),
     )
+    default_metric_index = 0  # LOC
 
     def __init__(self, config):
         # TODO: Use config from wily.cfg for harvester

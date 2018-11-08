@@ -1,10 +1,16 @@
 language: python
 python:
-  - "3.6"
-  - "3.7-dev"
-
+- '3.6'
+- 3.7-dev
 install:
-  - pip install tox-travis codecov
-
+- pip install tox-travis codecov flit
 script:
-  - tox
+- tox
+before_deploy: flit build
+deploy:
+  provider: pypi
+  user: anthonypjshaw
+  password: PYPI_PASS
+env:
+  global:
+    secure: MKWzyx9h+VM51TPFPkjxT7LS8fzhkCjRp5TsKDktAIkh1OvVi/hNkhKlwcBpkLICWU5GkX4GU9/5CcGz7soN9xPezz3DTIGxO2DMDCpJ8IT5W5tP6v45XYygbs8b1B333nkOi20pg5Iky9qV8JRHr8iJnoyS4+Ifdl4bWHnOgt/M094AA1ARTPO4v09GxrMkXJYgKzgCbDDlrLYxHt8E6pi9K8PxTlD3I6ns1WbBG5HzMBveUr1KYL8n5Xg0udF3PkAv3Q03QZP9bKs5wY27xxfGJSYkltFw1Vd/gdvcnZcPFWNUFjg0AuGdsHx5D3mCD8ZwAcYSLSFAyen6Yt3DUceEgEYaoSMEEKjmlpWk4K9P/6xCjpWEI/70tn6oDD0LN+g5QzR0Hlm0eCmCJgx0VS0os3c35nZ+SElZq/4e3LOAM4AHMD8y3rWoP1utvlxGkXiRfSr1aWsP58Z9AitegA202+w8qKZ9FK1gIx4nm6pwR+oUGgXI8o6BHBH0rhbHW7PGYJIGNy7YPvj1r3Pv3WHBtgZNewam4EoGorqKKxKmjTtuXDIY+hsuERM/ixs+4QXwuafVGr5b/ILMobsy8C+Up77dbvbXmz0HdxJcL4IFY3qm8PZcjedk12FuoP/cnT+ENHdBgSzcug+e6a72gdEfT/lQ8cc9ryzqo7CgZpY=

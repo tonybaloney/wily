@@ -1,7 +1,7 @@
+--prewily
 sphinx
 sphinx-click
 click
-wily
 progress
 colorlog
 plotly

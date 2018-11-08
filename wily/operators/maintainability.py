@@ -21,6 +21,8 @@ class MaintainabilityIndexOperator(BaseOperator):
         Metric("mi", "Maintainability Index", float, MetricType.AimLow),
     )
 
+    default_metric_index = 1  # MI
+
     def __init__(self, config):
         # TODO : Import config from wily.cfg
         logger.debug(f"Using {config.targets} with {self.defaults} for MI metrics")

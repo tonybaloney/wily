@@ -25,6 +25,9 @@ class BaseOperator(object):
     """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)"""
     metrics = ()
 
+    """Which metric is the default to display in the report command"""
+    default_metric_index = None
+
     def run(self, module, options):
         raise NotImplementedError()
 
