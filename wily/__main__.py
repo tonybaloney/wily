@@ -29,6 +29,7 @@ from wily.operators import resolve_operators
     "-p",
     "--path",
     type=click.Path(resolve_path=True),
+    default=".",
     help="Root path to the project folder to scan",
 )
 @click.pass_context
