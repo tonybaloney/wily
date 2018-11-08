@@ -10,14 +10,10 @@ install:
 script:
 - tox
 after_script:
-- echo [distutils]                                  > ~/.pypirc
-- echo index-servers = pypi                        >> ~/.pypirc
-- echo [pypi]                                      >> ~/.pypirc
-- echo username=$FLIT_USERNAME                     >> ~/.pypirc
-- echo password=$FLIT_PASSWORD                     >> ~/.pypirc
 - flit build
 - flit publish
 env:
   global:
-  - secure: F7TX3RzQabtFVuom1z412Q6EzQNhr+oGlOr4obzx1O+5qsKn6236AAV0GZP1gjTy/8wR+uxLqtJTvfXNxbdxFfkhuLesJAU5DZVPQe6vpYvvc9Hr/WJhCrd5Rl6jiW6oVw6dNkMDZrire8QQoFnC9ElxrZ9ablU0rAAxhgRdQYiGS97Rw4LqtU/Xi0+i/CvoulKVR3xnWamQ6Z+pggauBcWDio6v8PCjGL5wHVJFJOyeYkzG2TAOyz4rqFA42NGvV+eysIXpLaprnfLV4a4Fnx4P22jaWVndpBi84cQ1YI3h7Sg+eH2Wi790YHJyZPLO1NdzOvf9HhRuRWzdLv6p8vi561wiyYeFVG0MCjtGeFuXfol6sHKFAm6i740rZieFw5Hoi6bYAW46iKJIY2EMWHUbLzsfrQ5vqJgYw8IZGHbZG04FEQy3v3DqUHJsqJnFOkQcHHBisAAa6Ld5cMybF86lpks9rJkcaOh2z0PNXMofPwcioTqLKWzo3CywlTtJifqwquhJGU4rxJvPhLHnQkyoJ/ZVqnk3vQVy5YYoEE7/oajFoXJx13gjDmYt0r5pouCPGL1eHuLUDHhyKdNz4robBInfcKDjE6RIZog3m7wcoB1+FRAhTBI8XrZ9osvkWPYAyS2/Q/NZcsARRVmrt7ZEBa7Ip2a7G04zPyGN7rI=
+    - FLIT_USERNAME
+      secure: "PQOKAm+Cb3CEzJPGLMROPBB5ZLEKfpvgZKq0p+11cSd47883WH4ZuzltmiissucMVqsXgsrMEk5jYFg4lAMVbAujtIaVgydF3jdIqF7ESpqHgG2aaMQvHoEtD9jKCP6OuFi/OwVrqfCL5QMlYtWa7OXMBBjTY+ciCRuF0wGqfqJsxvVHcKDcUN7gR4B9eVx+LpicRRDn1und8bIawUpy61oUpxo4zHDdSt/43Rj+nLA6skN1R+e0ToA9x7WIChCipE4QTbfq7ns65NqTn5ukIWRIRSGMfwlYCcp/1FzQMa5JPGhUsXB2swa0OoXyoHQk2cyNur9CS7sH5lnxUbylf9WwiUvVbn7lLv9FCBxgXXfo2lPuBwq1CcG+Dh9oj1laaO8D1MpwQZ5K2P2L0DLzWlFPpZXGqmvP7GfgryROAq9tc8Dr0ZIcq5CxCRLbrGLU6eiBpzt75R5YmT5hAYIelSWy+nNl9w50uj+BNcF0k3n399qxXPXQnJtYSo1sRX/UDtjeMaccmWQBfNZHtsv1FumVBd4J0aByYuFcJVxHUI6o8/SOSawANpKQndUtRtZ7e32Fspi+04r9LubaE/wqhphX7dhXSS476IZT/SQS78s5RfcLw6A4rnn1iOw7VFkMLTAP8WT8vJBejkuvy09Oeyt8OFA6F0/nJeWt7HDra04="
   - secure: craytCM6RY+PQfQEVKFqPO/dSD2GxztahiyCXs2s5Q6K1/biwHf+GfO+umedoVD6P8xpwVGKHvTCL1hva+3qZtFsjN7z+IDYoTbLqcigHEhaLz+kLIkyaOL4P84EAcyWOrBAu0dLnLUVuGAF2VwAk0kfbF7p9rYdAgaxa6VPsJQsM+JvDsqAmKsKWKpZpV9Nii7qWL9QnbvfWlEdUlfjRsEqiMaIuDCyXVv1b/u0m/MaVLjdHiW47CI23VkYJ1UaRSZcFC19I1iZV9f9edPZiHQMSsFAAQLbkHikf4KqAqRXenhdtZD7vS2vABf3h31TEIE2BuNsi40DJyeoMacxO6Cpck0AfPZiU93iXrg3MfbPu52zBmGoK8uLNgm7h7J0hnudxKLk3jDAgPsL7YxFG+LnH7+EbiE7WC01MW0U2ia6W7Db6E8BXBlY6IlrypNqO9UvEcNPmarBO2O5tLya2C979XtbGMHqeo9LPs5U2tvfGvzD6qKRMJULDobO4eLHTiTtF1VGS7ulfE9Gis+lMF5ifLeYBQSUa0gNqxOmWKCC2V4SL47Q38CHKfRTofQKBwASdIvcq1ulajnuNaxl2/mfJdvwJg+kpMzk+rwzG94DCZu+YMXXRF9J8iYsattCWFKEw/XC1hQGGP++o4tLxHlpve+H+vFnhM58BE6qpNs=
