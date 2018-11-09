@@ -14,6 +14,42 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
    :maxdepth: 2
    :caption: Contents:
 
+What is wily?
+-------------
+
+Wily is a command-line tool for archiving, exploring and graphing the complexity of Python source code.
+
+Wily supports iterating over a git repository and indexing the complexity of the Python source files using a number of algorithms. You can then report on those in the console or graph them to a browser.
+
+Getting Started
+---------------
+
+You can install wily from PyPi using pip
+
+.. code-block:: console
+
+   $ pip install wily
+
+Wily needs an index of the project before any of the commands can be used. `wily build` builds an index in a Git repository. Provide the path to your source code as the first argument.
+
+.. code-block:: console
+
+   $ wily build src/
+
+You can provide multiple source directories, such as your test projects.
+
+.. code-block:: console
+
+   $ wily build src/ test/
+
+Now that you have an index, you can run `wily report` or `wily graph` to see the data.
+
+.. code-block:: console
+
+   $ wily report
+
+
+
 Command Line Usage
 ------------------
 

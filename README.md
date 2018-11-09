@@ -47,39 +47,31 @@ You can also override the path to the configuration with the `--config` flag on 
 The first step to using `wily` is to build a wily cache with all of the statistics of your project. 
 
 ```
-Usage: wily build [OPTIONS]
+Usage: __main__.py build [OPTIONS] [TARGETS]...
 
   Build the wily cache
 
 Options:
   -h, --max-revisions INTEGER  The maximum number of historical commits to
                                archive
-  -p, --path PATH              Root path to the project folder to scan
-  -t, --target PATH            Subdirectories or files to scan
-  -o, --operators TEXT         List of operators, seperated by commas
+  -o, --operators TEXT         List of operators, separated by commas
   --help                       Show this message and exit.
 ```
 
 By default, wily will assume your project folder is a `git` directory. Wily will not build a cache if the working copy is dirty (has changed files not commited).
 
 ```console
- $ wily build
+ $ wily build src/
  ```
- 
-For a specific directory
-
-```console
- $ wily build -p path/to/folder
-```
 
 Limit the number of revisions (defaults to 50).
 
 ```console
- $ wily build --max-revisions=10                       
+ $ wily build src/ --max-revisions=10                       
 Found 10 revisions from 'git' archiver in ..
 Running operators - cyclomatic,raw,maintainability
 Processing |################################| 30/30
-Completed building wily history, run `wily report` or `wily show` to see more.
+Completed building wily history, run `wily report` or `wily index` to see more.
 ```
  
 #### `wily index`
@@ -173,18 +165,22 @@ maintainability operator:
 Show a specific metric for a given file, requires that `.wily/` exists
 
 ```
-Usage: wily report [OPTIONS] FILE METRIC
+Usage: wily report [OPTIONS] FILE
 
-  Show a specific metric for a given file.
+  Show metrics for a given file.
 
 Options:
-  --help  Show this message and exit.
+  --metrics TEXT            comma-seperated list of metrics, see list-metrics
+                            for choices
+  -n, --number INTEGER      Number of items to show
+  --message / --no-message  Include revision message
+  --help                    Show this message and exit.
 ```
 
 `wily report` will print the metric and the delta between each revision.
 
 ```console
- $ wily report wily/__main__.py raw.loc
+ $ wily report wily/__main__.py --metrics raw.loc
 -----------History for raw.loc------------
 ╒══════════════════════════════════════════╤══════════════╤════════════╤═════════════════╕
 │ Revision                                 │ Author       │ Date       │ Lines of Code   │
