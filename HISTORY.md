@@ -1,5 +1,9 @@
 # Release History
 
+## 1.2.0 (9th November 2018)
+
+* Complete support for pre-commit
+
 ## 1.1.1 (9th November 2018)
 
 * Fix a bug where .gitignore was not being passed correctly
