@@ -45,6 +45,15 @@ def build(config, archiver, operators):
         logger.warning("Could not find any revisions, using HEAD")
         revisions = []  # TODO: Create a special HEAD revision to use current state
 
+    if cache.has_index(config, archiver):
+        logger.debug("Found existing index, doing a revision diff")
+        index = cache.has_index(config, archiver)
+        # remove existing revisions from the list
+        existing_revisions = [r["revision"] for r in index]
+        revisions = [
+            revision for revision in revisions if revision.key not in existing_revisions
+        ]
+
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
 

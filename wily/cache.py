@@ -185,6 +185,23 @@ def get_default_metrics(config):
     return default_metrics
 
 
+def has_index(config, archiver):
+    """
+    Does this archiver have an index file?
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
+    :param archiver: The name of the archiver type (e.g. 'git')
+    :type  archiver: ``str``
+
+    :return: the exist
+    :rtype: ``bool``
+    """
+    root = pathlib.Path(config.cache_path) / archiver / "index.json"
+    return root.exists()
+
+
 def get_index(config, archiver):
     """
     Get the contents of the archiver index file
