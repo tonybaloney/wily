@@ -27,11 +27,9 @@ def build(config, archiver, operators):
         logger.debug("Wily cache not found, creating.")
         cache.create(config)
         logger.debug("Created wily cache")
-
-    logger.debug(f"Using {archiver.name} archiver module")
-    archiver = archiver.cls(config)
-
     try:
+        logger.debug(f"Using {archiver.name} archiver module")
+        archiver = archiver.cls(config)
         revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
         logger.error(f"Failed to setup archiver: '{e.message}'")
