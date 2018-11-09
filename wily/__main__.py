@@ -1,7 +1,5 @@
 """
 Main command line
-
-TODO : Prompt the user for the specific metric in the graph and report commands?
 """
 
 import os.path
@@ -9,7 +7,7 @@ import click
 from wily import logger
 from wily.cache import exists, get_default_metrics
 from wily.config import load as load_config
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH, DEFAULT_PATH
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 
@@ -120,7 +118,7 @@ def index(ctx, message):
 @click.option("--message/--no-message", default=False, help="Include revision message")
 @click.pass_context
 def report(ctx, file, metrics, number, message):
-    """Show a specific metric for a given file."""
+    """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
