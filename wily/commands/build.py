@@ -37,10 +37,6 @@ def build(config, archiver, operators):
         logger.error(f"Failed to setup archiver: '{e.message}'")
         return
 
-    logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
-    )
-
     if revisions is None or len(revisions) == 0:
         logger.warning("Could not find any revisions, using HEAD")
         revisions = []  # TODO: Create a special HEAD revision to use current state
@@ -53,6 +49,10 @@ def build(config, archiver, operators):
         revisions = [
             revision for revision in revisions if revision.key not in existing_revisions
         ]
+
+    logger.info(
+        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
+    )
 
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
