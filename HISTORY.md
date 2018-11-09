@@ -3,6 +3,8 @@
 ## 1.0.0 (9th November 2018)
 
 * Build now compares existing git history with the cached history and only builds the missing revisions instead of building the entire index
+* Will check if .wily/ is not in .gitignore before running build
+* Improved documentation..
 
 ## 0.9.0 (9th November 2018)
 

@@ -41,6 +41,9 @@ Wily needs an index of the project before any of the commands can be used. `wily
 
    $ wily build src/
 
+.. image:: _static/wily_build.png
+   :align: center
+
 You can provide multiple source directories, such as your test projects.
 
 .. code-block:: console
@@ -49,25 +52,8 @@ You can provide multiple source directories, such as your test projects.
 
 Now that you have an index, you can run `wily report` or `wily graph` to see the data.
 
-.. code-block:: console
-
-   $ wily report wily/__main__.py -n 5
-
-   Using default metrics ['maintainability.mi', 'raw.loc']
-   -----------History for ['maintainability.mi', 'raw.loc']------------
-   ╒════════════╤══════════════╤════════════╤═════════════════════════╤═════════════════╕
-   │ Revision   │ Author       │ Date       │ Maintainability Index   │ Lines of Code   │
-   ╞════════════╪══════════════╪════════════╪═════════════════════════╪═════════════════╡
-   │ 9d6c3fa    │ Anthony Shaw │ 2018-11-09 │ 55.2078 (0.0)           │ 210 (0)         │
-   ├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-   │ 5f168ae    │ Anthony Shaw │ 2018-11-09 │ 55.2078 (+6.55007)      │ 210 (+13)       │
-   ├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-   │ 580a3ec    │ Anthony Shaw │ 2018-11-09 │ 48.6577 (+1.27916)      │ 197 (+2)        │
-   ├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-   │ a48a110    │ Anthony Shaw │ 2018-11-09 │ 47.3786 (0.0)           │ 195 (0)         │
-   ├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-   │ f61fc69    │ Anthony Shaw │ 2018-11-09 │ 47.3786 (0)             │ 195 (0)         │
-   ╘════════════╧══════════════╧════════════╧═════════════════════════╧═════════════════╛
+.. image:: _static/wily_report.png
+   :align: center
 
 You can display any of the metrics in a HTML graph by running the graph command with the path to the file and the metric
 

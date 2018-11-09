@@ -1,9 +1,9 @@
 ![wily](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/logo.png)
 
-A Python application for tracking, reporting on timing and complexity in tests and applications.
+A command-line application for tracking, reporting on complexity of Python tests and applications.
 
 [![Build Status](https://travis-ci.com/tonybaloney/wily.svg?branch=master)](https://travis-ci.com/tonybaloney/wily)
-[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily)
+[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily) [![Documentation Status](https://readthedocs.org/projects/wily/badge/?version=latest)](https://wily.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/wily.svg)](https://badge.fury.io/py/wily) ![black](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 
 ```
@@ -16,29 +16,16 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
 
 ## Usage
 
+See the [Documentation Site](https://wily.readthedocs.io/) for full usage guides.
+
 Wily can be used via a command line interface, `wily`.
 
 ```console
  $ wily --help
  
  ```
+![help-screen](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_help.png)
 
-### Configuration
-
-You can put a `wily.cfg` file in your project directory and `wily` will override the runtime settings. Here are the available options:
-
-```ini
-# list of operators, choose from cyclomatic, maintainability, mccabe and raw
-operators = cyclomatic,raw
-# archiver to use, defaults to git
-archiver = git
-# path to analyse, defaults to .
-path = /path/to/target
-# max revisions to archive, defaults to 50
-max_revisions = 20
-```
-
-You can also override the path to the configuration with the `--config` flag on the command-line.
 
 ### Command line usage
 
@@ -66,14 +53,36 @@ By default, wily will assume your project folder is a `git` directory. Wily will
 
 Limit the number of revisions (defaults to 50).
 
-```console
- $ wily build src/ --max-revisions=10                       
-Found 10 revisions from 'git' archiver in ..
-Running operators - cyclomatic,raw,maintainability
-Processing |################################| 30/30
-Completed building wily history, run `wily report` or `wily index` to see more.
+![wily-build](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_build.png)
+
+
+#### `wily report`
+
+Show a specific metric for a given file, requires that `.wily/` exists
+
 ```
- 
+Usage: wily report [OPTIONS] FILE
+
+  Show metrics for a given file.
+
+Options:
+  --metrics TEXT            comma-seperated list of metrics, see list-metrics
+                            for choices
+  -n, --number INTEGER      Number of items to show
+  --message / --no-message  Include revision message
+  --help                    Show this message and exit.
+```
+
+`wily report` will print the metric and the delta between each revision.
+
+![wily-report](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_report.png)
+
+#### `wily graph`
+
+Similar to `wily report` but instead of printing in the console, `wily` will print a graph in a browser.
+
+![wily-graph](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/graph.png)
+
 #### `wily index`
 
 Show information about the build directory. Requires that `.wily/` exists.
@@ -160,48 +169,22 @@ maintainability operator:
 ╘══════╧═════════════════════════╧═════════════════╧══════════════════════════╛
 ```
 
-#### `wily report`
+## Configuration
 
-Show a specific metric for a given file, requires that `.wily/` exists
+You can put a `wily.cfg` file in your project directory and `wily` will override the runtime settings. Here are the available options:
 
-```
-Usage: wily report [OPTIONS] FILE
-
-  Show metrics for a given file.
-
-Options:
-  --metrics TEXT            comma-seperated list of metrics, see list-metrics
-                            for choices
-  -n, --number INTEGER      Number of items to show
-  --message / --no-message  Include revision message
-  --help                    Show this message and exit.
+```ini
+# list of operators, choose from cyclomatic, maintainability, mccabe and raw
+operators = cyclomatic,raw
+# archiver to use, defaults to git
+archiver = git
+# path to analyse, defaults to .
+path = /path/to/target
+# max revisions to archive, defaults to 50
+max_revisions = 20
 ```
 
-`wily report` will print the metric and the delta between each revision.
-
-```console
- $ wily report wily/__main__.py -n 5
-Using default metrics ['maintainability.mi', 'raw.loc']
------------History for ['maintainability.mi', 'raw.loc']------------
-╒════════════╤══════════════╤════════════╤═════════════════════════╤═════════════════╕
-│ Revision   │ Author       │ Date       │ Maintainability Index   │ Lines of Code   │
-╞════════════╪══════════════╪════════════╪═════════════════════════╪═════════════════╡
-│ 9d6c3fa    │ Anthony Shaw │ 2018-11-09 │ 55.2078 (0.0)           │ 210 (0)         │
-├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-│ 5f168ae    │ Anthony Shaw │ 2018-11-09 │ 55.2078 (+6.55007)      │ 210 (+13)       │
-├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-│ 580a3ec    │ Anthony Shaw │ 2018-11-09 │ 48.6577 (+1.27916)      │ 197 (+2)        │
-├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-│ a48a110    │ Anthony Shaw │ 2018-11-09 │ 47.3786 (0.0)           │ 195 (0)         │
-├────────────┼──────────────┼────────────┼─────────────────────────┼─────────────────┤
-│ f61fc69    │ Anthony Shaw │ 2018-11-09 │ 47.3786 (0)             │ 195 (0)         │
-╘════════════╧══════════════╧════════════╧═════════════════════════╧═════════════════╛
-
-```
-
-#### `wily graph`
-
-Similar to `wily report` but instead of printing in the console, `wily` will print a graph in a browser.
+You can also override the path to the configuration with the `--config` flag on the command-line.
 
 
 # Credits
