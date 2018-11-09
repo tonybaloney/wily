@@ -1,5 +1,9 @@
 # Release History
 
+## 1.0.0 (9th November 2018)
+
+* Build now compares existing git history with the cached history and only builds the missing revisions instead of building the entire index
+
 ## 0.9.0 (9th November 2018)
 
 

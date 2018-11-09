@@ -87,7 +87,7 @@ def build(ctx, max_revisions, targets, operators):
         operators=resolve_operators(config.operators),
     )
     logger.info(
-        "Completed building wily history, run `wily report` or `wily index` to see more."
+        "Completed building wily history, run `wily report <file>` or `wily index` to see more."
     )
 
 
@@ -122,7 +122,7 @@ def report(ctx, file, metrics, number, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
         exit(-1)
 
     if not metrics:
@@ -146,7 +146,7 @@ def graph(ctx, files, metric):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
         exit(-1)
 
     from wily.commands.graph import graph
