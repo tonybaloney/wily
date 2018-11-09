@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 """
 Main command line
 """
@@ -32,7 +34,7 @@ from wily.operators import resolve_operators
 )
 @click.pass_context
 def cli(ctx, debug, config, path):
-    """Commands for creating and searching through history."""
+    """\U0001F98A Inspect and search through the complexity of your source code."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
     if debug:
