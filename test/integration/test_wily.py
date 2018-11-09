@@ -100,8 +100,20 @@ def test_report(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "report", "test.py", "raw.multi"]
+            main.cli,
+            ["--path", builddir, "report", "test.py", "--metrics", "raw.multi"],
         )
+        assert result.exit_code == 0, result.stdout
+        assert "Not found" not in result.stdout
+
+
+def test_report_default_metrics(builddir):
+    """
+    Test that report works with a build
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py"])
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
 
@@ -114,7 +126,15 @@ def test_report_with_message(builddir):
         runner = CliRunner()
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "report", "test.py", "raw.multi", "--message"],
+            [
+                "--path",
+                builddir,
+                "report",
+                "test.py",
+                "--metrics",
+                "raw.multi",
+                "--message",
+            ],
         )
         assert result.exit_code == 0, result.stdout
         assert "basic test" in result.stdout
@@ -129,7 +149,7 @@ def test_report_high_metric(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "report", "test.py", "raw.loc"]
+            main.cli, ["--path", builddir, "report", "test.py", "--metrics", "raw.loc"]
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
@@ -142,7 +162,15 @@ def test_report_low_metric(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "report", "test.py", "maintainability.mi"]
+            main.cli,
+            [
+                "--path",
+                builddir,
+                "report",
+                "test.py",
+                "--metrics",
+                "maintainability.mi",
+            ],
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
@@ -206,9 +234,7 @@ def test_index_no_cache(tmpdir):
 def test_report_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--path", tmpdir, "report", "test.py", "raw.loc"]
-        )
+        result = runner.invoke(main.cli, ["--path", tmpdir, "report", "test.py"])
         assert result.exit_code == -1, result.stdout
 
 
