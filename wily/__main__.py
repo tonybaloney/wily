@@ -34,7 +34,20 @@ from wily.operators import resolve_operators
 )
 @click.pass_context
 def cli(ctx, debug, config, path):
-    """\U0001F98A Inspect and search through the complexity of your source code."""
+    """\U0001F98A Inspect and search through the complexity of your source code.
+
+    To get started, build an index of your source code:
+
+      $ wily build <src>
+
+    Then explore basic metrics with:
+
+      $ wily report <file>
+
+    You can also graph specific metrics in a browser with:
+
+      $ wily graph <file> <metric>
+    """
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
     if debug:
