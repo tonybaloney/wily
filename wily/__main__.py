@@ -58,7 +58,7 @@ def cli(ctx, debug, config, path):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.argument("target", type=click.Path(resolve_path=True))
+@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1)
 @click.option(
     "-o",
     "--operators",
@@ -66,7 +66,7 @@ def cli(ctx, debug, config, path):
     help="List of operators, separated by commas",
 )
 @click.pass_context
-def build(ctx, max_revisions, target, operators):
+def build(ctx, max_revisions, targets, operators):
     """Build the wily cache"""
     config = ctx.obj["CONFIG"]
 
@@ -75,12 +75,13 @@ def build(ctx, max_revisions, target, operators):
     if max_revisions:
         logger.debug(f"Fixing revisions to {max_revisions}")
         config.max_revisions = max_revisions
-    if target:
-        logger.debug(f"Fixing targets to {target}")
-        config.targets = [target]
+
     if operators:
         logger.debug(f"Fixing operators to {operators}")
         config.operators = operators.strip().split(",")
+
+    logger.debug(f"Fixing targets to {targets}")
+    config.targets = targets
 
     build(
         config=config,
