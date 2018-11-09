@@ -1,15 +1,15 @@
+# -*- coding: UTF-8 -*-
+
 """
 Main command line
-
-TODO : Prompt the user for the specific metric in the graph and report commands?
 """
 
 import os.path
 import click
 from wily import logger
-from wily.cache import exists
+from wily.cache import exists, get_default_metrics
 from wily.config import load as load_config
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH, DEFAULT_PATH
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
 from wily.archivers import resolve_archiver
 from wily.operators import resolve_operators
 
@@ -29,11 +29,25 @@ from wily.operators import resolve_operators
     "-p",
     "--path",
     type=click.Path(resolve_path=True),
+    default=".",
     help="Root path to the project folder to scan",
 )
 @click.pass_context
 def cli(ctx, debug, config, path):
-    """Commands for creating and searching through history."""
+    """\U0001F98A Inspect and search through the complexity of your source code.
+
+    To get started, build an index of your source code:
+
+      $ wily build <src>
+
+    Then explore basic metrics with:
+
+      $ wily report <file>
+
+    You can also graph specific metrics in a browser with:
+
+      $ wily graph <file> <metric>
+    """
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
     if debug:
@@ -57,22 +71,15 @@ def cli(ctx, debug, config, path):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.option(
-    "-t",
-    "--target",
-    default=None,
-    type=click.Path(resolve_path=True),
-    multiple=True,
-    help="Subdirectories or files to scan",
-)
+@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1)
 @click.option(
     "-o",
     "--operators",
     type=click.STRING,
-    help="List of operators, seperated by commas",
+    help="List of operators, separated by commas",
 )
 @click.pass_context
-def build(ctx, max_revisions, target, operators):
+def build(ctx, max_revisions, targets, operators):
     """Build the wily cache"""
     config = ctx.obj["CONFIG"]
 
@@ -81,12 +88,13 @@ def build(ctx, max_revisions, target, operators):
     if max_revisions:
         logger.debug(f"Fixing revisions to {max_revisions}")
         config.max_revisions = max_revisions
-    if target:
-        logger.debug(f"Fixing targets to {target}")
-        config.targets = target
+
     if operators:
         logger.debug(f"Fixing operators to {operators}")
         config.operators = operators.strip().split(",")
+
+    logger.debug(f"Fixing targets to {targets}")
+    config.targets = targets
 
     build(
         config=config,
@@ -94,7 +102,7 @@ def build(ctx, max_revisions, target, operators):
         operators=resolve_operators(config.operators),
     )
     logger.info(
-        "Completed building wily history, run `wily report` or `wily index` to see more."
+        "Completed building wily history, run `wily report <file>` or `wily index` to see more."
     )
 
 
@@ -116,22 +124,32 @@ def index(ctx, message):
 
 @cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
-@click.argument("metric")
+@click.option(
+    "--metrics",
+    default=None,
+    help="comma-seperated list of metrics, see list-metrics for choices",
+)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
 @click.pass_context
-def report(ctx, file, metric, number, message):
-    """Show a specific metric for a given file."""
+def report(ctx, file, metrics, number, message):
+    """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
         exit(-1)
+
+    if not metrics:
+        metrics = get_default_metrics(config)
+        logger.info(f"Using default metrics {metrics}")
+    else:
+        metrics = metrics.split(",")
 
     from wily.commands.report import report
 
-    logger.debug(f"Running report on {file} for metric {metric}")
-    report(config=config, path=file, metric=metric, n=number, include_message=message)
+    logger.debug(f"Running report on {file} for metric {metrics}")
+    report(config=config, path=file, metrics=metrics, n=number, include_message=message)
 
 
 @cli.command()
@@ -143,7 +161,7 @@ def graph(ctx, files, metric):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
         exit(-1)
 
     from wily.commands.graph import graph

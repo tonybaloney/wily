@@ -13,12 +13,16 @@ import pathlib
 import os.path
 import json
 from wily.archivers import ALL_ARCHIVERS
+from wily.operators import resolve_operator
 from wily import logger
 
 
 def exists(config):
     """
     Check whether the .wily/ directory exists
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
 
     :return: Whether the .wily directory exists
     :rtype: ``boolean``
@@ -32,7 +36,10 @@ def exists(config):
 def create(config):
     """
     Create a wily cache
-    
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     :return: The path to the cache
     :rtype: ``str``
     """
@@ -47,6 +54,10 @@ def create(config):
 def clean(config):
     """
     Delete a wily cache
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     """
     if not exists(config):
         logger.debug("Wily cache does not exist, skipping")
@@ -58,7 +69,10 @@ def clean(config):
 def store(config, archiver, revision, stats):
     """
     Store a revision record within an archiver folder
-    
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
     
@@ -92,6 +106,8 @@ def store(config, archiver, revision, stats):
 
     logger.debug(f"Creating {revision.key} output")
     filename = root / (revision.key + ".json")
+    if filename.exists():
+        raise RuntimeError(f"File {filename} already exists, index may be corrupt.")
     with open(filename, "w") as out:
         out.write(json.dumps(stats, indent=2))
     return filename
@@ -100,7 +116,10 @@ def store(config, archiver, revision, stats):
 def store_index(config, archiver, index):
     """
     Store an archiver's index record for faster search
-    
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
     
@@ -124,7 +143,10 @@ def store_index(config, archiver, index):
 def list_archivers(config):
     """
     List the names of archivers with data
- 
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     :return: A list of archiver names
     :rtype: ``list`` of ``str``
     """
@@ -136,10 +158,59 @@ def list_archivers(config):
     return result
 
 
+def get_default_metrics(config):
+    """
+    Get the default metrics for a configuration
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
+    :return: Return the list of default metrics in this index
+    :rtype: ``list`` of ``str``
+    """
+    archivers = list_archivers(config)
+    default_metrics = []
+
+    for archiver in archivers:
+        index = get_index(config, archiver)
+
+        if len(index) == 0:
+            logger.warning("No records found in the index, no metrics available")
+            return []
+
+        operators = index[0]["operators"]
+        for operator in operators.split(","):
+            o = resolve_operator(operator)
+            if o.cls.default_metric_index is not None:
+                metric = o.cls.metrics[o.cls.default_metric_index]
+                default_metrics.append("{0}.{1}".format(o.cls.name, metric.name))
+    return default_metrics
+
+
+def has_index(config, archiver):
+    """
+    Does this archiver have an index file?
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
+    :param archiver: The name of the archiver type (e.g. 'git')
+    :type  archiver: ``str``
+
+    :return: the exist
+    :rtype: ``bool``
+    """
+    root = pathlib.Path(config.cache_path) / archiver / "index.json"
+    return root.exists()
+
+
 def get_index(config, archiver):
     """
     Get the contents of the archiver index file
-    
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
     
@@ -155,7 +226,10 @@ def get_index(config, archiver):
 def get(config, archiver, revision):
     """
     Get the data for a given revision
-    
+
+    :param config: The configuration
+    :type  config: :class:`wily.config.WilyConfig`
+
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
     

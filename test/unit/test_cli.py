@@ -19,7 +19,7 @@ def test_build():
     """
     with patch("wily.commands.build.build") as build:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build"])
+        result = runner.invoke(main.cli, ["build", "wily"])
         assert result.exit_code == 0
         assert build.called_once
 
@@ -30,7 +30,9 @@ def test_build_with_opts():
     """
     with patch("wily.commands.build.build") as build:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build", "-h 1", "-o raw,maintainability"])
+        result = runner.invoke(
+            main.cli, ["build", "wily", "-h 1", "-o raw,maintainability"]
+        )
         assert result.exit_code == 0
         assert build.called_once
         assert build.call_args[1]["config"].max_revisions == 1
@@ -82,15 +84,20 @@ def test_report():
     """
     Test that report calls the report command
     """
-    with patch("wily.__main__.exists", return_value=True) as check_cache:
-        with patch("wily.commands.report.report") as report:
-            runner = CliRunner()
-            result = runner.invoke(main.cli, ["report", "foo.py", "example_metric"])
-            assert result.exit_code == 0
-            assert report.called_once
-            assert check_cache.called_once
-            assert report.call_args[1]["path"] == "foo.py"
-            assert report.call_args[1]["metric"] == "example_metric"
+    with patch(
+        "wily.__main__.get_default_metrics",
+        return_value=["maintainability.mi", "raw.loc"],
+    ) as gdf:
+        with patch("wily.__main__.exists", return_value=True) as check_cache:
+            with patch("wily.commands.report.report") as report:
+                runner = CliRunner()
+                result = runner.invoke(main.cli, ["report", "foo.py"])
+                assert result.exit_code == 0, result.stdout
+                assert report.called_once
+                assert check_cache.called_once
+                assert report.call_args[1]["path"] == "foo.py"
+                assert "maintainability.mi" in report.call_args[1]["metrics"]
+                assert gdf.called_once
 
 
 def test_report_with_opts():
@@ -101,13 +108,21 @@ def test_report_with_opts():
         with patch("wily.commands.report.report") as report:
             runner = CliRunner()
             result = runner.invoke(
-                main.cli, ["report", "foo.py", "example_metric", "-n 101", "--message"]
+                main.cli,
+                [
+                    "report",
+                    "foo.py",
+                    "--metrics",
+                    "example_metric",
+                    "-n 101",
+                    "--message",
+                ],
             )
-            assert result.exit_code == 0
+            assert result.exit_code == 0, result.stdout
             assert report.called_once
             assert check_cache.called_once
             assert report.call_args[1]["path"] == "foo.py"
-            assert report.call_args[1]["metric"] == "example_metric"
+            assert report.call_args[1]["metrics"] == ["example_metric"]
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
 

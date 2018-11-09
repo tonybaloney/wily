@@ -1,7 +1,5 @@
 """
 Builds a cache based on a source-control history
-
-TODO : Compare with existing files and cache results, currently just overwrites
 """
 from progress.bar import Bar
 
@@ -35,18 +33,27 @@ def build(config, archiver, operators):
         logger.error(f"Failed to setup archiver: '{e.message}'")
         return
 
-    logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
-    )
-
     if revisions is None or len(revisions) == 0:
         logger.warning("Could not find any revisions, using HEAD")
         revisions = []  # TODO: Create a special HEAD revision to use current state
 
+    if cache.has_index(config, archiver.name):
+        logger.debug("Found existing index, doing a revision diff")
+        index = cache.get_index(config, archiver.name)
+        # remove existing revisions from the list
+        existing_revisions = [r["revision"] for r in index]
+        revisions = [
+            revision for revision in revisions if revision.key not in existing_revisions
+        ]
+    else:
+        index = []
+
+    logger.info(
+        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
+    )
+
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info(f"Running operators - {_op_desc}")
-
-    index = []
 
     bar = Bar("Processing", max=len(revisions) * len(operators))
     try:

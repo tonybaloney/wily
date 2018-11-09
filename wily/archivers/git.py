@@ -1,5 +1,6 @@
 from git import Repo
 import logging
+import pathlib
 
 from wily.archivers import BaseArchiver, Revision
 
@@ -12,11 +13,25 @@ class DirtyGitRepositoryError(Exception):
         self.message = "Dirty repository, make sure you commit/stash files first"
 
 
+class WilyIgnoreGitRepositoryError(Exception):
+    def __init__(self):
+        self.message = "Please add '.wily/' to .gitignore before running wily"
+
+
 class GitArchiver(BaseArchiver):
     name = "git"
 
     def __init__(self, config):
         self.repo = Repo(config.path)
+
+        gitignore = pathlib.Path(config.path) / ".gitignore"
+        if not gitignore.exists():
+            raise WilyIgnoreGitRepositoryError()
+
+        with open(gitignore, "r") as gitignore_f:
+            if ".wily/" not in gitignore_f.readlines():
+                raise WilyIgnoreGitRepositoryError()
+
         self.config = config
         self.current_branch = self.repo.active_branch
         assert not self.repo.bare, "Not a Git repository"

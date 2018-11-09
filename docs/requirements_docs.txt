@@ -1,4 +1,4 @@
---prewily
+wily
 sphinx
 sphinx-click
 click

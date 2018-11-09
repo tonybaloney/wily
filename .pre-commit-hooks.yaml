@@ -1,0 +1,7 @@
+-   id: wily
+    name: wily
+    description: 'Wily: A Python code-complexity archiver'
+    entry: wily
+    language: python
+    language_version: python3
+    types: [python]
