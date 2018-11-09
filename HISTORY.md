@@ -1,5 +1,11 @@
 # Release History
 
+## 0.9.0 (9th November 2018)
+
+* Operators all have a default metric (lines-of-code, maintainability-index)
+* Report command by default will now display the default metrics in an index
+* Report command now accepts multiple metrics and adds them to the table
+
 ## 0.8.0 (7th November 2018)
 
 * Add support for relative paths in cache

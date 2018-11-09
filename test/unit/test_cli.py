@@ -85,12 +85,12 @@ def test_report():
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.commands.report.report") as report:
             runner = CliRunner()
-            result = runner.invoke(main.cli, ["report", "foo.py", "example_metric"])
-            assert result.exit_code == 0
+            result = runner.invoke(main.cli, ["report", "foo.py"])
+            assert result.exit_code == 0, result.stdout
             assert report.called_once
             assert check_cache.called_once
             assert report.call_args[1]["path"] == "foo.py"
-            assert report.call_args[1]["metric"] == "example_metric"
+            assert "maintainability.mi" in report.call_args[1]["metrics"]
 
 
 def test_report_with_opts():
@@ -101,13 +101,21 @@ def test_report_with_opts():
         with patch("wily.commands.report.report") as report:
             runner = CliRunner()
             result = runner.invoke(
-                main.cli, ["report", "foo.py", "example_metric", "-n 101", "--message"]
+                main.cli,
+                [
+                    "report",
+                    "foo.py",
+                    "--metrics",
+                    "example_metric",
+                    "-n 101",
+                    "--message",
+                ],
             )
-            assert result.exit_code == 0
+            assert result.exit_code == 0, result.stdout
             assert report.called_once
             assert check_cache.called_once
             assert report.call_args[1]["path"] == "foo.py"
-            assert report.call_args[1]["metric"] == "example_metric"
+            assert report.call_args[1]["metrics"] == "example_metric"
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
 
