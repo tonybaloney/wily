@@ -106,6 +106,8 @@ def store(config, archiver, revision, stats):
 
     logger.debug(f"Creating {revision.key} output")
     filename = root / (revision.key + ".json")
+    if filename.exists():
+        raise RuntimeError(f"File {filename} already exists, index may be corrupt.")
     with open(filename, "w") as out:
         out.write(json.dumps(stats, indent=2))
     return filename
