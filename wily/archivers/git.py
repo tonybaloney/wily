@@ -29,7 +29,9 @@ class GitArchiver(BaseArchiver):
             raise WilyIgnoreGitRepositoryError()
 
         with open(gitignore, "r") as gitignore_f:
-            if ".wily/" not in gitignore_f.readlines():
+            lines = [line.replace("\n", "") for line in gitignore_f.readlines()]
+            logger.debug(lines)
+            if ".wily/" not in lines:
                 raise WilyIgnoreGitRepositoryError()
 
         self.config = config
