@@ -34,7 +34,10 @@ def builddir(tmpdir):
     with open(tmppath / "test.py", "w") as test_txt:
         test_txt.write("import collections")
 
-    index.add(["test.py"])
+    with open(tmppath / ".gitignore", "w") as test_txt:
+        test_txt.write(".wily/")
+
+    index.add(["test.py", ".gitignore"])
     index.commit("remove line", author=author, committer=committer)
 
     runner = CliRunner()
@@ -77,8 +80,11 @@ def test_build(tmpdir):
     with open(tmppath / "test.py", "w") as test_txt:
         test_txt.write("import abc")
 
+    with open(tmppath / ".gitignore", "w") as test_txt:
+        test_txt.write(".wily/")
+
     index = repo.index
-    index.add(["test.py"])
+    index.add(["test.py", ".gitignore"])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
@@ -110,9 +116,10 @@ def test_build_twice(tmpdir):
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
         test_txt.write("import abc")
-
+    with open(tmppath / ".gitignore", "w") as test_txt:
+        test_txt.write(".wily/")
     index = repo.index
-    index.add(["test.py"])
+    index.add(["test.py", ".gitignore"])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
