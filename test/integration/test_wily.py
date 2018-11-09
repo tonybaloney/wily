@@ -37,7 +37,9 @@ def builddir(tmpdir):
     index.commit("remove line", author=author, committer=committer)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir])
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", tmpdir, "build", str(tmpdir)]
+    )
     assert result.exit_code == 0, result.stdout
 
     return tmpdir

@@ -117,7 +117,7 @@ def test_report_with_opts():
             assert report.called_once
             assert check_cache.called_once
             assert report.call_args[1]["path"] == "foo.py"
-            assert report.call_args[1]["metrics"] == "example_metric"
+            assert report.call_args[1]["metrics"] == ["example_metric"]
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
 
