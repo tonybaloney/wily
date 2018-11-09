@@ -70,6 +70,23 @@ To get a list of available metrics, run:
 
    $ wily list-metrics
 
+Pre-commit hook
+---------------
+
+You can install wily as a pre-commit plugin.
+
+.. code-block:: yaml
+
+    repos:
+    -   repo: local
+        hooks:
+        -   id: wily
+            name: wily
+            entry: wily diff
+            language: python
+            additional_dependencies: [wily]
+
+
 Command Line Usage
 ------------------
 

@@ -26,6 +26,20 @@ Wily can be used via a command line interface, `wily`.
  ```
 ![help-screen](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_help.png)
 
+## pre-commit plugin
+
+You can install wily as a [pre-commit](http://www.pre-commit.com/) plugin.
+
+```yaml
+repos:
+-   repo: local
+    hooks:
+    -   id: wily
+        name: wily
+        entry: wily diff
+        language: python
+        additional_dependencies: [wily]
+```
 
 ### Command line usage
 
