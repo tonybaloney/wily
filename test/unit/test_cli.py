@@ -84,15 +84,20 @@ def test_report():
     """
     Test that report calls the report command
     """
-    with patch("wily.__main__.exists", return_value=True) as check_cache:
-        with patch("wily.commands.report.report") as report:
-            runner = CliRunner()
-            result = runner.invoke(main.cli, ["report", "foo.py"])
-            assert result.exit_code == 0, result.stdout
-            assert report.called_once
-            assert check_cache.called_once
-            assert report.call_args[1]["path"] == "foo.py"
-            assert "maintainability.mi" in report.call_args[1]["metrics"]
+    with patch(
+        "wily.__main__.get_default_metrics",
+        return_value=["maintainability.mi", "raw.loc"],
+    ) as gdf:
+        with patch("wily.__main__.exists", return_value=True) as check_cache:
+            with patch("wily.commands.report.report") as report:
+                runner = CliRunner()
+                result = runner.invoke(main.cli, ["report", "foo.py"])
+                assert result.exit_code == 0, result.stdout
+                assert report.called_once
+                assert check_cache.called_once
+                assert report.call_args[1]["path"] == "foo.py"
+                assert "maintainability.mi" in report.call_args[1]["metrics"]
+                assert gdf.called_once
 
 
 def test_report_with_opts():
