@@ -45,9 +45,9 @@ def build(config, archiver, operators):
         logger.warning("Could not find any revisions, using HEAD")
         revisions = []  # TODO: Create a special HEAD revision to use current state
 
-    if cache.has_index(config, archiver):
+    if cache.has_index(config, archiver.name):
         logger.debug("Found existing index, doing a revision diff")
-        index = cache.has_index(config, archiver)
+        index = cache.get_index(config, archiver.name)
         # remove existing revisions from the list
         existing_revisions = [r["revision"] for r in index]
         revisions = [
