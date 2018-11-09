@@ -60,6 +60,7 @@ def report(config, path, metrics, n, include_message=False):
         history = cache.get_index(config, archiver)[:n]
         # We have to do it backwards to get the deltas between releases
         history = history[::-1]
+        last = {}
         for rev in history:
             revision_entry = cache.get(config, archiver, rev["revision"])
             vals = []
@@ -71,14 +72,14 @@ def report(config, path, metrics, n, include_message=False):
                     val = revision_entry["operator_data"][meta["operator"]][path][
                         meta["key"]
                     ]
-
+                    last_val = last.get(meta["key"], None)
                     # Measure the difference between this value and the last
                     if meta["type"] in (int, float):
-                        if last:
-                            delta = val - last
+                        if last_val:
+                            delta = val - last_val
                         else:
                             delta = 0
-                        last = val
+                        last[meta["key"]] = val
                     else:
                         # TODO : Measure ranking increases/decreases for str types?
                         delta = 0
