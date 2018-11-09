@@ -2,6 +2,6 @@
     name: wily
     description: 'Wily: A Python code-complexity archiver'
     entry: wily
-    language: python
+    language: python_venv
     language_version: python3
     types: [python]
