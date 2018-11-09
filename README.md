@@ -37,6 +37,7 @@ repos:
     -   id: wily
         name: wily
         entry: wily diff
+        verbose: true
         language: python
         additional_dependencies: [wily]
 ```

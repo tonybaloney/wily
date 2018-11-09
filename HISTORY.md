@@ -1,5 +1,13 @@
 # Release History
 
+## 1.1.1 (9th November 2018)
+
+* Fix a bug where .gitignore was not being passed correctly
+
+## 1.1.0 (9th November 2018)
+
+* Add a 'diff' command to show the metrics changed values between the last index and the current data.
+
 ## 1.0.0 (9th November 2018)
 
 * Build now compares existing git history with the cached history and only builds the missing revisions instead of building the entire index
