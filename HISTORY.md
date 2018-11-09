@@ -2,6 +2,8 @@
 
 ## 0.9.0 (9th November 2018)
 
+
+* The build command now requires the target path, and supports multiple paths. Is no longer -t option, but an argument. This is to prevent the user from accidentally trying to scan venv's
 * Operators all have a default metric (lines-of-code, maintainability-index)
 * Report command by default will now display the default metrics in an index
 * Report command now accepts multiple metrics and adds them to the table
