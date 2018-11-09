@@ -19,7 +19,7 @@ def test_build():
     """
     with patch("wily.commands.build.build") as build:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build"])
+        result = runner.invoke(main.cli, ["build", "wily"])
         assert result.exit_code == 0
         assert build.called_once
 
@@ -30,7 +30,9 @@ def test_build_with_opts():
     """
     with patch("wily.commands.build.build") as build:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["build", "-h 1", "-o raw,maintainability"])
+        result = runner.invoke(
+            main.cli, ["build", "wily", "-h 1", "-o raw,maintainability"]
+        )
         assert result.exit_code == 0
         assert build.called_once
         assert build.call_args[1]["config"].max_revisions == 1

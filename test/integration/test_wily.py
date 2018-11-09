@@ -37,9 +37,7 @@ def builddir(tmpdir):
     index.commit("remove line", author=author, committer=committer)
 
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", "--target", tmpdir]
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir])
     assert result.exit_code == 0, result.stdout
 
     return tmpdir
@@ -51,7 +49,7 @@ def test_build_not_git_repo(tmpdir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert result.exit_code == 1, result.stdout
 
 
@@ -61,7 +59,7 @@ def test_build_invalid_path(tmpdir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build"])
+        result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build", "test.py"])
         assert result.exit_code == 1, result.stdout
 
 
@@ -86,7 +84,9 @@ def test_build(tmpdir):
 
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build"])
+        result = runner.invoke(
+            main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
+        )
         assert result.exit_code == 0, result.stdout
 
     cache_path = tmpdir / ".wily"
@@ -220,7 +220,7 @@ def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert result.exit_code == 1, result.stdout
 
 

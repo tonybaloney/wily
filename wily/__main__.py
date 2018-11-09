@@ -58,12 +58,7 @@ def cli(ctx, debug, config, path):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.argument(
-    "target",
-    type=click.Path(resolve_path=True),
-    multiple=True,
-    help="Subdirectories or file to scan",
-)
+@click.argument("target", type=click.Path(resolve_path=True))
 @click.option(
     "-o",
     "--operators",
@@ -82,7 +77,7 @@ def build(ctx, max_revisions, target, operators):
         config.max_revisions = max_revisions
     if target:
         logger.debug(f"Fixing targets to {target}")
-        config.targets = target
+        config.targets = [target]
     if operators:
         logger.debug(f"Fixing operators to {operators}")
         config.operators = operators.strip().split(",")
