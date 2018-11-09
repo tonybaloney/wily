@@ -31,7 +31,7 @@ def build(config, archiver, operators):
         revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
         logger.error(f"Failed to setup archiver: '{e.message}'")
-        return
+        exit(1)
 
     if revisions is None or len(revisions) == 0:
         logger.warning("Could not find any revisions, using HEAD")
@@ -86,6 +86,8 @@ def build(config, archiver, operators):
             logger.error(f"Failed to build cache: '{e.message}'")
         else:
             logger.error(f"Failed to build cache: '{e}'")
+        exit(1)
+
     finally:
         # Reset the archive after every run back to the head of the branch
         archiver.finish()
