@@ -153,6 +153,34 @@ def report(ctx, file, metrics, number, message):
 
 
 @cli.command()
+@click.argument("files", type=click.Path(resolve_path=False), nargs=-1)
+@click.option(
+    "--metrics",
+    default=None,
+    help="comma-seperated list of metrics, see list-metrics for choices",
+)
+@click.pass_context
+def diff(ctx, files, metrics):
+    """Show the differences in metrics for each file."""
+    config = ctx.obj["CONFIG"]
+
+    if not exists(config):
+        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
+        exit(-1)
+
+    if not metrics:
+        metrics = get_default_metrics(config)
+        logger.info(f"Using default metrics {metrics}")
+    else:
+        metrics = metrics.split(",")
+
+    from wily.commands.diff import diff
+
+    logger.debug(f"Running diff on {files} for metric {metrics}")
+    diff(config=config, files=files, metrics=metrics)
+
+
+@cli.command()
 @click.argument("files", type=click.Path(resolve_path=False))
 @click.argument("metric")
 @click.pass_context
