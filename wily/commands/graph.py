@@ -18,7 +18,7 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 
 
-def graph(config, paths, metric):
+def graph(config, paths, metric, output=None):
     """
     Graph information about the cache and runtime
     :param config: The configuration
@@ -30,7 +30,8 @@ def graph(config, paths, metric):
     :param metric: The metric to report on
     :type  metric: The metric
 
-    :return:
+    :param output: Save report to specified path instead of opening browser
+    :type  output: ``str``
     """
     logger.debug("Running report command")
 
@@ -69,7 +70,14 @@ def graph(config, paths, metric):
             xcalendar="gregorian",
         )
         data.append(trace)
+    if output:
+        filename = output
+        auto_open = False
+    else:
+        filename = "wily-report.html"
+        auto_open = True
     plotly.offline.plot(
         {"data": data, "layout": go.Layout(title=f"History of {metric.description}")},
-        auto_open=True,
+        auto_open=auto_open,
+        filename=filename,
     )

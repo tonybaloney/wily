@@ -142,6 +142,39 @@ def test_graph():
             assert graph.call_args[1]["metric"] == "example_metric"
 
 
+def test_graph_with_output():
+    """
+    Test that graph calls the graph command with output
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.graph.graph") as graph:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli, ["graph", "foo.py", "example_metric", "-o", "foo.html"]
+            )
+            assert result.exit_code == 0
+            assert graph.called_once
+            assert check_cache.called_once
+            assert graph.call_args[1]["paths"] == ["foo.py"]
+            assert graph.call_args[1]["metric"] == "example_metric"
+            assert graph.call_args[1]["output"] == "foo.html"
+
+
+def test_diff():
+    """
+    Test that diff calls the diff command
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.diff.diff") as diff:
+            runner = CliRunner()
+            result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py"])
+            assert result.exit_code == 0
+            assert diff.called_once
+            assert check_cache.called_once
+            assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
+            assert "maintainability.mi" in diff.call_args[1]["metrics"]
+
+
 def test_clean():
     """
     Test that graph calls the graph command

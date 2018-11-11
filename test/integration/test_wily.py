@@ -281,6 +281,25 @@ def test_graph(builddir):
         assert result.exit_code == 0, result.stdout
 
 
+def test_graph_output(builddir):
+    """ Test the graph feature with target output file """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli,
+            ["--path", builddir, "graph", "test.py", "raw.loc", "-o", "test.html"],
+        )
+        assert result.exit_code == 0, result.stdout
+
+
+def test_diff_output(builddir):
+    """ Test the diff feature """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", builddir, "diff", "test.py"])
+        assert result.exit_code == 0, result.stdout
+
+
 def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     with patch("wily.logger") as logger:

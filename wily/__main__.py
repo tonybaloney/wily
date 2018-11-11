@@ -183,8 +183,11 @@ def diff(ctx, files, metrics):
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False))
 @click.argument("metric")
+@click.option(
+    "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
+)
 @click.pass_context
-def graph(ctx, files, metric):
+def graph(ctx, files, metric, output):
     """Graph a specific metric for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -195,7 +198,7 @@ def graph(ctx, files, metric):
     from wily.commands.graph import graph
 
     logger.debug(f"Running report on {files} for metric {metric}")
-    graph(config=config, paths=[files], metric=metric)
+    graph(config=config, paths=[files], metric=metric, output=output)
 
 
 @cli.command()
