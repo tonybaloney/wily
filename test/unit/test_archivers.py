@@ -3,6 +3,7 @@ import wily.archivers
 import wily.archivers.git as git
 import wily.config
 from mock import patch
+import pathlib
 
 
 class MockAuthor(object):
@@ -38,8 +39,13 @@ class MockRepo(object):
 
 
 @pytest.fixture
-def repo():
-    return MockRepo()
+def repo(tmpdir):
+    repo = MockRepo()
+    tmppath = pathlib.Path(tmpdir)
+    with open(tmppath / ".gitignore", "w") as test_txt:
+        test_txt.write(".wily/")
+    repo.path = tmppath
+    return repo
 
 
 def test_basearchiver():
@@ -69,6 +75,7 @@ def test_bad_resolve_archiver():
 def test_git_init(repo):
     with patch('wily.archivers.git.Repo', return_value=repo):
         test_config = wily.config.DEFAULT_CONFIG
+        test_config.path = repo.path
         archiver = git.GitArchiver(test_config)
         assert archiver.repo is not None
         assert archiver.config == test_config
@@ -77,6 +84,7 @@ def test_git_init(repo):
 def test_git_revisions(repo, tmpdir):
     with patch('wily.archivers.git.Repo', return_value=repo):
         test_config = wily.config.DEFAULT_CONFIG
+        test_config.path = repo.path
         archiver = git.GitArchiver(test_config)
         revisions = archiver.revisions(tmpdir, 99)
         assert archiver.repo is not None
