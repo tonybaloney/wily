@@ -44,7 +44,7 @@ class GitArchiver(BaseArchiver):
 
         revisions = []
         for commit in self.repo.iter_commits(
-            self.current_branch, max_count=self.config.max_revisions
+            self.current_branch, max_count=max_revisions
         ):
             rev = Revision(
                 key=commit.name_rev.split(" ")[0],
