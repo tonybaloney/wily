@@ -1,5 +1,10 @@
 # Release History
 
+
+## 1.3.0 (tbc)
+
+* Introduce a new `--output`
+
 ## 1.2.0 (9th November 2018)
 
 * Complete support for pre-commit
