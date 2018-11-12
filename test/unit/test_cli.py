@@ -164,15 +164,20 @@ def test_diff():
     """
     Test that diff calls the diff command
     """
-    with patch("wily.__main__.exists", return_value=True) as check_cache:
-        with patch("wily.commands.diff.diff") as diff:
-            runner = CliRunner()
-            result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py"])
-            assert result.exit_code == 0
-            assert diff.called_once
-            assert check_cache.called_once
-            assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
-            assert "maintainability.mi" in diff.call_args[1]["metrics"]
+    with patch(
+        "wily.__main__.get_default_metrics",
+        return_value=["maintainability.mi", "raw.loc"],
+    ) as gdf:
+        with patch("wily.__main__.exists", return_value=True) as check_cache:
+            with patch("wily.commands.diff.diff") as diff:
+                runner = CliRunner()
+                result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py"])
+                assert result.exit_code == 0
+                assert diff.called_once
+                assert check_cache.called_once
+                assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
+                assert gdf.called_once
+                assert "maintainability.mi" in diff.call_args[1]["metrics"]
 
 
 def test_clean():
