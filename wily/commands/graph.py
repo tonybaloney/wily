@@ -83,7 +83,10 @@ def graph(config, paths, metrics, output=None):
         metric = resolve_metric(metrics[0])
         title = f"History of {metric.description}"
     else:
-        title = f"History of {metrics}"
+        descriptions = ", ".join(
+            [resolve_metric(metric).description for metric in metrics]
+        )
+        title = f"History of {descriptions}"
     plotly.offline.plot(
         {"data": data, "layout": go.Layout(title=title)},
         auto_open=auto_open,
