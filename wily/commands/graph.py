@@ -79,8 +79,13 @@ def graph(config, paths, metrics, output=None):
     else:
         filename = "wily-report.html"
         auto_open = True
+    if len(metrics) == 1:
+        metric = resolve_metric(metrics[0])
+        title = f"History of {metric.description}"
+    else:
+        title = f"History of {metrics}"
     plotly.offline.plot(
-        {"data": data, "layout": go.Layout(title=f"History of {metric.description}")},
+        {"data": data, "layout": go.Layout(title=title)},
         auto_open=auto_open,
         filename=filename,
     )
