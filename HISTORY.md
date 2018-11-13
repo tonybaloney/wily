@@ -4,8 +4,9 @@
 
 * Support multiple metrics in graph command
 * Git archiver will now check for existence of '.wily/', '.wily/**/*', '.wily', and others in .gitignore
-* Added toggle for disabling the .gitignore check, still needs .wily.cfg option
 * Introduce a new `--output` flag to the graph command to specify output HTML file instead of opening file in browser.
+* Added toggle for disabling the .gitignore check in git archiver
+* Add an --skip-ignore-check option to `wily build` to skip the checking of .gitignore 
 
 ## 1.2.0 (9th November 2018)
 
