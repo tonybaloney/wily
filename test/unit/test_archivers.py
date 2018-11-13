@@ -24,7 +24,7 @@ class MockCommit(object):
 
 
 class MockRepo(object):
-    active_branch = 'master'
+    active_branch = "master"
     bare = False
     _is_dirty = False
     commits = [MockCommit("commit-1"), MockCommit("commit-2")]
@@ -51,10 +51,10 @@ def repo(tmpdir):
 def test_basearchiver():
     archiver = wily.archivers.BaseArchiver()
     with pytest.raises(NotImplementedError):
-        archiver.revisions('', 10)
+        archiver.revisions("", 10)
 
     with pytest.raises(NotImplementedError):
-        archiver.checkout('')
+        archiver.checkout("")
 
 
 def test_defaults():
@@ -62,7 +62,7 @@ def test_defaults():
 
 
 def test_resolve_archiver():
-    archiver = wily.archivers.resolve_archiver('git')
+    archiver = wily.archivers.resolve_archiver("git")
     assert archiver == wily.archivers.ARCHIVER_GIT
     assert archiver.name == "git"
 
@@ -73,7 +73,7 @@ def test_bad_resolve_archiver():
 
 
 def test_git_init(repo):
-    with patch('wily.archivers.git.Repo', return_value=repo):
+    with patch("wily.archivers.git.Repo", return_value=repo):
         test_config = wily.config.DEFAULT_CONFIG
         test_config.path = repo.path
         archiver = git.GitArchiver(test_config)
@@ -82,7 +82,7 @@ def test_git_init(repo):
 
 
 def test_git_revisions(repo, tmpdir):
-    with patch('wily.archivers.git.Repo', return_value=repo):
+    with patch("wily.archivers.git.Repo", return_value=repo):
         test_config = wily.config.DEFAULT_CONFIG
         test_config.path = repo.path
         archiver = git.GitArchiver(test_config)

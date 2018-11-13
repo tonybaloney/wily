@@ -32,19 +32,12 @@ class BaseOperator(object):
         raise NotImplementedError()
 
 
-from wily.operators.mccabe import MccabeOperator
 from wily.operators.cyclomatic import CyclomaticComplexityOperator
 from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator"""
 Operator = namedtuple("Operator", "name cls description")
-
-OPERATOR_MCCABE = Operator(
-    name="mccabe",
-    cls=MccabeOperator,
-    description="Number of branches via the Mccabe algorithm",
-)
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",

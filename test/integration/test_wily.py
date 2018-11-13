@@ -165,7 +165,9 @@ def test_build_no_commits(tmpdir):
     repo = Repo.init(path=tmpdir)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir , "--skip-ignore-check"])
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", tmpdir, "build", tmpdir, "--skip-ignore-check"]
+    )
     assert result.exit_code == 1, result.stdout
 
 
@@ -178,7 +180,7 @@ def test_build_dirty_repo(builddir):
         test_txt.write("import abc\nfoo = 1")
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "build", builddir ])
+    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "build", builddir])
     assert result.exit_code == 1, result.stdout
 
 
@@ -203,8 +205,7 @@ def test_report_not_found(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "report", "test1.py", "--metrics", "raw.loc"],
+            main.cli, ["--path", builddir, "report", "test1.py", "--metrics", "raw.loc"]
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" in result.stdout
@@ -252,7 +253,8 @@ def test_report_high_metric(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "report", "test.py", "--metrics", "raw.comments"]
+            main.cli,
+            ["--path", builddir, "report", "test.py", "--metrics", "raw.comments"],
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
