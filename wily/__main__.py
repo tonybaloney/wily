@@ -115,7 +115,7 @@ def index(ctx, message):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build` first.")
-        exit(-1)
+        exit(1)
 
     from wily.commands.index import index
 
@@ -138,7 +138,7 @@ def report(ctx, file, metrics, number, message):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
-        exit(-1)
+        exit(1)
 
     if not metrics:
         metrics = get_default_metrics(config)
@@ -166,7 +166,7 @@ def diff(ctx, files, metrics):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
-        exit(-1)
+        exit(1)
 
     if not metrics:
         metrics = get_default_metrics(config)
@@ -182,23 +182,23 @@ def diff(ctx, files, metrics):
 
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False))
-@click.argument("metric")
+@click.argument("metrics", nargs=-1)
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
 )
 @click.pass_context
-def graph(ctx, files, metric, output):
+def graph(ctx, files, metrics, output):
     """Graph a specific metric for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
-        exit(-1)
+        exit(1)
 
     from wily.commands.graph import graph
 
-    logger.debug(f"Running report on {files} for metric {metric}")
-    graph(config=config, paths=[files], metric=metric, output=output)
+    logger.debug(f"Running report on {files} for metrics {metrics}")
+    graph(config=config, paths=[files], metrics=metrics, output=output)
 
 
 @cli.command()
@@ -210,7 +210,7 @@ def clean(ctx, yes):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache.")
-        exit(-1)
+        exit(1)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
@@ -230,7 +230,7 @@ def list_metrics(ctx):
 
     if not exists(config):
         logger.error(f"Could not locate wily cache.")
-        exit(-1)
+        exit(1)
 
     from wily.commands.list_metrics import list_metrics
 

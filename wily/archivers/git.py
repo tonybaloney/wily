@@ -6,6 +6,9 @@ from wily.archivers import BaseArchiver, Revision
 
 logger = logging.getLogger(__name__)
 
+""" Possible combinations in .gitignore """
+gitignore_options = (".wily/", ".wily", ".wily/*", ".wily/**/*")
+
 
 class DirtyGitRepositoryError(Exception):
     def __init__(self, untracked_files):
@@ -19,7 +22,12 @@ class WilyIgnoreGitRepositoryError(Exception):
 
 
 class GitArchiver(BaseArchiver):
+    """ Name of the archiver """
+
     name = "git"
+
+    """ Whether to ignore checking for .wily/ in .gitignore files """
+    ignore_gitignore = False
 
     def __init__(self, config):
         self.repo = Repo(config.path)
@@ -31,7 +39,13 @@ class GitArchiver(BaseArchiver):
         with open(gitignore, "r") as gitignore_f:
             lines = [line.replace("\n", "") for line in gitignore_f.readlines()]
             logger.debug(lines)
-            if ".wily/" not in lines:
+            has_ignore = False
+            for gitignore_opt in gitignore_options:
+                if gitignore_opt in lines:
+                    has_ignore = True
+                    break
+
+            if not has_ignore and not self.ignore_gitignore:  # :-/
                 raise WilyIgnoreGitRepositoryError()
 
         self.config = config

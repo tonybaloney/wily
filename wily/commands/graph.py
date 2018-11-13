@@ -18,7 +18,7 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 
 
-def graph(config, paths, metric, output=None):
+def graph(config, paths, metrics, output=None):
     """
     Graph information about the cache and runtime
     :param config: The configuration
@@ -27,8 +27,8 @@ def graph(config, paths, metric, output=None):
     :param paths: The path(s) to the files
     :type  paths: ``list``
 
-    :param metric: The metric to report on
-    :type  metric: The metric
+    :param metrics: The metrics to report on
+    :type  metrics: ``tuple``
 
     :param output: Save report to specified path instead of opening browser
     :type  output: ``str``
@@ -36,40 +36,43 @@ def graph(config, paths, metric, output=None):
     logger.debug("Running report command")
 
     data = []
-    operator, key = metric.split(".")
-    metric = resolve_metric(metric)
+
     archivers = cache.list_archivers(config)
 
-    for path in paths:
-        x = []
-        y = []
-        for archiver in archivers:
-            # We have to do it backwards to get the deltas between releases
-            history = cache.get_index(config, archiver)
-            ids = [rev["revision"] for rev in history[::-1]]
-            labels = [
-                f"{rev['author_name']} <br>{rev['message']}" for rev in history[::-1]
-            ]
-            for rev in history[::-1]:
-                revision_entry = cache.get(config, archiver, rev["revision"])
-                try:
-                    val = revision_entry["operator_data"][operator][path][key]
-                    y.append(val)
-                except KeyError:
-                    y.append(0)
-                finally:
-                    x.append(format_datetime(rev["date"]))
-        # Create traces
-        trace = go.Scatter(
-            x=x,
-            y=y,
-            mode="lines+markers",
-            name=f"{metric.description} for {path}",
-            ids=ids,
-            text=labels,
-            xcalendar="gregorian",
-        )
-        data.append(trace)
+    for metric in metrics:
+        operator, key = metric.split(".")
+        metric = resolve_metric(metric)
+        for path in paths:
+            x = []
+            y = []
+            for archiver in archivers:
+                # We have to do it backwards to get the deltas between releases
+                history = cache.get_index(config, archiver)
+                ids = [rev["revision"] for rev in history[::-1]]
+                labels = [
+                    f"{rev['author_name']} <br>{rev['message']}"
+                    for rev in history[::-1]
+                ]
+                for rev in history[::-1]:
+                    revision_entry = cache.get(config, archiver, rev["revision"])
+                    try:
+                        val = revision_entry["operator_data"][operator][path][key]
+                        y.append(val)
+                    except KeyError:
+                        y.append(0)
+                    finally:
+                        x.append(format_datetime(rev["date"]))
+            # Create traces
+            trace = go.Scatter(
+                x=x,
+                y=y,
+                mode="lines+markers",
+                name=f"{metric.description} for {path}",
+                ids=ids,
+                text=labels,
+                xcalendar="gregorian",
+            )
+            data.append(trace)
     if output:
         filename = output
         auto_open = False

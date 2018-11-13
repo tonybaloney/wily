@@ -312,14 +312,14 @@ def test_index_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "index"])
-        assert result.exit_code == -1, result.stdout
+        assert result.exit_code == 1, result.stdout
 
 
 def test_report_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "report", "test.py"])
-        assert result.exit_code == -1, result.stdout
+        assert result.exit_code == 1, result.stdout
 
 
 def test_graph_no_cache(tmpdir):
@@ -328,18 +328,25 @@ def test_graph_no_cache(tmpdir):
         result = runner.invoke(
             main.cli, ["--path", tmpdir, "graph", "test.py", "raw.loc"]
         )
-        assert result.exit_code == -1, result.stdout
+        assert result.exit_code == 1, result.stdout
 
 
 def test_clean_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "clean"])
-        assert result.exit_code == -1, result.stdout
+        assert result.exit_code == 1, result.stdout
 
 
-def test_graph_no_cache(tmpdir):
+def test_list_metrics_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "list-metrics"])
-        assert result.exit_code == -1, result.stdout
+        assert result.exit_code == 1, result.stdout
+
+
+def test_diff_no_cache(tmpdir):
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", tmpdir, "diff"])
+        assert result.exit_code == 1, result.stdout
