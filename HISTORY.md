@@ -7,6 +7,7 @@
 * Introduce a new `--output` flag to the graph command to specify output HTML file instead of opening file in browser.
 * Added toggle for disabling the .gitignore check in git archiver
 * Add an --skip-ignore-check option to `wily build` to skip the checking of .gitignore 
+* Remove references to the mccabe algorithm as it's not implemented
 
 ## 1.2.0 (9th November 2018)
 
