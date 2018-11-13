@@ -158,6 +158,30 @@ def test_build_twice(tmpdir):
     assert rev_path2.exists()
 
 
+def test_build_no_commits(tmpdir):
+    """
+    Test that build fails cleanly with no commits
+    """
+    repo = Repo.init(path=tmpdir)
+
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir ])
+    assert result.exit_code == 1, result.stdout
+
+
+def test_build_dirty_repo(builddir):
+    """
+    Test that build fails cleanly with a dirty repo
+    """
+    tmppath = pathlib.Path(builddir)
+    with open(tmppath / "test.py", "w") as test_txt:
+        test_txt.write("import abc\nfoo = 1")
+
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "build", builddir ])
+    assert result.exit_code == 1, result.stdout
+
+
 def test_report(builddir):
     """
     Test that report works with a build
