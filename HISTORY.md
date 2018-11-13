@@ -1,6 +1,6 @@
 # Release History
 
-## 1.3.0.beta1 
+## 1.3.0 (14th November 2018)
 
 * Support multiple metrics in graph command
 * Git archiver will now check for existence of '.wily/', '.wily/**/*', '.wily', and others in .gitignore
