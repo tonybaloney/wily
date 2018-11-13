@@ -31,7 +31,7 @@ class GitArchiver(BaseArchiver):
 
     def __init__(self, config):
         self.repo = Repo(config.path)
-
+        self.ignore_gitignore = config.skip_ignore_check
         gitignore = pathlib.Path(config.path) / ".gitignore"
         if not gitignore.exists():
             raise WilyIgnoreGitRepositoryError()

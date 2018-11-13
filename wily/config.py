@@ -32,6 +32,7 @@ class WilyConfig(object):
     archiver: Any
     path: str
     max_revisions: int
+    skip_ignore_check: bool = False
     cache_path: str = DEFAULT_CACHE_PATH
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)

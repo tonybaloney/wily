@@ -165,7 +165,7 @@ def test_build_no_commits(tmpdir):
     repo = Repo.init(path=tmpdir)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir ])
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir , "--skip-ignore-check"])
     assert result.exit_code == 1, result.stdout
 
 

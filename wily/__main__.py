@@ -78,8 +78,14 @@ def cli(ctx, debug, config, path):
     type=click.STRING,
     help="List of operators, separated by commas",
 )
+@click.option(
+    "--skip-ignore-check",
+    type=click.BOOL,
+    default=False,
+    help="Skip checking of .gitignore for '.wily/'",
+)
 @click.pass_context
-def build(ctx, max_revisions, targets, operators):
+def build(ctx, max_revisions, targets, operators, skip_ignore_check):
     """Build the wily cache"""
     config = ctx.obj["CONFIG"]
 
@@ -93,6 +99,7 @@ def build(ctx, max_revisions, targets, operators):
         logger.debug(f"Fixing operators to {operators}")
         config.operators = operators.strip().split(",")
 
+    config.skip_ignore_check = skip_ignore_check
     logger.debug(f"Fixing targets to {targets}")
     config.targets = targets
 
