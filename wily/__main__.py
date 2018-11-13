@@ -173,6 +173,7 @@ def diff(ctx, files, metrics):
         logger.info(f"Using default metrics {metrics}")
     else:
         metrics = metrics.split(",")
+        logger.info(f"Using specified metrics {metrics}")
 
     from wily.commands.diff import diff
 

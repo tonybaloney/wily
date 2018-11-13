@@ -172,6 +172,20 @@ def test_report(builddir):
         assert "Not found" not in result.stdout
 
 
+def test_report_not_found(builddir):
+    """
+    Test that report works with a build but not with an invalid path
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli,
+            ["--path", builddir, "report", "test1.py", "--metrics", "raw.loc"],
+        )
+        assert result.exit_code == 0, result.stdout
+        assert "Not found" in result.stdout
+
+
 def test_report_default_metrics(builddir):
     """
     Test that report works with a build
@@ -214,7 +228,7 @@ def test_report_high_metric(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "report", "test.py", "--metrics", "raw.loc"]
+            main.cli, ["--path", builddir, "report", "test.py", "--metrics", "raw.comments"]
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout

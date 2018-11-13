@@ -1,10 +1,11 @@
 # Release History
 
-## master 
+## 1.3.0.beta1 
 
 * Support multiple metrics in graph command
 * Git archiver will now check for existence of '.wily/', '.wily/**/*', '.wily', and others in .gitignore
 * Added toggle for disabling the .gitignore check, still needs .wily.cfg option
+* Introduce a new `--output` flag to the graph command to specify output HTML file instead of opening file in browser.
 
 ## 1.2.0 (9th November 2018)
 
