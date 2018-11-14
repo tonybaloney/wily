@@ -133,6 +133,9 @@ def store_index(config, archiver, index):
     if not root.exists():
         root.mkdir()
         logger.debug("Created archiver directory")
+
+    # TODO : Sort index by time stamp (descending)
+
     filename = root / "index.json"
     with open(filename, "w") as out:
         out.write(json.dumps(index, indent=2))

@@ -47,27 +47,27 @@ from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator"""
-Operator = namedtuple("Operator", "name cls description")
+Operator = namedtuple("Operator", "name cls description level")
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
     cls=CyclomaticComplexityOperator,
     description="Cyclomatic Complexity of modules",
-    level=OperatorLevel.Object
+    level=OperatorLevel.Object,
 )
 
 OPERATOR_RAW = Operator(
-    name="raw", 
-    cls=RawMetricsOperator, 
+    name="raw",
+    cls=RawMetricsOperator,
     description="Raw Python statistics",
-    level=OperatorLevel.File
+    level=OperatorLevel.File,
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
     cls=MaintainabilityIndexOperator,
     description="Maintainability index (lines of code and branching)",
-    level=OperatorLevel.File
+    level=OperatorLevel.File,
 )
 
 

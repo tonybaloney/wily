@@ -1,5 +1,8 @@
 """
 Builds a cache based on a source-control history
+
+TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
+
 """
 from progress.bar import Bar
 

@@ -4,8 +4,3 @@ repos:
     hooks:
     - id: black
       language_version: python3.7
--   repo: https://github.com/tonybaloney/wily
-    rev: master
-    hooks:
-    - id: wily
-      language_version: python3.7
