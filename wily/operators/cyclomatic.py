@@ -41,9 +41,9 @@ class CyclomaticComplexityOperator(BaseOperator):
         # TODO : Recursive.
         for filename, details in dict(self.harvester.results).items():
             logger.debug(details)
-            if len(details) == 8:
+            if details and len(details) == 8:
                 results[filename] = self._dict_from_function(details)
-            elif len(details) == 7:
+            elif details and len(details) == 7:
                 results[filename] = self._dict_from_class(details)
 
     @staticmethod
