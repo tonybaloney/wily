@@ -11,7 +11,7 @@ from radon.cli import Config
 import radon
 from radon.visitors import Function, Class
 from wily import logger
-from wily.operators import BaseOperator
+from wily.operators import BaseOperator, Metric, MetricType
 
 
 class CyclomaticComplexityOperator(BaseOperator):
@@ -26,7 +26,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         "order": radon.complexity.SCORE,
     }
 
-    metrics = ()
+    metrics = (Metric("complexity", "Cyclomatic Complexity", float, MetricType.AimLow),)
 
     def __init__(self, config):
         # TODO: Import config for harvester from .wily.cfg

@@ -135,7 +135,7 @@ def store_index(config, archiver, index):
         root.mkdir()
         logger.debug("Created archiver directory")
 
-    # TODO : Sort index by time stamp (descending)
+    index = sorted(index, key=lambda k: k["date"], reverse=True)
 
     filename = root / "index.json"
     with open(filename, "w") as out:

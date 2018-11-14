@@ -1,17 +1,14 @@
 """
 Draw graph in HTML for a specific metric
 
-
-TODO: Somehow link to the rev-hash?
 TODO: Add multiple lines for multiple files
-TODO: Add multiple lines for multiple metrics(?)
 """
 from wily import logger, format_datetime, format_revision
 import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
-from wily.operators import resolve_metric, MetricType
+from wily.operators import resolve_metric, MetricType, get_metric
 
 import plotly.offline
 import plotly.plotly as py
@@ -56,7 +53,9 @@ def graph(config, paths, metrics, output=None):
                 for rev in history[::-1]:
                     revision_entry = cache.get(config, archiver, rev["revision"])
                     try:
-                        val = revision_entry["operator_data"][operator][path][key]
+                        val = get_metric(
+                            revision_entry["operator_data"], operator, path, key
+                        )
                         y.append(val)
                     except KeyError:
                         y.append(0)
