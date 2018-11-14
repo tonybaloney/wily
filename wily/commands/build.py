@@ -89,7 +89,6 @@ def build(config, archiver, operators):
             logger.error(f"Failed to build cache: '{e.message}'")
         else:
             logger.error(f"Failed to build cache: '{e}'")
-        raise e
 
     finally:
         # Reset the archive after every run back to the head of the branch

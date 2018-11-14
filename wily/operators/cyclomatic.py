@@ -50,6 +50,7 @@ class CyclomaticComplexityOperator(BaseOperator):
                 else:
                     raise TypeError("unexpected type : {type(instance)}")
                 results[filename][i["fullname"]] = i
+        return results
 
     @staticmethod
     def _dict_from_function(l):
