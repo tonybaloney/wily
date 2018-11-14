@@ -2,6 +2,9 @@
 
 """
 Main command line
+
+TODO : Skip-ignore-check should be a flag not a value option
+
 """
 
 import os.path
