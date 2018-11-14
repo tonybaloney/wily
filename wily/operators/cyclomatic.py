@@ -39,7 +39,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         logger.debug("Running CC harvester")
         results = {}
         # TODO : Recursive.
-        for filename, details in self.harvester.results.items():
+        for filename, details in dict(self.harvester.results).items():
             if len(details) == 8:
                 results[filename] = self._dict_from_function(details)
             elif len(details) == 7:
