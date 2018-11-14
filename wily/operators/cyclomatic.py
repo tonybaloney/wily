@@ -9,6 +9,7 @@ TODO : Figure out how to deal with the list metrics for functions?
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 import radon
+from radon.visitors import Function, Class
 from wily import logger
 from wily.operators import BaseOperator
 
@@ -43,33 +44,34 @@ class CyclomaticComplexityOperator(BaseOperator):
 
         pdb.set_trace()
         for filename, details in dict(self.harvester.results).items():
-            logger.debug(details)
-            if details and len(details) == 8:
-                results[filename] = self._dict_from_function(details)
-            elif details and len(details) == 7:
-                results[filename] = self._dict_from_class(details)
+            results[filename] = {}
+            for instance in details:
+                if isinstance(instance, Class):
+                    i = self._dict_from_class(instance)
+                elif isinstance(instance, Function):
+                    i = self._dict_from_class(instance)
+                else:
+                    raise TypeError("unexpected type : {type(instance)}")
+                results[filename][i["fullname"]] = i
 
     @staticmethod
     def _dict_from_function(l):
         return {
-            "name": l[0],
-            "lineno": l[1],
-            "col_offset": l[2],
-            "endline": l[3],
-            "is_method": l[4],
-            "classname": l[5],
-            "closures": l[6],
-            "complexity": l[7],
+            "name": l.name,
+            "is_method": l.is_method,
+            "classname": l.classname,
+            "fullname": l.fullname(),
+            "closures": l.closures,
+            "complexity": l.complexity,
         }
 
     @staticmethod
     def _dict_from_class(l):
         return {
-            "name": l[0],
-            "lineno": l[1],
-            "col_offset": l[2],
-            "endline": l[3],
-            "methods": l[4],
-            "inner_classes": l[5],
-            "real_complexity": l[6],
+            "name": l.name,
+            "methods": l.methods,
+            "fullname": l.fullname(),
+            "inner_classes": l.inner_classes,
+            "real_complexity": l.real_complexity,
+            "complexity": l.complexity(),
         }
