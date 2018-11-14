@@ -39,6 +39,9 @@ class CyclomaticComplexityOperator(BaseOperator):
         logger.debug("Running CC harvester")
         results = {}
         # TODO : Recursive.
+        import pdb
+
+        pdb.set_trace()
         for filename, details in dict(self.harvester.results).items():
             logger.debug(details)
             if details and len(details) == 8:
