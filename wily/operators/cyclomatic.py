@@ -60,7 +60,7 @@ class CyclomaticComplexityOperator(BaseOperator):
             "name": l.name,
             "is_method": l.is_method,
             "classname": l.classname,
-            "fullname": l.fullname(),
+            "fullname": l.fullname,
             "closures": l.closures,
             "complexity": l.complexity,
         }
@@ -70,8 +70,8 @@ class CyclomaticComplexityOperator(BaseOperator):
         return {
             "name": l.name,
             "methods": l.methods,
-            "fullname": l.fullname(),
+            "fullname": l.fullname,
             "inner_classes": l.inner_classes,
             "real_complexity": l.real_complexity,
-            "complexity": l.complexity(),
+            "complexity": l.complexity,
         }
