@@ -13,6 +13,13 @@ class MetricType(Enum):
 Metric = namedtuple("Metric", "name description type measure")
 
 
+class OperatorLevel(Enum):
+    """ Level of operator """
+
+    File = 1
+    Object = 2
+
+
 class BaseOperator(object):
     """Abstract Operator Class"""
 
@@ -27,6 +34,9 @@ class BaseOperator(object):
 
     """Which metric is the default to display in the report command"""
     default_metric_index = None
+
+    """ Level at which the operator goes to """
+    level = OperatorLevel.File
 
     def run(self, module, options):
         raise NotImplementedError()
@@ -43,25 +53,26 @@ OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
     cls=CyclomaticComplexityOperator,
     description="Cyclomatic Complexity of modules",
+    level=OperatorLevel.Object
 )
 
 OPERATOR_RAW = Operator(
-    name="raw", cls=RawMetricsOperator, description="Raw Python statistics"
+    name="raw", 
+    cls=RawMetricsOperator, 
+    description="Raw Python statistics",
+    level=OperatorLevel.File
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
     cls=MaintainabilityIndexOperator,
     description="Maintainability index (lines of code and branching)",
+    level=OperatorLevel.File
 )
 
 
 """Set of all available operators"""
-ALL_OPERATORS = {
-    OPERATOR_CYCLOMATIC,
-    OPERATOR_MAINTAINABILITY,
-    OPERATOR_RAW,
-}
+ALL_OPERATORS = {OPERATOR_CYCLOMATIC, OPERATOR_MAINTAINABILITY, OPERATOR_RAW}
 
 
 def resolve_operator(name):

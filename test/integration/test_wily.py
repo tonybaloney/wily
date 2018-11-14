@@ -336,7 +336,8 @@ def test_graph_multiple(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "test.py", "raw.loc", "raw.comments"]
+            main.cli,
+            ["--path", builddir, "graph", "test.py", "raw.loc", "raw.comments"],
         )
         assert result.exit_code == 0, result.stdout
 
