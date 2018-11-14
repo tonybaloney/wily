@@ -99,3 +99,12 @@ def resolve_metric(metric):
     return [
         metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key
     ][0]
+
+
+def get_metric(revision, operator, path, key):
+    if ":" in path:
+        part, entry = path.split(":")
+        val = revision[operator][part][entry][key]
+    else:
+        val = revision[operator][path][key]
+    return val

@@ -6,7 +6,7 @@ import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
-from wily.operators import resolve_metric, MetricType
+from wily.operators import resolve_metric, MetricType, get_metric
 
 
 def report(config, path, metrics, n, include_message=False):
@@ -69,9 +69,13 @@ def report(config, path, metrics, n, include_message=False):
                     logger.debug(
                         f"Fetching metric {meta['key']} for {meta['operator']} in {path}"
                     )
-                    val = revision_entry["operator_data"][meta["operator"]][path][
-                        meta["key"]
-                    ]
+                    val = get_metric(
+                        revision_entry["operator_data"],
+                        meta["operator"],
+                        path,
+                        meta["key"],
+                    )
+
                     last_val = last.get(meta["key"], None)
                     # Measure the difference between this value and the last
                     if meta["type"] in (int, float):

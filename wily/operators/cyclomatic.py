@@ -39,7 +39,6 @@ class CyclomaticComplexityOperator(BaseOperator):
     def run(self, module, options):
         logger.debug("Running CC harvester")
         results = {}
-        # TODO : Recursive.
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {}
             for instance in details:
@@ -58,7 +57,6 @@ class CyclomaticComplexityOperator(BaseOperator):
             "name": l.name,
             "is_method": l.is_method,
             "classname": l.classname,
-            "fullname": l.fullname,
             "closures": l.closures,
             "complexity": l.complexity,
         }
@@ -67,8 +65,6 @@ class CyclomaticComplexityOperator(BaseOperator):
     def _dict_from_class(l):
         return {
             "name": l.name,
-            "methods": l.methods,
-            "fullname": l.fullname,
             "inner_classes": l.inner_classes,
             "real_complexity": l.real_complexity,
             "complexity": l.complexity,
