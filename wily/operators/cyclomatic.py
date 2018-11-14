@@ -49,6 +49,7 @@ class CyclomaticComplexityOperator(BaseOperator):
                 else:
                     raise TypeError("unexpected type : {type(instance)}")
                 results[filename][i["fullname"]] = i
+                del i["fullname"]
         return results
 
     @staticmethod
@@ -59,6 +60,7 @@ class CyclomaticComplexityOperator(BaseOperator):
             "classname": l.classname,
             "closures": l.closures,
             "complexity": l.complexity,
+            "fullname": l.fullname,
         }
 
     @staticmethod
@@ -68,4 +70,5 @@ class CyclomaticComplexityOperator(BaseOperator):
             "inner_classes": l.inner_classes,
             "real_complexity": l.real_complexity,
             "complexity": l.complexity,
+            "fullname": l.fullname,
         }
