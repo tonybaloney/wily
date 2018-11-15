@@ -4,7 +4,7 @@ Compares metrics between uncommitted files and indexed files
 from wily import logger
 import wily.cache as cache
 from wily.config import DEFAULT_GRID_STYLE
-from wily.operators import resolve_metric, resolve_operator
+from wily.operators import resolve_metric, resolve_operator, get_metric
 import tabulate
 
 
@@ -43,7 +43,9 @@ def diff(config, files, metrics):
         try:
             metrics_data = [
                 "{0:n} -> {1:n}".format(
-                    last_entry["operator_data"][operator][file][metric.name],
+                    get_metric(
+                        last_entry["operator_data"], operator, file, metric.name
+                    ),
                     data[operator][file][metric.name],
                 )
                 for operator, metric in metrics

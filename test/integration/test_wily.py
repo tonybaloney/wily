@@ -1,6 +1,7 @@
 import wily.__main__ as main
 import wily.cache
 from mock import patch
+from textwrap import dedent
 from click.testing import CliRunner
 from git import Repo, Actor
 import pathlib
@@ -25,14 +26,36 @@ def builddir(tmpdir):
 
     index.commit("basic test", author=author, committer=committer)
 
+    first_test = """
+    import abc
+    foo = 1
+    def function1():
+        a = 1 + 1
+    
+    class Class1(object):
+        def method(self):
+            b = 1 + 5
+    """
     with open(tmppath / "test.py", "w") as test_txt:
-        test_txt.write("import abc\nfoo = 1")
+        test_txt.write(dedent(first_test))
 
     index.add(["test.py"])
     index.commit("add line", author=author, committer=committer)
 
+    second_test = """
+    import abc
+    foo = 1
+    def function1():
+        a = 1 + 1
+    class Class1(object):
+        def method(self):
+            b = 1 + 5
+            if b == 6:
+                return 'banana'
+    """
+
     with open(tmppath / "test.py", "w") as test_txt:
-        test_txt.write("import collections")
+        test_txt.write(dedent(second_test))
 
     with open(tmppath / ".gitignore", "w") as test_txt:
         test_txt.write(".wily/")
