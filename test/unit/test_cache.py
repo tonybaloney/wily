@@ -3,6 +3,8 @@ from wily.archivers import Revision
 import wily.cache as cache
 import pathlib
 import json
+import pytest
+from mock import patch
 
 
 def test_exists(tmpdir):
@@ -21,6 +23,17 @@ def test_not_exists():
     config = DEFAULT_CONFIG
     config.cache_path = "/v/v/w"
     assert not cache.exists(config)
+
+
+def test_get_default_metrics_empty():
+    """ 
+    Test that get_metrics goes ok with an empty index
+    """
+    config = DEFAULT_CONFIG
+    with patch("wily.cache.get_index", return_value=[]) as get_index:
+        metrics = cache.get_default_metrics(config)
+        assert metrics == []
+        assert get_index.called_once
 
 
 def test_create_and_delete(tmpdir):
@@ -80,6 +93,26 @@ def test_store_basic(tmpdir):
         result = json.load(cache_item)
         assert isinstance(result, dict)
         assert result == _TEST_STATS
+
+
+def test_store_twice(tmpdir):
+    """ Test that you can't write the same revision twice """
+    config = DEFAULT_CONFIG
+    cache_path = pathlib.Path(tmpdir) / ".wily"
+    cache_path.mkdir()
+    config.cache_path = cache_path
+    target_path = str(pathlib.Path(tmpdir) / "foo" / "bar.py")
+    _TEST_STATS = {"operator_data": {"test": {target_path: {"metric1": 1}}}}
+    _TEST_REVISION = Revision(
+        key="12345",
+        author_name="Anthony Shaw",
+        author_email="anthony@test.com",
+        revision_date="17/01/1990",
+        message="my changes",
+    )
+    fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+    with pytest.raises(RuntimeError):
+        cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
 
 
 def test_store_relative_paths(tmpdir):

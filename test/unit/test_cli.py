@@ -223,3 +223,18 @@ def test_clean_with_prompt():
                 assert clean.called_once
                 assert check_cache.called_once
                 assert mock_input.called_once
+
+
+def test_clean_with_prompt_no_value():
+    """
+    Test that graph calls the clean command and if enter type "n" it doesn't clean index
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.cache.clean") as clean:
+            with patch("wily.__main__.input", return_value="n") as mock_input:
+                runner = CliRunner()
+                result = runner.invoke(main.cli, ["clean"])
+                assert result.exit_code == 0
+                assert not clean.called
+                assert check_cache.called_once
+                assert mock_input.called_once
