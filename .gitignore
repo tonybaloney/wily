@@ -105,6 +105,7 @@ venv.bak/
 temp-plot.html
 test.html
 wily-report.html
+test_granular.html
 .wily/
 
 .idea/
