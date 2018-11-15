@@ -1,5 +1,6 @@
 """
-TODO : Better error handling of wonky builds
+The report command gives a table of metrics for a specified list of files.
+Will compare the values between revisions and highlight changes in green/red.
 """
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 import tabulate

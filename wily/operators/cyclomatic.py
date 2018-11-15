@@ -28,6 +28,8 @@ class CyclomaticComplexityOperator(BaseOperator):
 
     metrics = (Metric("complexity", "Cyclomatic Complexity", float, MetricType.AimLow),)
 
+    default_metric_index = 0  # MI
+
     def __init__(self, config):
         # TODO: Import config for harvester from .wily.cfg
         logger.debug(f"Using {config.targets} with {self.defaults} for CC metrics")
@@ -39,8 +41,10 @@ class CyclomaticComplexityOperator(BaseOperator):
     def run(self, module, options):
         logger.debug("Running CC harvester")
         results = {}
+        totals = {}
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {}
+            total = 0  # running CC total
             for instance in details:
                 if isinstance(instance, Class):
                     i = self._dict_from_class(instance)
@@ -50,6 +54,8 @@ class CyclomaticComplexityOperator(BaseOperator):
                     raise TypeError("unexpected type : {type(instance)}")
                 results[filename][i["fullname"]] = i
                 del i["fullname"]
+                total += i["complexity"]
+            results[filename]["complexity"] = total
         return results
 
     @staticmethod
