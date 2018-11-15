@@ -41,16 +41,18 @@ def diff(config, files, metrics, changes_only=True):
 
     for file in files:
         try:
-            metrics_data = [
-                "{0:n} -> {1:n}".format(
-                    get_metric(
-                        last_entry["operator_data"], operator, file, metric.name
-                    ),
-                    data[operator][file][metric.name],
+            metrics_data = []
+            has_changes = False
+            for operator, metric in metrics:
+                current = get_metric(
+                    last_entry["operator_data"], operator, file, metric.name
                 )
-                for operator, metric in metrics
-            ]
-            results.append((file, *metrics_data))
+                new = data[operator][file][metric.name]
+                if new != current:
+                    has_changes = True
+                metrics_data.append("{0:n} -> {1:n}".format(current, new))
+            if has_changes or not changes_only:
+                results.append((file, *metrics_data))
         except KeyError:
             # don't care.
             pass
