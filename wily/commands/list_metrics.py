@@ -20,5 +20,3 @@ def list_metrics():
                     tablefmt=DEFAULT_GRID_STYLE,
                 )
             )
-        else:
-            logger.warning("No metrics available")
