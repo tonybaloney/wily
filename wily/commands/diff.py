@@ -53,15 +53,18 @@ def diff(config, files, metrics, changes_only=True):
                 metrics_data.append("{0:n} -> {1:n}".format(current, new))
             if has_changes or not changes_only:
                 results.append((file, *metrics_data))
-        except KeyError:
-            # don't care.
+            else:
+                logger.debug(metrics_data)
+        except KeyError as e:
+            logger.debug(f"Could not find {e}")
             pass
 
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
-    print(
-        # But it still makes more sense to show the newest at the top, so reverse again
-        tabulate.tabulate(
-            headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
+    if len(results) > 0:
+        print(
+            # But it still makes more sense to show the newest at the top, so reverse again
+            tabulate.tabulate(
+                headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
+            )
         )
-    )
