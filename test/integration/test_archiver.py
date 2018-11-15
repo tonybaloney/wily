@@ -2,7 +2,11 @@ import pathlib
 from git import Repo, Actor
 import pytest
 from wily.config import DEFAULT_CONFIG
-from wily.archivers.git import GitArchiver, WilyIgnoreGitRepositoryError
+from wily.archivers.git import (
+    GitArchiver,
+    WilyIgnoreGitRepositoryError,
+    DirtyGitRepositoryError,
+)
 
 
 def test_gitignore_missing(tmpdir):
@@ -109,3 +113,32 @@ def test_git_end_to_end(tmpdir):
     finish = archiver.finish()
 
     assert (tmppath / "test.py").exists()
+
+
+def test_dirty_git(tmpdir):
+    """ Check that repository fails to initialise if unchecked files are in the repo """
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
+    index = repo.index
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    # First commit
+    with open(tmppath / ".gitignore", "w") as ignore:
+        ignore.write(".wily/")
+
+    index.add([".gitignore"])
+    commit1 = index.commit("commit1", author=author, committer=committer)
+
+    # Write a test file to the repo
+    with open(tmppath / "blah.py", "w") as ignore:
+        ignore.write("*.py[co]\n")
+    index.add(["blah.py"])
+
+    config = DEFAULT_CONFIG
+    config.path = tmpdir
+
+    with pytest.raises(DirtyGitRepositoryError):
+        archiver = GitArchiver(config)
+        archiver.revisions(tmpdir, 2)
