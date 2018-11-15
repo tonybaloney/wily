@@ -221,6 +221,29 @@ def test_report(builddir):
         assert "Not found" not in result.stdout
 
 
+def test_report_granular(builddir):
+    """
+    Test that report works with a build
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli,
+            [
+                "--path",
+                builddir,
+                "report",
+                "test.py:function1",
+                "--metrics",
+                "cyclomatic.complexity",
+                "-n",
+                1,
+            ],
+        )
+        assert result.exit_code == 0, result.stdout
+        assert "Not found" not in result.stdout
+
+
 def test_report_not_found(builddir):
     """
     Test that report works with a build but not with an invalid path
@@ -372,6 +395,25 @@ def test_graph_output(builddir):
         result = runner.invoke(
             main.cli,
             ["--path", builddir, "graph", "test.py", "raw.loc", "-o", "test.html"],
+        )
+        assert result.exit_code == 0, result.stdout
+
+
+def test_graph_output_granular(builddir):
+    """ Test the graph feature with target output file """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli,
+            [
+                "--path",
+                builddir,
+                "graph",
+                "test.py:function1",
+                "cyclomatic.complexity",
+                "-o",
+                "test_granular.html",
+            ],
         )
         assert result.exit_code == 0, result.stdout
 
