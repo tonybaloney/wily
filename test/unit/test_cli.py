@@ -199,7 +199,7 @@ def test_diff():
 
 def test_clean():
     """
-    Test that graph calls the graph command
+    Test that graph calls the clean command
     """
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.cache.clean") as clean:
@@ -208,3 +208,18 @@ def test_clean():
             assert result.exit_code == 0
             assert clean.called_once
             assert check_cache.called_once
+
+
+def test_clean_with_prompt():
+    """
+    Test that graph calls the clean command
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.cache.clean") as clean:
+            with patch("wily.__main__.input", return_value="y") as mock_input:
+                runner = CliRunner()
+                result = runner.invoke(main.cli, ["clean"])
+                assert result.exit_code == 0
+                assert clean.called_once
+                assert check_cache.called_once
+                assert mock_input.called_once

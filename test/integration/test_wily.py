@@ -426,6 +426,16 @@ def test_diff_output(builddir):
         assert result.exit_code == 0, result.stdout
 
 
+def test_diff_output_metrics(builddir):
+    """ Test the diff feature with specific metrics """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "diff", "test.py", "--metrics", "raw.loc"]
+        )
+        assert result.exit_code == 0, result.stdout
+
+
 def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     with patch("wily.logger") as logger:
