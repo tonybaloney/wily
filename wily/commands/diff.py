@@ -8,7 +8,7 @@ from wily.operators import resolve_metric, resolve_operator, get_metric
 import tabulate
 
 
-def diff(config, files, metrics):
+def diff(config, files, metrics, changes_only=True):
     """
     Show the differences in metrics for each of the files.
 
