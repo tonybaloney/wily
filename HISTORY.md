@@ -1,10 +1,14 @@
 # Release History
 
-## 1.4.0 (master)
+## 1.4.0 (16th November 2018)
 
 * Support for cyclomatic complexity of methods, funtions and classes
 * Extend the report and graph command line to support querying of methods, classes and functions within a file
 * Sort the index before storing by date (descending) incase the order changes for git commits
+* Diff will only show files with changed metrics by default
+* Extend the diff command to have an --all flag to show all changes
+* Diff command now supports granular metrics \o/
+* Added lines-of-code metric to the granular metrics
 
 ## 1.3.0 (14th November 2018)
 
