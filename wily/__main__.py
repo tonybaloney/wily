@@ -169,8 +169,16 @@ def report(ctx, file, metrics, number, message):
     default=None,
     help="comma-seperated list of metrics, see list-metrics for choices",
 )
-@click.option("--all/--changes-only", default=False, help="Show all files, instead of changes only")
-@click.option("--detail/--no-detail", default=True, help="Show function/class level metrics where available")
+@click.option(
+    "--all/--changes-only",
+    default=False,
+    help="Show all files, instead of changes only",
+)
+@click.option(
+    "--detail/--no-detail",
+    default=True,
+    help="Show function/class level metrics where available",
+)
 @click.pass_context
 def diff(ctx, files, metrics, all, detail):
     """Show the differences in metrics for each file."""
@@ -190,7 +198,9 @@ def diff(ctx, files, metrics, all, detail):
     from wily.commands.diff import diff
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
-    diff(config=config, files=files, metrics=metrics, changes_only=not all, detail=detail)
+    diff(
+        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+    )
 
 
 @cli.command()

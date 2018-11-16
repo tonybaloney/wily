@@ -15,13 +15,13 @@ Metric = namedtuple("Metric", "name description type measure")
 GOOD_COLORS = {
     MetricType.AimHigh: 32,
     MetricType.AimLow: 31,
-    MetricType.Informational:33
+    MetricType.Informational: 33,
 }
 
 BAD_COLORS = {
     MetricType.AimHigh: 31,
     MetricType.AimLow: 32,
-    MetricType.Informational:33
+    MetricType.Informational: 33,
 }
 
 
