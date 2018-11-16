@@ -1,5 +1,4 @@
 import wily.__main__ as main
-import wily.cache
 from mock import patch
 from textwrap import dedent
 from click.testing import CliRunner
@@ -13,13 +12,14 @@ def builddir(tmpdir):
     """ Create a project and build it """
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir)
-
+    testpath = tmppath / "src" / "test.py"
+    (tmppath / "src").mkdir()
     # Write a test file to the repo
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(testpath, "w") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
-    index.add(["test.py"])
+    index.add([str(testpath)])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
@@ -36,10 +36,10 @@ def builddir(tmpdir):
         def method(self):
             b = 1 + 5
     """
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(testpath, "w") as test_txt:
         test_txt.write(dedent(first_test))
 
-    index.add(["test.py"])
+    index.add([str(testpath)])
     index.commit("add line", author=author, committer=committer)
 
     second_test = """
@@ -54,19 +54,21 @@ def builddir(tmpdir):
                 return 'banana'
     """
 
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(testpath, "w") as test_txt:
         test_txt.write(dedent(second_test))
 
     with open(tmppath / ".gitignore", "w") as test_txt:
         test_txt.write(".wily/")
 
-    index.add(["test.py", ".gitignore"])
+    index.add([str(testpath), ".gitignore"])
     index.commit("remove line", author=author, committer=committer)
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", str(tmpdir)]
+        main.cli, ["--debug", "--path", tmpdir, "build", str(tmppath / "src")]
     )
+    assert result.exit_code == 0, result.stdout
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "index"])
     assert result.exit_code == 0, result.stdout
 
     return tmpdir
@@ -215,7 +217,14 @@ def test_report(builddir):
         runner = CliRunner()
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "report", "test.py", "--metrics", "raw.multi"],
+            [
+                "--path",
+                builddir,
+                "report",
+                "src/test.py",
+                "--metrics",
+                "raw.multi,maintainability.rank",
+            ],
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
@@ -233,7 +242,7 @@ def test_report_granular(builddir):
                 "--path",
                 builddir,
                 "report",
-                "test.py:function1",
+                "src/test.py:function1",
                 "--metrics",
                 "cyclomatic.complexity",
                 "-n",
@@ -251,7 +260,8 @@ def test_report_not_found(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "report", "test1.py", "--metrics", "raw.loc"]
+            main.cli,
+            ["--path", builddir, "report", "src/test1.py", "--metrics", "raw.loc"],
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" in result.stdout
@@ -263,7 +273,7 @@ def test_report_default_metrics(builddir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "report", "test.py"])
+        result = runner.invoke(main.cli, ["--path", builddir, "report", "src/test.py"])
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
 
@@ -280,7 +290,7 @@ def test_report_with_message(builddir):
                 "--path",
                 builddir,
                 "report",
-                "test.py",
+                "src/test.py",
                 "--metrics",
                 "raw.multi",
                 "--message",
@@ -300,7 +310,7 @@ def test_report_high_metric(builddir):
         runner = CliRunner()
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "report", "test.py", "--metrics", "raw.comments"],
+            ["--path", builddir, "report", "src/test.py", "--metrics", "raw.comments"],
         )
         assert result.exit_code == 0, result.stdout
         assert "Not found" not in result.stdout
@@ -318,7 +328,7 @@ def test_report_low_metric(builddir):
                 "--path",
                 builddir,
                 "report",
-                "test.py",
+                "src/test.py",
                 "--metrics",
                 "maintainability.mi",
             ],
@@ -372,7 +382,7 @@ def test_graph(builddir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "test.py", "raw.loc"]
+            main.cli, ["--path", builddir, "graph", "src/test.py", "raw.loc"]
         )
         assert result.exit_code == 0, result.stdout
 
@@ -383,64 +393,157 @@ def test_graph_multiple(builddir):
         runner = CliRunner()
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", "test.py", "raw.loc", "raw.comments"],
+            ["--path", builddir, "graph", "src/test.py", "raw.loc", "raw.comments"],
         )
         assert result.exit_code == 0, result.stdout
 
 
 def test_graph_output(builddir):
     """ Test the graph feature with target output file """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "graph", "test.py", "raw.loc", "-o", "test.html"],
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        [
+            "--debug",
+            "--path",
+            builddir,
+            "graph",
+            "src/test.py",
+            "raw.loc",
+            "-o",
+            "test.html",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_graph_output_granular(builddir):
     """ Test the graph feature with target output file """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli,
-            [
-                "--path",
-                builddir,
-                "graph",
-                "test.py:function1",
-                "cyclomatic.complexity",
-                "-o",
-                "test_granular.html",
-            ],
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        [
+            "--debug",
+            "--path",
+            builddir,
+            "graph",
+            "src/test.py:function1",
+            "cyclomatic.complexity",
+            "-o",
+            "test_granular.html",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_diff_output(builddir):
-    """ Test the diff feature """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", builddir, "diff", "test.py"])
-        assert result.exit_code == 0, result.stdout
+    """ Test the diff feature with no changes """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "test.py" not in result.stdout
 
 
-def test_diff_output_metrics(builddir):
-    """ Test the diff feature with specific metrics """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "diff", "test.py", "--metrics", "raw.loc"]
-        )
-        assert result.exit_code == 0, result.stdout
+def test_diff_output_all(builddir):
+    """ Test the diff feature with no changes and the --all flag """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "test.py" in result.stdout
+
+
+def test_diff_output_bad_path(builddir):
+    """ Test the diff feature with no changes """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", builddir, "diff", "src/baz.py"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "test.py" not in result.stdout
+
+
+def test_diff_output_remove_all(builddir):
+    """ Test the diff feature by removing all functions and classes """
+
+    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+        test_py.write("print(1)")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+    )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_diff_output_more_complex(builddir):
+    """ Test the diff feature by making the test file more complicated """
+
+    complex_test = """
+            import abc
+            foo = 1
+            def function1():
+                a = 1 + 1
+                if a == 2:
+                    print(1)
+            class Class1(object):
+                def method(self):
+                    b = 1 + 5
+                    if b == 6:
+                        if 1==2:
+                           if 2==3:
+                              print(1)
+            """
+
+    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+        test_py.write(dedent(complex_test))
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "test.py" in result.stdout
+    assert "- -> -" not in result.stdout
+    assert "-> -" not in result.stdout
+    assert "- ->" not in result.stdout
+
+
+def test_diff_output_less_complex(builddir):
+    """ Test the diff feature by making the test file more complicated """
+
+    simple_test = """
+            import abc
+            foo = 1
+            def function1():
+                pass
+            class Class1(object):
+                def method(self):
+                    pass
+            """
+
+    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+        test_py.write(dedent(simple_test))
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "test.py" in result.stdout
+    assert "- -> -" not in result.stdout
+    assert "-> -" not in result.stdout
+    assert "- ->" not in result.stdout
 
 
 def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "src/test.py"])
         assert result.exit_code == 1, result.stdout
 
 
@@ -454,7 +557,7 @@ def test_index_no_cache(tmpdir):
 def test_report_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "report", "test.py"])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "report", "src/test.py"])
         assert result.exit_code == 1, result.stdout
 
 
@@ -462,7 +565,7 @@ def test_graph_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", tmpdir, "graph", "test.py", "raw.loc"]
+            main.cli, ["--path", tmpdir, "graph", "src/test.py", "raw.loc"]
         )
         assert result.exit_code == 1, result.stdout
 

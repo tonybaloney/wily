@@ -3,6 +3,7 @@ Compares metrics between uncommitted files and indexed files
 """
 import tabulate
 
+import os
 import wily.cache as cache
 from wily import logger
 from wily.config import DEFAULT_GRID_STYLE
@@ -43,10 +44,12 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     # Build a set of operators
     _operators = [operator.cls(config) for operator in operators]
 
+    cwd = os.getcwd()
+    os.chdir(config.path)
     for operator in _operators:
         logger.debug(f"Running {operator.name} operator")
         data[operator.name] = operator.run(None, config)
-
+    os.chdir(cwd)
     # Write a summary table..
     last_entry = cache.get(config, archiver, last_revision["revision"])
     extra = []
@@ -63,6 +66,8 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                     )
                 except KeyError:
                     logger.debug(f"File {file} not in cache")
+                    logger.debug("Cache follows -- ")
+                    logger.debug(data[operator])
     files.extend(extra)
     logger.debug(files)
     for file in files:
@@ -98,7 +103,10 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                     else:
                         metrics_data.append("{0:n} -> {1:n}".format(current, new))
                 else:
-                    metrics_data.append("{0} -> {1}".format(current, new))
+                    if current == "-" and new == "-":
+                        metrics_data.append("-")
+                    else:
+                        metrics_data.append("{0} -> {1}".format(current, new))
             if has_changes or not changes_only:
                 results.append((file, *metrics_data))
             else:

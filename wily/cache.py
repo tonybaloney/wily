@@ -14,7 +14,7 @@ import os.path
 import json
 from wily.archivers import ALL_ARCHIVERS
 from wily.operators import resolve_operator
-from wily import logger
+from wily import logger, __version__
 
 
 def exists(config):
@@ -48,6 +48,10 @@ def create(config):
         return config.cache_path
     logger.debug(f"Creating wily cache {config.cache_path}")
     pathlib.Path(config.cache_path).mkdir()
+    filename = pathlib.Path(config.cache_path) / "index.json"
+    index = {"version": __version__}
+    with open(filename, "w") as out:
+        out.write(json.dumps(index, indent=2))
     return config.cache_path
 
 

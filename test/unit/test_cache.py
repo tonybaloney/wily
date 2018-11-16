@@ -25,15 +25,20 @@ def test_not_exists():
     assert not cache.exists(config)
 
 
-def test_get_default_metrics_empty():
+def test_get_default_metrics_empty(tmpdir):
     """ 
     Test that get_metrics goes ok with an empty index
     """
     config = DEFAULT_CONFIG
-    with patch("wily.cache.get_index", return_value=[]) as get_index:
-        metrics = cache.get_default_metrics(config)
-        assert metrics == []
-        assert get_index.called_once
+    tmppath = pathlib.Path(tmpdir) / ".wily"
+    config.cache_path = str(tmppath)
+    tmppath.mkdir()
+    (tmppath / "git").mkdir()
+    with open(tmppath / "git" / "index.json", "w+") as f:
+        f.write("[]")
+
+    metrics = cache.get_default_metrics(config)
+    assert metrics == []
 
 
 def test_create_and_delete(tmpdir):

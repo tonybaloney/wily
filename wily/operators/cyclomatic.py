@@ -3,7 +3,6 @@ Cyclomatic complexity metric for each function/method
 
 Provided by the radon library
 
-TODO : Figure out how to deal with the list metrics for functions?
 """
 
 import radon.cli.harvest as harvesters
@@ -41,7 +40,6 @@ class CyclomaticComplexityOperator(BaseOperator):
     def run(self, module, options):
         logger.debug("Running CC harvester")
         results = {}
-        totals = {}
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {}
             total = 0  # running CC total

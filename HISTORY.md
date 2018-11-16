@@ -1,5 +1,9 @@
 # Release History
 
+## 1.5.0 (beta)
+
+* Introduce index versioning
+
 ## 1.4.0 (16th November 2018)
 
 * Support for cyclomatic complexity of methods, funtions and classes

@@ -2,9 +2,6 @@
 
 """
 Main command line
-
-TODO : Skip-ignore-check should be a flag not a value option
-
 """
 
 import os.path
@@ -82,13 +79,12 @@ def cli(ctx, debug, config, path):
     help="List of operators, separated by commas",
 )
 @click.option(
-    "--skip-ignore-check",
-    type=click.BOOL,
+    "--skip-gitignore-check/--gitignore-check",
     default=False,
     help="Skip checking of .gitignore for '.wily/'",
 )
 @click.pass_context
-def build(ctx, max_revisions, targets, operators, skip_ignore_check):
+def build(ctx, max_revisions, targets, operators, skip_gitignore_check):
     """Build the wily cache"""
     config = ctx.obj["CONFIG"]
 
@@ -102,7 +98,7 @@ def build(ctx, max_revisions, targets, operators, skip_ignore_check):
         logger.debug(f"Fixing operators to {operators}")
         config.operators = operators.strip().split(",")
 
-    config.skip_ignore_check = skip_ignore_check
+    config.skip_ignore_check = skip_gitignore_check
     logger.debug(f"Fixing targets to {targets}")
     config.targets = targets
 
