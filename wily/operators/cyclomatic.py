@@ -67,6 +67,7 @@ class CyclomaticComplexityOperator(BaseOperator):
             "closures": l.closures,
             "complexity": l.complexity,
             "fullname": l.fullname,
+            "loc": l.endline - l.lineno
         }
 
     @staticmethod
@@ -77,4 +78,5 @@ class CyclomaticComplexityOperator(BaseOperator):
             "real_complexity": l.real_complexity,
             "complexity": l.complexity,
             "fullname": l.fullname,
+            "loc": l.endline - l.lineno
         }

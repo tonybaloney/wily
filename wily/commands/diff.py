@@ -1,22 +1,26 @@
 """
 Compares metrics between uncommitted files and indexed files
 """
-from wily import logger
-import wily.cache as cache
-from wily.config import DEFAULT_GRID_STYLE
-from wily.operators import resolve_metric, resolve_operator, get_metric
 import tabulate
 
+import wily.cache as cache
+from wily import logger
+from wily.config import DEFAULT_GRID_STYLE
+from wily.operators import resolve_metric, resolve_operator, get_metric, GOOD_COLORS, BAD_COLORS, OperatorLevel
 
-def diff(config, files, metrics, changes_only=True):
+
+def diff(config, files, metrics, changes_only=True, detail=True):
     """
     Show the differences in metrics for each of the files.
 
     :param config: The wily configuration
     :type  config: :namedtuple:`wily.config.WilyConfig`
+
+
     """
     archiver = config.archiver
     config.targets = files
+    files = list(files)
     if cache.has_index(config, archiver):
         index = cache.get_index(config, archiver)
         last_revision = index[0]
@@ -38,19 +42,39 @@ def diff(config, files, metrics, changes_only=True):
 
     # Write a summary table..
     last_entry = cache.get(config, archiver, last_revision["revision"])
-
+    extra = []
+    for operator, metric in metrics:
+        if detail and resolve_operator(operator).level == OperatorLevel.Object:
+            for file in files:
+                extra.extend([f"{file}:{k}" for k in data[operator][file].keys() if k != metric.name])
+    files.extend(extra)
+    logger.debug(files)
     for file in files:
         try:
             metrics_data = []
             has_changes = False
             for operator, metric in metrics:
-                current = get_metric(
-                    last_entry["operator_data"], operator, file, metric.name
-                )
-                new = data[operator][file][metric.name]
+                try:
+                    current = get_metric(
+                        last_entry["operator_data"], operator, file, metric.name
+                    )
+                except KeyError:
+                    current = "-"
+                try:
+                    new = get_metric(data, operator, file, metric.name)
+                except KeyError:
+                    new = "-"
                 if new != current:
                     has_changes = True
-                metrics_data.append("{0:n} -> {1:n}".format(current, new))
+                if metric.type in (int, float) and new != "-" and current != "-":
+                    if current > new:
+                        metrics_data.append("{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(current, new, BAD_COLORS[metric.measure]))
+                    elif current < new:
+                        metrics_data.append("{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(current, new, GOOD_COLORS[metric.measure]))
+                    else:
+                        metrics_data.append("{0:n} -> {1:n}".format(current, new))
+                else:
+                    metrics_data.append("{0} -> {1}".format(current, new))
             if has_changes or not changes_only:
                 results.append((file, *metrics_data))
             else:
