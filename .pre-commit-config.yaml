@@ -4,3 +4,11 @@ repos:
     hooks:
     - id: black
       language_version: python3.7
+-   repo: local
+    hooks:
+    -   id: wily
+        name: wily
+        entry: wily diff
+        verbose: true
+        language: python
+        additional_dependencies: [wily]
