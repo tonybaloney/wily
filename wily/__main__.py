@@ -256,5 +256,27 @@ def list_metrics(ctx):
     list_metrics()
 
 
+@cli.command("setup")
+@click.option(
+    "--target", prompt="Path to your source files; comma-seperated for multiple"
+)
+@click.option(
+    "--revisions",
+    prompt="How many git revisions do you want to index?",
+    default=50,
+    type=click.INT,
+)
+@click.pass_context
+def setup(ctx, target, revisions):
+    paths = target.split(",")
+    ctx.invoke(
+        build,
+        max_revisions=revisions,
+        targets=paths,
+        operators=None,
+        skip_gitignore_check=False,
+    )
+
+
 if __name__ == "__main__":
     cli()
