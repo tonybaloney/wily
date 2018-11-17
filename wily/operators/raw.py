@@ -22,7 +22,9 @@ class RawMetricsOperator(BaseOperator):
 
     def __init__(self, config):
         # TODO: Use config from wily.cfg for harvester
-        logger.debug(f"Using {config.targets} with {self.defaults} for Raw metrics")
+        logger.debug(
+            "Using {0} with {1} for Raw metrics".format(config.targets, self.defaults)
+        )
         self.harvester = harvesters.RawHarvester(
             config.targets, config=Config(**self.defaults)
         )

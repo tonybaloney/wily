@@ -27,7 +27,7 @@ def report(config, path, metrics, n, include_message=False):
     """
     logger.debug("Running report command")
 
-    logger.info(f"-----------History for {metrics}------------")
+    logger.info("-----------History for {0}------------".format(metrics))
 
     data = []
     last = None
@@ -68,7 +68,9 @@ def report(config, path, metrics, n, include_message=False):
             for meta in metric_metas:
                 try:
                     logger.debug(
-                        f"Fetching metric {meta['key']} for {meta['operator']} in {path}"
+                        "Fetching metric {0} for {1} in {2}".format(
+                            meta["key"], meta["operator"], path
+                        )
                     )
                     val = get_metric(
                         revision_entry["operator_data"],
@@ -92,14 +94,18 @@ def report(config, path, metrics, n, include_message=False):
                     if delta == 0:
                         delta_col = delta
                     elif delta < 0:
-                        delta_col = f"\u001b[{meta['good_color']}m{delta:n}\u001b[0m"
+                        delta_col = "\u001b[{0}m{1:n}\u001b[0m".format(
+                            meta["good_color"], delta
+                        )
                     else:
-                        delta_col = f"\u001b[{meta['bad_color']}m+{delta:n}\u001b[0m"
+                        delta_col = "\u001b[{0}m+{1:n}\u001b[0m".format(
+                            meta["bad_color"], delta
+                        )
 
                     if meta["type"] in (int, float):
-                        k = f"{val:n} ({delta_col})"
+                        k = "{0:n} ({1})".format(val, delta_col)
                     else:
-                        k = f"{val}"
+                        k = str(val)
                 except KeyError:
                     k = "Not found"
                 vals.append(k)

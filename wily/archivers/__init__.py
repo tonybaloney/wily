@@ -1,5 +1,5 @@
 from collections import namedtuple
-from dataclasses import dataclass
+from attr import attrs, attrib
 
 
 class BaseArchiver(object):
@@ -31,13 +31,13 @@ class BaseArchiver(object):
         raise NotImplementedError()
 
 
-@dataclass
+@attrs
 class Revision:
-    key: str
-    author_name: str
-    author_email: str
-    revision_date: str
-    message: str
+    key = attrib()
+    author_name = attrib()
+    author_email = attrib()
+    revision_date = attrib()
+    message = attrib()
 
 
 from wily.archivers.git import GitArchiver
@@ -63,6 +63,6 @@ def resolve_archiver(name):
     """
     r = [archiver for archiver in ALL_ARCHIVERS if archiver.name == name.lower()]
     if not r:
-        raise ValueError(f"Resolver {name} not recognised.")
+        raise ValueError("Resolver {0} not recognised.".format(name))
     else:
         return r[0]

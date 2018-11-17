@@ -11,7 +11,7 @@ import tabulate
 
 def list_metrics():
     for operator in ALL_OPERATORS:
-        print(f"{operator.name} operator:")
+        print("{0} operator:".format(operator.name))
         if len(operator.cls.metrics) > 0:
             print(
                 tabulate.tabulate(

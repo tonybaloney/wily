@@ -95,7 +95,7 @@ def resolve_operator(name):
     """
     r = [operator for operator in ALL_OPERATORS if operator.name == name.lower()]
     if not r:
-        raise ValueError(f"Operator {name} not recognised.")
+        raise ValueError("Operator {0} not recognised.".format(name))
     else:
         return r[0]
 

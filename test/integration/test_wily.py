@@ -8,14 +8,13 @@ import pytest
 
 
 @pytest.fixture
-def builddir(tmpdir):
+def builddir(tmp_path):
     """ Create a project and build it """
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
-    testpath = tmppath / "src" / "test.py"
-    (tmppath / "src").mkdir()
+    repo = Repo.init(path=tmp_path)
+    testpath = tmp_path / "src" / "test.py"
+    (tmp_path / "src").mkdir()
     # Write a test file to the repo
-    with open(testpath, "w") as test_txt:
+    with open(str(testpath), "w") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
@@ -36,7 +35,7 @@ def builddir(tmpdir):
         def method(self):
             b = 1 + 5
     """
-    with open(testpath, "w") as test_txt:
+    with open(str(testpath), "w") as test_txt:
         test_txt.write(dedent(first_test))
 
     index.add([str(testpath)])
@@ -54,10 +53,10 @@ def builddir(tmpdir):
                 return 'banana'
     """
 
-    with open(testpath, "w") as test_txt:
+    with open(str(testpath), "w") as test_txt:
         test_txt.write(dedent(second_test))
 
-    with open(tmppath / ".gitignore", "w") as test_txt:
+    with open(str(tmp_path / ".gitignore"), "w") as test_txt:
         test_txt.write(".wily/")
 
     index.add([str(testpath), ".gitignore"])
@@ -65,26 +64,26 @@ def builddir(tmpdir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", str(tmppath / "src")]
+        main.cli, ["--debug", "--path", tmp_path, "build", str(tmppath / "src")]
     )
     assert result.exit_code == 0, result.stdout
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "index"])
+    result = runner.invoke(main.cli, ["--debug", "--path", tmp_path, "index"])
     assert result.exit_code == 0, result.stdout
 
-    return tmpdir
+    return tmp_path
 
 
-def test_build_not_git_repo(tmpdir):
+def test_build_not_git_repo(tmp_path):
     """
     Test that build fails in a non-git directory
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "build", "test.py"])
         assert result.exit_code == 1, result.stdout
 
 
-def test_build_invalid_path(tmpdir):
+def test_build_invalid_path(tmp_path):
     """
     Test that build fails with a garbage path
     """
@@ -94,12 +93,12 @@ def test_build_invalid_path(tmpdir):
         assert result.exit_code == 1, result.stdout
 
 
-def test_build(tmpdir):
+def test_build(tmp_path):
     """
     Test that build works in a basic repository.
     """
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
+    repo = Repo.init(path=tmp_path)
+    tmppath = pathlib.Path(tmp_path)
 
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
@@ -119,24 +118,24 @@ def test_build(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
+            main.cli, ["--debug", "--path", tmp_path, "build", "test.py"]
         )
         assert result.exit_code == 0, result.stdout
 
-    cache_path = tmpdir / ".wily"
+    cache_path = tmp_path / ".wily"
     assert cache_path.exists()
-    index_path = tmpdir / ".wily" / "git" / "index.json"
+    index_path = tmp_path / ".wily" / "git" / "index.json"
     assert index_path.exists()
-    rev_path = tmpdir / ".wily" / "git" / commit.name_rev.split(" ")[0] + ".json"
+    rev_path = tmp_path / ".wily" / "git" / commit.name_rev.split(" ")[0] + ".json"
     assert rev_path.exists()
 
 
-def test_build_twice(tmpdir):
+def test_build_twice(tmp_path):
     """
     Test that build works when run twice.
     """
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
+    repo = Repo.init(path=tmp_path)
+    tmppath = pathlib.Path(tmp_path)
 
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
@@ -152,14 +151,16 @@ def test_build_twice(tmpdir):
     commit = index.commit("basic test", author=author, committer=committer)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", "test.py"])
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", tmp_path, "build", "test.py"]
+    )
     assert result.exit_code == 0, result.stdout
 
-    cache_path = tmpdir / ".wily"
+    cache_path = tmp_path / ".wily"
     assert cache_path.exists()
-    index_path = tmpdir / ".wily" / "git" / "index.json"
+    index_path = tmp_path / ".wily" / "git" / "index.json"
     assert index_path.exists()
-    rev_path = tmpdir / ".wily" / "git" / commit.name_rev.split(" ")[0] + ".json"
+    rev_path = tmp_path / ".wily" / "git" / commit.name_rev.split(" ")[0] + ".json"
     assert rev_path.exists()
 
     # Write a test file to the repo
@@ -170,28 +171,31 @@ def test_build_twice(tmpdir):
 
     commit2 = index.commit("basic test", author=author, committer=committer)
 
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", "test.py"])
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", tmp_path, "build", "test.py"]
+    )
     assert result.exit_code == 0, result.stdout
 
-    cache_path = tmpdir / ".wily"
+    cache_path = tmp_path / ".wily"
     assert cache_path.exists()
-    index_path = tmpdir / ".wily" / "git" / "index.json"
+    index_path = tmp_path / ".wily" / "git" / "index.json"
     assert index_path.exists()
-    rev_path = tmpdir / ".wily" / "git" / commit.name_rev.split(" ")[0] + ".json"
+    rev_path = tmp_path / ".wily" / "git" / commit.name_rev.split(" ")[0] + ".json"
     assert rev_path.exists()
-    rev_path2 = tmpdir / ".wily" / "git" / commit2.name_rev.split(" ")[0] + ".json"
+    rev_path2 = tmp_path / ".wily" / "git" / commit2.name_rev.split(" ")[0] + ".json"
     assert rev_path2.exists()
 
 
-def test_build_no_commits(tmpdir):
+def test_build_no_commits(tmp_path):
     """
     Test that build fails cleanly with no commits
     """
-    repo = Repo.init(path=tmpdir)
+    repo = Repo.init(path=tmp_path)
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", tmpdir, "--skip-ignore-check"]
+        main.cli,
+        ["--debug", "--path", tmp_path, "build", tmp_path, "--skip-ignore-check"],
     )
     assert result.exit_code == 1, result.stdout
 
@@ -539,53 +543,53 @@ def test_diff_output_less_complex(builddir):
     assert "- ->" not in result.stdout
 
 
-def test_build_no_git_history(tmpdir):
-    repo = Repo.init(path=tmpdir)
+def test_build_no_git_history(tmp_path):
+    repo = Repo.init(path=tmp_path)
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "src/test.py"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "build", "src/test.py"])
         assert result.exit_code == 1, result.stdout
 
 
-def test_index_no_cache(tmpdir):
+def test_index_no_cache(tmp_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "index"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "index"])
         assert result.exit_code == 1, result.stdout
 
 
-def test_report_no_cache(tmpdir):
+def test_report_no_cache(tmp_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "report", "src/test.py"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "report", "src/test.py"])
         assert result.exit_code == 1, result.stdout
 
 
-def test_graph_no_cache(tmpdir):
+def test_graph_no_cache(tmp_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", tmpdir, "graph", "src/test.py", "raw.loc"]
+            main.cli, ["--path", tmp_path, "graph", "src/test.py", "raw.loc"]
         )
         assert result.exit_code == 1, result.stdout
 
 
-def test_clean_no_cache(tmpdir):
+def test_clean_no_cache(tmp_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "clean"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "clean"])
         assert result.exit_code == 1, result.stdout
 
 
-def test_list_metrics_no_cache(tmpdir):
+def test_list_metrics_no_cache(tmp_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "list-metrics"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "list-metrics"])
         assert result.exit_code == 1, result.stdout
 
 
-def test_diff_no_cache(tmpdir):
+def test_diff_no_cache(tmp_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "diff"])
+        result = runner.invoke(main.cli, ["--path", tmp_path, "diff"])
         assert result.exit_code == 1, result.stdout

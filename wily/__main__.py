@@ -57,10 +57,10 @@ def cli(ctx, debug, config, path):
 
     ctx.obj["CONFIG"] = load_config(config)
     if path:
-        logger.debug(f"Fixing path to {path}")
+        logger.debug("Fixing path to {0}".format(path))
         ctx.obj["CONFIG"].path = path
         ctx.obj["CONFIG"].cache_path = os.path.join(path, DEFAULT_CACHE_PATH)
-    logger.debug(f"Loaded configuration from {config}")
+    logger.debug("Loaded configuration from {0}".format(config))
 
 
 @cli.command()
@@ -91,15 +91,15 @@ def build(ctx, max_revisions, targets, operators, skip_gitignore_check):
     from wily.commands.build import build
 
     if max_revisions:
-        logger.debug(f"Fixing revisions to {max_revisions}")
+        logger.debug("Fixing revisions to {0}".format(max_revisions))
         config.max_revisions = max_revisions
 
     if operators:
-        logger.debug(f"Fixing operators to {operators}")
+        logger.debug("Fixing operators to {0}".format(operators))
         config.operators = operators.strip().split(",")
 
     config.skip_ignore_check = skip_gitignore_check
-    logger.debug(f"Fixing targets to {targets}")
+    logger.debug("Fixing targets to {0}".format(targets))
     config.targets = targets
 
     build(
@@ -120,7 +120,7 @@ def index(ctx, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build` first.")
+        logger.error("Could not locate wily cache. Run `wily build` first.")
         exit(1)
 
     from wily.commands.index import index
@@ -143,18 +143,18 @@ def report(ctx, file, metrics, number, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
+        logger.error("Could not locate wily cache. Run `wily build <target>` first.")
         exit(1)
 
     if not metrics:
         metrics = get_default_metrics(config)
-        logger.info(f"Using default metrics {metrics}")
+        logger.info("Using default metrics {0}".format(metrics))
     else:
         metrics = metrics.split(",")
 
     from wily.commands.report import report
 
-    logger.debug(f"Running report on {file} for metric {metrics}")
+    logger.debug("Running report on {0} for metric {1}".format(file, metrics))
     report(config=config, path=file, metrics=metrics, n=number, include_message=message)
 
 
@@ -181,19 +181,19 @@ def diff(ctx, files, metrics, all, detail):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
+        logger.error("Could not locate wily cache. Run `wily build <target>` first.")
         exit(1)
 
     if not metrics:
         metrics = get_default_metrics(config)
-        logger.info(f"Using default metrics {metrics}")
+        logger.info("Using default metrics {0}".format(metrics))
     else:
         metrics = metrics.split(",")
-        logger.info(f"Using specified metrics {metrics}")
+        logger.info("Using specified metrics {0}".format(metrics))
 
     from wily.commands.diff import diff
 
-    logger.debug(f"Running diff on {files} for metric {metrics}")
+    logger.debug("Running diff on {0} for metric {1}".format(files, metrics))
     diff(
         config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
     )
@@ -211,12 +211,12 @@ def graph(ctx, files, metrics, output):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
+        logger.error("Could not locate wily cache. Run `wily build <target>` first.")
         exit(1)
 
     from wily.commands.graph import graph
 
-    logger.debug(f"Running report on {files} for metrics {metrics}")
+    logger.debug("Running report on {0} for metrics {1}".format(files, metrics))
     graph(config=config, paths=[files], metrics=metrics, output=output)
 
 
@@ -228,7 +228,7 @@ def clean(ctx, yes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache.")
+        logger.error("Could not locate wily cache.")
         exit(1)
 
     if not yes:
@@ -248,7 +248,7 @@ def list_metrics(ctx):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache.")
+        logger.error("Could not locate wily cache.")
         exit(1)
 
     from wily.commands.list_metrics import list_metrics

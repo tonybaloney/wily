@@ -47,7 +47,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     cwd = os.getcwd()
     os.chdir(config.path)
     for operator in _operators:
-        logger.debug(f"Running {operator.name} operator")
+        logger.debug("Running {0} operator".format(operator.name))
         data[operator.name] = operator.run(None, config)
     os.chdir(cwd)
     # Write a summary table..
@@ -59,13 +59,13 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                 try:
                     extra.extend(
                         [
-                            f"{file}:{k}"
+                            "{0}:{1}".format(file, k)
                             for k in data[operator][file].keys()
                             if k != metric.name
                         ]
                     )
                 except KeyError:
-                    logger.debug(f"File {file} not in cache")
+                    logger.debug("File {0} not in cache".format(file))
                     logger.debug("Cache follows -- ")
                     logger.debug(data[operator])
     files.extend(extra)
@@ -112,8 +112,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
             else:
                 logger.debug(metrics_data)
         except KeyError as e:
-            logger.debug(f"Could not find {e}")
-            pass
+            logger.debug("Could not find {0}".format(e))
 
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)

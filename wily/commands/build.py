@@ -29,11 +29,11 @@ def build(config, archiver, operators):
         cache.create(config)
         logger.debug("Created wily cache")
     try:
-        logger.debug(f"Using {archiver.name} archiver module")
+        logger.debug("Using {0} archiver module.".format(archiver.name))
         archiver = archiver.cls(config)
         revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
-        logger.error(f"Failed to setup archiver: '{e.message}'")
+        logger.error("Failed to setup archiver: '{0}'".format(e.message))
         exit(1)
 
     if cache.has_index(config, archiver.name):
@@ -48,11 +48,13 @@ def build(config, archiver, operators):
         index = []
 
     logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
+        "Found {0} revisions from '{1}' archiver in '{2}'.".format(
+            len(revisions), archiver.name, config.path
+        )
     )
 
     _op_desc = ",".join([operator.name for operator in operators])
-    logger.info(f"Running operators - {_op_desc}")
+    logger.info("Running operators - {0}".format(_op_desc))
 
     bar = Bar("Processing", max=len(revisions) * len(operators))
     try:
@@ -73,7 +75,9 @@ def build(config, archiver, operators):
             stats = stats_header.copy()
             stats["operator_data"] = {}
             for operator in _operators:
-                logger.debug(f"Running {operator.name} operator on {revision.key}")
+                logger.debug(
+                    "Running {0} operator on {1}".format(operator.name, revision.key)
+                )
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
             index.append(stats_header)
@@ -81,7 +85,7 @@ def build(config, archiver, operators):
         cache.store_index(config, archiver, index)
         bar.finish()
     except Exception as e:
-        logger.error(f"Failed to build cache: '{e}'")
+        logger.error("Failed to build cache: '{0}'".format(e))
     finally:
         # Reset the archive after every run back to the head of the branch
         archiver.finish()

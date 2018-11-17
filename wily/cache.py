@@ -46,7 +46,7 @@ def create(config):
     if exists(config):
         logger.debug("Wily cache exists, skipping")
         return config.cache_path
-    logger.debug(f"Creating wily cache {config.cache_path}")
+    logger.debug("Creating wily cache {0}".format(config.cache_path))
     pathlib.Path(config.cache_path).mkdir()
     filename = pathlib.Path(config.cache_path) / "index.json"
     index = {"version": __version__}
@@ -109,10 +109,12 @@ def store(config, archiver, revision, stats):
                 del stats["operator_data"][operator]
                 stats["operator_data"][operator] = new_operator_data
 
-    logger.debug(f"Creating {revision.key} output")
+    logger.debug("Creating {0} output".format(revision.key))
     filename = root / (revision.key + ".json")
     if filename.exists():
-        raise RuntimeError(f"File {filename} already exists, index may be corrupt.")
+        raise RuntimeError(
+            "File {0} already exists, index may be corrupt.".format(filename)
+        )
     with open(filename, "w") as out:
         out.write(json.dumps(stats, indent=2))
     return filename
@@ -144,7 +146,7 @@ def store_index(config, archiver, index):
     filename = root / "index.json"
     with open(filename, "w") as out:
         out.write(json.dumps(index, indent=2))
-    logger.debug(f"Created index output")
+    logger.debug("Created index output.")
     return filename
 
 
@@ -249,6 +251,6 @@ def get(config, archiver, revision):
     """
     root = pathlib.Path(config.cache_path) / archiver
     # TODO : string escaping!!!
-    with (root / f"{revision}.json").open("r") as rev_f:
+    with (root / "{0}.json".format(revision)).open("r") as rev_f:
         index = json.load(rev_f)
     return index

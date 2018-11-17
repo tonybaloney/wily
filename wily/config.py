@@ -9,8 +9,7 @@ TODO : Better utilise default values and factory in @dataclass to replace DEFAUL
 import configparser
 import pathlib
 import logging
-from dataclasses import dataclass, field
-from typing import Any, List
+from attr import attrs, attrib
 
 import wily.operators as operators
 from wily.archivers import ARCHIVER_GIT
@@ -21,21 +20,21 @@ logger = logging.getLogger(__name__)
 DEFAULT_CACHE_PATH = ".wily"
 
 
-@dataclass
+@attrs
 class WilyConfig(object):
     """
     A data class to reflect the configurable options
     within Wily.
     """
 
-    operators: List
-    archiver: Any
-    path: str
-    max_revisions: int
-    skip_ignore_check: bool = False
-    cache_path: str = DEFAULT_CACHE_PATH
-    targets: List[str] = None
-    checkout_options: dict = field(default_factory=dict)
+    operators = attrib()
+    archiver = attrib()
+    path = attrib()
+    max_revisions = attrib()
+    skip_ignore_check = attrib(default=False)
+    cache_path = attrib(default=DEFAULT_CACHE_PATH)
+    targets = attrib(default=None)
+    checkout_options = attrib(default={})
 
     def __post_init__(self):
         # Clone targets as a list of path
@@ -87,7 +86,7 @@ def load(config_path=DEFAULT_CONFIG_PATH):
     """
 
     if not pathlib.Path(config_path).exists():
-        logger.debug(f"Could not locate {config_path}, using default config.")
+        logger.debug("Could not locate {0}, using default config.".format(config_path))
         return DEFAULT_CONFIG
 
     config = configparser.ConfigParser(default_section=DEFAULT_CONFIG_SECTION)

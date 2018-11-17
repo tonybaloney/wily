@@ -18,9 +18,9 @@ def index(config, include_message=False):
     """
     logger.debug("Running show command")
     logger.info("--------Configuration---------")
-    logger.info(f"Path: {config.path}")
-    logger.info(f"Archiver: {config.archiver}")
-    logger.info(f"Operators: {config.operators}")
+    logger.info("Path: {0}".format(config.path))
+    logger.info("Archiver: {0}".format(config.archiver))
+    logger.info("Operators: {0}".format(config.operators))
     logger.info("")
     logger.info("-----------History------------")
 

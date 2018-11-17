@@ -9,9 +9,9 @@ from wily.archivers.git import (
 )
 
 
-def test_gitignore_missing(tmpdir):
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
+def test_gitignore_missing(tmp_path):
+    repo = Repo.init(path=tmp_path)
+    tmppath = pathlib.Path(tmp_path)
 
     # Write a test file to the repo
     with open(tmppath / ".gitignore", "w") as ignore:
@@ -26,7 +26,7 @@ def test_gitignore_missing(tmpdir):
     index.commit("ignore python cache", author=author, committer=committer)
 
     config = DEFAULT_CONFIG
-    config.path = tmpdir
+    config.path = tmp_path
 
     with pytest.raises(WilyIgnoreGitRepositoryError):
         archiver = GitArchiver(config)
@@ -36,9 +36,9 @@ gitignore_combinations = (".wily/", ".wily", ".wily/*")
 
 
 @pytest.mark.parametrize("ignore", gitignore_combinations)
-def test_gitignore(tmpdir, ignore, **kwargs):
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
+def test_gitignore(tmp_path, ignore, **kwargs):
+    repo = Repo.init(path=tmp_path)
+    tmppath = pathlib.Path(tmp_path)
 
     # Write a test file to the repo
     with open(tmppath / ".gitignore", "w") as ignore_f:
@@ -53,42 +53,41 @@ def test_gitignore(tmpdir, ignore, **kwargs):
     index.commit("ignore python cache", author=author, committer=committer)
 
     config = DEFAULT_CONFIG
-    config.path = tmpdir
+    config.path = tmp_path
 
     archiver = GitArchiver(config)
     assert archiver.config == config
 
 
-def test_git_end_to_end(tmpdir):
+def test_git_end_to_end(tmp_path):
     """
     Complete end-to-end test of the git integration
     """
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
+    repo = Repo.init(path=tmp_path)
 
     index = repo.index
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
 
     # First commit
-    with open(tmppath / ".gitignore", "w") as ignore:
+    with open(str(tmp_path / ".gitignore"), "w") as ignore:
         ignore.write(".wily/")
     index.add([".gitignore"])
     commit1 = index.commit("commit1", author=author, committer=committer)
 
     # Second commit
-    with open(tmppath / "test.py", "w") as file1:
+    with open(str(tmp_path / "test.py"), "w") as file1:
         file1.write("print(1)")
     index.add(["test.py"])
     commit2 = index.commit("commit2", author=author, committer=committer)
 
     config = DEFAULT_CONFIG
-    config.path = tmpdir
+    config.path = tmp_path
 
     archiver = GitArchiver(config)
     assert archiver.config == config
 
-    revisions = archiver.revisions(tmpdir, 3)
+    revisions = archiver.revisions(tmp_path, 3)
     assert len(revisions) == 2
     assert revisions[0].message == "commit2"
     assert revisions[0].author_email == "author@example.com"
@@ -115,30 +114,29 @@ def test_git_end_to_end(tmpdir):
     assert (tmppath / "test.py").exists()
 
 
-def test_dirty_git(tmpdir):
+def test_dirty_git(tmp_path):
     """ Check that repository fails to initialise if unchecked files are in the repo """
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
+    repo = Repo.init(path=tmp_path)
 
     index = repo.index
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
 
     # First commit
-    with open(tmppath / ".gitignore", "w") as ignore:
+    with open(str(tmp_path / ".gitignore"), "w") as ignore:
         ignore.write(".wily/")
 
     index.add([".gitignore"])
     commit1 = index.commit("commit1", author=author, committer=committer)
 
     # Write a test file to the repo
-    with open(tmppath / "blah.py", "w") as ignore:
+    with open(str(tmp_path / "blah.py"), "w") as ignore:
         ignore.write("*.py[co]\n")
     index.add(["blah.py"])
 
     config = DEFAULT_CONFIG
-    config.path = tmpdir
+    config.path = tmp_path
 
     with pytest.raises(DirtyGitRepositoryError):
         archiver = GitArchiver(config)
-        archiver.revisions(tmpdir, 2)
+        archiver.revisions(tmp_path, 2)

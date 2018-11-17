@@ -10,7 +10,7 @@ requires = [
     "sphinx",
     "sphinx-click",
     "progress",
-    "dataclasses; python_version == '3.6'",]
+    "attrs"]
 build-backend = "flit.buildapi"
 
 [tool.flit.metadata]
@@ -27,8 +27,8 @@ requires = [
     "tabulate",
     "plotly",
     "progress",
-    "dataclasses; python_version == '3.6'",]
-requires-python = ">=3.6"
+    "attrs"]
+requires-python = ">=3.5"
 description-file = "README.md"
 
 

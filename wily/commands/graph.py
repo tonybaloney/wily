@@ -47,7 +47,7 @@ def graph(config, paths, metrics, output=None):
                 history = cache.get_index(config, archiver)
                 ids = [rev["revision"] for rev in history[::-1]]
                 labels = [
-                    f"{rev['author_name']} <br>{rev['message']}"
+                    "{0} <br>{1}".format(rev["author_name"], rev["message"])
                     for rev in history[::-1]
                 ]
                 for rev in history[::-1]:
@@ -66,7 +66,7 @@ def graph(config, paths, metrics, output=None):
                 x=x,
                 y=y,
                 mode="lines+markers",
-                name=f"{metric.description} for {path}",
+                name="{0} for {1}".format(metric.description, path),
                 ids=ids,
                 text=labels,
                 xcalendar="gregorian",
@@ -80,12 +80,12 @@ def graph(config, paths, metrics, output=None):
         auto_open = True
     if len(metrics) == 1:
         metric = resolve_metric(metrics[0])
-        title = f"History of {metric.description}"
+        title = "History of {0}".format(metric.description)
     else:
         descriptions = ", ".join(
             [resolve_metric(metric).description for metric in metrics]
         )
-        title = f"History of {descriptions}"
+        title = "History of {0}".format(descriptions)
     plotly.offline.plot(
         {"data": data, "layout": go.Layout(title=title)},
         auto_open=auto_open,
