@@ -187,7 +187,7 @@ def get_default_metrics(config):
             return []
 
         operators = index[0]["operators"]
-        for operator in operators.split(","):
+        for operator in operators:
             o = resolve_operator(operator)
             if o.cls.default_metric_index is not None:
                 metric = o.cls.metrics[o.cls.default_metric_index]

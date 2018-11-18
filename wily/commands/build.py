@@ -57,8 +57,7 @@ def build(config, archiver, operators):
             # Build a set of operators
             _operators = [operator.cls(config) for operator in operators]
 
-            stats = {}
-            stats["operator_data"] = {}
+            stats = {'operator_data':{}}
             for operator in _operators:
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)

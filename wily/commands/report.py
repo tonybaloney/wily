@@ -7,7 +7,8 @@ import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
-from wily.operators import resolve_metric, MetricType, get_metric
+from wily.state import State
+from wily.operators import resolve_metric, MetricType
 
 
 def report(config, path, metrics, n, include_message=False):
@@ -58,20 +59,18 @@ def report(config, path, metrics, n, include_message=False):
         metric_metas.append(metric_meta)
 
     for archiver in archivers:
-        history = cache.get_index(config, archiver)[:n]
+        state = State(config, archiver)
         # We have to do it backwards to get the deltas between releases
-        history = history[::-1]
+        history = state.index.revisions[::-1][:n]
         last = {}
         for rev in history:
-            revision_entry = cache.get(config, archiver, rev["revision"])
             vals = []
             for meta in metric_metas:
                 try:
                     logger.debug(
                         f"Fetching metric {meta['key']} for {meta['operator']} in {path}"
                     )
-                    val = get_metric(
-                        revision_entry["operator_data"],
+                    val = rev.get(
                         meta["operator"],
                         path,
                         meta["key"],
@@ -100,25 +99,25 @@ def report(config, path, metrics, n, include_message=False):
                         k = f"{val:n} ({delta_col})"
                     else:
                         k = f"{val}"
-                except KeyError:
-                    k = "Not found"
+                except KeyError as e:
+                    k = f"Not found {e}"
                 vals.append(k)
             if include_message:
                 data.append(
                     (
-                        format_revision(rev["revision"]),
-                        rev["message"][:MAX_MESSAGE_WIDTH],
-                        rev["author_name"],
-                        format_date(rev["date"]),
+                        format_revision(rev.revision),
+                        rev.message[:MAX_MESSAGE_WIDTH],
+                        rev.author_name,
+                        format_date(rev.date),
                         *vals,
                     )
                 )
             else:
                 data.append(
                     (
-                        format_revision(rev["revision"]),
-                        rev["author_name"],
-                        format_date(rev["date"]),
+                        format_revision(rev.revision),
+                        rev.author_name,
+                        format_date(rev.date),
                         *vals,
                     )
                 )

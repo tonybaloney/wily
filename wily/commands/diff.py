@@ -7,6 +7,7 @@ import os
 import wily.cache as cache
 from wily import logger
 from wily.config import DEFAULT_GRID_STYLE
+from wily.archivers import resolve_archiver
 from wily.operators import (
     resolve_metric,
     resolve_operator,
@@ -15,6 +16,7 @@ from wily.operators import (
     BAD_COLORS,
     OperatorLevel,
 )
+from wily.state import State
 
 
 def diff(config, files, metrics, changes_only=True, detail=True):
@@ -23,17 +25,12 @@ def diff(config, files, metrics, changes_only=True, detail=True):
 
     :param config: The wily configuration
     :type  config: :namedtuple:`wily.config.WilyConfig`
-
-
     """
-    archiver = config.archiver
+    archiver = resolve_archiver(config.archiver)
     config.targets = files
     files = list(files)
-    if cache.has_index(config, archiver):
-        index = cache.get_index(config, archiver)
-        last_revision = index[0]
-    else:
-        raise RuntimeError("Missing index, run `wily build`.")
+    state = State(config, archiver)
+    last_revision = state.index.revisions[0]
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
@@ -50,8 +47,8 @@ def diff(config, files, metrics, changes_only=True, detail=True):
         logger.debug(f"Running {operator.name} operator")
         data[operator.name] = operator.run(None, config)
     os.chdir(cwd)
+
     # Write a summary table..
-    last_entry = cache.get(config, archiver, last_revision["revision"])
     extra = []
     for operator, metric in metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
@@ -76,9 +73,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
             has_changes = False
             for operator, metric in metrics:
                 try:
-                    current = get_metric(
-                        last_entry["operator_data"], operator, file, metric.name
-                    )
+                    current = last_revision.get(operator, file, metric.name)
                 except KeyError as e:
                     current = "-"
                 try:

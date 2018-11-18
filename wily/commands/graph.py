@@ -8,8 +8,8 @@ import tabulate
 import pathlib
 from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
 import wily.cache as cache
-from wily.operators import resolve_metric, MetricType, get_metric
-
+from wily.operators import resolve_metric, MetricType
+from wily.state import State
 import plotly.offline
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -42,32 +42,26 @@ def graph(config, paths, metrics, output=None):
         for path in paths:
             x = []
             y = []
+            labels = []
             for archiver in archivers:
+                state = State(config, archiver)
                 # We have to do it backwards to get the deltas between releases
-                history = cache.get_index(config, archiver)
-                ids = [rev["revision"] for rev in history[::-1]]
-                labels = [
-                    f"{rev['author_name']} <br>{rev['message']}"
-                    for rev in history[::-1]
-                ]
-                for rev in history[::-1]:
-                    revision_entry = cache.get(config, archiver, rev["revision"])
+                for rev in state.index.revisions[::-1]:
+                    labels.append(f"{rev.author_name} <br>{rev.message}")
                     try:
-                        val = get_metric(
-                            revision_entry["operator_data"], operator, path, key
-                        )
+                        val = rev.get(operator, path, key)
                         y.append(val)
                     except KeyError:
                         y.append(0)
                     finally:
-                        x.append(format_datetime(rev["date"]))
+                        x.append(format_datetime(rev.date))
             # Create traces
             trace = go.Scatter(
                 x=x,
                 y=y,
                 mode="lines+markers",
                 name=f"{metric.description} for {path}",
-                ids=ids,
+                ids=state.index.revision_keys,
                 text=labels,
                 xcalendar="gregorian",
             )
