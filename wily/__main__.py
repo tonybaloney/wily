@@ -120,8 +120,7 @@ def index(ctx, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build` first.")
-        exit(1)
+        handle_no_cache(ctx, config)
 
     from wily.commands.index import index
 
@@ -143,8 +142,7 @@ def report(ctx, file, metrics, number, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
-        exit(1)
+        handle_no_cache(ctx, config)
 
     if not metrics:
         metrics = get_default_metrics(config)
@@ -181,8 +179,7 @@ def diff(ctx, files, metrics, all, detail):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
-        exit(1)
+        handle_no_cache(ctx, config)
 
     if not metrics:
         metrics = get_default_metrics(config)
@@ -211,8 +208,7 @@ def graph(ctx, files, metrics, output):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache. Run `wily build <target>` first.")
-        exit(1)
+        handle_no_cache(ctx, config)
 
     from wily.commands.graph import graph
 
@@ -228,8 +224,7 @@ def clean(ctx, yes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache.")
-        exit(1)
+        handle_no_cache(ctx, config)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
@@ -248,8 +243,7 @@ def list_metrics(ctx):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        logger.error(f"Could not locate wily cache.")
-        exit(1)
+        handle_no_cache(ctx, config)
 
     from wily.commands.list_metrics import list_metrics
 
@@ -257,25 +251,30 @@ def list_metrics(ctx):
 
 
 @cli.command("setup")
-@click.option(
-    "--target", prompt="Path to your source files; comma-seperated for multiple"
-)
-@click.option(
-    "--revisions",
-    prompt="How many git revisions do you want to index?",
-    default=50,
-    type=click.INT,
-)
 @click.pass_context
 def setup(ctx, target, revisions):
-    paths = target.split(",")
-    ctx.invoke(
-        build,
-        max_revisions=revisions,
-        targets=paths,
-        operators=None,
-        skip_gitignore_check=False,
+    handle_no_cache(ctx, ctx["CONFIG"])
+
+
+def handle_no_cache(context, config):
+    logger.error(
+        f"Could not locate wily cache, the cache is required to provide insights."
     )
+    p = input("Do you want to run setup and index your project now? [y/N]")
+    if p.lower() != "y":
+        exit(1)
+    else:
+        revisions = input("How many previous git revisions do you want to index? : ")
+        revisions = int(revisions)
+        path = input("Path to your source files; comma-seperated for multiple: ")
+        paths = path.split(",")
+        context.invoke(
+            build,
+            max_revisions=revisions,
+            targets=paths,
+            operators=None,
+            skip_gitignore_check=False,
+        )
 
 
 if __name__ == "__main__":
