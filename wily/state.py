@@ -19,6 +19,9 @@ class Index(object):
         return [d['revision'] for d in self.data]
     
     def add(self, revision, operators):
+        """
+        Add a revision to the index
+        """
         stats_header = {
                 "revision": revision.key,
                 "author_name": revision.author_name,
