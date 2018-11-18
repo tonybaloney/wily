@@ -51,7 +51,7 @@ class BaseOperator(object):
     level = OperatorLevel.File
 
     def run(self, module, options):
-        pass
+        raise NotImplementedError
 
 
 from wily.operators.cyclomatic import CyclomaticComplexityOperator

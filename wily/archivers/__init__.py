@@ -17,7 +17,7 @@ class BaseArchiver(object):
         :return: A list of revisions
         :rtype: ``list`` of :class:`Revision`
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def checkout(self, revision, **options):
         """
@@ -28,7 +28,7 @@ class BaseArchiver(object):
         :param options: Any additional options
         :type  options: ``dict``
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 @dataclass

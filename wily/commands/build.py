@@ -7,6 +7,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 from progress.bar import Bar
 
 from wily import logger
+from wily.state import State
 import wily.cache as cache
 
 
@@ -23,11 +24,11 @@ def build(config, archiver, operators):
     :param operators: The list of operators to execute
     :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
+    state = State(config, archiver)
+
     # Check for existence of cache, else provision
-    if not cache.exists(config):
-        logger.debug("Wily cache not found, creating.")
-        cache.create(config)
-        logger.debug("Created wily cache")
+    state.ensure_exists()
+
     try:
         logger.debug(f"Using {archiver.name} archiver module")
         archiver = archiver.cls(config)
@@ -36,16 +37,13 @@ def build(config, archiver, operators):
         logger.error(f"Failed to setup archiver: '{e.message}'")
         exit(1)
 
-    if cache.has_index(config, archiver.name):
-        logger.debug("Found existing index, doing a revision diff")
-        index = cache.get_index(config, archiver.name)
-        # remove existing revisions from the list
-        existing_revisions = [r["revision"] for r in index]
-        revisions = [
-            revision for revision in revisions if revision.key not in existing_revisions
-        ]
-    else:
-        index = []
+    index = state.index
+
+    # remove existing revisions from the list
+    existing_revisions = index.revisions
+    revisions = [
+        revision for revision in revisions if revision.key not in existing_revisions
+    ]
 
     logger.info(
         f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
@@ -78,7 +76,7 @@ def build(config, archiver, operators):
                 bar.next()
             index.append(stats_header)
             cache.store(config, archiver, revision, stats)
-        cache.store_index(config, archiver, index)
+        index.save()
         bar.finish()
     except Exception as e:
         logger.error(f"Failed to build cache: '{e}'")

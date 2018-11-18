@@ -36,7 +36,11 @@ from wily.operators import resolve_operators
 def cli(ctx, debug, config, path):
     """\U0001F98A Inspect and search through the complexity of your source code.
 
-    To get started, build an index of your source code:
+    To get started, run setup:
+
+      $ wily setup
+
+    To reindex any changes in your source code:
 
       $ wily build <src>
 
@@ -253,10 +257,16 @@ def list_metrics(ctx):
 @cli.command("setup")
 @click.pass_context
 def setup(ctx, target, revisions):
+    """
+    Run a guided setup to build the wily cache
+    """
     handle_no_cache(ctx, ctx["CONFIG"])
 
 
 def handle_no_cache(context, config):
+    """
+    Handle lack-of-cache error, prompt user for index process.
+    """
     logger.error(
         f"Could not locate wily cache, the cache is required to provide insights."
     )
