@@ -28,7 +28,7 @@ class Index(object):
                 "author_email": revision.author_email,
                 "date": revision.revision_date,
                 "message": revision.message,
-                "operators": operators,
+                "operators": [operator.name for operator in operators],
             }
         self.data.append(stats_header)
 

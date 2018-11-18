@@ -140,7 +140,7 @@ def store_index(config, archiver, index):
         logger.debug("Created archiver directory")
 
     index = sorted(index, key=lambda k: k["date"], reverse=True)
-    logger.debug(f"Saving index : {index}")
+
     filename = root / "index.json"
     with open(filename, "w") as out:
         out.write(json.dumps(index, indent=2))
