@@ -6,6 +6,7 @@ from git import Repo, Actor
 import pathlib
 import pytest
 
+
 def test_diff_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()

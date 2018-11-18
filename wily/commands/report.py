@@ -70,11 +70,7 @@ def report(config, path, metrics, n, include_message=False):
                     logger.debug(
                         f"Fetching metric {meta['key']} for {meta['operator']} in {path}"
                     )
-                    val = rev.get(
-                        meta["operator"],
-                        path,
-                        meta["key"],
-                    )
+                    val = rev.get(meta["operator"], path, meta["key"])
 
                     last_val = last.get(meta["key"], None)
                     # Measure the difference between this value and the last

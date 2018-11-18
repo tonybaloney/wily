@@ -40,7 +40,9 @@ def build(config, archiver, operators):
     index = state.index
 
     # remove existing revisions from the list
-    revisions = [revision for revision in revisions if revision.key not in index.revision_keys]
+    revisions = [
+        revision for revision in revisions if revision.key not in index.revision_keys
+    ]
 
     logger.info(
         f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
@@ -57,7 +59,7 @@ def build(config, archiver, operators):
             # Build a set of operators
             _operators = [operator.cls(config) for operator in operators]
 
-            stats = {'operator_data':{}}
+            stats = {"operator_data": {}}
             for operator in _operators:
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)

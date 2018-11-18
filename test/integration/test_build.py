@@ -141,6 +141,7 @@ def test_build_dirty_repo(builddir):
     result = runner.invoke(main.cli, ["--debug", "--path", builddir, "build", builddir])
     assert result.exit_code == 1, result.stdout
 
+
 def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     with patch("wily.logger") as logger:

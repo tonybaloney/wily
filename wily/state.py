@@ -10,8 +10,9 @@ class LazyRevision(object):
     if an attribute is requested that requires loading the stored data, the cache
     will be loaded to the object.
     """
+
     def __init__(self, config, archiver, revision, index_dict):
-        self._index_dict= index_dict
+        self._index_dict = index_dict
         self._cache = None
         self.config = config
         self.revision = revision
@@ -26,7 +27,7 @@ class LazyRevision(object):
             else:
                 self._cache = cache.get(self.config, self.archiver.name, self.revision)
                 return self._cache[attr]
-    
+
     def get(self, operator, path, key):
         return get_metric(self.operator_data, operator, path, key)
 
@@ -35,24 +36,32 @@ class Index(object):
     """
     The index of the wily cache
     """
+
     def __init__(self, config, archiver):
         self.config = config
         self.archiver = archiver
-        self.data = cache.get_index(config, archiver.name) if cache.has_index(config, archiver.name) else []
+        self.data = (
+            cache.get_index(config, archiver.name)
+            if cache.has_index(config, archiver.name)
+            else []
+        )
 
     @property
     def revisions(self):
         """
         List of all the revisions
         """
-        return [LazyRevision(self.config, self.archiver, d['revision'], d) for d in self.data]
-    
+        return [
+            LazyRevision(self.config, self.archiver, d["revision"], d)
+            for d in self.data
+        ]
+
     @property
     def revision_keys(self):
         """
         List of all the revision indexes
         """
-        return [d['revision'] for d in self.data]
+        return [d["revision"] for d in self.data]
 
     def __contains__(self, item):
         if isinstance(item, Revision):
@@ -68,13 +77,13 @@ class Index(object):
         Add a revision to the index
         """
         stats_header = {
-                "revision": revision.key,
-                "author_name": revision.author_name,
-                "author_email": revision.author_email,
-                "date": revision.revision_date,
-                "message": revision.message,
-                "operators": [operator.name for operator in operators],
-            }
+            "revision": revision.key,
+            "author_name": revision.author_name,
+            "author_email": revision.author_email,
+            "date": revision.revision_date,
+            "message": revision.message,
+            "operators": [operator.name for operator in operators],
+        }
         self.data.append(stats_header)
 
     def save(self):
@@ -82,6 +91,7 @@ class Index(object):
         Save the index data back to the wily cache
         """
         cache.store_index(self.config, self.archiver, self.data)
+
 
 class State(object):
     def __init__(self, config, archiver):

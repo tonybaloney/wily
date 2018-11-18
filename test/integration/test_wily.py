@@ -16,6 +16,7 @@ def test_list_metrics(builddir):
         result = runner.invoke(main.cli, ["--path", builddir, "list-metrics"])
         assert result.exit_code == 0, result.stdout
 
+
 def test_clean(builddir):
     """ Test the clean feature """
     with patch("wily.logger") as logger:
@@ -24,6 +25,7 @@ def test_clean(builddir):
         assert result.exit_code == 0, result.stdout
     cache_path = pathlib.Path(builddir) / ".wily"
     assert not cache_path.exists()
+
 
 def test_clean_no_cache(tmpdir):
     with patch("wily.logger") as logger:
@@ -37,5 +39,3 @@ def test_list_metrics_no_cache(tmpdir):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "list-metrics"])
         assert result.exit_code == 1, result.stdout
-
-
