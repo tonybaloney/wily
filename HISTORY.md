@@ -3,6 +3,8 @@
 ## 1.5.0 (beta)
 
 * Introduce index versioning
+* Add a `setup` command, which will be prompted by default in the absence of wily cache
+* Fixed various bugs
 
 ## 1.4.0 (16th November 2018)
 
