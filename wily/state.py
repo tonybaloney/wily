@@ -15,6 +15,23 @@ class Index(object):
         List of all the revision indexes
         """
         return [d['revision'] for d in self.data]
+    
+    def add(self, revision):
+        stats_header = {
+                "revision": revision.key,
+                "author_name": revision.author_name,
+                "author_email": revision.author_email,
+                "date": revision.revision_date,
+                "message": revision.message,
+                "operators": _op_desc,
+            }
+        self.data.append(stats_header)
+
+    def save(self):
+        """
+        Save the index data back to the wily cache
+        """
+        cache.store_index(self.config, self.archiver, self.data)
 
 class State(object):
     def __init__(self, config, archiver):

@@ -60,21 +60,13 @@ def build(config, archiver, operators):
             # Build a set of operators
             _operators = [operator.cls(config) for operator in operators]
 
-            stats_header = {
-                "revision": revision.key,
-                "author_name": revision.author_name,
-                "author_email": revision.author_email,
-                "date": revision.revision_date,
-                "message": revision.message,
-                "operators": _op_desc,
-            }
-            stats = stats_header.copy()
+            stats = {}
             stats["operator_data"] = {}
             for operator in _operators:
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
-            index.append(stats_header)
+            index.add(revision)
             cache.store(config, archiver, revision, stats)
         index.save()
         bar.finish()
