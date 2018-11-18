@@ -8,6 +8,7 @@ class Index(object):
     """
     def __init__(self, config, archiver):
         self.config = config
+        self.archiver = archiver
         self.data = cache.get_index(config, archiver.name) if cache.has_index(config, archiver.name) else []
 
     @property
