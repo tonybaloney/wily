@@ -1,5 +1,6 @@
 import wily.cache as cache
 from wily import logger
+from wily.archivers import Revision
 
 
 class Index(object):
@@ -18,6 +19,12 @@ class Index(object):
         """
         return [d['revision'] for d in self.data]
     
+    def __contains__(self, item):
+        if isinstance(item, Revision):
+            return item.key in self.revisions
+        else:
+            return item in self.revisions
+
     def add(self, revision, operators):
         """
         Add a revision to the index

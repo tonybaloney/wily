@@ -40,10 +40,7 @@ def build(config, archiver, operators):
     index = state.index
 
     # remove existing revisions from the list
-    existing_revisions = index.revisions
-    revisions = [
-        revision for revision in revisions if revision.key not in existing_revisions
-    ]
+    revisions = index.revisions - revisions
 
     logger.info(
         f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
