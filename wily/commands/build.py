@@ -66,7 +66,7 @@ def build(config, archiver, operators):
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
-            index.add(revision)
+            index.add(revision, operators)
             cache.store(config, archiver, revision, stats)
         index.save()
         bar.finish()

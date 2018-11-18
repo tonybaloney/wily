@@ -16,14 +16,14 @@ class Index(object):
         """
         return [d['revision'] for d in self.data]
     
-    def add(self, revision):
+    def add(self, revision, operators):
         stats_header = {
                 "revision": revision.key,
                 "author_name": revision.author_name,
                 "author_email": revision.author_email,
                 "date": revision.revision_date,
                 "message": revision.message,
-                "operators": _op_desc,
+                "operators": operators,
             }
         self.data.append(stats_header)
 
