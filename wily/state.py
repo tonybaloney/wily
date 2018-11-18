@@ -7,7 +7,8 @@ class Index(object):
     The index of the wily cache
     """
     def __init__(self, config, archiver):
-        self.data = cache.get_index(self.config, archiver.name) if cache.has_index(config, archiver.name) else []
+        self.config = config
+        self.data = cache.get_index(config, archiver.name) if cache.has_index(config, archiver.name) else []
 
     @property
     def revisions(self):
