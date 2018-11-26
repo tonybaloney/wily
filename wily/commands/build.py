@@ -69,10 +69,7 @@ def build(config, archiver, operators):
         bar.finish()
     except Exception as e:
         logger.error(f"Failed to build cache: '{e}'")
-        if logger.level == "DEBUG":
-            traceback.print_exc()
-        else:
-            logger.debug(logger.level)
+        raise e
     finally:
         # Reset the archive after every run back to the head of the branch
         archiver.finish()
