@@ -4,6 +4,7 @@ Builds a cache based on a source-control history
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+import traceback
 from progress.bar import Bar
 
 from wily import logger
@@ -69,7 +70,7 @@ def build(config, archiver, operators):
     except Exception as e:
         logger.error(f"Failed to build cache: '{e}'")
         if logger.level == "DEBUG":
-            raise e
+            traceback.print_exc()
         else:
             logger.debug(logger.level)
     finally:
