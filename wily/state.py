@@ -71,6 +71,8 @@ class Index(object):
     def __contains__(self, item):
         if isinstance(item, Revision):
             return item.key in self._revisions
+        elif isinstance(item, LazyRevision):
+            return item.revision in self._revisions
         elif isinstance(item, str):
             return item in self._revisions
         else:
