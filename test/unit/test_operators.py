@@ -21,3 +21,8 @@ def test_resolve_operators():
 def test_resolve_metric():
     metric = wily.operators.resolve_metric("raw.loc")
     assert metric.name == "loc"
+
+
+def test_resolve_invalid_metric():
+    with pytest.raises(ValueError):
+        wily.operators.resolve_metric("raw.spanner")

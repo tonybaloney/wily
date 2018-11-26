@@ -35,6 +35,47 @@ def test_build_no_target(tmpdir):
         assert result.exit_code == 2, result.stdout
 
 
+def test_build_crash(tmpdir):
+    """
+    Test that build works in a basic repository.
+    """
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
+    # Write a test file to the repo
+    with open(tmppath / "test.py", "w") as test_txt:
+        test_txt.write("import abc")
+
+    with open(tmppath / ".gitignore", "w") as test_txt:
+        test_txt.write(".wily/")
+
+    index = repo.index
+    index.add(["test.py", ".gitignore"])
+
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    index.commit("basic test", author=author, committer=committer)
+    import wily.commands.build
+    with patch.object(wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")) as bar_finish:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli, ["--path", tmpdir, "build", "test.py"]
+        )
+        assert bar_finish.called_once
+        assert result.exit_code == 0, result.stdout
+
+    with patch("wily.commands.build.logger", ) as logger:
+        logger.level = "DEBUG"
+        with patch.object(wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")) as bar_finish:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
+            )
+            assert bar_finish.called_once
+            assert result.exit_code == 1, result.stdout
+
+
 def test_build(tmpdir):
     """
     Test that build works in a basic repository.

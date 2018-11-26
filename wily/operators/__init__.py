@@ -94,7 +94,7 @@ def resolve_operator(name):
     :return: The operator type
     """
     r = [operator for operator in ALL_OPERATORS if operator.name == name.lower()]
-    if not r:
+    if not r or len(r) == 0:
         raise ValueError(f"Operator {name} not recognised.")
     else:
         return r[0]
@@ -107,10 +107,13 @@ def resolve_operators(operators):
 def resolve_metric(metric):
     """ Resolve metric key to a given target """
     operator, key = metric.split(".")
-    # TODO: Handle this better!
-    return [
+    r = [
         metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key
-    ][0]
+    ]
+    if not r or len(r) == 0:
+        raise ValueError(f"Metric {metric} not recognised.")
+    else:
+        return r[0]
 
 
 def get_metric(revision, operator, path, key):
