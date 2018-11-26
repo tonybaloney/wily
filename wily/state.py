@@ -51,6 +51,9 @@ class Index(object):
         for d in self.data:
             self._revisions["revision"] = LazyRevision(self.config, self.archiver, d["revision"], d)
 
+    def __len__(self):
+        return len(self._revisions)
+
     @property
     def revisions(self):
         """
@@ -67,11 +70,11 @@ class Index(object):
 
     def __contains__(self, item):
         if isinstance(item, Revision):
-            return self._revisions[item.key]
+            return item.key in self._revisions
         elif isinstance(item, str):
-            return self._revisions[item]
+            return item in self._revisions
         else:
-            return item in self._revisions.items()
+            raise TypeError("Invalid type for __contains__ in Index.")
 
     def __getitem__(self, index):
         return self._revisions[index]
@@ -88,13 +91,13 @@ class Index(object):
             "message": revision.message,
             "operators": [operator.name for operator in operators],
         }
-        self.data.append(stats_header)
+        self._revisions[revision.key] = stats_header
 
     def save(self):
         """
         Save the index data back to the wily cache
         """
-        cache.store_index(self.config, self.archiver, self.data)
+        cache.store_index(self.config, self.archiver, self._revisions.items())
 
 
 class State(object):
