@@ -1,10 +1,7 @@
 import wily.__main__ as main
 from mock import patch
-from textwrap import dedent
 from click.testing import CliRunner
-from git import Repo, Actor
 import pathlib
-import pytest
 
 
 def test_list_metrics(builddir):
