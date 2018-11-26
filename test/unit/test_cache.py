@@ -90,7 +90,7 @@ def test_store_basic(tmpdir):
         key="12345",
         author_name="Anthony Shaw",
         author_email="anthony@test.com",
-        revision_date="17/01/1990",
+        date="17/01/1990",
         message="my changes",
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
@@ -112,7 +112,7 @@ def test_store_twice(tmpdir):
         key="12345",
         author_name="Anthony Shaw",
         author_email="anthony@test.com",
-        revision_date="17/01/1990",
+        date="17/01/1990",
         message="my changes",
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
@@ -135,7 +135,7 @@ def test_store_relative_paths(tmpdir):
         key="12345",
         author_name="Anthony Shaw",
         author_email="anthony@test.com",
-        revision_date="17/01/1990",
+        date="17/01/1990",
         message="my changes",
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)

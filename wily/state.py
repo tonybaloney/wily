@@ -60,7 +60,7 @@ class Index(object):
         """
         List of all the revisions
         """
-        return list(self._revisions.values())
+        return [LazyRevision(self.config, self.archiver, r['revision'], r) for r in self._revisions.values()]
 
     @property
     def revision_keys(self):

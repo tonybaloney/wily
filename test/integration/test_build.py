@@ -64,7 +64,7 @@ def test_build_crash(tmpdir):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert bar_finish.called_once
-        assert result.exit_code == 0, result.stdout
+        assert result.exit_code == 1, result.stdout
 
     with patch("wily.commands.build.logger") as logger:
         logger.level = "DEBUG"
