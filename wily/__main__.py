@@ -75,7 +75,7 @@ def cli(ctx, debug, config, path):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1)
+@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1, required=True)
 @click.option(
     "-o",
     "--operators",

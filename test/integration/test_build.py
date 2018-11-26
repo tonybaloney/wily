@@ -31,7 +31,7 @@ def test_build_no_target(tmpdir):
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build"])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
         assert result.exit_code == 1, result.stdout
 
 
