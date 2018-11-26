@@ -27,14 +27,11 @@ def report(config, path, metrics, n, include_message=False):
     :type  n: ``int``
     """
     logger.debug("Running report command")
-
     logger.info(f"-----------History for {metrics}------------")
 
     data = []
-    last = None
-    archivers = cache.list_archivers(config)
-
     metric_metas = []
+
     for metric in metrics:
         operator, key = metric.split(".")
         metric = resolve_metric(metric)
@@ -58,10 +55,10 @@ def report(config, path, metrics, n, include_message=False):
         }
         metric_metas.append(metric_meta)
 
-    for archiver in archivers:
-        state = State(config, archiver)
+    state = State(config)
+    for archiver in state.archivers:
         # We have to do it backwards to get the deltas between releases
-        history = state.index.revisions[:n][::-1]
+        history = state.index[archiver].revisions[:n][::-1]
         last = {}
         for rev in history:
             vals = []

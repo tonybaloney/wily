@@ -1,6 +1,6 @@
 import wily.cache as cache
 from wily import logger
-from wily.archivers import Revision, resolve_archiver, Archiver
+from wily.archivers import Revision, resolve_archiver
 from wily.operators import get_metric
 
 
@@ -103,6 +103,7 @@ class State(object):
         self.index = {}
         for archiver in self.archivers:
             self.index[archiver] = Index(self.config, resolve_archiver(archiver))
+        self.default_archiver = self.archivers[0]
 
     def ensure_exists(self):
         if not cache.exists(self.config):

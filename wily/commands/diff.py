@@ -105,7 +105,6 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                 logger.debug(metrics_data)
         except KeyError as e:
             logger.debug(f"Could not find {e}")
-            pass
 
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)

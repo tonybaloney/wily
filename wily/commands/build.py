@@ -37,12 +37,11 @@ def build(config, archiver, operators):
         logger.error(f"Failed to setup archiver: '{e.message}'")
         exit(1)
 
-    import pdb; pdb.set_trace()
-    index = state.index[archiver]
+    index = state.index[archiver.name]
 
     # remove existing revisions from the list
     revisions = [
-        revision for revision in revisions if revision.key not in index.revision_keys
+        revision for revision in revisions if revision not in index
     ]
 
     logger.info(
