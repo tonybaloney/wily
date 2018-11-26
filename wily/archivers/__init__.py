@@ -36,7 +36,7 @@ class Revision:
     key: str
     author_name: str
     author_email: str
-    revision_date: str
+    date: str
     message: str
 
 

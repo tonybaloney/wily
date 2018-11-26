@@ -17,6 +17,7 @@ class LazyRevision(object):
         self._cache = None
         self.config = config
         self.revision = revision
+        self.key = revision
         self.archiver = archiver
 
     def __getattr__(self, attr):
@@ -49,7 +50,7 @@ class Index(object):
         # If only Python supported Ordered Dict comprehensions :-(
         self._revisions = OrderedDict()
         for d in self.data:
-            self._revisions[d["revision"]] = LazyRevision(self.config, self.archiver, d["revision"], d)
+            self.add(LazyRevision(self.config, self.archiver, d["revision"], d))
 
     def __len__(self):
         return len(self._revisions)
@@ -69,10 +70,8 @@ class Index(object):
         return list(self._revisions.keys())
 
     def __contains__(self, item):
-        if isinstance(item, Revision):
+        if isinstance(item, (Revision, LazyRevision)):
             return item.key in self._revisions
-        elif isinstance(item, LazyRevision):
-            return item.revision in self._revisions
         elif isinstance(item, str):
             return item in self._revisions
         else:
@@ -81,15 +80,18 @@ class Index(object):
     def __getitem__(self, index):
         return self._revisions[index]
 
-    def add(self, revision, operators):
+    def add(self, revision, operators=[]):
         """
         Add a revision to the index
+
+        :param revision: The revision
+        :type  revision: :class:`Revision` or :class:`LazyRevision`
         """
         stats_header = {
             "revision": revision.key,
             "author_name": revision.author_name,
             "author_email": revision.author_email,
-            "date": revision.revision_date,
+            "date": revision.date,
             "message": revision.message,
             "operators": [operator.name for operator in operators],
         }

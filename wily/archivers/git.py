@@ -64,7 +64,7 @@ class GitArchiver(BaseArchiver):
                 key=commit.name_rev.split(" ")[0],
                 author_name=commit.author.name,
                 author_email=commit.author.email,
-                revision_date=commit.committed_date,
+                date=commit.committed_date,
                 message=commit.message,
             )
             revisions.append(rev)
