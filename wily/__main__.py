@@ -161,7 +161,7 @@ def report(ctx, file, metrics, number, message):
 
 
 @cli.command()
-@click.argument("files", type=click.Path(resolve_path=False), nargs=-1)
+@click.argument("files", type=click.Path(resolve_path=False), nargs=-1, required=True)
 @click.option(
     "--metrics",
     default=None,
@@ -202,7 +202,7 @@ def diff(ctx, files, metrics, all, detail):
 
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=-1)
+@click.argument("metrics", nargs=-1, required=True)
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
 )
