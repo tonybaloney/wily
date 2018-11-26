@@ -65,7 +65,7 @@ class Index(object):
 
     def __contains__(self, item):
         if isinstance(item, Revision):
-            return item.key in self.revisions
+            return item.key in self.revision_keys
         else:
             return item in self.revisions
 
