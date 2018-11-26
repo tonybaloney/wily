@@ -250,7 +250,16 @@ def test_diff_with_metrics():
         with patch("wily.__main__.exists", return_value=True) as check_cache:
             with patch("wily.commands.diff.diff") as diff:
                 runner = CliRunner()
-                result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py", "--metrics", "maintainability.mi,raw.sloc"])
+                result = runner.invoke(
+                    main.cli,
+                    [
+                        "diff",
+                        "foo.py",
+                        "x/b.py",
+                        "--metrics",
+                        "maintainability.mi,raw.sloc",
+                    ],
+                )
                 assert result.exit_code == 0
                 assert diff.called_once
                 assert check_cache.called_once

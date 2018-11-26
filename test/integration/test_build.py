@@ -57,17 +57,20 @@ def test_build_crash(tmpdir):
 
     index.commit("basic test", author=author, committer=committer)
     import wily.commands.build
-    with patch.object(wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")) as bar_finish:
+
+    with patch.object(
+        wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")
+    ) as bar_finish:
         runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--path", tmpdir, "build", "test.py"]
-        )
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert bar_finish.called_once
         assert result.exit_code == 0, result.stdout
 
-    with patch("wily.commands.build.logger", ) as logger:
+    with patch("wily.commands.build.logger") as logger:
         logger.level = "DEBUG"
-        with patch.object(wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")) as bar_finish:
+        with patch.object(
+            wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")
+        ) as bar_finish:
             runner = CliRunner()
             result = runner.invoke(
                 main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]

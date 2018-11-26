@@ -132,7 +132,8 @@ def test_diff_output_loc(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--metrics", "raw.loc"]
+        main.cli,
+        ["--debug", "--path", builddir, "diff", "src/test.py", "--metrics", "raw.loc"],
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -149,7 +150,17 @@ def test_diff_output_rank(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all", "--metrics", "maintainability.rank"]
+        main.cli,
+        [
+            "--debug",
+            "--path",
+            builddir,
+            "diff",
+            "src/test.py",
+            "--all",
+            "--metrics",
+            "maintainability.rank",
+        ],
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
