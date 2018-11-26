@@ -12,11 +12,12 @@ from wily.config import DEFAULT_GRID_STYLE
 def index(config, include_message=False):
     """
     Show information about the cache and runtime
-    :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
+    :param state: The runtime state
+    :type  state: :class:`wily.state.State`
 
     :return:
     """
+    state = State(config=config)
     logger.debug("Running show command")
     logger.info("--------Configuration---------")
     logger.info(f"Path: {config.path}")
@@ -26,10 +27,8 @@ def index(config, include_message=False):
     logger.info("-----------History------------")
 
     data = []
-    archivers = cache.list_archivers(config)
-    for archiver in archivers:
-        state = State(config, archiver)
-        for rev in state.index.revisions:
+    for archiver in state.archivers:
+        for rev in state.index[archiver].revisions:
             if include_message:
                 data.append(
                     (

@@ -4,10 +4,8 @@ Compares metrics between uncommitted files and indexed files
 import tabulate
 
 import os
-import wily.cache as cache
 from wily import logger
 from wily.config import DEFAULT_GRID_STYLE
-from wily.archivers import resolve_archiver
 from wily.operators import (
     resolve_metric,
     resolve_operator,
@@ -26,11 +24,10 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     :param config: The wily configuration
     :type  config: :namedtuple:`wily.config.WilyConfig`
     """
-    archiver = resolve_archiver(config.archiver)
     config.targets = files
     files = list(files)
-    state = State(config, archiver)
-    last_revision = state.index.revisions[0]
+    state = State(config)
+    last_revision = state.index[state.default_archiver].revisions[0]
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}

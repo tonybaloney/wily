@@ -1,6 +1,6 @@
 import wily.cache as cache
 from wily import logger
-from wily.archivers import Revision, resolve_archiver
+from wily.archivers import Revision, resolve_archiver, Archiver
 from wily.operators import get_metric
 
 
@@ -94,28 +94,18 @@ class Index(object):
 
 
 class State(object):
-    def __init__(self, config, archiver):
-        self.config = config
-        if isinstance(archiver, str):
-            self.archiver = resolve_archiver(archiver)
+    def __init__(self, config, archiver=None):
+        if archiver:
+            self.archivers = [archiver.name]
         else:
-            self.archiver = archiver
-        self._index = None
+            self.archivers = cache.list_archivers(config)
+        self.config = config
+        self.index = {}
+        for archiver in self.archivers:
+            self.index[archiver] = Index(self.config, resolve_archiver(archiver))
 
     def ensure_exists(self):
         if not cache.exists(self.config):
             logger.debug("Wily cache not found, creating.")
             cache.create(self.config)
             logger.debug("Created wily cache")
-
-    @property
-    def index(self):
-        """
-        The index of the cache state 
-        :rtype: :class:`Index`
-        """
-        if self._index:
-            return self._index
-        else:
-            self._index = Index(self.config, self.archiver)
-            return self._index

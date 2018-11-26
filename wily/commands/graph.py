@@ -33,8 +33,7 @@ def graph(config, paths, metrics, output=None):
     logger.debug("Running report command")
 
     data = []
-
-    archivers = cache.list_archivers(config)
+    state = State(config)
 
     for metric in metrics:
         operator, key = metric.split(".")
@@ -43,10 +42,9 @@ def graph(config, paths, metrics, output=None):
             x = []
             y = []
             labels = []
-            for archiver in archivers:
-                state = State(config, archiver)
+            for archiver in state.archivers:
                 # We have to do it backwards to get the deltas between releases
-                for rev in state.index.revisions[::-1]:
+                for rev in state.index[archiver].revisions[::-1]:
                     labels.append(f"{rev.author_name} <br>{rev.message}")
                     try:
                         val = rev.get(operator, path, key)
@@ -61,7 +59,7 @@ def graph(config, paths, metrics, output=None):
                 y=y,
                 mode="lines+markers",
                 name=f"{metric.description} for {path}",
-                ids=state.index.revision_keys,
+                ids=state.index[archiver].revision_keys,
                 text=labels,
                 xcalendar="gregorian",
             )

@@ -24,7 +24,7 @@ def build(config, archiver, operators):
     :param operators: The list of operators to execute
     :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
-    state = State(config, archiver)
+    state = State(config, archiver=archiver)
 
     # Check for existence of cache, else provision
     state.ensure_exists()
@@ -37,7 +37,7 @@ def build(config, archiver, operators):
         logger.error(f"Failed to setup archiver: '{e.message}'")
         exit(1)
 
-    index = state.index
+    index = state.index[archiver]
 
     # remove existing revisions from the list
     revisions = [
