@@ -1,10 +1,8 @@
 import wily.__main__ as main
 from mock import patch
-from textwrap import dedent
 from click.testing import CliRunner
 from git import Repo, Actor
 import pathlib
-import pytest
 
 
 def test_build_not_git_repo(tmpdir):
@@ -24,6 +22,16 @@ def test_build_invalid_path(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build", "test.py"])
+        assert result.exit_code == 1, result.stdout
+
+
+def test_build_no_target(tmpdir):
+    """
+    Test that build fails with no target
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build"])
         assert result.exit_code == 1, result.stdout
 
 

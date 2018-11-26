@@ -276,7 +276,7 @@ def handle_no_cache(context, config):
     else:
         revisions = input("How many previous git revisions do you want to index? : ")
         revisions = int(revisions)
-        path = input("Path to your source files; comma-seperated for multiple: ")
+        path = input("Path to your source files; comma-separated for multiple: ")
         paths = path.split(",")
         context.invoke(
             build,
