@@ -8,6 +8,13 @@ import pathlib
 def test_diff_no_cache(tmpdir):
     with patch("wily.logger") as logger:
         runner = CliRunner()
+        result = runner.invoke(main.cli, ["--path", tmpdir, "diff", "src/test.py"])
+        assert result.exit_code == 1, result.stdout
+
+
+def test_diff_no_path(tmpdir):
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "diff"])
         assert result.exit_code == 2, result.stdout
 

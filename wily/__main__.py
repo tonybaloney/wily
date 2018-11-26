@@ -124,7 +124,7 @@ def index(ctx, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx, config)
+        handle_no_cache(ctx)
 
     from wily.commands.index import index
 
@@ -146,7 +146,7 @@ def report(ctx, file, metrics, number, message):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx, config)
+        handle_no_cache(ctx)
 
     if not metrics:
         metrics = get_default_metrics(config)
@@ -183,7 +183,7 @@ def diff(ctx, files, metrics, all, detail):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx, config)
+        handle_no_cache(ctx)
 
     if not metrics:
         metrics = get_default_metrics(config)
@@ -212,7 +212,7 @@ def graph(ctx, files, metrics, output):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx, config)
+        handle_no_cache(ctx)
 
     from wily.commands.graph import graph
 
@@ -228,7 +228,7 @@ def clean(ctx, yes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx, config)
+        handle_no_cache(ctx)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
@@ -247,7 +247,7 @@ def list_metrics(ctx):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx, config)
+        handle_no_cache(ctx)
 
     from wily.commands.list_metrics import list_metrics
 
@@ -256,14 +256,14 @@ def list_metrics(ctx):
 
 @cli.command("setup")
 @click.pass_context
-def setup(ctx, target, revisions):
+def setup(ctx):
     """
     Run a guided setup to build the wily cache
     """
-    handle_no_cache(ctx, ctx["CONFIG"])
+    handle_no_cache(ctx)
 
 
-def handle_no_cache(context, config):
+def handle_no_cache(context):
     """
     Handle lack-of-cache error, prompt user for index process.
     """

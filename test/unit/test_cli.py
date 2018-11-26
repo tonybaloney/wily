@@ -1,6 +1,14 @@
 import wily.__main__ as main
 from mock import patch
 from click.testing import CliRunner
+import pytest
+
+
+def test_init():
+    with patch.object(main, "cli", return_value=None) as cli:
+        with patch.object(main, "__name__", "__main__"):
+            __import__("wily.__main__")
+            assert cli.called_once
 
 
 def test_help():
@@ -11,6 +19,40 @@ def test_help():
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--help", "--debug"])
         assert result.exit_code == 0
+
+
+def test_setup():
+    """
+    Test that CLI when called with help options
+    """
+    with patch("wily.__main__.handle_no_cache", return_value=True) as handle_no_cache:
+        runner = CliRunner()
+        result = runner.invoke(main.cli, ["setup"])
+        assert result.exit_code == 0
+        assert handle_no_cache.called_once
+
+
+def test_handle_no_cache_no():
+    """
+    Test that setup cancels when "n" typed
+    """
+    with patch("wily.__main__.input", return_value="n") as mock_input:
+        with pytest.raises(SystemExit):
+            main.handle_no_cache(None)
+            assert mock_input.called_once
+
+
+def test_handle_no_cache():
+    """
+    Test that setup works
+    """
+    with patch("wily.__main__.build", return_value="n") as build_command:
+        with patch("wily.__main__.input", side_effect=["y", "11", "."]) as mock_input:
+            runner = CliRunner()
+            runner.invoke(main.cli, ["setup"])
+            assert mock_input.called
+            assert build_command.called_once
+            assert build_command.called_with("1")
 
 
 def test_build():
@@ -195,6 +237,27 @@ def test_diff():
                 assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
                 assert gdf.called_once
                 assert "maintainability.mi" in diff.call_args[1]["metrics"]
+
+
+def test_diff_with_metrics():
+    """
+    Test that diff calls the diff command with additional metrics
+    """
+    with patch(
+        "wily.__main__.get_default_metrics",
+        return_value=["maintainability.mi", "raw.loc"],
+    ) as gdf:
+        with patch("wily.__main__.exists", return_value=True) as check_cache:
+            with patch("wily.commands.diff.diff") as diff:
+                runner = CliRunner()
+                result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py", "--metrics", "maintainability.mi,raw.sloc"])
+                assert result.exit_code == 0
+                assert diff.called_once
+                assert check_cache.called_once
+                assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
+                assert not gdf.called
+                assert "maintainability.mi" in diff.call_args[1]["metrics"]
+                assert "raw.loc" not in diff.call_args[1]["metrics"]
 
 
 def test_clean():
