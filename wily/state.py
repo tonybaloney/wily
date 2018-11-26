@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import wily.cache as cache
 from wily import logger
 from wily.archivers import Revision, resolve_archiver
@@ -45,32 +46,35 @@ class Index(object):
             if cache.has_index(config, archiver.name)
             else []
         )
+        # If only Python supported Ordered Dict comprehensions :-(
+        self._revisions = OrderedDict()
+        for d in self.data:
+            self._revisions["revision"] = LazyRevision(self.config, self.archiver, d["revision"], d)
 
     @property
     def revisions(self):
         """
         List of all the revisions
         """
-        return [
-            LazyRevision(self.config, self.archiver, d["revision"], d)
-            for d in self.data
-        ]
+        return self._revisions.items()
 
     @property
     def revision_keys(self):
         """
         List of all the revision indexes
         """
-        return [d["revision"] for d in self.data]
+        return self._revisions.keys()
 
     def __contains__(self, item):
         if isinstance(item, Revision):
-            return item.key in self.revision_keys
+            return self._revisions[item.key]
+        elif isinstance(item, str):
+            return self._revisions[item]
         else:
-            return item in self.revisions
+            return item in self._revisions.items()
 
     def __getitem__(self, index):
-        return self.data[index]
+        return self._revisions[index]
 
     def add(self, revision, operators):
         """
