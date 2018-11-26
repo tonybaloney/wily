@@ -59,14 +59,14 @@ class Index(object):
         """
         List of all the revisions
         """
-        return self._revisions.items()
+        return list(self._revisions.items())
 
     @property
     def revision_keys(self):
         """
         List of all the revision indexes
         """
-        return self._revisions.keys()
+        return list(self._revisions.keys())
 
     def __contains__(self, item):
         if isinstance(item, Revision):
@@ -97,7 +97,7 @@ class Index(object):
         """
         Save the index data back to the wily cache
         """
-        cache.store_index(self.config, self.archiver, self._revisions.items())
+        cache.store_index(self.config, self.archiver, self._revisions)
 
 
 class State(object):
