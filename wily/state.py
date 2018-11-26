@@ -49,7 +49,7 @@ class Index(object):
         # If only Python supported Ordered Dict comprehensions :-(
         self._revisions = OrderedDict()
         for d in self.data:
-            self._revisions["revision"] = LazyRevision(self.config, self.archiver, d["revision"], d)
+            self._revisions[d["revision"]] = LazyRevision(self.config, self.archiver, d["revision"], d)
 
     def __len__(self):
         return len(self._revisions)
@@ -59,7 +59,7 @@ class Index(object):
         """
         List of all the revisions
         """
-        return list(self._revisions.items())
+        return list(self._revisions.values())
 
     @property
     def revision_keys(self):
@@ -97,7 +97,7 @@ class Index(object):
         """
         Save the index data back to the wily cache
         """
-        cache.store_index(self.config, self.archiver, self._revisions)
+        cache.store_index(self.config, self.archiver, list(self._revisions.values()))
 
 
 class State(object):
