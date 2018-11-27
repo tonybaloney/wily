@@ -1,5 +1,5 @@
 """
-A module for working with the .wily/ cache directory
+A module for working with the .wily/ cache directory.
 
 This API is not intended to be public and should not be consumed directly.
 The API in this module is for archivers and commands to work with the local cache
@@ -19,7 +19,7 @@ from wily import logger, __version__
 
 def exists(config):
     """
-    Check whether the .wily/ directory exists
+    Check whether the .wily/ directory exists.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -35,7 +35,7 @@ def exists(config):
 
 def create(config):
     """
-    Create a wily cache
+    Create a wily cache.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -57,7 +57,7 @@ def create(config):
 
 def clean(config):
     """
-    Delete a wily cache
+    Delete a wily cache.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -72,7 +72,7 @@ def clean(config):
 
 def store(config, archiver, revision, stats):
     """
-    Store a revision record within an archiver folder
+    Store a revision record within an archiver folder.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -120,7 +120,7 @@ def store(config, archiver, revision, stats):
 
 def store_index(config, archiver, index):
     """
-    Store an archiver's index record for faster search
+    Store an archiver's index record for faster search.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -150,7 +150,7 @@ def store_index(config, archiver, index):
 
 def list_archivers(config):
     """
-    List the names of archivers with data
+    List the names of archivers with data.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -168,7 +168,7 @@ def list_archivers(config):
 
 def get_default_metrics(config):
     """
-    Get the default metrics for a configuration
+    Get the default metrics for a configuration.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -197,7 +197,7 @@ def get_default_metrics(config):
 
 def has_index(config, archiver):
     """
-    Does this archiver have an index file?
+    Check if this archiver has an index file.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -214,7 +214,7 @@ def has_index(config, archiver):
 
 def get_index(config, archiver):
     """
-    Get the contents of the archiver index file
+    Get the contents of the archiver index file.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
@@ -233,7 +233,7 @@ def get_index(config, archiver):
 
 def get(config, archiver, revision):
     """
-    Get the data for a given revision
+    Get the data for a given revision.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`

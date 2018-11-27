@@ -1,5 +1,5 @@
 """
-List available metrics across all providers
+List available metrics across all providers.
 
 TODO : Only show metrics for the operators that the cache has?
 """
@@ -10,6 +10,7 @@ import tabulate
 
 
 def list_metrics():
+    """List metrics available."""
     for operator in ALL_OPERATORS:
         print(f"{operator.name} operator:")
         if len(operator.cls.metrics) > 0:

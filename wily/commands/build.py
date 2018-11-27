@@ -1,5 +1,5 @@
 """
-Builds a cache based on a source-control history
+Builds a cache based on a source-control history.
 
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 

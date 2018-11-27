@@ -1,5 +1,5 @@
 """
-Draw graph in HTML for a specific metric
+Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
 """
@@ -17,17 +17,18 @@ import plotly.graph_objs as go
 
 def graph(config, paths, metrics, output=None):
     """
-    Graph information about the cache and runtime
-    :param config: The configuration
+    Graph information about the cache and runtime.
+
+    :param config: The configuration.
     :type  config: :class:`wily.config.WilyConfig`
 
-    :param paths: The path(s) to the files
+    :param paths: The path(s) to the files.
     :type  paths: ``list``
 
-    :param metrics: The metrics to report on
+    :param metrics: The metrics to report on.
     :type  metrics: ``tuple``
 
-    :param output: Save report to specified path instead of opening browser
+    :param output: Save report to specified path instead of opening browser.
     :type  output: ``str``
     """
     logger.debug("Running report command")

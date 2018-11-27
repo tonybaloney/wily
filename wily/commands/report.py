@@ -1,4 +1,6 @@
 """
+Report command.
+
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
@@ -13,7 +15,8 @@ from wily.operators import resolve_metric, MetricType
 
 def report(config, path, metrics, n, include_message=False):
     """
-    Show information about the cache and runtime
+    Show information about the cache and runtime.
+
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
 
@@ -25,6 +28,9 @@ def report(config, path, metrics, n, include_message=False):
 
     :param n: Number of items to list
     :type  n: ``int``
+
+    :param include_message: Include revision messages
+    :type  include_message: ``bool``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")

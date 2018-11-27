@@ -1,8 +1,5 @@
 # -*- coding: UTF-8 -*-
-
-"""
-Main command line
-"""
+"""Main command line."""
 
 import os.path
 import click
@@ -34,7 +31,7 @@ from wily.operators import resolve_operators
 )
 @click.pass_context
 def cli(ctx, debug, config, path):
-    """\U0001F98A Inspect and search through the complexity of your source code.
+    r"""\U0001F98A Inspect and search through the complexity of your source code.
 
     To get started, run setup:
 
@@ -89,7 +86,7 @@ def cli(ctx, debug, config, path):
 )
 @click.pass_context
 def build(ctx, max_revisions, targets, operators, skip_gitignore_check):
-    """Build the wily cache"""
+    """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
     from wily.commands.build import build
@@ -243,7 +240,7 @@ def clean(ctx, yes):
 @cli.command("list-metrics")
 @click.pass_context
 def list_metrics(ctx):
-    """List the available metrics"""
+    """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -257,16 +254,12 @@ def list_metrics(ctx):
 @cli.command("setup")
 @click.pass_context
 def setup(ctx):
-    """
-    Run a guided setup to build the wily cache
-    """
+    """Run a guided setup to build the wily cache."""
     handle_no_cache(ctx)
 
 
 def handle_no_cache(context):
-    """
-    Handle lack-of-cache error, prompt user for index process.
-    """
+    """Handle lack-of-cache error, prompt user for index process."""
     logger.error(
         f"Could not locate wily cache, the cache is required to provide insights."
     )

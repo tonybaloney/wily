@@ -1,4 +1,6 @@
 """
+Wily.
+
 A Python application for tracking, reporting on timing and complexity in tests and applications.
 """
 import colorlog
@@ -18,15 +20,15 @@ MAX_MESSAGE_WIDTH = 50
 
 
 def format_date(timestamp):
-    """ Reusable timestamp -> date """
+    """Reusable timestamp -> date."""
     return datetime.date.fromtimestamp(timestamp).isoformat()
 
 
 def format_datetime(timestamp):
-    """ Reusable timestamp -> datetime """
+    """Reusable timestamp -> datetime."""
     return datetime.datetime.fromtimestamp(timestamp).isoformat()
 
 
 def format_revision(sha):
-    """ Return a shorter git sha """
+    """Return a shorter git sha."""
     return sha[:7]

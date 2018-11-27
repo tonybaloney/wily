@@ -1,5 +1,5 @@
 """
-Configuration of wily
+Configuration of wily.
 
 TODO : Handle operator settings. Maybe a section for each operator and then pass kwargs to operators?
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
@@ -24,8 +24,9 @@ DEFAULT_CACHE_PATH = ".wily"
 @dataclass
 class WilyConfig(object):
     """
-    A data class to reflect the configurable options
-    within Wily.
+    Wily configuration.
+
+    A data class to reflect the configurable options within Wily.
     """
 
     operators: List
@@ -38,7 +39,7 @@ class WilyConfig(object):
     checkout_options: dict = field(default_factory=dict)
 
     def __post_init__(self):
-        # Clone targets as a list of path
+        """Clone targets as a list of path."""
         if self.targets is None or "":
             self.targets = [self.path]
 
@@ -85,7 +86,6 @@ def load(config_path=DEFAULT_CONFIG_PATH):
     :return: The configuration ``WilyConfig``
     :rtype: :class:`wily.config.WilyConfig`
     """
-
     if not pathlib.Path(config_path).exists():
         logger.debug(f"Could not locate {config_path}, using default config.")
         return DEFAULT_CONFIG

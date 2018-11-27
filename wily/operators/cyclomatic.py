@@ -1,8 +1,7 @@
 """
-Cyclomatic complexity metric for each function/method
+Cyclomatic complexity metric for each function/method.
 
-Provided by the radon library
-
+Provided by the radon library.
 """
 
 import radon.cli.harvest as harvesters
@@ -14,6 +13,8 @@ from wily.operators import BaseOperator, Metric, MetricType
 
 
 class CyclomaticComplexityOperator(BaseOperator):
+    """Cyclomatic complexity operator."""
+
     name = "cyclomatic"
     defaults = {
         "exclude": None,
@@ -30,6 +31,12 @@ class CyclomaticComplexityOperator(BaseOperator):
     default_metric_index = 0  # MI
 
     def __init__(self, config):
+        """
+        Instantiate a new Cyclomatic Complexity operator.
+
+        :param config: The wily configuration.
+        :type  config: :class:`WilyConfig`
+        """
         # TODO: Import config for harvester from .wily.cfg
         logger.debug(f"Using {config.targets} with {self.defaults} for CC metrics")
 
@@ -38,6 +45,18 @@ class CyclomaticComplexityOperator(BaseOperator):
         )
 
     def run(self, module, options):
+        """
+        Run the operator.
+
+        :param module: The target module path.
+        :type  module: ``str``
+
+        :param options: Any runtime options.
+        :type  options: ``dict``
+
+        :return: The operator results.
+        :rtype: ``dict``
+        """
         logger.debug("Running CC harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():

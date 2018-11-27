@@ -1,5 +1,7 @@
 """
-Compares metrics between uncommitted files and indexed files
+Diff command.
+
+Compares metrics between uncommitted files and indexed files.
 """
 import tabulate
 

@@ -1,3 +1,8 @@
+"""
+Git Archiver.
+
+Implementation of the archiver API for the gitpython module.
+"""
 from git import Repo
 import logging
 import pathlib
@@ -6,30 +11,47 @@ from wily.archivers import BaseArchiver, Revision
 
 logger = logging.getLogger(__name__)
 
-""" Possible combinations in .gitignore """
+"""Possible combinations in .gitignore."""
 gitignore_options = (".wily/", ".wily", ".wily/*", ".wily/**/*")
 
 
 class DirtyGitRepositoryError(Exception):
+    """Error for a dirty git repository (untracked files)."""
+
     def __init__(self, untracked_files):
+        """
+        Raise error for untracked files.
+
+        :param untracked_files: List of untracked files
+        :param untracked_files: ``list``
+        """
         self.untracked_files = untracked_files
         self.message = "Dirty repository, make sure you commit/stash files first"
 
 
 class WilyIgnoreGitRepositoryError(Exception):
+    """Error for .wily/ being missing from .gitignore."""
+
     def __init__(self):
+        """Raise runtime error for .gitignore being incorrectly configured."""
         self.message = "Please add '.wily/' to .gitignore before running wily"
 
 
 class GitArchiver(BaseArchiver):
-    """ Name of the archiver """
+    """Gitpython implementation of the base archiver."""
 
     name = "git"
 
-    """ Whether to ignore checking for .wily/ in .gitignore files """
+    """Whether to ignore checking for .wily/ in .gitignore files."""
     ignore_gitignore = False
 
     def __init__(self, config):
+        """
+        Instantiate a new Git Archiver.
+
+        :param config: The wily configuration
+        :type  config: :class:`wily.config.WilyConfig`
+        """
         self.repo = Repo(config.path)
         self.ignore_gitignore = config.skip_ignore_check
         gitignore = pathlib.Path(config.path) / ".gitignore"
@@ -53,6 +75,18 @@ class GitArchiver(BaseArchiver):
         assert not self.repo.bare, "Not a Git repository"
 
     def revisions(self, path, max_revisions):
+        """
+        Get the list of revisions.
+
+        :param path: the path to target.
+        :type  path: ``str``
+
+        :param max_revisions: the maximum number of revisions.
+        :type  max_revisions: ``int``
+
+        :return: A list of revisions.
+        :rtype: ``list`` of :class:`Revision`
+        """
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
@@ -71,9 +105,22 @@ class GitArchiver(BaseArchiver):
         return revisions
 
     def checkout(self, revision, options):
+        """
+        Checkout a specific revision.
+
+        :param revision: The revision identifier.
+        :type  revision: :class:`Revision`
+
+        :param options: Any additional options.
+        :type  options: ``dict``
+        """
         rev = revision.key
         self.repo.git.checkout(rev)
 
     def finish(self):
-        # Make sure you checkout HEAD on the original branch when finishing
+        """
+        Clean up any state if processing completed/failed.
+
+        For git, will checkout HEAD on the original branch when finishing
+        """
         self.repo.git.checkout(self.current_branch)
