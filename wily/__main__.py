@@ -288,4 +288,4 @@ def handle_no_cache(context):
 
 
 if __name__ == "__main__":
-    cli()
+    cli()  # pragma: no cover
