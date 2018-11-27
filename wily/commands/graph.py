@@ -31,10 +31,10 @@ def graph(config, path, metrics, output=None):
 
     data = []
     state = State(config)
-    path = pathlib.Path(path)
+    abs_path = config.path / pathlib.Path(path)
 
-    if path.is_dir():
-        paths = list(pathlib.Path(path).glob('**/*.py'))
+    if abs_path.is_dir():
+        paths = [p.relative_to(config.path) for p in pathlib.Path(abs_path).glob('**/*.py')]
     else:
         paths = [path]
 

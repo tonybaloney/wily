@@ -6,9 +6,7 @@ Will compare the values between revisions and highlight changes in green/red.
 """
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 import tabulate
-import pathlib
-from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
-import wily.cache as cache
+from wily.config import DEFAULT_GRID_STYLE
 from wily.state import State
 from wily.operators import resolve_metric, MetricType
 

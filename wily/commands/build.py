@@ -8,7 +8,6 @@ from progress.bar import Bar
 
 from wily import logger
 from wily.state import State
-import wily.cache as cache
 
 
 def build(config, archiver, operators):
@@ -63,8 +62,8 @@ def build(config, archiver, operators):
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
-            index.add(revision, operators=operators)
-            cache.store(config, archiver, revision, stats)
+            ir = index.add(revision, operators=operators)
+            ir.store(config, archiver, stats)
         index.save()
         bar.finish()
     except Exception as e:

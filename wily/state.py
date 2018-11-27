@@ -65,6 +65,22 @@ class IndexedRevision(object):
         logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
         return get_metric(self._data, operator, path, key)
 
+    def store(self, config, archiver, stats):
+        """
+        Store the stats for this indexed revision.
+
+        :param config: The wily config.
+        :type  config: :class:`wily.config.WilyConfig`
+
+        :param archiver: The archiver.
+        :type  archiver: :class:`wily.archivers.Archiver`
+
+        :param stats: The data
+        :type  stats: ``dict``
+        """
+        self._data = stats
+        return cache.store(config, archiver, self.revision, stats)
+
 
 class Index(object):
     """The index of the wily cache."""
@@ -146,6 +162,7 @@ class Index(object):
             revision=revision, operators=[operator.name for operator in operators]
         )
         self._revisions[revision.key] = ir
+        return ir
 
     def save(self):
         """Save the index data back to the wily cache."""

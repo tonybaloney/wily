@@ -6,7 +6,6 @@ Print information about the wily cache and what is in the index.
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.state import State
 import tabulate
-import wily.cache as cache
 from wily.config import DEFAULT_GRID_STYLE
 
 

@@ -1,61 +1,51 @@
 import wily.__main__ as main
-from mock import patch
-from textwrap import dedent
 from click.testing import CliRunner
-from git import Repo, Actor
-import pathlib
-import pytest
 
 
 def test_graph_no_cache(tmpdir):
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--path", tmpdir, "graph", "src/test.py", "raw.loc"]
-        )
-        assert result.exit_code == 1, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", tmpdir, "graph", "src/test.py", "raw.loc"]
+    )
+    assert result.exit_code == 1, result.stdout
 
 
 def test_graph(builddir):
     """ Test the graph feature """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "src/test.py", "raw.loc"]
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "graph", "src/test.py", "raw.loc"]
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_graph_path(builddir):
     """ Test the graph feature """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "src/", "raw.loc"]
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "graph", "src/", "raw.loc"]
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_graph_multiple(builddir):
     """ Test the graph feature with multiple metrics """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "graph", "src/test.py", "raw.loc", "raw.comments"],
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--path", builddir, "graph", "src/test.py", "raw.loc", "raw.comments"],
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_graph_multiple_path(builddir):
     """ Test the graph feature with multiple metrics """
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "graph", "src/", "raw.loc", "raw.comments"],
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--path", builddir, "graph", "src/", "raw.loc", "raw.comments"],
+    )
+    assert result.exit_code == 0, result.stdout
 
 
 def test_graph_output(builddir):

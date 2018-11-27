@@ -3,7 +3,6 @@ List available metrics across all providers.
 
 TODO : Only show metrics for the operators that the cache has?
 """
-from wily import logger
 from wily.operators import ALL_OPERATORS
 from wily.config import DEFAULT_GRID_STYLE
 import tabulate
