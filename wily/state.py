@@ -104,7 +104,7 @@ class Index(object):
         :param revision: The revision.
         :type  revision: :class:`Revision` or :class:`LazyRevision`
         """
-        ir = IndexedRevision(revision=revision, operators=operators)
+        ir = IndexedRevision(revision=revision, operators=[operator.name for operator in operators])
         self._revisions[revision.key] = ir
 
     def save(self):
