@@ -4,7 +4,7 @@
 
 **NB: Changes to the wily index will require a rebuild of cache.**
 
-* Introduce index versioning
+* Introduce index versioning, raises a warning if index is old
 * Add a `setup` command, which will be prompted by default in the absence of wily cache
 * Wily `build` now specifies the maximum revisions using `-n` instead of `-h`, which was confusing with `--help`
 * Build targets are now a required argument
