@@ -47,11 +47,7 @@ def exists(config):
 
 
 def create_index(config):
-    """
-    Create the root index.
-    :param config:
-    :return:
-    """
+    """Create the root index."""
     filename = pathlib.Path(config.cache_path) / "index.json"
     index = {"version": __version__}
     with open(filename, "w") as out:
