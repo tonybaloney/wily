@@ -66,7 +66,7 @@ def cli(ctx, debug, config, path):
 
 @cli.command()
 @click.option(
-    "-h",
+    "-n",
     "--max-revisions",
     default=None,
     type=click.INT,
