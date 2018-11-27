@@ -4,62 +4,15 @@ For managing the state of the wily process.
 Contains a lazy revision, index and process state model.
 """
 from collections import OrderedDict
+from dataclasses import asdict
 import wily.cache as cache
 from wily import logger
 from wily.archivers import Revision, resolve_archiver
-from wily.operators import get_metric
-
-
-class LazyRevision(object):
-    """
-    Represents a revision within an archiver.
-
-    Is instantiated with index data,
-    if an attribute is requested that requires loading the stored data, the cache
-    will be loaded to the object.
-    """
-
-    def __init__(self, config, archiver, revision, index_dict):
-        """
-        Instantiate a lazy revision.
-
-        :param config: The wily configuration.
-        :type  config: :class:`WilyConfig`
-
-        :param archiver: The archiver.
-        :type  archiver: :class:`wily.archivers.Archiver`
-
-        :param revision: The revision ID.
-        :type  revision: ``str``
-
-        :param index_dict: The index dictionary.
-        :type  index_dict: ``dict``
-        """
-        self._index_dict = index_dict
-        self._cache = None
-        self.config = config
-        self.revision = revision
-        self.key = revision
-        self.archiver = archiver
-
-    def __getattr__(self, attr):
-        """Override default __getattr__ to fetch data from cache."""
-        if attr in self._index_dict:
-            return self._index_dict[attr]
-        else:
-            if self._cache:
-                return self._cache[attr]
-            else:
-                self._cache = cache.get(self.config, self.archiver.name, self.revision)
-                return self._cache[attr]
-
-    def get(self, operator, path, key):
-        """Get the data from wily cache."""
-        return get_metric(self.operator_data, operator, path, key)
 
 
 class Index(object):
     """The index of the wily cache."""
+    operators = None
 
     def __init__(self, config, archiver):
         """
@@ -81,7 +34,9 @@ class Index(object):
         # If only Python supported Ordered Dict comprehensions :-(
         self._revisions = OrderedDict()
         for d in self.data:
-            self.add(LazyRevision(self.config, self.archiver, d["revision"], d))
+            if not self.operators:
+                self.operators = d['operators']
+            self.add(Revision(key=d['revision'], author_name=d['author_name'], author_email=d['author_email'], date=d['date'], message=d['message']))
 
     def __len__(self):
         """Use length of revisions as len."""
@@ -94,7 +49,7 @@ class Index(object):
 
         :rtype: ``list`` of :class:`LazyRevision`
         """
-        return [LazyRevision(self.config, self.archiver, r['revision'], r) for r in self._revisions.values()]
+        return list(self._revisions.values())
 
     @property
     def revision_keys(self):
@@ -114,7 +69,7 @@ class Index(object):
 
         :return: ``True`` for contains, ``False`` for not.
         """
-        if isinstance(item, (Revision, LazyRevision)):
+        if isinstance(item, Revision):
             return item.key in self._revisions
         elif isinstance(item, str):
             return item in self._revisions
@@ -125,26 +80,19 @@ class Index(object):
         """Get the revision for a specific index."""
         return self._revisions[index]
 
-    def add(self, revision, operators=[]):
+    def add(self, revision):
         """
         Add a revision to the index.
 
         :param revision: The revision.
         :type  revision: :class:`Revision` or :class:`LazyRevision`
         """
-        stats_header = {
-            "revision": revision.key,
-            "author_name": revision.author_name,
-            "author_email": revision.author_email,
-            "date": revision.date,
-            "message": revision.message,
-            "operators": [operator.name for operator in operators],
-        }
-        self._revisions[revision.key] = stats_header
+        self._revisions[revision.key] = revision
 
     def save(self):
         """Save the index data back to the wily cache."""
-        cache.store_index(self.config, self.archiver, list(self._revisions.values()))
+        data = [asdict(i) for i in self._revisions.values()]
+        cache.store_index(self.config, self.archiver, data)
 
 
 class State(object):

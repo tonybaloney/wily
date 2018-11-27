@@ -42,6 +42,7 @@ class BaseArchiver(object):
         """Clean up any state if processing completed/failed."""
         raise NotImplementedError
 
+
 @dataclass
 class Revision:
     """Represents a revision in the archiver."""

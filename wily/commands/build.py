@@ -4,7 +4,6 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
-import traceback
 from progress.bar import Bar
 
 from wily import logger
@@ -51,6 +50,7 @@ def build(config, archiver, operators):
     logger.info(f"Running operators - {_op_desc}")
 
     bar = Bar("Processing", max=len(revisions) * len(operators))
+    state.operators = operators
     try:
         for revision in revisions:
             # Checkout target revision
@@ -63,7 +63,7 @@ def build(config, archiver, operators):
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
-            index.add(revision, operators)
+            index.add(revision)
             cache.store(config, archiver, revision, stats)
         index.save()
         bar.finish()
