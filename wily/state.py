@@ -50,7 +50,7 @@ class Index(object):
             if cache.has_index(config, archiver.name)
             else []
         )
-        # If only Python supported Ordered Dict comprehensions :-(
+
         self._revisions = OrderedDict()
         for d in self.data:
             self._revisions[d['revision']] = IndexedRevision.fromdict(d)
@@ -110,6 +110,7 @@ class Index(object):
     def save(self):
         """Save the index data back to the wily cache."""
         data = [i.asdict() for i in self._revisions.values()]
+        logger.debug(data)
         cache.store_index(self.config, self.archiver, data)
 
 
