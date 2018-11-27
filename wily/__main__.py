@@ -209,7 +209,7 @@ def graph(ctx, path, metrics, output):
     """
     Graph a specific metric for a given file, if a path is given, all files within path will be graphed.
 
-    Examples:
+    Some common examples:
 
     Graph all .py files within src/ for the raw.loc metric
 
