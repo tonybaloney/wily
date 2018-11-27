@@ -121,6 +121,14 @@ Then looking up values can be as simple as checking for the key in the dictionar
   if "birch" in list_of_trees:
     print("yes!")
 
+In all of these examples, you can put python statements into the assignments, for example:
+
+.. code-block:: python
+
+  >> # as a dictionary comprehension
+  >> {tree.capitalize():color.upper() for tree,color in list_of_trees}
+  {'Birch': 'SILVER', 'Lemon': 'YELLOW', 'Oak': 'GREEN', 'Pine': 'BROWN'}
+
 .. _exception hierarchy: https://docs.python.org/3/library/exceptions.html#exception-hierarchy
 .. _Jmes path: https://github.com/jmespath/jmespath.py
 .. _See detail: https://radon.readthedocs.io/en/latest/intro.html
