@@ -21,6 +21,13 @@ class IndexedRevision(object):
         rev = Revision(key=d['revision'], author_name=d['author_name'], author_email=d['author_email'], date=d['date'],
                  message=d['message'])
         operators = d['operators']
+        return IndexedRevision(revision=rev, operators=operators)
+
+    @classmethod
+    def asdict(cls):
+        d = asdict(cls.revision)
+        d['operators'] = cls.operators
+        return d
 
 
 class Index(object):
@@ -103,7 +110,7 @@ class Index(object):
 
     def save(self):
         """Save the index data back to the wily cache."""
-        data = [asdict(i) for i in self._revisions.values()]
+        data = [i.asdict() for i in self._revisions.values()]
         cache.store_index(self.config, self.archiver, data)
 
 
