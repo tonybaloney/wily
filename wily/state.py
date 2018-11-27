@@ -23,10 +23,9 @@ class IndexedRevision(object):
         operators = d['operators']
         return IndexedRevision(revision=rev, operators=operators)
 
-    @classmethod
-    def asdict(cls):
-        d = asdict(cls.revision)
-        d['operators'] = cls.operators
+    def asdict(self):
+        d = asdict(self.revision)
+        d['operators'] = self.operators
         return d
 
 
