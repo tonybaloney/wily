@@ -49,7 +49,7 @@ class CyclomaticComplexityOperator(BaseOperator):
                 elif isinstance(instance, Function):
                     i = self._dict_from_function(instance)
                 else:
-                    raise TypeError("unexpected type : {type(instance)}")
+                    raise TypeError
                 results[filename][i["fullname"]] = i
                 del i["fullname"]
                 total += i["complexity"]

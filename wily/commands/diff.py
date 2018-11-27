@@ -65,46 +65,43 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     files.extend(extra)
     logger.debug(files)
     for file in files:
-        try:
-            metrics_data = []
-            has_changes = False
-            for operator, metric in metrics:
-                try:
-                    current = last_revision.get(operator, file, metric.name)
-                except KeyError as e:
-                    current = "-"
-                try:
-                    new = get_metric(data, operator, file, metric.name)
-                except KeyError as e:
-                    new = "-"
-                if new != current:
-                    has_changes = True
-                if metric.type in (int, float) and new != "-" and current != "-":
-                    if current > new:
-                        metrics_data.append(
-                            "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
-                                current, new, BAD_COLORS[metric.measure]
-                            )
+        metrics_data = []
+        has_changes = False
+        for operator, metric in metrics:
+            try:
+                current = last_revision.get(operator, file, metric.name)
+            except KeyError as e:
+                current = "-"
+            try:
+                new = get_metric(data, operator, file, metric.name)
+            except KeyError as e:
+                new = "-"
+            if new != current:
+                has_changes = True
+            if metric.type in (int, float) and new != "-" and current != "-":
+                if current > new:
+                    metrics_data.append(
+                        "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
+                            current, new, BAD_COLORS[metric.measure]
                         )
-                    elif current < new:
-                        metrics_data.append(
-                            "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
-                                current, new, GOOD_COLORS[metric.measure]
-                            )
+                    )
+                elif current < new:
+                    metrics_data.append(
+                        "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
+                            current, new, GOOD_COLORS[metric.measure]
                         )
-                    else:
-                        metrics_data.append("{0:n} -> {1:n}".format(current, new))
+                    )
                 else:
-                    if current == "-" and new == "-":
-                        metrics_data.append("-")
-                    else:
-                        metrics_data.append("{0} -> {1}".format(current, new))
-            if has_changes or not changes_only:
-                results.append((file, *metrics_data))
+                    metrics_data.append("{0:n} -> {1:n}".format(current, new))
             else:
-                logger.debug(metrics_data)
-        except KeyError as e:
-            logger.debug(f"Could not find {e}")
+                if current == "-" and new == "-":
+                    metrics_data.append("-")
+                else:
+                    metrics_data.append("{0} -> {1}".format(current, new))
+        if has_changes or not changes_only:
+            results.append((file, *metrics_data))
+        else:
+            logger.debug(metrics_data)
 
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
