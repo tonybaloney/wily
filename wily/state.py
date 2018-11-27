@@ -4,10 +4,23 @@ For managing the state of the wily process.
 Contains a lazy revision, index and process state model.
 """
 from collections import OrderedDict
-from dataclasses import asdict
+from dataclasses import dataclass, asdict
+from typing import Dict, List
 import wily.cache as cache
 from wily import logger
 from wily.archivers import Revision, resolve_archiver
+
+
+@dataclass
+class IndexedRevision(object):
+    revision: Revision
+    operators: List
+
+    @staticmethod
+    def fromdict(d):
+        rev = Revision(key=d['revision'], author_name=d['author_name'], author_email=d['author_email'], date=d['date'],
+                 message=d['message'])
+        operators = d['operators']
 
 
 class Index(object):
@@ -34,9 +47,7 @@ class Index(object):
         # If only Python supported Ordered Dict comprehensions :-(
         self._revisions = OrderedDict()
         for d in self.data:
-            if not self.operators:
-                self.operators = d['operators']
-            self.add(Revision(key=d['revision'], author_name=d['author_name'], author_email=d['author_email'], date=d['date'], message=d['message']))
+            self._revisions[d['revision']] = IndexedRevision.fromdict(d)
 
     def __len__(self):
         """Use length of revisions as len."""
@@ -80,14 +91,15 @@ class Index(object):
         """Get the revision for a specific index."""
         return self._revisions[index]
 
-    def add(self, revision):
+    def add(self, revision, operators):
         """
         Add a revision to the index.
 
         :param revision: The revision.
         :type  revision: :class:`Revision` or :class:`LazyRevision`
         """
-        self._revisions[revision.key] = revision
+        ir = IndexedRevision(revision=revision, operators=operators)
+        self._revisions[revision.key] = ir
 
     def save(self):
         """Save the index data back to the wily cache."""
