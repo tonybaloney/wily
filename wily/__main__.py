@@ -31,7 +31,8 @@ from wily.operators import resolve_operators
 )
 @click.pass_context
 def cli(ctx, debug, config, path):
-    r"""\U0001F98A Inspect and search through the complexity of your source code.
+    """
+    \U0001F98A Inspect and search through the complexity of your source code.
 
     To get started, run setup:
 
@@ -198,14 +199,27 @@ def diff(ctx, files, metrics, all, detail):
 
 
 @cli.command()
-@click.argument("files", type=click.Path(resolve_path=False))
+@click.argument("path", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=True)
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
 )
 @click.pass_context
-def graph(ctx, files, metrics, output):
-    """Graph a specific metric for a given file."""
+def graph(ctx, path, metrics, output):
+    """
+    Graph a specific metric for a given file, if a path is given, all files within path will be graphed.
+
+    Examples:
+
+    Graph all .py files within src/ for the raw.loc metric
+
+        $ wily graph src/ raw.loc
+
+    Graph test.py against raw.loc and cyclomatic.complexity metrics
+
+        $ wily graph src/test.py raw.loc cyclomatic.complexity
+
+    """
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -213,8 +227,8 @@ def graph(ctx, files, metrics, output):
 
     from wily.commands.graph import graph
 
-    logger.debug(f"Running report on {files} for metrics {metrics}")
-    graph(config=config, path=files, metrics=metrics, output=output)
+    logger.debug(f"Running report on {path} for metrics {metrics}")
+    graph(config=config, path=path, metrics=metrics, output=output)
 
 
 @cli.command()

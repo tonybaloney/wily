@@ -180,7 +180,7 @@ def test_graph():
             assert result.exit_code == 0
             assert graph.called_once
             assert check_cache.called_once
-            assert graph.call_args[1]["paths"] == ["foo.py"]
+            assert graph.call_args[1]["path"] == "foo.py"
             assert graph.call_args[1]["metrics"] == ("example_metric",)
 
 
@@ -197,7 +197,7 @@ def test_graph_multiple_metrics():
             assert result.exit_code == 0
             assert graph.called_once
             assert check_cache.called_once
-            assert graph.call_args[1]["paths"] == ["foo.py"]
+            assert graph.call_args[1]["path"] == "foo.py"
             assert graph.call_args[1]["metrics"] == ("example_metric", "another_metric")
 
 
@@ -214,7 +214,7 @@ def test_graph_with_output():
             assert result.exit_code == 0
             assert graph.called_once
             assert check_cache.called_once
-            assert graph.call_args[1]["paths"] == ["foo.py"]
+            assert graph.call_args[1]["path"] == "foo.py"
             assert graph.call_args[1]["metrics"] == ("example_metric",)
             assert graph.call_args[1]["output"] == "foo.html"
 

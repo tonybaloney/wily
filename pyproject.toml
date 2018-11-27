@@ -53,7 +53,7 @@ deps =
 commands =
     pytest --cov=wily
     codecov
-    pydocstyle wily/
+    pydocstyle --ignore=D301,D212,D203 wily
 """
 
 [tool.black]

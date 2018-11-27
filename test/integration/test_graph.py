@@ -26,6 +26,16 @@ def test_graph(builddir):
         assert result.exit_code == 0, result.stdout
 
 
+def test_graph_path(builddir):
+    """ Test the graph feature """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "graph", "src/", "raw.loc"]
+        )
+        assert result.exit_code == 0, result.stdout
+
+
 def test_graph_multiple(builddir):
     """ Test the graph feature with multiple metrics """
     with patch("wily.logger") as logger:
@@ -33,6 +43,17 @@ def test_graph_multiple(builddir):
         result = runner.invoke(
             main.cli,
             ["--path", builddir, "graph", "src/test.py", "raw.loc", "raw.comments"],
+        )
+        assert result.exit_code == 0, result.stdout
+
+
+def test_graph_multiple_path(builddir):
+    """ Test the graph feature with multiple metrics """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli,
+            ["--path", builddir, "graph", "src/", "raw.loc", "raw.comments"],
         )
         assert result.exit_code == 0, result.stdout
 
