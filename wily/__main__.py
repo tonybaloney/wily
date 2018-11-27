@@ -214,7 +214,7 @@ def graph(ctx, files, metrics, output):
     from wily.commands.graph import graph
 
     logger.debug(f"Running report on {files} for metrics {metrics}")
-    graph(config=config, paths=[files], metrics=metrics, output=output)
+    graph(config=config, path=files, metrics=metrics, output=output)
 
 
 @cli.command()

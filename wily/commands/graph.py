@@ -3,19 +3,15 @@ Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
 """
-from wily import logger, format_datetime, format_revision
-import tabulate
-import pathlib
-from wily.config import DEFAULT_CACHE_PATH, DEFAULT_GRID_STYLE
-import wily.cache as cache
-from wily.operators import resolve_metric, MetricType
+from wily import logger, format_datetime
+from wily.operators import resolve_metric
 from wily.state import State
 import plotly.offline
-import plotly.plotly as py
 import plotly.graph_objs as go
+import pathlib
 
 
-def graph(config, paths, metrics, output=None):
+def graph(config, path, metrics, output=None):
     """
     Graph information about the cache and runtime.
 
@@ -35,6 +31,12 @@ def graph(config, paths, metrics, output=None):
 
     data = []
     state = State(config)
+    path = pathlib.Path(path)
+
+    if path.is_dir():
+        paths = list(pathlib.Path(path).glob('**/*.py'))
+    else:
+        paths = [path]
 
     for metric in metrics:
         operator, key = metric.split(".")
@@ -48,7 +50,7 @@ def graph(config, paths, metrics, output=None):
                 for rev in state.index[archiver].revisions[::-1]:
                     labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                     try:
-                        val = rev.get(config, archiver, operator, path, key)
+                        val = rev.get(config, archiver, operator, str(path), key)
                         y.append(val)
                     except KeyError:
                         y.append(0)

@@ -1,5 +1,9 @@
 # Release History
 
+## 1.6.0 (beta)
+
+* Support for directories in graph command, will recursively scan all .py files and graph them
+
 ## 1.5.0 (27th November 2018)
 
 **NB: Changes to the wily index will require a rebuild of cache.**
