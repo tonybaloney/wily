@@ -33,6 +33,6 @@ def test_index(config):
     assert len(state.index['git']) == 3
     assert len(state.index['git'].revision_keys) == 3
     for revision in state.index['git'].revisions:
-        assert state.index['git'][revision.revision]
+        assert state.index['git'][revision.revision.key]
         assert revision.revision in state.index['git']
-        assert revision in state.index['git']
+        assert revision.revision.key in state.index['git']

@@ -46,14 +46,14 @@ def graph(config, paths, metrics, output=None):
             for archiver in state.archivers:
                 # We have to do it backwards to get the deltas between releases
                 for rev in state.index[archiver].revisions[::-1]:
-                    labels.append(f"{rev.author_name} <br>{rev.message}")
+                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                     try:
-                        val = rev.get(operator, path, key)
+                        val = rev.get(config, archiver, operator, path, key)
                         y.append(val)
                     except KeyError:
                         y.append(0)
                     finally:
-                        x.append(format_datetime(rev.date))
+                        x.append(format_datetime(rev.revision.date))
             # Create traces
             trace = go.Scatter(
                 x=x,

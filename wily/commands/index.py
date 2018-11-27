@@ -35,18 +35,18 @@ def index(config, include_message=False):
             if include_message:
                 data.append(
                     (
-                        format_revision(rev.revision),
-                        rev.author_name,
-                        rev.message[:MAX_MESSAGE_WIDTH],
-                        format_date(rev.date),
+                        format_revision(rev.revision.key),
+                        rev.revision.author_name,
+                        rev.revision.message[:MAX_MESSAGE_WIDTH],
+                        format_date(rev.revision.date),
                     )
                 )
             else:
                 data.append(
                     (
-                        format_revision(rev.revision),
-                        rev.author_name,
-                        format_date(rev.date),
+                        format_revision(rev.revision.key),
+                        rev.revision.author_name,
+                        format_date(rev.revision.date),
                     )
                 )
 

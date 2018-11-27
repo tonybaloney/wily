@@ -5,32 +5,70 @@ Contains a lazy revision, index and process state model.
 """
 from collections import OrderedDict
 from dataclasses import dataclass, asdict
-from typing import Dict, List
+from typing import List
 import wily.cache as cache
 from wily import logger
+from wily.operators import get_metric
 from wily.archivers import Revision, resolve_archiver
 
 
 @dataclass
 class IndexedRevision(object):
+    """Union of revision and the operators executed."""
+
     revision: Revision
     operators: List
+    _data = None
 
     @staticmethod
     def fromdict(d):
-        rev = Revision(key=d['revision'], author_name=d['author_name'], author_email=d['author_email'], date=d['date'],
-                 message=d['message'])
-        operators = d['operators']
+        """Instantiate from a dictionary."""
+        rev = Revision(
+            key=d["key"],
+            author_name=d["author_name"],
+            author_email=d["author_email"],
+            date=d["date"],
+            message=d["message"],
+        )
+        operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)
 
     def asdict(self):
+        """Convert to dictionary."""
         d = asdict(self.revision)
-        d['operators'] = self.operators
+        d["operators"] = self.operators
         return d
+
+    def get(self, config, archiver, operator, path, key):
+        """
+        Get the metric data for this indexed revision.
+
+        :param config: The wily config.
+        :type  config: :class:`wily.config.WilyConfig`
+
+        :param archiver: The archiver.
+        :type  archiver: :class:`wily.archivers.Archiver`
+
+        :param operator: The operator to find
+        :type  operator: ``str``
+
+        :param path: The path to find
+        :type  path: ``str``
+
+        :param key: The metric key
+        :type  key: ``str``
+        """
+        if not self._data:
+            self._data = cache.get(
+                config=config, archiver=archiver, revision=self.revision.key
+            )["operator_data"]
+        logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
+        return get_metric(self._data, operator, path, key)
 
 
 class Index(object):
     """The index of the wily cache."""
+
     operators = None
 
     def __init__(self, config, archiver):
@@ -53,7 +91,7 @@ class Index(object):
 
         self._revisions = OrderedDict()
         for d in self.data:
-            self._revisions[d['revision']] = IndexedRevision.fromdict(d)
+            self._revisions[d["key"]] = IndexedRevision.fromdict(d)
 
     def __len__(self):
         """Use length of revisions as len."""
@@ -104,7 +142,9 @@ class Index(object):
         :param revision: The revision.
         :type  revision: :class:`Revision` or :class:`LazyRevision`
         """
-        ir = IndexedRevision(revision=revision, operators=[operator.name for operator in operators])
+        ir = IndexedRevision(
+            revision=revision, operators=[operator.name for operator in operators]
+        )
         self._revisions[revision.key] = ir
 
     def save(self):

@@ -83,7 +83,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
         has_changes = False
         for operator, metric in metrics:
             try:
-                current = last_revision.get(operator, file, metric.name)
+                current = last_revision.get(config, state.default_archiver, operator, file, metric.name)
             except KeyError as e:
                 current = "-"
             try:

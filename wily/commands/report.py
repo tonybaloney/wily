@@ -73,7 +73,7 @@ def report(config, path, metrics, n, include_message=False):
                     logger.debug(
                         f"Fetching metric {meta['key']} for {meta['operator']} in {path}"
                     )
-                    val = rev.get(meta["operator"], path, meta["key"])
+                    val = rev.get(config, archiver, meta["operator"], path, meta["key"])
 
                     last_val = last.get(meta["key"], None)
                     # Measure the difference between this value and the last
@@ -104,19 +104,19 @@ def report(config, path, metrics, n, include_message=False):
             if include_message:
                 data.append(
                     (
-                        format_revision(rev.revision),
-                        rev.message[:MAX_MESSAGE_WIDTH],
-                        rev.author_name,
-                        format_date(rev.date),
+                        format_revision(rev.revision.key),
+                        rev.revision.message[:MAX_MESSAGE_WIDTH],
+                        rev.revision.author_name,
+                        format_date(rev.revision.date),
                         *vals,
                     )
                 )
             else:
                 data.append(
                     (
-                        format_revision(rev.revision),
-                        rev.author_name,
-                        format_date(rev.date),
+                        format_revision(rev.revision.key),
+                        rev.revision.author_name,
+                        format_date(rev.revision.date),
                         *vals,
                     )
                 )

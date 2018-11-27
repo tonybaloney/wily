@@ -73,7 +73,7 @@ def test_build_with_opts():
     with patch("wily.commands.build.build") as build:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["build", "wily", "-h 1", "-o raw,maintainability"]
+            main.cli, ["build", "wily", "-n 1", "-o raw,maintainability"]
         )
         assert result.exit_code == 0
         assert build.called_once
