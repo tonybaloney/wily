@@ -49,9 +49,11 @@ deps =
     pytest-cov
     codecov
     mock
+    pydocstyle
 commands =
     pytest --cov=wily
     codecov
+    pydocstyle wily/
 """
 
 [tool.black]

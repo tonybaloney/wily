@@ -25,6 +25,18 @@ def diff(config, files, metrics, changes_only=True, detail=True):
 
     :param config: The wily configuration
     :type  config: :namedtuple:`wily.config.WilyConfig`
+
+    :param files: The files to compare.
+    :type  files: ``list`` of ``str``
+
+    :param metrics: The metrics to measure.
+    :type  metrics: ``list`` of ``str``
+
+    :param changes_only: Only include changes files in output.
+    :type  changes_only: ``bool``
+
+    :param detail: Show details (function-level)
+    :type  detail: ``bool``
     """
     config.targets = files
     files = list(files)
