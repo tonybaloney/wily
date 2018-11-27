@@ -14,7 +14,6 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
    :maxdepth: 2
    :caption: Contents:
 
-   complexity
 
 What is wily?
 -------------

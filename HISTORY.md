@@ -1,6 +1,6 @@
 # Release History
 
-## 1.5.0 (beta)
+## 1.5.0 (27th November 2018)
 
 **NB: Changes to the wily index will require a rebuild of cache.**
 
