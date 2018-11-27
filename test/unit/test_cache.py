@@ -156,7 +156,7 @@ def test_store_index(tmpdir):
     config.cache_path = cache_path
     config.path = tmpdir
     _TEST_INDEX = [{"message": "a", "date": 1234}, {"message": "b", "date": 1345}]
-    fn = cache.store_index(config, ARCHIVER_GIT, _TEST_INDEX)
+    fn = cache.store_archiver_index(config, ARCHIVER_GIT, _TEST_INDEX)
     with open(fn) as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, list)

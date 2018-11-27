@@ -27,10 +27,35 @@ def exists(config):
     :return: Whether the .wily directory exists
     :rtype: ``boolean``
     """
-    return (
+    exists = (
         pathlib.Path(config.cache_path).exists()
         and pathlib.Path(config.cache_path).is_dir()
     )
+    if not exists:
+        return False
+    index_path = pathlib.Path(config.cache_path) / "index.json"
+    if index_path.exists():
+        with open(index_path, "r") as out:
+            index = json.load(out)
+        if index['version'] != __version__:
+            # TODO: Inspect the versions properly.
+            logger.warning("! Wily cache is old, you may incur errors until you rebuild the cache.")
+    else:
+        logger.warning("Wily cache was not versioned, you may incur errors until you rebuild the cache.")
+        create_index(config)
+    return True
+
+
+def create_index(config):
+    """
+    Create the root index.
+    :param config:
+    :return:
+    """
+    filename = pathlib.Path(config.cache_path) / "index.json"
+    index = {"version": __version__}
+    with open(filename, "w") as out:
+        out.write(json.dumps(index, indent=2))
 
 
 def create(config):
@@ -48,10 +73,7 @@ def create(config):
         return config.cache_path
     logger.debug(f"Creating wily cache {config.cache_path}")
     pathlib.Path(config.cache_path).mkdir()
-    filename = pathlib.Path(config.cache_path) / "index.json"
-    index = {"version": __version__}
-    with open(filename, "w") as out:
-        out.write(json.dumps(index, indent=2))
+    create_index(config)
     return config.cache_path
 
 
@@ -118,7 +140,7 @@ def store(config, archiver, revision, stats):
     return filename
 
 
-def store_index(config, archiver, index):
+def store_archiver_index(config, archiver, index):
     """
     Store an archiver's index record for faster search.
 
@@ -180,7 +202,7 @@ def get_default_metrics(config):
     default_metrics = []
 
     for archiver in archivers:
-        index = get_index(config, archiver)
+        index = get_archiver_index(config, archiver)
 
         if len(index) == 0:
             logger.warning("No records found in the index, no metrics available")
@@ -195,7 +217,7 @@ def get_default_metrics(config):
     return default_metrics
 
 
-def has_index(config, archiver):
+def has_archiver_index(config, archiver):
     """
     Check if this archiver has an index file.
 
@@ -212,7 +234,7 @@ def has_index(config, archiver):
     return root.exists()
 
 
-def get_index(config, archiver):
+def get_archiver_index(config, archiver):
     """
     Get the contents of the archiver index file.
 

@@ -84,8 +84,8 @@ class Index(object):
         self.config = config
         self.archiver = archiver
         self.data = (
-            cache.get_index(config, archiver.name)
-            if cache.has_index(config, archiver.name)
+            cache.get_archiver_index(config, archiver.name)
+            if cache.has_archiver_index(config, archiver.name)
             else []
         )
 
@@ -151,7 +151,7 @@ class Index(object):
         """Save the index data back to the wily cache."""
         data = [i.asdict() for i in self._revisions.values()]
         logger.debug(data)
-        cache.store_index(self.config, self.archiver, data)
+        cache.store_archiver_index(self.config, self.archiver, data)
 
 
 class State(object):

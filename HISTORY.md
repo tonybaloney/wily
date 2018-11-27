@@ -2,15 +2,24 @@
 
 ## 1.5.0 (beta)
 
+**NB: Changes to the wily index will require a rebuild of cache.**
+
 * Introduce index versioning
 * Add a `setup` command, which will be prompted by default in the absence of wily cache
+* Wily `build` now specifies the maximum revisions using `-n` instead of `-h`, which was confusing with `--help`
+* Build targets are now a required argument
+* `skip-ignore-check` argument in build renamed to `skip-gitignore-check`
+* All commands will prompt to build instead of raising an error for missing cache
+* `files` is now a required argument for the diff command
+* `metrics` is now a required argument for the graph command
 * Fixed various bugs
+* Improved performance
 
 ## 1.4.0 (16th November 2018)
 
-* Support for cyclomatic complexity of methods, funtions and classes
+* Support for cyclomatic complexity of methods, functions and classes
 * Extend the report and graph command line to support querying of methods, classes and functions within a file
-* Sort the index before storing by date (descending) incase the order changes for git commits
+* Sort the index before storing by date (descending) in-case the order changes for git commits
 * Diff will only show files with changed metrics by default
 * Extend the diff command to have an --all flag to show all changes
 * Diff command now supports granular metrics \o/
