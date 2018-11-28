@@ -3,6 +3,10 @@
 ## 1.6.0 (beta)
 
 * Support for directories in graph command, will recursively scan all .py files and graph them
+* Support for configuring the x-axis on the graph command (defaults to history) to a custom metric
+* Support for configuring the z-axis (size of bubble on scatter) in graph command by specifying a second metric
+* Set metrics to cap at 2 possible options in graph command
+* Running the test suite no longer opens 12 browser windows :-)
 
 ## 1.5.0 (27th November 2018)
 
