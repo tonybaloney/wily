@@ -202,12 +202,16 @@ def diff(ctx, files, metrics, all, detail):
 
 @cli.command()
 @click.argument("path", type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=-1, required=True)
+@click.argument("metrics", nargs=-2, required=True)
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
 )
+@click.option(
+    "-x", "--x-axis", help="Metric to use on x-axis, defaults to history."
+)
+@click.option("-a/-c", "--changes/--all", default=True, help="All commits or changes only")
 @click.pass_context
-def graph(ctx, path, metrics, output):
+def graph(ctx, path, metrics, output, x_axis, changes):
     """
     Graph a specific metric for a given file, if a path is given, all files within path will be graphed.
 
@@ -230,7 +234,7 @@ def graph(ctx, path, metrics, output):
     from wily.commands.graph import graph
 
     logger.debug(f"Running report on {path} for metrics {metrics}")
-    graph(config=config, path=path, metrics=metrics, output=output)
+    graph(config=config, path=path, metrics=metrics, output=output, x_axis=x_axis, changes=changes)
 
 
 @cli.command()
