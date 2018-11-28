@@ -94,12 +94,4 @@ You can install wily as a pre-commit plugin.
             additional_dependencies: [wily]
 
 
-Command Line Usage
-------------------
-
-.. click:: wily.__main__:cli
-   :prog: wily
-   :show-nested:
-
-
 "cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)
