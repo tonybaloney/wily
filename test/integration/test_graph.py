@@ -22,9 +22,7 @@ def test_graph(builddir):
 def test_graph_path(builddir):
     """ Test the graph feature """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "graph", "src/", "raw.loc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "graph", "src/", "raw.loc"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -42,8 +40,7 @@ def test_graph_multiple_path(builddir):
     """ Test the graph feature with multiple metrics """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--path", builddir, "graph", "src/", "raw.loc", "raw.comments"],
+        main.cli, ["--path", builddir, "graph", "src/", "raw.loc", "raw.comments"]
     )
     assert result.exit_code == 0, result.stdout
 

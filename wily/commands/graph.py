@@ -34,7 +34,9 @@ def graph(config, path, metrics, output=None):
     abs_path = config.path / pathlib.Path(path)
 
     if abs_path.is_dir():
-        paths = [p.relative_to(config.path) for p in pathlib.Path(abs_path).glob('**/*.py')]
+        paths = [
+            p.relative_to(config.path) for p in pathlib.Path(abs_path).glob("**/*.py")
+        ]
     else:
         paths = [path]
 
@@ -48,7 +50,9 @@ def graph(config, path, metrics, output=None):
             for archiver in state.archivers:
                 # We have to do it backwards to get the deltas between releases
                 for rev in state.index[archiver].revisions[::-1]:
-                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
+                    labels.append(
+                        f"{rev.revision.author_name} <br>{rev.revision.message}"
+                    )
                     try:
                         val = rev.get(config, archiver, operator, str(path), key)
                         y.append(val)

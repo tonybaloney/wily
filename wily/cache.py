@@ -37,11 +37,15 @@ def exists(config):
     if index_path.exists():
         with open(index_path, "r") as out:
             index = json.load(out)
-        if index['version'] != __version__:
+        if index["version"] != __version__:
             # TODO: Inspect the versions properly.
-            logger.warning("! Wily cache is old, you may incur errors until you rebuild the cache.")
+            logger.warning(
+                "! Wily cache is old, you may incur errors until you rebuild the cache."
+            )
     else:
-        logger.warning("Wily cache was not versioned, you may incur errors until you rebuild the cache.")
+        logger.warning(
+            "Wily cache was not versioned, you may incur errors until you rebuild the cache."
+        )
         create_index(config)
     return True
 

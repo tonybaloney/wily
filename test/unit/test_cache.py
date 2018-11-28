@@ -22,7 +22,7 @@ def test_exists_older(tmp_path):
     and has a file with the version older than the current
     """
     config = DEFAULT_CONFIG
-    config.cache_path = (tmp_path / ".wily")
+    config.cache_path = tmp_path / ".wily"
     (tmp_path / ".wily").mkdir()
     with open((tmp_path / ".wily" / "index.json"), "w+") as index:
         index.write('{"version": "0.1.0"}')
