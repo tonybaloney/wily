@@ -225,6 +225,9 @@ def graph(ctx, path, metrics, output, x_axis, changes):
 
         $ wily graph src/test.py raw.loc cyclomatic.complexity
 
+    Graph test.py against raw.loc and raw.sloc on the x-axis
+
+        $ wily graph src/test.py raw.loc --x-axis raw.sloc
     """
     config = ctx.obj["CONFIG"]
 
