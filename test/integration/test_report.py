@@ -57,8 +57,7 @@ def test_report_not_found(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--path", builddir, "report", "src/test1.py", "--metrics", "raw.loc"],
+        main.cli, ["--path", builddir, "report", "src/test1.py", "--metrics", "raw.loc"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" in result.stdout

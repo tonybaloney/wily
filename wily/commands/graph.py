@@ -36,9 +36,9 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     abs_path = config.path / pathlib.Path(path)
 
     if x_axis is None:
-        x_axis = 'history'
+        x_axis = "history"
     else:
-        x_operator, x_key = x_axis.split('.')
+        x_operator, x_key = x_axis.split(".")
 
     if abs_path.is_dir():
         paths = [
@@ -48,11 +48,11 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
         paths = [path]
 
     operator, key = metrics[0].split(".")
-    if len(metrics) == 1: # only y-axis
+    if len(metrics) == 1:  # only y-axis
         z_axis = None
     else:
         z_axis = resolve_metric(metrics[1])
-        z_operator, z_key = metrics[1].split('.')
+        z_operator, z_key = metrics[1].split(".")
     for path in paths:
         x = []
         y = []
@@ -60,19 +60,33 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
         labels = []
         last_y = None
         for rev in state.index[state.default_archiver].revisions:
-            labels.append(
-                f"{rev.revision.author_name} <br>{rev.revision.message}"
-            )
+            labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
             try:
                 val = rev.get(config, state.default_archiver, operator, str(path), key)
                 if val != last_y or not changes:
                     y.append(val)
                     if z_axis:
-                        z.append(rev.get(config, state.default_archiver, z_operator, str(path), z_key))
-                    if x_axis == 'history':
+                        z.append(
+                            rev.get(
+                                config,
+                                state.default_archiver,
+                                z_operator,
+                                str(path),
+                                z_key,
+                            )
+                        )
+                    if x_axis == "history":
                         x.append(format_datetime(rev.revision.date))
                     else:
-                        x.append(rev.get(config, state.default_archiver, x_operator, str(path), x_key))
+                        x.append(
+                            rev.get(
+                                config,
+                                state.default_archiver,
+                                x_operator,
+                                str(path),
+                                x_key,
+                            )
+                        )
                 last_y = val
             except KeyError:
                 # missing data
@@ -104,7 +118,14 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     y_metric = resolve_metric(metrics[0])
     title = f"{x_axis.capitalize()} of {y_metric.description} for {path}"
     plotly.offline.plot(
-        {"data": data, "layout": go.Layout(title=title, xaxis={"title": x_axis}, yaxis={"title": y_metric.description})},
+        {
+            "data": data,
+            "layout": go.Layout(
+                title=title,
+                xaxis={"title": x_axis},
+                yaxis={"title": y_metric.description},
+            ),
+        },
         auto_open=auto_open,
         filename=filename,
     )

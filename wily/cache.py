@@ -29,8 +29,8 @@ def exists(config):
     :rtype: ``boolean``
     """
     exists = (
-            pathlib.Path(config.cache_path).exists()
-            and pathlib.Path(config.cache_path).is_dir()
+        pathlib.Path(config.cache_path).exists()
+        and pathlib.Path(config.cache_path).is_dir()
     )
     if not exists:
         return False
