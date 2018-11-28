@@ -4,11 +4,12 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
-from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 import tabulate
+
+from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
-from wily.state import State
 from wily.operators import resolve_metric, MetricType
+from wily.state import State
 
 
 def report(config, path, metrics, n, include_message=False):

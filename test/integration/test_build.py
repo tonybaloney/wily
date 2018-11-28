@@ -1,8 +1,10 @@
-import wily.__main__ as main
-from mock import patch
+import pathlib
+
 from click.testing import CliRunner
 from git import Repo, Actor
-import pathlib
+from mock import patch
+
+import wily.__main__ as main
 
 
 def test_build_not_git_repo(tmpdir):

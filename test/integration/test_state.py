@@ -2,10 +2,12 @@
 This is really an integration test.
 """
 
-import wily.state
-import wily.config
-import pytest
 import os.path
+
+import pytest
+
+import wily.config
+import wily.state
 
 
 @pytest.fixture

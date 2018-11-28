@@ -3,9 +3,10 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
+import os
+
 import tabulate
 
-import os
 from wily import logger
 from wily.config import DEFAULT_GRID_STYLE
 from wily.operators import (

@@ -1,8 +1,10 @@
-import wily.__main__ as main
-from mock import patch
-from textwrap import dedent
-from click.testing import CliRunner
 import pathlib
+from textwrap import dedent
+
+from click.testing import CliRunner
+from mock import patch
+
+import wily.__main__ as main
 
 
 def test_diff_no_cache(tmpdir):

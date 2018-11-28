@@ -1,10 +1,11 @@
-from wily.config import DEFAULT_CONFIG, ARCHIVER_GIT
-from wily.archivers import Revision
-import wily.cache as cache
-import pathlib
 import json
+import pathlib
+
 import pytest
-from mock import patch
+
+import wily.cache as cache
+from wily.archivers import Revision
+from wily.config import DEFAULT_CONFIG, ARCHIVER_GIT
 
 
 def test_exists(tmpdir):

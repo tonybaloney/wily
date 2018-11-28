@@ -6,10 +6,11 @@ Contains a lazy revision, index and process state model.
 from collections import OrderedDict
 from dataclasses import dataclass, asdict
 from typing import List
+
 import wily.cache as cache
 from wily import logger
-from wily.operators import get_metric
 from wily.archivers import Revision, resolve_archiver
+from wily.operators import get_metric
 
 
 @dataclass

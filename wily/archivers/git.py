@@ -3,9 +3,10 @@ Git Archiver.
 
 Implementation of the archiver API for the gitpython module.
 """
-from git import Repo
 import logging
 import pathlib
+
+from git import Repo
 
 from wily.archivers import BaseArchiver, Revision
 

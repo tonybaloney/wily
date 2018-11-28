@@ -3,12 +3,14 @@ Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
 """
+import pathlib
+
+import plotly.graph_objs as go
+import plotly.offline
+
 from wily import logger, format_datetime
 from wily.operators import resolve_metric
 from wily.state import State
-import plotly.offline
-import plotly.graph_objs as go
-import pathlib
 
 
 def graph(config, path, metrics, output=None):

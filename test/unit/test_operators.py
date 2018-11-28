@@ -1,5 +1,6 @@
-import wily.operators
 import pytest
+
+import wily.operators
 
 
 def test_resolve_operator():

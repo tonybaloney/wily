@@ -1,7 +1,8 @@
-import wily.__main__ as main
-from mock import patch
-from click.testing import CliRunner
 import pytest
+from click.testing import CliRunner
+from mock import patch
+
+import wily.__main__ as main
 
 
 def test_init():

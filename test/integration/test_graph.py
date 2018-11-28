@@ -1,5 +1,6 @@
-import wily.__main__ as main
 from click.testing import CliRunner
+
+import wily.__main__ as main
 
 
 def test_graph_no_cache(tmpdir):

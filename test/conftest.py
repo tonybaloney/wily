@@ -1,10 +1,11 @@
-import wily.__main__ as main
-from mock import patch
+import pathlib
 from textwrap import dedent
+
+import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
-import pathlib
-import pytest
+
+import wily.__main__ as main
 
 
 @pytest.fixture

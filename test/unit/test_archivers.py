@@ -1,9 +1,11 @@
+import pathlib
+
 import pytest
+from mock import patch
+
 import wily.archivers
 import wily.archivers.git as git
 import wily.config
-from mock import patch
-import pathlib
 
 
 class MockAuthor(object):

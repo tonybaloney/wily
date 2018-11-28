@@ -5,6 +5,7 @@ Measures the "maintainability" using the Halstead index.
 """
 import radon.cli.harvest as harvesters
 from radon.cli import Config
+
 from wily import logger
 from wily.operators import BaseOperator, MetricType, Metric
 

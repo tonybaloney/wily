@@ -4,10 +4,11 @@ Cyclomatic complexity metric for each function/method.
 Provided by the radon library.
 """
 
+import radon
 import radon.cli.harvest as harvesters
 from radon.cli import Config
-import radon
 from radon.visitors import Function, Class
+
 from wily import logger
 from wily.operators import BaseOperator, Metric, MetricType
 

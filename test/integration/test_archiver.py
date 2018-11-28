@@ -1,12 +1,14 @@
 import pathlib
-from git import Repo, Actor
+
 import pytest
-from wily.config import DEFAULT_CONFIG
+from git import Repo, Actor
+
 from wily.archivers.git import (
     GitArchiver,
     WilyIgnoreGitRepositoryError,
     DirtyGitRepositoryError,
 )
+from wily.config import DEFAULT_CONFIG
 
 
 def test_gitignore_missing(tmpdir):

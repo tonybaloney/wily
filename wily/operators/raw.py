@@ -5,6 +5,7 @@ Includes insights like lines-of-code, number of comments. Does not measure compl
 """
 import radon.cli.harvest as harvesters
 from radon.cli import Config
+
 from wily import logger
 from wily.operators import BaseOperator, MetricType, Metric
 

@@ -3,10 +3,11 @@ Print command.
 
 Print information about the wily cache and what is in the index.
 """
-from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
-from wily.state import State
 import tabulate
+
+from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
+from wily.state import State
 
 
 def index(config, include_message=False):

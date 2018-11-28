@@ -8,13 +8,14 @@ TODO: Version .wily/ cache folders?
 
 """
 
-import shutil
-import pathlib
-import os.path
 import json
+import os.path
+import pathlib
+import shutil
+
+from wily import logger, __version__
 from wily.archivers import ALL_ARCHIVERS
 from wily.operators import resolve_operator
-from wily import logger, __version__
 
 
 def exists(config):
@@ -28,8 +29,8 @@ def exists(config):
     :rtype: ``boolean``
     """
     exists = (
-        pathlib.Path(config.cache_path).exists()
-        and pathlib.Path(config.cache_path).is_dir()
+            pathlib.Path(config.cache_path).exists()
+            and pathlib.Path(config.cache_path).is_dir()
     )
     if not exists:
         return False

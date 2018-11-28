@@ -2,12 +2,14 @@
 """Main command line."""
 
 import os.path
+
 import click
+
 from wily import logger
-from wily.cache import exists, get_default_metrics
-from wily.config import load as load_config
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
 from wily.archivers import resolve_archiver
+from wily.cache import exists, get_default_metrics
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
+from wily.config import load as load_config
 from wily.operators import resolve_operators
 
 

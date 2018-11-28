@@ -1,6 +1,7 @@
-import wily.__main__ as main
-from mock import patch
 from click.testing import CliRunner
+from mock import patch
+
+import wily.__main__ as main
 
 
 def test_report_no_cache(tmpdir):
