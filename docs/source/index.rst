@@ -11,9 +11,14 @@ A Python application for tracking, reporting on timing and complexity in tests a
 Wily uses git to go through each revision (commit) in a branch and run complexity and code-analysis metrics over the code. You can use this to limit your code or report on trends for complexity, length etc.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   commands/build
+   commands/diff
+   commands/graph
+   commands/index
+   commands/report
 
 What is wily?
 -------------
