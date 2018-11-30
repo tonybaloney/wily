@@ -11,9 +11,14 @@ A Python application for tracking, reporting on timing and complexity in tests a
 Wily uses git to go through each revision (commit) in a branch and run complexity and code-analysis metrics over the code. You can use this to limit your code or report on trends for complexity, length etc.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   commands/build
+   commands/diff
+   commands/graph
+   commands/index
+   commands/report
 
 What is wily?
 -------------
@@ -31,7 +36,7 @@ You can install wily from PyPi using pip
 
    $ pip install wily
 
-Wily needs an index of the project before any of the commands can be used. `wily build` builds an index in a Git repository. Provide the path to your source code as the first argument.
+Wily needs an index of the project before any of the commands can be used. :doc:`commands/build` builds an index in a Git repository. Provide the path to your source code as the first argument.
 
 
 .. warning::
@@ -51,6 +56,8 @@ You can provide multiple source directories, such as your test projects.
 
    $ wily build src/ test/
 
+See :doc:`commands/build` for more details on the build command.
+
 Now that you have an index, you can run `wily report` or `wily graph` to see the data.
 
 .. image:: _static/wily_report.png
@@ -64,6 +71,9 @@ You can display any of the metrics in a HTML graph by running the graph command 
 
 .. image:: _static/graph.png
    :align: center
+
+
+See :doc:`commands/report` and :doc:`commands/graph` for more details on the report and graph commands.
 
 To get a list of available metrics, run:
 
@@ -87,14 +97,6 @@ You can install wily as a pre-commit plugin.
             verbose: true
             language: python
             additional_dependencies: [wily]
-
-
-Command Line Usage
-------------------
-
-.. click:: wily.__main__:cli
-   :prog: wily
-   :show-nested:
 
 
 "cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)
