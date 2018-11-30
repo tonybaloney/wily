@@ -3,6 +3,9 @@ Diff Command
 
 The `wily diff` command will compare the last cached revision of the code with the current metrics. It will run the default metrics for the current environment.
 
+.. image:: ../_static/wily_diff.png
+   :align: center
+
 Examples
 --------
 

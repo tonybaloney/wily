@@ -3,6 +3,9 @@ Index Command
 
 The index command will display all revisions that have been analysed inside the available wily cache folder.
 
+.. image:: ../_static/wily_index.png
+   :align: center
+
 Examples
 --------
 
