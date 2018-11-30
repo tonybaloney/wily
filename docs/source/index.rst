@@ -8,6 +8,13 @@
 
 A Python application for tracking, reporting on timing and complexity in tests and applications.
 
+.. image:: https://readthedocs.org/projects/wily/badge/?version=latest
+:target: https://wily.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
+.. image:: https://badge.fury.io/py/wily.svg
+    :target: https://badge.fury.io/py/wily
+
+
 Wily uses git to go through each revision (commit) in a branch and run complexity and code-analysis metrics over the code. You can use this to limit your code or report on trends for complexity, length etc.
 
 .. toctree::
@@ -69,7 +76,7 @@ You can display any of the metrics in a HTML graph by running the graph command 
 
    $ wily graph wily/__main__.py raw.loc
 
-.. image:: ../_static/single_metric_graph.png
+.. image:: _static/single_metric_graph.png
    :align: center
 
 
