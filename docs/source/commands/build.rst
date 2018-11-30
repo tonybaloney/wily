@@ -6,6 +6,9 @@ The build command will iterate through each revision in the chosen archiver and 
 
 By default, ``wily build <target>`` will assume the directory is a `git` repository and will scan back through 50 revisions.
 
+.. image:: ../_static/wily_build.png
+   :align: center
+
 Examples
 --------
 
