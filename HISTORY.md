@@ -1,6 +1,8 @@
 # Release History
 
-## 1.6.0 (beta)
+## 1.6.0 (30th November 2018)
+
+**NB: Upgrade will warn about index rebuild, this is expected behaviour**
 
 * Support for directories in graph command, will recursively scan all .py files and graph them
 * Support for configuring the x-axis on the graph command (defaults to history) to a custom metric
@@ -8,6 +10,7 @@
 * Set metrics to cap at 2 possible options in graph command
 * Running the test suite no longer opens 12 browser windows :-)
 * __API Change__ The `wily report` command now takes the metrics as the 2nd - nth arguments, instead of via ``--metrics``
+* Lots more documentation! See https://wily.readthedocs.io/ 
 
 ## 1.5.0 (27th November 2018)
 
