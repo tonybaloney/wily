@@ -28,7 +28,7 @@ Wily can be used via a command line interface, `wily`.
 
 ## pre-commit plugin
 
-You can install wily as a [pre-commit](http://www.pre-commit.com/) plugin.
+You can install wily as a [pre-commit](http://www.pre-commit.com/) plugin by adding the following to ``.pre-commit-config.yaml``
 
 ```yaml
 repos:
@@ -54,7 +54,7 @@ Usage: __main__.py build [OPTIONS] [TARGETS]...
   Build the wily cache
 
 Options:
-  -h, --max-revisions INTEGER  The maximum number of historical commits to
+  -n, --max-revisions INTEGER  The maximum number of historical commits to
                                archive
   -o, --operators TEXT         List of operators, separated by commas
   --help                       Show this message and exit.
@@ -75,19 +75,6 @@ Limit the number of revisions (defaults to 50).
 
 Show a specific metric for a given file, requires that `.wily/` exists
 
-```
-Usage: wily report [OPTIONS] FILE
-
-  Show metrics for a given file.
-
-Options:
-  --metrics TEXT            comma-seperated list of metrics, see list-metrics
-                            for choices
-  -n, --number INTEGER      Number of items to show
-  --message / --no-message  Include revision message
-  --help                    Show this message and exit.
-```
-
 `wily report` will print the metric and the delta between each revision.
 
 ![wily-report](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_report.png)
@@ -96,55 +83,16 @@ Options:
 
 Similar to `wily report` but instead of printing in the console, `wily` will print a graph in a browser.
 
-![wily-graph](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/graph.png)
+![wily-graph](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/single_metric_graph.png)
 
 #### `wily index`
 
 Show information about the build directory. Requires that `.wily/` exists.
 
-```
-Usage: wily index [OPTIONS]
-
-  Show the history archive in the .wily/ folder.
-
-Options:
-  --help  Show this message and exit.
-```
-
 `wily index` will print the configuration to the screen and list all revisions that have been analysed and the operators used.
 
-```console
- $ wily index
---------Configuration---------
-Path: .
-Archiver: git
-Operators: {'cyclomatic', 'raw', 'maintainability'}
+![wily-graph](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_index.png)
 
------------History------------
-╒══════════════════════════════════════════╤══════════════╤════════════╕
-│ Revision                                 │ Author       │ Date       │
-╞══════════════════════════════════════════╪══════════════╪════════════╡
-│ e8110e550ed018738e9c4e2e573cd2bdc2402ad0 │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ d639f1d274cf16d92f74c38fc6cfbee9fa4872bb │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 3e8af55e0f0300013fb621fe93628173907b263e │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 86484e5c33fe11d930be05e9d727846af106af34 │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 3cfe33daa87cb28f0b89c1fd84e1d2c42d7613e9 │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 14e31c613f094c24171e0be3448a8543e73db996 │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 267b91abefb8b47a7bbed7d08889644ced691774 │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 98a95a28e4753a3b783788a2208994b69d4f6b99 │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 8d8da4e1e3fdf0642693ca104d5e4b33ce0b5fad │ Anthony Shaw │ 2018-10-15 │
-├──────────────────────────────────────────┼──────────────┼────────────┤
-│ 7ac596ee04c2cc86b0f3aa8d7159535834befd59 │ Anthony Shaw │ 2018-10-15 │
-╘══════════════════════════════════════════╧══════════════╧════════════╛
- ```
  
 ### `wily list-metrics`
 
