@@ -8,25 +8,25 @@ Examples
 
 To see the changes in metrics for a list of files, give the files to the ``wily diff`` command.
 
-.. code-block::
+.. code-block:: none
 
   $ wily diff example.py example2.py src/example3.py
 
 The diff command will only show files where the metrics have changes, to see all files regardless of changes, provide the ``--all`` flag.
 
-.. code-block::
+.. code-block:: none
 
   $ wily diff example.py --all
 
 To show specific metrics, add a combination of comma-separated ``--metrics`` flags.
 
-.. code-block::
+.. code-block:: none
 
   $ wily diff example.py --metrics raw.loc,cyclomatic.complexity
 
 Diff will show function and class-level metrics by default. To show only module-level metrics, add the ``--no-detail`` flag
 
-.. code-block::
+.. code-block:: none
 
   $ wily diff example.py --no-detail
 
