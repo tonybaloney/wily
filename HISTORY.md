@@ -7,6 +7,7 @@
 * Support for configuring the z-axis (size of bubble on scatter) in graph command by specifying a second metric
 * Set metrics to cap at 2 possible options in graph command
 * Running the test suite no longer opens 12 browser windows :-)
+* __API Change__ The `wily report` command now takes the metrics as the 2nd - nth arguments, instead of via ``--metrics``
 
 ## 1.5.0 (27th November 2018)
 

@@ -133,11 +133,7 @@ def index(ctx, message):
 
 @cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
-@click.option(
-    "--metrics",
-    default=None,
-    help="comma-seperated list of metrics, see list-metrics for choices",
-)
+@click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
 @click.pass_context
@@ -151,8 +147,6 @@ def report(ctx, file, metrics, number, message):
     if not metrics:
         metrics = get_default_metrics(config)
         logger.info(f"Using default metrics {metrics}")
-    else:
-        metrics = metrics.split(",")
 
     from wily.commands.report import report
 
