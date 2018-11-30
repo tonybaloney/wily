@@ -17,11 +17,11 @@ To show a report, simply give the name or path to the file you want to report on
 
 By default, wily will show the default metrics (typically Lines-of-code, cyclomatic complexity and maintainability index)
 
-To change the metrics, provide a comma-separated list
+To change the metrics, provide the metric names (run ``wily list-metrics`` for a list) as arguments.
 
 .. code-block:: none
 
-  $ wily report example.py --metrics raw.loc,raw.sloc,raw.comments
+  $ wily report example.py raw.loc raw.sloc raw.comments
 
 Wily report will show all available revisions, to only show a set number, add the ``-n`` or ``--number`` flag
 
