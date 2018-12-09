@@ -1,5 +1,9 @@
 # Release History
 
+## 1.7.0 (tbc)
+
+* Add halstead metrics
+
 ## 1.6.0 (30th November 2018)
 
 **NB: Upgrade will warn about index rebuild, this is expected behaviour**
