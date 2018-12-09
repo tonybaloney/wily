@@ -1,7 +1,7 @@
 """
-Maintainability operator.
+Halstead operator.
 
-Measures the "maintainability" using the Halstead index.
+Measures all of the halstead metrics (volume, vocab, difficulty)
 """
 import radon.cli.harvest as harvesters
 from radon.cli import Config
@@ -10,10 +10,10 @@ from wily import logger
 from wily.operators import BaseOperator, MetricType, Metric
 
 
-class MaintainabilityIndexOperator(BaseOperator):
-    """MI Operator."""
+class HalsteadOperator(BaseOperator):
+    """Halstead Operator."""
 
-    name = "maintainability"
+    name = "halstead"
     defaults = {
         "exclude": None,
         "ignore": None,
@@ -25,23 +25,21 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("rank", "Maintainability Ranking", str, MetricType.Informational),
-        Metric("mi", "Maintainability Index", float, MetricType.AimLow),
     )
 
-    default_metric_index = 1  # MI
+    default_metric_index = None  # MI
 
     def __init__(self, config):
         """
-        Instantiate a new MI operator.
+        Instantiate a new HC operator.
 
         :param config: The wily configuration.
         :type  config: :class:`WilyConfig`
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {config.targets} with {self.defaults} for MI metrics")
+        logger.debug(f"Using {config.targets} with {self.defaults} for HC metrics")
 
-        self.harvester = harvesters.MIHarvester(
+        self.harvester = harvesters.HCHarvester(
             config.targets, config=Config(**self.defaults)
         )
 
@@ -58,5 +56,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         :return: The operator results.
         :rtype: ``dict``
         """
-        logger.debug("Running maintainability harvester")
-        return dict(self.harvester.results)
+        logger.debug("Running halstead harvester")
+        r = dict(self.harvester.results)
+        import pdb; pdb.set_trace()
+        return r

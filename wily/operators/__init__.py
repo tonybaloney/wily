@@ -71,6 +71,8 @@ class BaseOperator(object):
 from wily.operators.cyclomatic import CyclomaticComplexityOperator
 from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
+from wily.operators.halstead import HalsteadOperator
+
 
 """Type for an operator."""
 Operator = namedtuple("Operator", "name cls description level")
@@ -96,9 +98,16 @@ OPERATOR_MAINTAINABILITY = Operator(
     level=OperatorLevel.File,
 )
 
+OPERATOR_HALSTEAD = Operator(
+    name="halstead",
+    cls=HalsteadOperator,
+    description="Halstead metrics",
+    level=OperatorLevel.File,
+)
+
 
 """Set of all available operators."""
-ALL_OPERATORS = {OPERATOR_CYCLOMATIC, OPERATOR_MAINTAINABILITY, OPERATOR_RAW}
+ALL_OPERATORS = {OPERATOR_CYCLOMATIC, OPERATOR_MAINTAINABILITY, OPERATOR_RAW, OPERATOR_HALSTEAD}
 
 
 def resolve_operator(name):
