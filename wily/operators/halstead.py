@@ -67,4 +67,9 @@ class HalsteadOperator(BaseOperator):
         :rtype: ``dict``
         """
         logger.debug("Running halstead harvester")
-        return dict(self.harvester.results)
+        results = {}
+        for filename, details in dict(self.harvester.results).items():
+            results[filename] = {}
+            for instance in details:
+                print(instance)
+        return results
