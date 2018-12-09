@@ -22,6 +22,7 @@ class HalsteadOperator(BaseOperator):
         "multi": True,
         "show": False,
         "sort": False,
+        "by_function": True,
     }
 
     metrics = (
