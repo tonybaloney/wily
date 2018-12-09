@@ -71,6 +71,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                             f"{file}:{k}"
                             for k in data[operator][file].keys()
                             if k != metric.name
+                            and isinstance(data[operator][file][k], dict)
                         ]
                     )
                 except KeyError:
