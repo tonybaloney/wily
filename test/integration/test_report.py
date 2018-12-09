@@ -21,7 +21,8 @@ def test_report(builddir):
             builddir,
             "report",
             "src/test.py",
-            "raw.multi", "maintainability.rank",
+            "raw.multi",
+            "maintainability.rank",
         ],
     )
     assert result.exit_code == 0, result.stdout
@@ -78,14 +79,7 @@ def test_report_with_message(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        [
-            "--path",
-            builddir,
-            "report",
-            "src/test.py",
-            "raw.multi",
-            "--message",
-        ],
+        ["--path", builddir, "report", "src/test.py", "raw.multi", "--message"],
     )
     assert result.exit_code == 0, result.stdout
     assert "basic test" in result.stdout
@@ -99,8 +93,7 @@ def test_report_high_metric(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--path", builddir, "report", "src/test.py", "raw.comments"],
+        main.cli, ["--path", builddir, "report", "src/test.py", "raw.comments"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
@@ -112,14 +105,7 @@ def test_report_low_metric(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        [
-            "--path",
-            builddir,
-            "report",
-            "src/test.py",
-            "maintainability.mi",
-        ],
+        main.cli, ["--path", builddir, "report", "src/test.py", "maintainability.mi"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout

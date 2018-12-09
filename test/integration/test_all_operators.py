@@ -11,14 +11,15 @@ from textwrap import dedent
 import wily.__main__ as main
 
 operators = (
-    'halstead',
-    'cyclomatic',
-    'maintainability',
-    'raw',
-    'halstead,cyclomatic',
-    'maintainability,raw',
-    'halstead,cyclomatic,maintainability,raw'
+    "halstead",
+    "cyclomatic",
+    "maintainability",
+    "raw",
+    "halstead,cyclomatic",
+    "maintainability,raw",
+    "halstead,cyclomatic,maintainability,raw",
 )
+
 
 @pytest.mark.parametrize("operator", operators)
 def test_operator(operator, gitdir):

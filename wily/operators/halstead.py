@@ -78,7 +78,7 @@ class HalsteadOperator(BaseOperator):
                 else:
                     results[filename] = self._report_to_dict(instance)
         return results
-    
+
     def _report_to_dict(self, report):
         return {
             "h1": report.h1,
