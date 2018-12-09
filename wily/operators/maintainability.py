@@ -58,5 +58,5 @@ class MaintainabilityIndexOperator(BaseOperator):
         :return: The operator results.
         :rtype: ``dict``
         """
-        logger.debug("Running raw harvester")
+        logger.debug("Running maintainability harvester")
         return dict(self.harvester.results)

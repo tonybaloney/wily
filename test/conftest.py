@@ -9,8 +9,8 @@ import wily.__main__ as main
 
 
 @pytest.fixture
-def builddir(tmpdir):
-    """ Create a project and build it """
+def gitdir(tmpdir):
+    """ Create a project and add code to it """
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir)
     testpath = tmppath / "src" / "test.py"
@@ -64,12 +64,21 @@ def builddir(tmpdir):
     index.add([str(testpath), ".gitignore"])
     index.commit("remove line", author=author, committer=committer)
 
+    return tmpdir
+
+
+@pytest.fixture
+def builddir(gitdir):
+    """
+    A directory with a wily cache
+    """
+    tmppath = pathlib.Path(gitdir)
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", str(tmppath / "src")]
+        main.cli, ["--debug", "--path", gitdir, "build", str(tmppath / "src")]
     )
     assert result.exit_code == 0, result.stdout
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "index"])
+    result = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
     assert result.exit_code == 0, result.stdout
 
-    return tmpdir
+    return gitdir
