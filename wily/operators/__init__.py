@@ -102,7 +102,7 @@ OPERATOR_HALSTEAD = Operator(
     name="halstead",
     cls=HalsteadOperator,
     description="Halstead metrics",
-    level=OperatorLevel.File,
+    level=OperatorLevel.Object,
 )
 
 
