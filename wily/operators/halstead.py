@@ -71,5 +71,22 @@ class HalsteadOperator(BaseOperator):
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {}
             for instance in details:
-                print(instance)
+                if isinstance(instance, list):
+                    for item in instance:
+                        function, report = item
+                        results[filename][function] = self._report_to_dict(report)
+                else:
+                    results[filename] = self._report_to_dict(instance)
         return results
+    
+    def _report_to_dict(self, report):
+        return {
+            "h1": report.h1,
+            "h2": report.h2,
+            "N1": report.N1,
+            "N2": report.N2,
+            "vocabulary": report.vocabulary,
+            "volume": report.volume,
+            "length": report.length,
+            "effort": report.effort,
+        }
