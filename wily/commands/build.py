@@ -9,6 +9,9 @@ from progress.bar import Bar
 from wily import logger
 from wily.state import State
 
+from wily.archivers.git import InvalidGitRepositoryError
+from wily.archivers import FilesystemArchiver
+
 
 def build(config, archiver, operators):
     """
@@ -23,18 +26,25 @@ def build(config, archiver, operators):
     :param operators: The list of operators to execute
     :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
-    state = State(config, archiver=archiver)
-
-    # Check for existence of cache, else provision
-    state.ensure_exists()
-
     try:
         logger.debug(f"Using {archiver.name} archiver module")
         archiver = archiver.cls(config)
         revisions = archiver.revisions(config.path, config.max_revisions)
+    except InvalidGitRepositoryError:
+        # TODO: This logic shouldn't really be here (SoC)
+        logger.info(f"Defaulting back to the filesystem archiver, not a valid git repo")
+        archiver = FilesystemArchiver(config)
+        revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
-        logger.error(f"Failed to setup archiver: '{e.message}'")
+        if hasattr(e, "message"):
+            logger.error(f"Failed to setup archiver: '{e.message}'")
+        else:
+            logger.error(f"Failed to setup archiver: '{type(e)} - {e}'")
         exit(1)
+
+    state = State(config, archiver=archiver)
+    # Check for existence of cache, else provision
+    state.ensure_exists()
 
     index = state.index[archiver.name]
 

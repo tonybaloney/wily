@@ -40,7 +40,7 @@ class BaseArchiver(object):
 
     def finish(self):
         """Clean up any state if processing completed/failed."""
-        raise NotImplementedError
+        pass
 
 
 @dataclass
@@ -55,6 +55,7 @@ class Revision:
 
 
 from wily.archivers.git import GitArchiver
+from wily.archivers.filesystem import FilesystemArchiver
 
 
 """Type for an operator"""
@@ -64,9 +65,13 @@ Archiver = namedtuple("Archiver", "name cls description")
 """Git Operator defined in `wily.archivers.git`"""
 ARCHIVER_GIT = Archiver(name="git", cls=GitArchiver, description="Git archiver")
 
+"""Filesystem archiver"""
+ARCHIVER_FILESYSTEM = Archiver(
+    name="filesystem", cls=FilesystemArchiver, description="Filesystem archiver"
+)
 
 """Set of all available archivers"""
-ALL_ARCHIVERS = {ARCHIVER_GIT}
+ALL_ARCHIVERS = {ARCHIVER_GIT, ARCHIVER_FILESYSTEM}
 
 
 def resolve_archiver(name):

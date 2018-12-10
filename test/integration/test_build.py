@@ -8,22 +8,27 @@ TODO : Test build + build with extra operator
 TODO : Test build specific (non-default) operator and wily report
 """
 import pathlib
-
+import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
 from mock import patch
 
 import wily.__main__ as main
+from wily.archivers import ALL_ARCHIVERS
 
 
 def test_build_not_git_repo(tmpdir):
     """
-    Test that build fails in a non-git directory
+    Test that build defaults to filesystem in a non-git directory
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
-        assert result.exit_code == 1, result.stdout
+        assert result.exit_code == 0, result.stdout
+        cache_path = tmpdir / ".wily"
+        assert cache_path.exists()
+        index_path = tmpdir / ".wily" / "filesystem" / "index.json"
+        assert index_path.exists()
 
 
 def test_build_invalid_path(tmpdir):
@@ -211,3 +216,23 @@ def test_build_no_git_history(tmpdir):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "src/test.py"])
         assert result.exit_code == 1, result.stdout
+
+
+archivers = {archiver.name for archiver in ALL_ARCHIVERS}
+
+
+@pytest.mark.parametrize("archiver", archivers)
+def test_build_archiver(gitdir, archiver):
+    """
+    Test the build against each type of archiver
+    """
+    with patch("wily.logger") as logger:
+        runner = CliRunner()
+        result = runner.invoke(
+            main.cli, ["--path", gitdir, "build", "src/test.py", "-a", archiver]
+        )
+        assert result.exit_code == 0, result.stdout
+        cache_path = gitdir / ".wily"
+        assert cache_path.exists()
+        index_path = gitdir / ".wily" / archiver / "index.json"
+        assert index_path.exists()
