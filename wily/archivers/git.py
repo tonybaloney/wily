@@ -18,7 +18,7 @@ gitignore_options = (".wily/", ".wily", ".wily/*", ".wily/**/*")
 
 
 class InvalidGitRepositoryError(Exception):
-    """Error for when a folder is not a git repo"""
+    """Error for when a folder is not a git repo."""
 
     pass
 
