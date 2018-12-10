@@ -151,14 +151,7 @@ def test_report_with_opts():
         with patch("wily.commands.report.report") as report:
             runner = CliRunner()
             result = runner.invoke(
-                main.cli,
-                [
-                    "report",
-                    "foo.py",
-                    "example_metric",
-                    "-n 101",
-                    "--message",
-                ],
+                main.cli, ["report", "foo.py", "example_metric", "-n 101", "--message"]
             )
             assert result.exit_code == 0, result.stdout
             assert report.called_once
