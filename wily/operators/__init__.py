@@ -106,12 +106,15 @@ OPERATOR_HALSTEAD = Operator(
 )
 
 
-"""Set of all available operators."""
+"""Dictionary of all operators"""
 ALL_OPERATORS = {
-    OPERATOR_CYCLOMATIC,
-    OPERATOR_MAINTAINABILITY,
-    OPERATOR_RAW,
-    OPERATOR_HALSTEAD,
+    operator.name: operator
+    for operator in {
+        OPERATOR_CYCLOMATIC,
+        OPERATOR_MAINTAINABILITY,
+        OPERATOR_RAW,
+        OPERATOR_HALSTEAD,
+    }
 }
 
 
@@ -122,11 +125,10 @@ def resolve_operator(name):
     :param name: The name of the operator
     :return: The operator type
     """
-    r = [operator for operator in ALL_OPERATORS if operator.name == name.lower()]
-    if not r or len(r) == 0:
-        raise ValueError(f"Operator {name} not recognised.")
+    if name.lower() in ALL_OPERATORS:
+        return ALL_OPERATORS[name.lower()]
     else:
-        return r[0]
+        raise ValueError(f"Operator {name} not recognised.")
 
 
 def resolve_operators(operators):
