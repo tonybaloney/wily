@@ -74,11 +74,14 @@ def builddir(gitdir):
     """
     tmppath = pathlib.Path(gitdir)
     runner = CliRunner()
-    result = runner.invoke(
+    result1 = runner.invoke(
         main.cli, ["--debug", "--path", gitdir, "build", str(tmppath / "src")]
     )
-    assert result.exit_code == 0, result.stdout
-    result = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
-    assert result.exit_code == 0, result.stdout
+    assert result1.exit_code == 0, result1.stdout
+
+    result2 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
+    assert result2.exit_code == 0, result2.stdout
+
+    assert (tmppath / ".wily" / "git").exists()
 
     return gitdir
