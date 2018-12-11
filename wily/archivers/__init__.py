@@ -71,7 +71,7 @@ ARCHIVER_FILESYSTEM = Archiver(
 )
 
 """Set of all available archivers"""
-ALL_ARCHIVERS = {ARCHIVER_GIT, ARCHIVER_FILESYSTEM}
+ALL_ARCHIVERS = {a.name: a for a in [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]}
 
 
 def resolve_archiver(name):
@@ -82,8 +82,7 @@ def resolve_archiver(name):
     :type  name: ``str``
     :return: The archiver type
     """
-    r = [archiver for archiver in ALL_ARCHIVERS if archiver.name == name.lower()]
-    if not r:
+    if name not in ALL_ARCHIVERS:
         raise ValueError(f"Resolver {name} not recognised.")
     else:
-        return r[0]
+        return ALL_ARCHIVERS[name.lower()]

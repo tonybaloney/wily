@@ -183,9 +183,9 @@ def list_archivers(config):
     """
     root = pathlib.Path(config.cache_path)
     result = []
-    for archiver in ALL_ARCHIVERS:
-        if (root / archiver.name).exists():
-            result.append(archiver.name)
+    for name in ALL_ARCHIVERS.keys():
+        if (root / name).exists():
+            result.append(name)
     return result
 
 

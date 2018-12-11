@@ -86,6 +86,7 @@ def cli(ctx, debug, config, path):
     "-a",
     "--archiver",
     type=click.STRING,
+    default="git",
     help="Archiver to use, defaults to git if git repo, else filesystem",
 )
 @click.option(

@@ -60,7 +60,7 @@ def test_basearchiver():
 
 
 def test_defaults():
-    assert wily.archivers.ARCHIVER_GIT in wily.archivers.ALL_ARCHIVERS
+    assert wily.archivers.ARCHIVER_GIT in wily.archivers.ALL_ARCHIVERS.values()
 
 
 def test_resolve_archiver():
