@@ -168,7 +168,7 @@ class Index(object):
     def save(self):
         """Save the index data back to the wily cache."""
         data = [i.asdict() for i in self._revisions.values()]
-        logger.debug(data)
+        logger.debug("Saving data")
         cache.store_archiver_index(self.config, self.archiver, data)
 
 

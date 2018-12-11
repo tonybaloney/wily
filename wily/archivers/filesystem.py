@@ -4,7 +4,9 @@ Filesystem Archiver.
 Implementation of the archiver API for a standard directory (no revisions)
 """
 import logging
-
+import os.path
+from datetime import datetime
+import hashlib
 from wily.archivers import BaseArchiver, Revision
 
 logger = logging.getLogger(__name__)
@@ -37,14 +39,14 @@ class FilesystemArchiver(BaseArchiver):
         :return: A list of revisions.
         :rtype: ``list`` of :class:`Revision`
         """
-        # TODO : Sha the current file/path
-        # so if the files change, the revision is redundant
+        mtime = os.path.getmtime(path)
+        key = hashlib.sha1(str(mtime).encode()).hexdigest()[:7]
         return [
             Revision(
-                key="current",
-                author_name="Local User",
-                author_email="-",
-                date="Current",
+                key=key,
+                author_name="Local User",  # Don't want to leak local data
+                author_email="-",  # as above
+                date=int(mtime),
                 message="None",
             )
         ]
