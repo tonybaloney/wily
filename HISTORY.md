@@ -1,5 +1,12 @@
 # Release History
 
+## 1.7.0 (tbc)
+
+* Add halstead metrics as an optional operator
+* Add an archiver flag to the build command (`-a`)
+* Add a new filesystem archiver as an alternative to the git archiver for when you want to measure changes between files without having to use git.
+* Setup new workflow - if the git archiver fails to initialise, build will default to the filesystem assuming the path is not a git repository.
+
 ## 1.6.0 (30th November 2018)
 
 **NB: Upgrade will warn about index rebuild, this is expected behaviour**

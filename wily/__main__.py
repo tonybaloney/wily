@@ -83,12 +83,19 @@ def cli(ctx, debug, config, path):
     help="List of operators, separated by commas",
 )
 @click.option(
+    "-a",
+    "--archiver",
+    type=click.STRING,
+    default="git",
+    help="Archiver to use, defaults to git if git repo, else filesystem",
+)
+@click.option(
     "--skip-gitignore-check/--gitignore-check",
     default=False,
     help="Skip checking of .gitignore for '.wily/'",
 )
 @click.pass_context
-def build(ctx, max_revisions, targets, operators, skip_gitignore_check):
+def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver):
     """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
@@ -101,6 +108,10 @@ def build(ctx, max_revisions, targets, operators, skip_gitignore_check):
     if operators:
         logger.debug(f"Fixing operators to {operators}")
         config.operators = operators.strip().split(",")
+
+    if archiver:
+        logger.debug(f"Fixing archiver to {archiver}")
+        config.archiver = archiver
 
     config.skip_ignore_check = skip_gitignore_check
     logger.debug(f"Fixing targets to {targets}")

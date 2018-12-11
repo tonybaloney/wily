@@ -7,6 +7,7 @@ import logging
 import pathlib
 
 from git import Repo
+import git.exc
 
 from wily.archivers import BaseArchiver, Revision
 
@@ -14,6 +15,12 @@ logger = logging.getLogger(__name__)
 
 """Possible combinations in .gitignore."""
 gitignore_options = (".wily/", ".wily", ".wily/*", ".wily/**/*")
+
+
+class InvalidGitRepositoryError(Exception):
+    """Error for when a folder is not a git repo."""
+
+    pass
 
 
 class DirtyGitRepositoryError(Exception):
@@ -53,7 +60,10 @@ class GitArchiver(BaseArchiver):
         :param config: The wily configuration
         :type  config: :class:`wily.config.WilyConfig`
         """
-        self.repo = Repo(config.path)
+        try:
+            self.repo = Repo(config.path)
+        except git.exc.InvalidGitRepositoryError as e:
+            raise InvalidGitRepositoryError from e
         self.ignore_gitignore = config.skip_ignore_check
         gitignore = pathlib.Path(config.path) / ".gitignore"
         if not gitignore.exists():

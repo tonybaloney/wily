@@ -168,7 +168,7 @@ class Index(object):
     def save(self):
         """Save the index data back to the wily cache."""
         data = [i.asdict() for i in self._revisions.values()]
-        logger.debug(data)
+        logger.debug("Saving data")
         cache.store_archiver_index(self.config, self.archiver, data)
 
 
@@ -193,6 +193,7 @@ class State(object):
             self.archivers = [archiver.name]
         else:
             self.archivers = cache.list_archivers(config)
+        logger.debug(f"Initialised state indexes for archivers {self.archivers}")
         self.config = config
         self.index = {}
         for archiver in self.archivers:
