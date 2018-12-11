@@ -11,8 +11,8 @@ from wily.operators import ALL_OPERATORS
 
 def list_metrics():
     """List metrics available."""
-    for operator in ALL_OPERATORS:
-        print(f"{operator.name} operator:")
+    for name, operator in ALL_OPERATORS.items():
+        print(f"{name} operator:")
         if len(operator.cls.metrics) > 0:
             print(
                 tabulate.tabulate(
