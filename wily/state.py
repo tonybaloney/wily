@@ -192,8 +192,8 @@ class State(object):
         if archiver:
             self.archivers = [archiver.name]
         else:
-            raise ValueError("Archiver not specified")
             self.archivers = cache.list_archivers(config)
+        logger.debug(f"Initialised state indexes for archivers {self.archivers}")
         self.config = config
         self.index = {}
         for archiver in self.archivers:
