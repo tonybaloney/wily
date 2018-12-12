@@ -62,7 +62,7 @@ def build(config, archiver, operators):
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
     try:
-        pool = multiprocessing.pool.Pool(processes=len(operators))
+        pool = multiprocessing.Pool(processes=len(operators))
         for revision in revisions:
             # Checkout target revision
             archiver.checkout(revision, config.checkout_options)
