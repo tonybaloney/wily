@@ -1,5 +1,7 @@
 # Release History
 
+# 1.8.0 (tb)
+
 ## 1.7.0 (12th December 2018)
 
 * Add halstead metrics as an optional operator

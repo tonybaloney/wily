@@ -4,6 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+import multiprocessing
 from progress.bar import Bar
 
 from wily import logger
@@ -61,6 +62,7 @@ def build(config, archiver, operators):
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
     try:
+        pool = multiprocessing.pool.Pool(processes=len(operators))
         for revision in revisions:
             # Checkout target revision
             archiver.checkout(revision, config.checkout_options)
@@ -68,10 +70,12 @@ def build(config, archiver, operators):
             _operators = [operator.cls(config) for operator in operators]
 
             stats = {"operator_data": {}}
-            for operator in _operators:
+            def run_operator(operator):
                 logger.debug(f"Running {operator.name} operator on {revision.key}")
                 stats["operator_data"][operator.name] = operator.run(revision, config)
                 bar.next()
+            pool.map(run_operator, _operators)
+
             ir = index.add(revision, operators=operators)
             ir.store(config, archiver, stats)
         index.save()
