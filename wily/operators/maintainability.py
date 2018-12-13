@@ -27,8 +27,16 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("rank", "Maintainability Ranking", str, MetricType.Informational, statistics.median),
-        Metric("mi", "Maintainability Index", float, MetricType.AimLow, statistics.mean),
+        Metric(
+            "rank",
+            "Maintainability Ranking",
+            str,
+            MetricType.Informational,
+            statistics.median,
+        ),
+        Metric(
+            "mi", "Maintainability Index", float, MetricType.AimLow, statistics.mean
+        ),
     )
 
     default_metric_index = 1  # MI

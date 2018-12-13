@@ -23,7 +23,11 @@ class RawMetricsOperator(BaseOperator):
         Metric("multi", "Multi lines", int, MetricType.Informational, sum),
         Metric("blank", "blank lines", int, MetricType.Informational, sum),
         Metric(
-            "single_comments", "Single comment lines", int, MetricType.Informational, sum
+            "single_comments",
+            "Single comment lines",
+            int,
+            MetricType.Informational,
+            sum,
         ),
     )
     default_metric_index = 0  # LOC

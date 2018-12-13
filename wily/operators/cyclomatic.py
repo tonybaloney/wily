@@ -28,7 +28,15 @@ class CyclomaticComplexityOperator(BaseOperator):
         "order": radon.complexity.SCORE,
     }
 
-    metrics = (Metric("complexity", "Cyclomatic Complexity", float, MetricType.AimLow, statistics.mean),)
+    metrics = (
+        Metric(
+            "complexity",
+            "Cyclomatic Complexity",
+            float,
+            MetricType.AimLow,
+            statistics.mean,
+        ),
+    )
 
     default_metric_index = 0  # MI
 

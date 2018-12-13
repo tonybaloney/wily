@@ -83,9 +83,28 @@ def build(config, archiver, operators):
 
                 # Map the data back into a dictionary
                 for operator_name, result in data:
-                    bar.next()
+                    # aggregate values to directories
+                    roots = []
+
+                    # find all unique directories in the results
+                    for entry in result.keys():
+                        parent = pathlib.Path(entry).parents[0]
+                        if parent not in roots:
+                            roots.append(parent)
+                    
+                    for root in roots:
+                        # find all matching entries recursively
+                        aggregates = [path for path in result.keys() if pathlib.Path(path).match(root + "/**/*")]
+                    
+                        # aggregate values
+                        for metric in resolve_operator(operator_name).cls.metrics:
+                            func = metric.aggregate
+                            values = [result[aggregate] for aggregate in aggregates]
+                            stats["operator_data"][root][metric] = func(values)
+
                     stats["operator_data"][operator_name] = result
-                logger.debug(list(stats["operator_data"][operator_name].keys()))
+                    bar.next()
+
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver, stats)
         index.save()

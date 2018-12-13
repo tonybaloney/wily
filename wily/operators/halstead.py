@@ -30,7 +30,9 @@ class HalsteadOperator(BaseOperator):
         Metric("h2", "h2 metric", int, MetricType.AimLow, sum),
         Metric("N1", "N1 metric", int, MetricType.AimLow, sum),
         Metric("N2", "N2 metric", int, MetricType.AimLow, sum),
-        Metric("vocabulary", "Unique vocabulary (h1 + h2)", int, MetricType.AimLow, sum),
+        Metric(
+            "vocabulary", "Unique vocabulary (h1 + h2)", int, MetricType.AimLow, sum
+        ),
         Metric("length", "Length of application", int, MetricType.AimLow, sum),
         Metric("volume", "Code volume", float, MetricType.AimLow, sum),
         Metric("difficulity", "Difficulty", float, MetricType.AimLow, sum),
