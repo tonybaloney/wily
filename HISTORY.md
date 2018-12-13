@@ -1,6 +1,8 @@
 # Release History
 
-# 1.8.0 (tb)
+## 1.8.0 (master)
+
+* Build process is now run with a multiprocess pool, build times are 50-70% faster (depending on number of operators)
 
 ## 1.7.0 (12th December 2018)
 
