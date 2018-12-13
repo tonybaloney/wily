@@ -17,7 +17,7 @@ from wily.archivers import FilesystemArchiver
 def run_operator(operator, revision, config):
     instance = operator.cls(config)
     logger.debug(f"Running {operator.name} operator on {revision.key}")
-    return instance.run(revision, config)
+    return operator.name, instance.run(revision, config)
 
 
 def build(config, archiver, operators):
@@ -75,11 +75,11 @@ def build(config, archiver, operators):
 
                 stats = {"operator_data": {}}
 
-                bar.next()
                 data = pool.starmap(run_operator, [(operator, revision, config) for operator in operators])
-                logger.debug(data)
-
-                # stats["operator_data"][operator.name] = operator.run(revision, config)
+                
+                for operator_name, result in data:
+                    bar.next()
+                    stats["operator_data"][operator_name] = result
 
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver, stats)
