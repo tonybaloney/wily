@@ -15,6 +15,7 @@ from wily.archivers import FilesystemArchiver
 
 
 def run_operator(operator, revision, config):
+    """The function for the multiprocessing pool."""
     instance = operator.cls(config)
     logger.debug(f"Running {operator.name} operator on {revision.key}")
     return operator.name, instance.run(revision, config)
