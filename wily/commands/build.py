@@ -102,7 +102,8 @@ def build(config, archiver, operators):
                         for metric in resolve_operator(operator_name).cls.metrics:
                             func = metric.aggregate
                             values = [result[aggregate][metric.name] for aggregate in aggregates]
-                            stats["operator_data"][root][metric] = func(values)
+                            if len(values) > 0:
+                                stats["operator_data"][root][metric] = func(values)
 
                     stats["operator_data"][operator_name] = result
                     bar.next()
