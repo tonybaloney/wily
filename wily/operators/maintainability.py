@@ -32,7 +32,7 @@ class MaintainabilityIndexOperator(BaseOperator):
             "Maintainability Ranking",
             str,
             MetricType.Informational,
-            statistics.median,
+            statistics.mode,
         ),
         Metric(
             "mi", "Maintainability Index", float, MetricType.AimLow, statistics.mean
