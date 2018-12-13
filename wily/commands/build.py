@@ -14,6 +14,7 @@ from wily.state import State
 from wily.archivers.git import InvalidGitRepositoryError
 from wily.archivers import FilesystemArchiver
 
+from wily.operators import resolve_operator
 
 def run_operator(operator, revision, config):
     """Run an operator for the multiprocessing pool. Not called directly."""
