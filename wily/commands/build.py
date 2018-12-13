@@ -72,11 +72,12 @@ def build(config, archiver, operators):
             for revision in revisions:
                 # Checkout target revision
                 archiver.checkout(revision, config.checkout_options)
-
                 stats = {"operator_data": {}}
 
+                # Run each operator as a seperate process
                 data = pool.starmap(run_operator, [(operator, revision, config) for operator in operators])
                 
+                # Map the data back into a dictionary
                 for operator_name, result in data:
                     bar.next()
                     stats["operator_data"][operator_name] = result
