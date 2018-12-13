@@ -97,13 +97,13 @@ def build(config, archiver, operators):
                     for root in roots:
                         # find all matching entries recursively
                         aggregates = [path for path in result.keys() if pathlib.Path(path).match(root + "/**/*")]
-                        stats["operator_data"][root] = {}
+                        result[root] = {}
                         # aggregate values
                         for metric in resolve_operator(operator_name).cls.metrics:
                             func = metric.aggregate
                             values = [result[aggregate][metric.name] for aggregate in aggregates]
                             if len(values) > 0:
-                                stats["operator_data"][root][metric] = func(values)
+                                result[root][metric.name] = func(values)
 
                     stats["operator_data"][operator_name] = result
                     bar.next()
