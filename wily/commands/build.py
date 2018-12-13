@@ -4,6 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+import multiprocessing
 from progress.bar import Bar
 
 from wily import logger
@@ -11,6 +12,13 @@ from wily.state import State
 
 from wily.archivers.git import InvalidGitRepositoryError
 from wily.archivers import FilesystemArchiver
+
+
+def run_operator(operator, revision, config):
+    """Run an operator for the multiprocessing pool. Not called directly."""
+    instance = operator.cls(config)
+    logger.debug(f"Running {operator.name} operator on {revision.key}")
+    return operator.name, instance.run(revision, config)
 
 
 def build(config, archiver, operators):
@@ -61,19 +69,25 @@ def build(config, archiver, operators):
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
     try:
-        for revision in revisions:
-            # Checkout target revision
-            archiver.checkout(revision, config.checkout_options)
-            # Build a set of operators
-            _operators = [operator.cls(config) for operator in operators]
+        with multiprocessing.Pool(processes=len(operators)) as pool:
+            for revision in revisions:
+                # Checkout target revision
+                archiver.checkout(revision, config.checkout_options)
+                stats = {"operator_data": {}}
 
-            stats = {"operator_data": {}}
-            for operator in _operators:
-                logger.debug(f"Running {operator.name} operator on {revision.key}")
-                stats["operator_data"][operator.name] = operator.run(revision, config)
-                bar.next()
-            ir = index.add(revision, operators=operators)
-            ir.store(config, archiver, stats)
+                # Run each operator as a seperate process
+                data = pool.starmap(
+                    run_operator,
+                    [(operator, revision, config) for operator in operators],
+                )
+
+                # Map the data back into a dictionary
+                for operator_name, result in data:
+                    bar.next()
+                    stats["operator_data"][operator_name] = result
+
+                ir = index.add(revision, operators=operators)
+                ir.store(config, archiver, stats)
         index.save()
         bar.finish()
     except Exception as e:
