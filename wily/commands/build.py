@@ -84,7 +84,7 @@ def build(config, archiver, operators):
                 for operator_name, result in data:
                     bar.next()
                     stats["operator_data"][operator_name] = result
-
+                logger.debug(list(stats["operator_data"][operator_name].keys()))
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver, stats)
         index.save()

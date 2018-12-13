@@ -3,6 +3,8 @@ Maintainability operator.
 
 Measures the "maintainability" using the Halstead index.
 """
+import statistics
+
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 
@@ -25,8 +27,8 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("rank", "Maintainability Ranking", str, MetricType.Informational),
-        Metric("mi", "Maintainability Index", float, MetricType.AimLow),
+        Metric("rank", "Maintainability Ranking", str, MetricType.Informational, statistics.median),
+        Metric("mi", "Maintainability Index", float, MetricType.AimLow, statistics.mean),
     )
 
     default_metric_index = 1  # MI
