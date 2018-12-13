@@ -14,6 +14,12 @@ from wily.archivers.git import InvalidGitRepositoryError
 from wily.archivers import FilesystemArchiver
 
 
+def run_operator(operator, revision, config):
+    instance = operator.cls(config)
+    logger.debug(f"Running {operator.name} operator on {revision.key}")
+    return instance.run(revision, config)
+
+
 def build(config, archiver, operators):
     """
     Build the history given a archiver and collection of operators.
@@ -62,22 +68,21 @@ def build(config, archiver, operators):
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
     try:
-        pool = multiprocessing.Pool(processes=len(operators))
-        for revision in revisions:
-            # Checkout target revision
-            archiver.checkout(revision, config.checkout_options)
-            # Build a set of operators
-            _operators = [operator.cls(config) for operator in operators]
+        with multiprocessing.Pool(processes=len(operators)) as pool:
+            for revision in revisions:
+                # Checkout target revision
+                archiver.checkout(revision, config.checkout_options)
 
-            stats = {"operator_data": {}}
-            def run_operator(operator):
-                logger.debug(f"Running {operator.name} operator on {revision.key}")
-                stats["operator_data"][operator.name] = operator.run(revision, config)
+                stats = {"operator_data": {}}
+
                 bar.next()
-            pool.map(run_operator, _operators)
+                data = pool.starmap(run_operator, [(operator, revision, config) for operator in operators])
+                logger.debug(data)
 
-            ir = index.add(revision, operators=operators)
-            ir.store(config, archiver, stats)
+                # stats["operator_data"][operator.name] = operator.run(revision, config)
+
+                ir = index.add(revision, operators=operators)
+                ir.store(config, archiver, stats)
         index.save()
         bar.finish()
     except Exception as e:
