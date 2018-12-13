@@ -101,7 +101,7 @@ def build(config, archiver, operators):
                         # aggregate values
                         for metric in resolve_operator(operator_name).cls.metrics:
                             func = metric.aggregate
-                            values = [result[aggregate] for aggregate in aggregates]
+                            values = [result[aggregate][metric.name] for aggregate in aggregates]
                             stats["operator_data"][root][metric] = func(values)
 
                     stats["operator_data"][operator_name] = result
