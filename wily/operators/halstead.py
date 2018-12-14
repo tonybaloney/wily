@@ -35,7 +35,7 @@ class HalsteadOperator(BaseOperator):
         ),
         Metric("length", "Length of application", int, MetricType.AimLow, sum),
         Metric("volume", "Code volume", float, MetricType.AimLow, sum),
-        Metric("difficulity", "Difficulty", float, MetricType.AimLow, sum),
+        Metric("difficulty", "Difficulty", float, MetricType.AimLow, sum),
         Metric("effort", "Effort", float, MetricType.AimLow, sum),
     )
 
@@ -91,4 +91,5 @@ class HalsteadOperator(BaseOperator):
             "volume": report.volume,
             "length": report.length,
             "effort": report.effort,
+            "difficulty": report.difficulty,
         }
