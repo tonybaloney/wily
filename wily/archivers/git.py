@@ -135,3 +135,4 @@ class GitArchiver(BaseArchiver):
         For git, will checkout HEAD on the original branch when finishing
         """
         self.repo.git.checkout(self.current_branch)
+        self.repo.close()

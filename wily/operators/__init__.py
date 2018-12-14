@@ -12,7 +12,7 @@ class MetricType(Enum):
     Informational = 3  # Doesn't matter
 
 
-Metric = namedtuple("Metric", "name description type measure")
+Metric = namedtuple("Metric", "name description type measure aggregate")
 
 GOOD_COLORS = {
     MetricType.AimHigh: 32,

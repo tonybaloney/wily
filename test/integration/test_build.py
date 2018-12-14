@@ -5,7 +5,6 @@ All of the following tests will use a click CLI runner to fully simulate the CLI
 Many of the tests will depend on a "builddir" fixture which is a compiled wily cache.
 
 TODO : Test build + build with extra operator
-TODO : Test build specific (non-default) operator and wily report
 """
 import pathlib
 import pytest

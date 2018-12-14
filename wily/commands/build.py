@@ -4,6 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+import pathlib
 import multiprocessing
 from progress.bar import Bar
 
@@ -12,6 +13,8 @@ from wily.state import State
 
 from wily.archivers.git import InvalidGitRepositoryError
 from wily.archivers import FilesystemArchiver
+
+from wily.operators import resolve_operator
 
 
 def run_operator(operator, revision, config):
@@ -83,8 +86,35 @@ def build(config, archiver, operators):
 
                 # Map the data back into a dictionary
                 for operator_name, result in data:
-                    bar.next()
+                    # aggregate values to directories
+                    roots = []
+
+                    # find all unique directories in the results
+                    for entry in result.keys():
+                        parent = pathlib.Path(entry).parents[0]
+                        if parent not in roots:
+                            roots.append(parent)
+
+                    for root in roots:
+                        # find all matching entries recursively
+                        aggregates = [
+                            path
+                            for path in result.keys()
+                            if root in pathlib.Path(path).parents
+                        ]
+                        result[str(root)] = {}
+                        # aggregate values
+                        for metric in resolve_operator(operator_name).cls.metrics:
+                            func = metric.aggregate
+                            values = [
+                                result[aggregate][metric.name]
+                                for aggregate in aggregates
+                            ]
+                            if len(values) > 0:
+                                result[str(root)][metric.name] = func(values)
+
                     stats["operator_data"][operator_name] = result
+                    bar.next()
 
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver, stats)

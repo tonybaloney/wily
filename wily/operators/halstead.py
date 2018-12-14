@@ -26,15 +26,17 @@ class HalsteadOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("h1", "h1 metric", int, MetricType.AimLow),
-        Metric("h2", "h2 metric", int, MetricType.AimLow),
-        Metric("N1", "N1 metric", int, MetricType.AimLow),
-        Metric("N2", "N2 metric", int, MetricType.AimLow),
-        Metric("vocabulary", "Unique vocabulary (h1 + h2)", int, MetricType.AimLow),
-        Metric("length", "Length of application", int, MetricType.AimLow),
-        Metric("volume", "Code volume", float, MetricType.AimLow),
-        Metric("difficulity", "Difficulty", float, MetricType.AimLow),
-        Metric("effort", "Effort", float, MetricType.AimLow),
+        Metric("h1", "h1 metric", int, MetricType.AimLow, sum),
+        Metric("h2", "h2 metric", int, MetricType.AimLow, sum),
+        Metric("N1", "N1 metric", int, MetricType.AimLow, sum),
+        Metric("N2", "N2 metric", int, MetricType.AimLow, sum),
+        Metric(
+            "vocabulary", "Unique vocabulary (h1 + h2)", int, MetricType.AimLow, sum
+        ),
+        Metric("length", "Length of application", int, MetricType.AimLow, sum),
+        Metric("volume", "Code volume", float, MetricType.AimLow, sum),
+        Metric("difficulty", "Difficulty", float, MetricType.AimLow, sum),
+        Metric("effort", "Effort", float, MetricType.AimLow, sum),
     )
 
     default_metric_index = 0  # MI
@@ -89,4 +91,5 @@ class HalsteadOperator(BaseOperator):
             "volume": report.volume,
             "length": report.length,
             "effort": report.effort,
+            "difficulty": report.difficulty,
         }

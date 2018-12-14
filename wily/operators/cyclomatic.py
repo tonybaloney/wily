@@ -3,6 +3,7 @@ Cyclomatic complexity metric for each function/method.
 
 Provided by the radon library.
 """
+import statistics
 
 import radon
 import radon.cli.harvest as harvesters
@@ -27,7 +28,15 @@ class CyclomaticComplexityOperator(BaseOperator):
         "order": radon.complexity.SCORE,
     }
 
-    metrics = (Metric("complexity", "Cyclomatic Complexity", float, MetricType.AimLow),)
+    metrics = (
+        Metric(
+            "complexity",
+            "Cyclomatic Complexity",
+            float,
+            MetricType.AimLow,
+            statistics.mean,
+        ),
+    )
 
     default_metric_index = 0  # MI
 

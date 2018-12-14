@@ -3,6 +3,7 @@
 ## 1.8.0 (master)
 
 * Build process is now run with a multiprocess pool, build times are 50-70% faster (depending on number of operators)
+* Build process will now create a stub for each directory so you can run report on any directory and it will give you aggregate metrics. Each metric specifies it's own aggregation function.
 
 ## 1.7.0 (12th December 2018)
 
