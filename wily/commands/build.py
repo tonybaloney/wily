@@ -16,6 +16,7 @@ from wily.archivers import FilesystemArchiver
 
 from wily.operators import resolve_operator
 
+
 def run_operator(operator, revision, config):
     """Run an operator for the multiprocessing pool. Not called directly."""
     instance = operator.cls(config)
@@ -93,15 +94,22 @@ def build(config, archiver, operators):
                         parent = pathlib.Path(entry).parents[0]
                         if parent not in roots:
                             roots.append(parent)
-                    
+
                     for root in roots:
                         # find all matching entries recursively
-                        aggregates = [path for path in result.keys() if root in pathlib.Path(path).parents]
+                        aggregates = [
+                            path
+                            for path in result.keys()
+                            if root in pathlib.Path(path).parents
+                        ]
                         result[str(root)] = {}
                         # aggregate values
                         for metric in resolve_operator(operator_name).cls.metrics:
                             func = metric.aggregate
-                            values = [result[aggregate][metric.name] for aggregate in aggregates]
+                            values = [
+                                result[aggregate][metric.name]
+                                for aggregate in aggregates
+                            ]
                             if len(values) > 0:
                                 result[str(root)][metric.name] = func(values)
 

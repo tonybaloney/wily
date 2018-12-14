@@ -11,7 +11,7 @@ def test_report_no_cache(tmpdir):
 
 def test_report(builddir):
     """
-    Test that report works with a build
+    Test that report works with a build and a specific metric
     """
     runner = CliRunner()
     result = runner.invoke(
@@ -31,7 +31,7 @@ def test_report(builddir):
 
 def test_report_granular(builddir):
     """
-    Test that report works with a build
+    Test that report works with a build against specific metrics and a function
     """
     runner = CliRunner()
     result = runner.invoke(
@@ -64,7 +64,7 @@ def test_report_not_found(builddir):
 
 def test_report_default_metrics(builddir):
     """
-    Test that report works with a build
+    Test that report works with default metrics
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "report", "src/test.py"])
@@ -72,9 +72,19 @@ def test_report_default_metrics(builddir):
     assert "Not found" not in result.stdout
 
 
+def test_report_path(builddir):
+    """
+    Test that report with a path to a folder (aggregate values)
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "report", "src"])
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
 def test_report_with_message(builddir):
     """
-    Test that report works with a build
+    Test that report works messages in UI
     """
     runner = CliRunner()
     result = runner.invoke(
