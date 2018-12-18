@@ -78,6 +78,7 @@ class CyclomaticComplexityOperator(BaseOperator):
                 elif isinstance(instance, Function):
                     i = self._dict_from_function(instance)
                 else:
+                    logger.debug(f"Received unexpected {type(instance)} from radon.")
                     raise TypeError
                 results[filename][i["fullname"]] = i
                 del i["fullname"]
