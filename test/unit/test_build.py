@@ -16,10 +16,10 @@ class MockArchiverCls(BaseArchiver):
     def revisions(self, path, max_revisions):
         return [
             Revision(
-                key='12345',
+                key="12345",
                 author_name="Local User",  # Don't want to leak local data
                 author_email="-",  # as above
-                date=12345679,
+                date=12_345_679,
                 message="None",
             )
         ]
@@ -52,6 +52,6 @@ def config():
 
 def test_build_simple(config):
     _test_operators = (MockOperator,)
-    with patch('wily.state.resolve_archiver', return_value=MockArchiver):
+    with patch("wily.state.resolve_archiver", return_value=MockArchiver):
         result = build.build(config, MockArchiver, _test_operators)
     assert result is None
