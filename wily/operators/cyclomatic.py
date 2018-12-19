@@ -78,7 +78,16 @@ class CyclomaticComplexityOperator(BaseOperator):
                 elif isinstance(instance, Function):
                     i = self._dict_from_function(instance)
                 else:
-                    raise TypeError
+                    if isinstance(instance, str) and instance == "error":
+                        logger.warning(
+                            f"Failed to run CC harvester on {filename} : {details['error']}"
+                        )
+                        continue
+                    else:
+                        logger.warning(
+                            f"Unexpected result from Radon : {instance} of {type(instance)}. Please report on Github."
+                        )
+                        continue
                 results[filename][i["fullname"]] = i
                 del i["fullname"]
                 total += i["complexity"]

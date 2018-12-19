@@ -1,6 +1,10 @@
 # Release History
 
-## 1.8.0 (master)
+## 1.8.1 (19th Decemember 2018)
+
+* [BUGFIX] Fixed an issue that occured if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
+
+## 1.8.0 (14th December 2018)
 
 * Build process is now run with a multiprocess pool, build times are 50-70% faster (depending on number of operators)
 * Build process will now create a stub for each directory so you can run report on any directory and it will give you aggregate metrics. Each metric specifies it's own aggregation function.
