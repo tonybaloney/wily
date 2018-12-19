@@ -68,6 +68,12 @@ class BaseOperator(object):
         raise NotImplementedError
 
 
+class RevisionOperatorError(Exception):
+    def __init__(self, revision):
+        self.message = f"Failed to build {revision.key}"
+        self.revision = revision
+
+
 from wily.operators.cyclomatic import CyclomaticComplexityOperator
 from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
