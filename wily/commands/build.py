@@ -108,7 +108,8 @@ def build(config, archiver, operators):
                             func = metric.aggregate
                             values = [
                                 result[aggregate][metric.name]
-                                for aggregate in aggregates
+                                for aggregate in aggregates if aggregate in result
+                                and metric.name in result[aggregate]
                             ]
                             if len(values) > 0:
                                 result[str(root)][metric.name] = func(values)

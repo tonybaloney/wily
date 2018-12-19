@@ -78,7 +78,9 @@ class CyclomaticComplexityOperator(BaseOperator):
                 elif isinstance(instance, Function):
                     i = self._dict_from_function(instance)
                 else:
-                    raise TypeError
+                    if isinstance(instance, str) and instance == 'error':
+                        logger.warning(f"Failed to run CC harvester on {filename}")
+                        continue
                 results[filename][i["fullname"]] = i
                 del i["fullname"]
                 total += i["complexity"]
