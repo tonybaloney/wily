@@ -5,7 +5,7 @@ import os.path
 
 import click
 
-from wily import logger
+from wily import logger, __version__
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
@@ -14,6 +14,12 @@ from wily.operators import resolve_operators
 
 
 @click.group()
+@click.version_option(
+    __version__,
+    "-V",
+    "--version",
+    message="\U0001F98A %(prog)s, version %(version)s"
+)
 @click.option(
     "--debug/--no-debug",
     default=False,
