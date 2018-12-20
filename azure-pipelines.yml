@@ -25,7 +25,7 @@ jobs:
       versionSpec: '$(python.version)'
       architecture: 'x64'
 
-  - script: python -m pip install --upgrade pip && pip install flit && flit install
+  - script: python -m pip install --upgrade pip && pip install flit mock && flit install
     displayName: 'Install dependencies'
 
   - script: |
