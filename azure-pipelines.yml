@@ -8,7 +8,7 @@ trigger:
 
 jobs:
 
-- job: 'Test'
+- job: 'Test-Linux'
   pool:
     vmImage: 'Ubuntu-16.04'
   strategy:
@@ -38,6 +38,39 @@ jobs:
       testResultsFiles: '**/test-results.xml'
       testRunTitle: 'Python $(python.version)'
     condition: succeededOrFailed()
+- job: 'Test-Windows'
+  pool:
+    vmImage: 'vs2017-win2016'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'
+    maxParallel: 4
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install flit mock
+      flit install
+    displayName: 'Install dependencies'
+
+  - script: |
+      pip install pytest
+      pytest test --junitxml=junit/test-results.xml
+    displayName: 'pytest'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-results.xml'
+      testRunTitle: 'Python $(python.version)'
+    condition: succeededOrFailed()
 
 - job: 'Publish'
   dependsOn: 'Test'
@@ -50,5 +83,6 @@ jobs:
       versionSpec: '3.x'
       architecture: 'x64'
 
-  - script: python setup.py sdist
+  - script: flit build
     displayName: 'Build sdist'
+
