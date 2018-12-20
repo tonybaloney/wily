@@ -64,12 +64,12 @@ jobs:
 
   - script: |
       pip install pytest
-      pytest test --junitxml=junit/test-results.xml
+      pytest test --junitxml=junit\test-results.xml
     displayName: 'pytest'
 
   - task: PublishTestResults@2
     inputs:
-      testResultsFiles: '**/test-results.xml'
+      testResultsFiles: '**\test-results.xml'
       testRunTitle: 'Python $(python.version)'
     condition: succeededOrFailed()
 
