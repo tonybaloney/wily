@@ -1,5 +1,9 @@
 # Release History
 
+## 1.8.2 (21st December 2018)
+
+* [BUGFIX] Fixed an issue where the aggregation of the maintainability.rank metric would cause the build to crash if 2 files in the same directory had the same rank. 
+
 ## 1.8.1 (19th Decemember 2018)
 
 * [BUGFIX] Fixed an issue that occured if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
