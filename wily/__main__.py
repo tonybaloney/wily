@@ -5,15 +5,22 @@ import os.path
 
 import click
 
-from wily import logger
+from wily import logger, __version__
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
 from wily.config import load as load_config
+from wily.decorators import add_version
 from wily.operators import resolve_operators
 
 
 @click.group()
+@click.version_option(
+    __version__,
+    "-V",
+    "--version",
+    message="\U0001F98A %(prog)s, version %(version)s"
+)
 @click.option(
     "--debug/--no-debug",
     default=False,
@@ -32,6 +39,7 @@ from wily.operators import resolve_operators
     help="Root path to the project folder to scan",
 )
 @click.pass_context
+@add_version
 def cli(ctx, debug, config, path):
     """
     \U0001F98A Inspect and search through the complexity of your source code.
