@@ -10,6 +10,7 @@ from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
 from wily.config import load as load_config
+from wily.decorators import add_version
 from wily.operators import resolve_operators
 
 
@@ -38,6 +39,7 @@ from wily.operators import resolve_operators
     help="Root path to the project folder to scan",
 )
 @click.pass_context
+@add_version
 def cli(ctx, debug, config, path):
     """
     \U0001F98A Inspect and search through the complexity of your source code.
