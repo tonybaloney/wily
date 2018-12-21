@@ -1,5 +1,9 @@
 # Release History
 
+## 1.9.0 (master)
+
+* Added `-V` version flag and added current version to `--help` header @DahlitzFlorian
+
 ## 1.8.2 (21st December 2018)
 
 * [BUGFIX] Fixed an issue where the aggregation of the maintainability.rank metric would cause the build to crash if 2 files in the same directory had the same rank. 
