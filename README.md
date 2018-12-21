@@ -153,4 +153,9 @@ You can also override the path to the configuration with the `--config` flag on 
 
 # Credits
 
+## Contributors
+
+- @wcooley (Wil Cooley)
+- @DahlitzFlorian (Florian Dahlitz)
+
 "cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)
