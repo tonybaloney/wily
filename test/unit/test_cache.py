@@ -1,6 +1,6 @@
 import json
 import pathlib
-
+import sys
 import pytest
 
 import wily.cache as cache
@@ -157,7 +157,10 @@ def test_store_relative_paths(tmpdir):
     with open(fn) as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, dict)
-        assert "foo/bar.py" in result["operator_data"]["test"].keys()
+        if sys.platform == "win32":
+            assert "foo\\bar.py" in result["operator_data"]["test"].keys()
+        else:
+            assert "foo/bar.py" in result["operator_data"]["test"].keys()
 
 
 def test_store_index(tmpdir):
