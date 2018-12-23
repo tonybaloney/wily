@@ -7,7 +7,7 @@ Will compare the values between revisions and highlight changes in green/red.
 import tabulate
 
 from pathlib import Path
-from shutil import copy2, copytree
+from shutil import copytree
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
