@@ -155,8 +155,9 @@ def index(ctx, message):
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option("-f", "--format", default="console", help="Specify report format (console or html)")
 @click.pass_context
-def report(ctx, file, metrics, number, message):
+def report(ctx, file, metrics, number, message, format):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -170,7 +171,7 @@ def report(ctx, file, metrics, number, message):
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
-    report(config=config, path=file, metrics=metrics, n=number, include_message=message)
+    report(config=config, path=file, metrics=metrics, n=number, include_message=message, format=format)
 
 
 @cli.command()

@@ -6,13 +6,16 @@ Will compare the values between revisions and highlight changes in green/red.
 """
 import tabulate
 
+from pathlib import Path
+from shutil import copy2, copytree
+
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
 from wily.operators import resolve_metric, MetricType
 from wily.state import State
 
 
-def report(config, path, metrics, n, include_message=False):
+def report(config, path, metrics, n, include_message=False, format="console"):
     """
     Show information about the cache and runtime.
 
@@ -30,6 +33,9 @@ def report(config, path, metrics, n, include_message=False):
 
     :param include_message: Include revision messages
     :type  include_message: ``bool``
+
+    :param format: Output format
+    :type  format: ``str``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
@@ -124,9 +130,50 @@ def report(config, path, metrics, n, include_message=False):
         headers = ("Revision", "Message", "Author", "Date", *descriptions)
     else:
         headers = ("Revision", "Author", "Date", *descriptions)
-    print(
-        # But it still makes more sense to show the newest at the top, so reverse again
-        tabulate.tabulate(
-            headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
+
+    if format == "console":
+        print(
+            # But it still makes more sense to show the newest at the top, so reverse again
+            tabulate.tabulate(
+                headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
+            )
         )
-    )
+    else:
+        report_path = Path.cwd() / "wily_report"
+        report_path.mkdir(exist_ok=True, parents=True)
+        report_output = report_path.joinpath("index.html")
+        with report_output.open("w") as output, open("wily/templates/report_header.html") as h:
+            for line in h.readlines():
+                output.write(line)
+
+            output.write("<thead><tr>")
+            for header in headers:
+                output.write(f"<th>{header}</th>")
+            output.write("</tr></thead>")
+
+            output.write("<tbody>")
+            for line in data[::-1]:
+                output.write("<tr>")
+                for element in line:
+                    output.write(f"<td>{element}</td>")
+                output.write("</tr>")
+
+            output.write("""
+            </tbody>
+            </table>
+            </div>
+            </div>
+            </div>
+            </body>
+            </html>
+            """)
+
+        try:
+            copytree("wily/templates/css", str(report_path / "css"))
+        except FileExistsError:
+            pass
+
+        try:
+            copytree("wily/templates/fonts", str(report_path / "fonts"))
+        except FileExistsError:
+            pass
