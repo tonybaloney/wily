@@ -1,3 +1,4 @@
+import sys
 from mock import patch
 
 from click.testing import CliRunner

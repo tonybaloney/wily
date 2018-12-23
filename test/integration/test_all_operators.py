@@ -4,6 +4,7 @@ Parameterised tests for each operator (and some combinations).
 Build them and test out some of the metrics/commands work correctly.
 """
 import pytest
+import sys
 from click.testing import CliRunner
 import pathlib
 from textwrap import dedent

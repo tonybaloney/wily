@@ -6,6 +6,7 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
+import sys
 import pathlib
 import pytest
 from click.testing import CliRunner

@@ -1,4 +1,5 @@
 import pathlib
+import sys
 from textwrap import dedent
 
 from click.testing import CliRunner
