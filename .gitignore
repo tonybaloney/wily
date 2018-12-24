@@ -111,3 +111,6 @@ test_granular.html
 .idea/
 .vscode/
 docs/build/
+
+# OSX
+.DS_Store

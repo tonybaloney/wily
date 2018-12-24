@@ -172,8 +172,3 @@ def report(config, path, metrics, n, include_message=False, format="console"):
             copytree("wily/templates/css", str(report_path / "css"))
         except FileExistsError:
             pass
-
-        try:
-            copytree("wily/templates/fonts", str(report_path / "fonts"))
-        except FileExistsError:
-            pass

@@ -1,20 +1,6 @@
 
 
 /*//////////////////////////////////////////////////////////////////
-[ FONT ]*/
-
-
-@font-face {
-  font-family: Poppins-Regular;
-  src: url('../fonts/poppins/Poppins-Regular.ttf'); 
-}
-
-@font-face {
-  font-family: Poppins-Bold;
-  src: url('../fonts/poppins/Poppins-Bold.ttf'); 
-}
-
-/*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
 * {
 	margin: 0px; 
@@ -61,6 +47,7 @@ ul, li {
 .limiter {
   width: 100%;
   margin: 0 auto;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .container-table100 {
@@ -127,7 +114,6 @@ thead tr {
   }
 
   tr td:before {
-    font-family: Poppins-Bold;
     font-size: 12px;
     color: #808080;
     line-height: 1.2;
@@ -152,7 +138,6 @@ td {
 }
 
 tr td {
-  font-family: Poppins-Regular;
   font-size: 15px;
   color: #666666;
   line-height: 1.2;
@@ -164,7 +149,6 @@ tr td {
 }
 
 tbody tr th {
-  font-family: Poppins-Regular;
   font-size: 18px;
   color: #fff;
   line-height: 1.2;
@@ -203,7 +187,6 @@ tr:hover {
   }
   
   tr td {
-    font-family: Poppins-Regular;
     font-size: 18px;
     color: #555555;
     line-height: 1.2;
