@@ -168,9 +168,17 @@ def report(ctx, file, metrics, number, message, format):
         metrics = get_default_metrics(config)
         logger.info(f"Using default metrics {metrics}")
 
+    supported_formats = {"console", "html"}
+
+    if format not in supported_formats:
+        logger.info(f"{format} is not supported as output format, console is used instead")
+        format = "console"
+
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
+    logger.debug(f"Output format is {format}")
+
     report(config=config, path=file, metrics=metrics, n=number, include_message=message, format=format)
 
 

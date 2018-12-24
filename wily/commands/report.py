@@ -131,14 +131,7 @@ def report(config, path, metrics, n, include_message=False, format="console"):
     else:
         headers = ("Revision", "Author", "Date", *descriptions)
 
-    if format == "console":
-        print(
-            # But it still makes more sense to show the newest at the top, so reverse again
-            tabulate.tabulate(
-                headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
-            )
-        )
-    else:
+    if format == "html":
         report_path = Path.cwd() / "wily_report"
         report_path.mkdir(exist_ok=True, parents=True)
         report_output = report_path.joinpath("index.html")
@@ -159,16 +152,25 @@ def report(config, path, metrics, n, include_message=False, format="console"):
                 output.write("</tr>")
 
             output.write("""
-            </tbody>
-            </table>
-            </div>
-            </div>
-            </div>
-            </body>
-            </html>
-            """)
+                    </tbody>
+                    </table>
+                    </div>
+                    </div>
+                    </div>
+                    </body>
+                    </html>
+                    """)
 
         try:
             copytree("wily/templates/css", str(report_path / "css"))
         except FileExistsError:
             pass
+
+        logger.info(f"wily report was saved to {report_path}")
+    else:
+        print(
+            # But it still makes more sense to show the newest at the top, so reverse again
+            tabulate.tabulate(
+                headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
+            )
+        )
