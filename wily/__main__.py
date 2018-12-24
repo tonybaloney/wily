@@ -16,10 +16,7 @@ from wily.operators import resolve_operators
 
 @click.group()
 @click.version_option(
-    __version__,
-    "-V",
-    "--version",
-    message="\U0001F98A %(prog)s, version %(version)s"
+    __version__, "-V", "--version", message="\U0001F98A %(prog)s, version %(version)s"
 )
 @click.option(
     "--debug/--no-debug",
@@ -155,9 +152,14 @@ def index(ctx, message):
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
-@click.option("-f", "--format", default="console", help="Specify report format (console or html)")
+@click.option(
+    "-f", "--format", default="console", help="Specify report format (console or html)"
+)
+@click.option(
+    "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
+)
 @click.pass_context
-def report(ctx, file, metrics, number, message, format):
+def report(ctx, file, metrics, number, message, format, output):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -171,7 +173,9 @@ def report(ctx, file, metrics, number, message, format):
     supported_formats = {"console", "html"}
 
     if format not in supported_formats:
-        logger.info(f"{format} is not supported as output format, console is used instead")
+        logger.info(
+            f"{format} is not supported as output format, console is used instead"
+        )
         format = "console"
 
     from wily.commands.report import report
@@ -179,7 +183,15 @@ def report(ctx, file, metrics, number, message, format):
     logger.debug(f"Running report on {file} for metric {metrics}")
     logger.debug(f"Output format is {format}")
 
-    report(config=config, path=file, metrics=metrics, n=number, include_message=message, format=format)
+    report(
+        config=config,
+        path=file,
+        metrics=metrics,
+        n=number,
+        include_message=message,
+        format=format,
+        output=output,
+    )
 
 
 @cli.command()

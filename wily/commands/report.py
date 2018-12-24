@@ -15,7 +15,9 @@ from wily.operators import resolve_metric, MetricType
 from wily.state import State
 
 
-def report(config, path, metrics, n, include_message=False, format="console"):
+def report(
+    config, path, metrics, n, include_message=False, format="console", output=None
+):
     """
     Show information about the cache and runtime.
 
@@ -36,6 +38,9 @@ def report(config, path, metrics, n, include_message=False, format="console"):
 
     :param format: Output format
     :type  format: ``str``
+
+    :param output: Output path
+    :type  output: ``str``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
@@ -132,10 +137,23 @@ def report(config, path, metrics, n, include_message=False, format="console"):
         headers = ("Revision", "Author", "Date", *descriptions)
 
     if format == "html":
-        report_path = Path.cwd() / "wily_report"
+        report_path = Path.cwd()
+        if output:
+            output = Path(output)
+            if output.suffix == ".html":
+                report_path /= output.parents[0]
+                report_output = report_path.joinpath(output.name)
+            else:
+                report_path /= output
+                report_output = report_path.joinpath("index.html")
+        else:
+            report_path /= "wily_report"
+            report_output = report_path.joinpath("index.html")
+
         report_path.mkdir(exist_ok=True, parents=True)
-        report_output = report_path.joinpath("index.html")
-        with report_output.open("w") as output, open("wily/templates/report_header.html") as h:
+        with report_output.open("w") as output, open(
+            "wily/templates/report_header.html"
+        ) as h:
             for line in h.readlines():
                 output.write(line)
 
@@ -151,7 +169,8 @@ def report(config, path, metrics, n, include_message=False, format="console"):
                     output.write(f"<td>{element}</td>")
                 output.write("</tr>")
 
-            output.write("""
+            output.write(
+                """
                     </tbody>
                     </table>
                     </div>
@@ -159,7 +178,8 @@ def report(config, path, metrics, n, include_message=False, format="console"):
                     </div>
                     </body>
                     </html>
-                    """)
+                    """
+            )
 
         try:
             copytree("wily/templates/css", str(report_path / "css"))
