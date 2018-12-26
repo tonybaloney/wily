@@ -33,7 +33,7 @@ jobs:
 
   - script: |
       pip install pytest
-      pytest test --junitxml=junit/test-results.xml --cov=wily
+      pytest test --junitxml=junit/test-results.xml --cov
     displayName: 'pytest'
   
   - script: pydocstyle --ignore=D301,D212,D203 wily
