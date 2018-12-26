@@ -4,11 +4,15 @@ Parameterised tests for each operator (and some combinations).
 Build them and test out some of the metrics/commands work correctly.
 """
 import pytest
+import sys
 from click.testing import CliRunner
 import pathlib
 from textwrap import dedent
 
 import wily.__main__ as main
+
+_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+
 
 operators = (
     "halstead",
@@ -30,12 +34,12 @@ def test_operator(operator, gitdir):
     assert result.exit_code == 0, result.stdout
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "report", "src/test.py"]
+        main.cli, ["--debug", "--path", gitdir, "report", _path]
     )
     assert result.exit_code == 0, result.stdout
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "diff", "src/test.py", "--all"]
+        main.cli, ["--debug", "--path", gitdir, "diff", _path, "--all"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -60,7 +64,7 @@ def test_operator(operator, gitdir):
         test_py.write(dedent(complex_test))
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "diff", "src/test.py", "--all"]
+        main.cli, ["--debug", "--path", gitdir, "diff", _path, "--all"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout

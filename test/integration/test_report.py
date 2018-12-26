@@ -1,11 +1,12 @@
 from click.testing import CliRunner
-
+import sys
 import wily.__main__ as main
 
+_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 def test_report_no_cache(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "report", "src/test.py"])
+    result = runner.invoke(main.cli, ["--path", tmpdir, "report", _path])
     assert result.exit_code == 1, result.stdout
 
 
@@ -20,7 +21,7 @@ def test_report(builddir):
             "--path",
             builddir,
             "report",
-            "src/test.py",
+            _path,
             "raw.multi",
             "maintainability.rank",
         ],
@@ -40,7 +41,7 @@ def test_report_granular(builddir):
             "--path",
             builddir,
             "report",
-            "src/test.py:function1",
+            _path + ":function1",
             "cyclomatic.complexity",
             "-n",
             1,
@@ -56,7 +57,7 @@ def test_report_not_found(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test1.py", "raw.loc"]
+        main.cli, ["--path", builddir, "report", "test1.py", "raw.loc"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" in result.stdout
@@ -67,7 +68,7 @@ def test_report_default_metrics(builddir):
     Test that report works with default metrics
     """
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", builddir, "report", "src/test.py"])
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -89,7 +90,7 @@ def test_report_with_message(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--path", builddir, "report", "src/test.py", "raw.multi", "--message"],
+        ["--path", builddir, "report", _path, "raw.multi", "--message"],
     )
     assert result.exit_code == 0, result.stdout
     assert "basic test" in result.stdout
@@ -103,7 +104,7 @@ def test_report_high_metric(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test.py", "raw.comments"]
+        main.cli, ["--path", builddir, "report", _path, "raw.comments"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
@@ -115,7 +116,7 @@ def test_report_low_metric(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test.py", "maintainability.mi"]
+        main.cli, ["--path", builddir, "report", _path, "maintainability.mi"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout

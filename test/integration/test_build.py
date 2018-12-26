@@ -6,6 +6,8 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
+import sys
+import pytest
 import pathlib
 import pytest
 from click.testing import CliRunner
@@ -14,6 +16,8 @@ from mock import patch
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
+
+_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 
 def test_build_not_git_repo(tmpdir):
@@ -213,7 +217,7 @@ def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     with patch("wily.logger") as logger:
         runner = CliRunner()
-        result = runner.invoke(main.cli, ["--path", tmpdir, "build", "src/test.py"])
+        result = runner.invoke(main.cli, ["--path", tmpdir, "build", _path])
         assert result.exit_code == 1, result.stdout
 
 
@@ -228,7 +232,7 @@ def test_build_archiver(gitdir, archiver):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", gitdir, "build", "src/test.py", "-a", archiver]
+            main.cli, ["--path", gitdir, "build", _path, "-a", archiver]
         )
         assert result.exit_code == 0, result.stdout
         cache_path = gitdir / ".wily"

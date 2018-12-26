@@ -1,8 +1,11 @@
+import sys
 from mock import patch
 
 from click.testing import CliRunner
 
 import wily.__main__ as main
+
+_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 
 PATCHED_ENV = {"BROWSER": "echo %s", "LC_ALL": "C.UTF-8", "LANG": "C.UTF-8"}
@@ -13,7 +16,7 @@ def test_graph_no_cache(tmpdir):
 
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
-            main.cli, ["--path", tmpdir, "graph", "src/test.py", "raw.loc"]
+            main.cli, ["--path", tmpdir, "graph", _path, "raw.loc"]
         )
     assert result.exit_code == 1, result.stdout
 
@@ -23,7 +26,7 @@ def test_graph(builddir):
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "src/test.py", "raw.loc"]
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc"]
         )
     assert result.exit_code == 0, result.stdout
 
@@ -33,7 +36,7 @@ def test_graph_all(builddir):
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "src/test.py", "raw.loc", "--all"]
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc", "--all"]
         )
     assert result.exit_code == 0, result.stdout
 
@@ -44,7 +47,7 @@ def test_graph_changes(builddir):
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", "src/test.py", "raw.loc", "--changes"],
+            ["--path", builddir, "graph", _path, "raw.loc", "--changes"],
         )
     assert result.exit_code == 0, result.stdout
 
@@ -55,7 +58,7 @@ def test_graph_custom_x(builddir):
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", "src/test.py", "raw.loc", "-x", "raw.sloc"],
+            ["--path", builddir, "graph", _path, "raw.loc", "-x", "raw.sloc"],
         )
     assert result.exit_code == 0, result.stdout
 
@@ -76,7 +79,7 @@ def test_graph_multiple(builddir):
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", "src/test.py", "raw.loc", "raw.comments"],
+            ["--path", builddir, "graph", _path, "raw.loc", "raw.comments"],
         )
     assert result.exit_code == 0, result.stdout
 
@@ -91,7 +94,7 @@ def test_graph_multiple_custom_x(builddir):
                 "--path",
                 builddir,
                 "graph",
-                "src/test.py",
+                _path,
                 "raw.loc",
                 "raw.comments",
                 "-x",
@@ -122,7 +125,7 @@ def test_graph_output(builddir):
                 "--path",
                 builddir,
                 "graph",
-                "src/test.py",
+                _path,
                 "raw.loc",
                 "-o",
                 "test.html",
