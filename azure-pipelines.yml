@@ -41,6 +41,8 @@ jobs:
   
   - script: codecov
     displayName: 'codecov'
+    env:
+      CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
 
   - task: PublishTestResults@2
     inputs:
