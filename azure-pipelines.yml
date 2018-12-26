@@ -27,13 +27,13 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip
-      pip install flit mock codecov pydocstyle
+      pip install flit mock codecov pydocstyle pytest-cov
       flit install
     displayName: 'Install dependencies'
 
   - script: |
       pip install pytest
-      pytest test --junitxml=junit/test-results.xml
+      pytest test --junitxml=junit/test-results.xml --cov=wily
     displayName: 'pytest'
   
   - script: pydocstyle --ignore=D301,D212,D203 wily
@@ -43,6 +43,9 @@ jobs:
     displayName: 'codecov'
     env:
       CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
+
+  - script: flit build
+    displayName: 'flit build'
 
   - task: PublishTestResults@2
     inputs:
