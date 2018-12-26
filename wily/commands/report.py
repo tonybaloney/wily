@@ -8,6 +8,7 @@ import tabulate
 
 from pathlib import Path
 from shutil import copytree
+from string import Template
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
@@ -151,35 +152,22 @@ def report(
             report_output = report_path.joinpath("index.html")
 
         report_path.mkdir(exist_ok=True, parents=True)
-        with report_output.open("w") as output, open(
-            "wily/templates/report_header.html"
-        ) as h:
-            for line in h.readlines():
-                output.write(line)
+        report_template = Template(open("wily/templates/report_template.html").read())
 
-            output.write("<thead><tr>")
-            for header in headers:
-                output.write(f"<th>{header}</th>")
-            output.write("</tr></thead>")
+        table_headers = "".join([f"<th>{header}</th>" for header in headers])
+        table_content = ""
+        for line in data[::-1]:
+            table_content += "<tr>"
+            for element in line:
+                table_content += f"<td>{element}</td>"
+            table_content += "</tr>"
 
-            output.write("<tbody>")
-            for line in data[::-1]:
-                output.write("<tr>")
-                for element in line:
-                    output.write(f"<td>{element}</td>")
-                output.write("</tr>")
+        report_template = report_template.safe_substitute(
+            headers=table_headers, content=table_content
+        )
 
-            output.write(
-                """
-                    </tbody>
-                    </table>
-                    </div>
-                    </div>
-                    </div>
-                    </body>
-                    </html>
-                    """
-            )
+        with report_output.open("w") as output:
+            output.write(report_template)
 
         try:
             copytree("wily/templates/css", str(report_path / "css"))
