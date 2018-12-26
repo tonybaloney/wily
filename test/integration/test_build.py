@@ -7,6 +7,7 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 TODO : Test build + build with extra operator
 """
 import sys
+import pytest
 import pathlib
 import pytest
 from click.testing import CliRunner
@@ -134,6 +135,8 @@ def test_build(tmpdir):
     assert rev_path.exists()
 
 
+@pytest.mark.skipif(sys.platform == 'win32',
+                    reason="does not run on windows")
 def test_build_twice(tmpdir):
     """
     Test that build works when run twice.
