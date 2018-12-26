@@ -15,9 +15,7 @@ def test_graph_no_cache(tmpdir):
     runner = CliRunner()
 
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", tmpdir, "graph", _path, "raw.loc"]
-        )
+        result = runner.invoke(main.cli, ["--path", tmpdir, "graph", _path, "raw.loc"])
     assert result.exit_code == 1, result.stdout
 
 
@@ -46,8 +44,7 @@ def test_graph_changes(builddir):
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "graph", _path, "raw.loc", "--changes"],
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc", "--changes"]
         )
     assert result.exit_code == 0, result.stdout
 
@@ -57,8 +54,7 @@ def test_graph_custom_x(builddir):
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "graph", _path, "raw.loc", "-x", "raw.sloc"],
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc", "-x", "raw.sloc"]
         )
     assert result.exit_code == 0, result.stdout
 
@@ -78,8 +74,7 @@ def test_graph_multiple(builddir):
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
-            main.cli,
-            ["--path", builddir, "graph", _path, "raw.loc", "raw.comments"],
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc", "raw.comments"]
         )
     assert result.exit_code == 0, result.stdout
 

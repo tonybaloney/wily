@@ -33,9 +33,7 @@ def test_operator(operator, gitdir):
     )
     assert result.exit_code == 0, result.stdout
 
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "report", _path]
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", gitdir, "report", _path])
     assert result.exit_code == 0, result.stdout
 
     result = runner.invoke(
