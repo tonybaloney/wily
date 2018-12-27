@@ -1,8 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Main command line."""
 
-import os.path
-
 import click
 
 from wily import logger, __version__

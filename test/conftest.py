@@ -1,6 +1,7 @@
 import pathlib
 from textwrap import dedent
-
+import os
+import tempfile
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -82,6 +83,8 @@ def builddir(gitdir):
     result2 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
     assert result2.exit_code == 0, result2.stdout
 
-    assert (tmppath / ".wily" / "git").exists()
-
     return gitdir
+
+
+def pytest_runtest_setup(item):
+    os.environ['HOME'] = tempfile.gettempdir()

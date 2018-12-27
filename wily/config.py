@@ -26,7 +26,7 @@ def generate_cache_path(path):
     wily_home = pathlib.Path.home() / ".wily"
     if not wily_home.exists() and not wily_home.is_dir():
         wily_home.mkdir()
-    sha = hashlib.sha1(str(path).encode()).hexdigest()[:7]
+    sha = hashlib.sha1(str(path).encode()).hexdigest()
     cache_path = pathlib.Path.home() / ".wily" / sha
     return str(cache_path)
 
@@ -44,7 +44,6 @@ class WilyConfig(object):
     path: str
     max_revisions: int
     skip_ignore_check: bool = False
-    cache_path: str = None
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
@@ -52,8 +51,10 @@ class WilyConfig(object):
         """Clone targets as a list of path."""
         if self.targets is None or "":
             self.targets = [self.path]
-        abs_path = pathlib.Path(self.path).absolute()
-        self.cache_path = generate_cache_path(abs_path)
+
+    @property
+    def cache_path(self):
+        return generate_cache_path(pathlib.Path(self.path).absolute())
 
 
 # Default values for Wily
