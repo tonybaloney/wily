@@ -23,6 +23,9 @@ def generate_cache_path(path):
     """
     Generate the cache path
     """
+    wily_home = pathlib.Path.home() / ".wily"
+    if not wily_home.exists() and not wily_home.is_dir():
+        wily_home.mkdir()
     sha = hashlib.sha1(str(path).encode()).hexdigest()[:7]
     cache_path = pathlib.Path.home() / ".wily" / sha
     return str(cache_path)
