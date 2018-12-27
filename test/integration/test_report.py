@@ -119,3 +119,40 @@ def test_report_low_metric(builddir):
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
+
+
+def test_report_html_format(builddir):
+    """
+    Test that report works with HTML as format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "html"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_console_format(builddir):
+    """
+    Test that report works with console as format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "console"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_not_existing_format(builddir):
+    """
+    Test that report works with non-existing format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--path", builddir, "report", "src/test.py", "--format", "non-existing"],
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout

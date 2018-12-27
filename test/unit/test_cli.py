@@ -139,6 +139,7 @@ def test_report():
                 assert report.called_once
                 assert check_cache.called_once
                 assert report.call_args[1]["path"] == "foo.py"
+                assert report.call_args[1]["format"] == "console"
                 assert "maintainability.mi" in report.call_args[1]["metrics"]
                 assert gdf.called_once
 
@@ -160,6 +161,121 @@ def test_report_with_opts():
             assert report.call_args[1]["metrics"] == ("example_metric",)
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
+            assert report.call_args[1]["format"] == "console"
+
+
+def test_report_html_format():
+    """
+    Test that report calls the report command with HTML as format
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.report.report") as report:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli,
+                [
+                    "report",
+                    "foo.py",
+                    "example_metric",
+                    "-n 101",
+                    "--message",
+                    "--format=html",
+                ],
+            )
+            assert result.exit_code == 0, result.stdout
+            assert report.called_once
+            assert check_cache.called_once
+            assert report.call_args[1]["path"] == "foo.py"
+            assert report.call_args[1]["metrics"] == ("example_metric",)
+            assert report.call_args[1]["include_message"]
+            assert report.call_args[1]["n"] == 101
+            assert report.call_args[1]["format"] == "html"
+
+
+def test_report_console_format():
+    """
+    Test that report calls the report command with console as format
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.report.report") as report:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli,
+                [
+                    "report",
+                    "foo.py",
+                    "example_metric",
+                    "-n 101",
+                    "--message",
+                    "--format=console",
+                ],
+            )
+            assert result.exit_code == 0, result.stdout
+            assert report.called_once
+            assert check_cache.called_once
+            assert report.call_args[1]["path"] == "foo.py"
+            assert report.call_args[1]["metrics"] == ("example_metric",)
+            assert report.call_args[1]["include_message"]
+            assert report.call_args[1]["n"] == 101
+            assert report.call_args[1]["format"] == "console"
+
+
+def test_report_not_existing_format():
+    """
+    Test that report calls the report command with a non-existing format
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.report.report") as report:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli,
+                [
+                    "report",
+                    "foo.py",
+                    "example_metric",
+                    "-n 101",
+                    "--message",
+                    "--format=non-existing",
+                ],
+            )
+            assert result.exit_code == 0, result.stdout
+            assert report.called_once
+            assert check_cache.called_once
+            assert report.call_args[1]["path"] == "foo.py"
+            assert report.call_args[1]["metrics"] == ("example_metric",)
+            assert report.call_args[1]["include_message"]
+            assert report.call_args[1]["n"] == 101
+            assert report.call_args[1]["format"] == "console"
+
+
+def test_report_html_format_with_output():
+    """
+    Test that report calls the report command with HTML as format and specified output
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.report.report") as report:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli,
+                [
+                    "report",
+                    "foo.py",
+                    "example_metric",
+                    "-n 101",
+                    "--message",
+                    "--format=html",
+                    "--output=reports/out.html",
+                ],
+            )
+            assert result.exit_code == 0, result.stdout
+            assert report.called_once
+            assert check_cache.called_once
+            assert report.call_args[1]["path"] == "foo.py"
+            assert report.call_args[1]["metrics"] == ("example_metric",)
+            assert report.call_args[1]["include_message"]
+            assert report.call_args[1]["n"] == 101
+            assert report.call_args[1]["format"] == "html"
+            assert report.call_args[1]["output"] == "reports/out.html"
 
 
 def test_graph():
