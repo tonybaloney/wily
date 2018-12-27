@@ -33,9 +33,15 @@ from wily.operators import resolve_operators
     default=".",
     help="Root path to the project folder to scan",
 )
+@click.option(
+    "-c",
+    "--cache",
+    type=click.Path(resolve_path=True),
+    help="Override the default cache path (defaults to $HOME/.wily/HASH)"
+)
 @click.pass_context
 @add_version
-def cli(ctx, debug, config, path):
+def cli(ctx, debug, config, path, cache):
     """
     \U0001F98A Inspect and search through the complexity of your source code.
 
@@ -66,6 +72,9 @@ def cli(ctx, debug, config, path):
     if path:
         logger.debug(f"Fixing path to {path}")
         ctx.obj["CONFIG"].path = path
+    if cache:
+        logger.debug(f"Fixing cache to {cache}")
+        ctx.obj["CONFIG"].cache_path = cache
     logger.debug(f"Loaded configuration from {config}")
 
 
