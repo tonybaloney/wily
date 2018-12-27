@@ -51,10 +51,17 @@ class WilyConfig(object):
         """Clone targets as a list of path."""
         if self.targets is None or "":
             self.targets = [self.path]
+        self._cache_path = None
 
     @property
     def cache_path(self):
+        if self._cache_path:
+            return self._cache_path
         return generate_cache_path(pathlib.Path(self.path).absolute())
+
+    @cache_path.setter
+    def cache_path(self, value):
+        self._cache_path = value
 
 
 # Default values for Wily

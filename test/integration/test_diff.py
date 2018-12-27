@@ -24,9 +24,7 @@ def test_diff_no_path(tmpdir):
 def test_diff_output(builddir):
     """ Test the diff feature with no changes """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", _path]
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "diff", _path])
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
 
@@ -134,8 +132,7 @@ def test_diff_output_loc(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc"],
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout

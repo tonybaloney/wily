@@ -87,4 +87,4 @@ def builddir(gitdir):
 
 
 def pytest_runtest_setup(item):
-    os.environ['HOME'] = tempfile.gettempdir()
+    os.environ["HOME"] = tempfile.gettempdir()

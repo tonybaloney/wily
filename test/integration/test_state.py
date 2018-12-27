@@ -14,7 +14,6 @@ import wily.state
 def config(builddir):
     _cfg = wily.config.DEFAULT_CONFIG
     _cfg.path = builddir
-    _cfg.cache_path = os.path.join(builddir, wily.config.DEFAULT_CACHE_PATH)
     return _cfg
 
 

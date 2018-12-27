@@ -14,10 +14,7 @@ from wily.operators import resolve_operators
 
 @click.group()
 @click.version_option(
-    __version__,
-    "-V",
-    "--version",
-    message="\U0001F98A %(prog)s, version %(version)s"
+    __version__, "-V", "--version", message="\U0001F98A %(prog)s, version %(version)s"
 )
 @click.option(
     "--debug/--no-debug",
