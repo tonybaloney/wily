@@ -5,7 +5,7 @@ TODO : Handle operator settings. Maybe a section for each operator and then pass
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
 """
-
+from functools import lru_cache
 import configparser
 import logging
 import pathlib
@@ -19,6 +19,7 @@ from wily.archivers import ARCHIVER_GIT
 logger = logging.getLogger(__name__)
 
 
+@lru_cache(maxsize=128)
 def generate_cache_path(path):
     """
     Generate the cache path
