@@ -71,7 +71,7 @@ def create(config):
         logger.debug("Wily cache exists, skipping")
         return config.cache_path
     logger.debug(f"Creating wily cache {config.cache_path}")
-    pathlib.Path(config.cache_path).mkdir()
+    pathlib.Path(config.cache_path).mkdir(parents=True, exist_ok=True)
     create_index(config)
     return config.cache_path
 

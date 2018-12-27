@@ -128,18 +128,17 @@ def test_build(tmpdir):
 
     commit = index.commit("basic test", author=author, committer=committer)
 
-    with patch("wily.logger") as logger:
-        runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
-        )
-        assert result.exit_code == 0, result.stdout
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
+    )
+    assert result.exit_code == 0, result.stdout
 
-    cache_path = pathlib.Path(generate_cache_path(tmpdir)) / "git"
+    cache_path = pathlib.Path(generate_cache_path(tmpdir))
     assert cache_path.exists()
-    index_path = cache_path / "index.json"
+    index_path = cache_path / "git" / "index.json"
     assert index_path.exists()
-    rev_path = cache_path / (commit.name_rev.split(" ")[0] + ".json")
+    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
     assert rev_path.exists()
 
 
