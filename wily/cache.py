@@ -4,8 +4,6 @@ A module for working with the .wily/ cache directory.
 This API is not intended to be public and should not be consumed directly.
 The API in this module is for archivers and commands to work with the local cache
 
-TODO: Version .wily/ cache folders?
-
 """
 
 import json

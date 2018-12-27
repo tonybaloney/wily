@@ -91,13 +91,8 @@ def cli(ctx, debug, config, path):
     default="git",
     help="Archiver to use, defaults to git if git repo, else filesystem",
 )
-@click.option(
-    "--skip-gitignore-check/--gitignore-check",
-    default=False,
-    help="Skip checking of .gitignore for '.wily/'",
-)
 @click.pass_context
-def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver):
+def build(ctx, max_revisions, targets, operators, archiver):
     """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
@@ -115,7 +110,6 @@ def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver
         logger.debug(f"Fixing archiver to {archiver}")
         config.archiver = archiver
 
-    config.skip_ignore_check = skip_gitignore_check
     logger.debug(f"Fixing targets to {targets}")
     config.targets = targets
 
