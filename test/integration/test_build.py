@@ -33,6 +33,20 @@ def test_build_not_git_repo(tmpdir):
     assert index_path.exists()
 
 
+def test_build_custom_cache(tmpdir):
+    """
+    Test that build defaults to filesystem in a non-git directory with custom cache path.
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"])
+    assert result.exit_code == 0, result.stdout
+    cache_path = tmpdir / ".wily"
+    assert cache_path.exists()
+    index_path = cache_path / "filesystem" / "index.json"
+    assert index_path.exists()
+    assert not pathlib.Path(generate_cache_path(tmpdir)).exists()
+
+
 def test_build_invalid_path():
     """
     Test that build fails with a garbage path
@@ -106,11 +120,8 @@ def test_build(tmpdir):
     with open(tmppath / "test.py", "w") as test_txt:
         test_txt.write("import abc")
 
-    with open(tmppath / ".gitignore", "w") as test_txt:
-        test_txt.write(".wily/")
-
     index = repo.index
-    index.add(["test.py", ".gitignore"])
+    index.add(["test.py"])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
@@ -142,10 +153,9 @@ def test_build_twice(tmpdir):
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
         test_txt.write("import abc")
-    with open(tmppath / ".gitignore", "w") as test_txt:
-        test_txt.write(".wily/")
+
     index = repo.index
-    index.add(["test.py", ".gitignore"])
+    index.add(["test.py"])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
