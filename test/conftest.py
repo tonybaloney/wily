@@ -59,10 +59,7 @@ def gitdir(tmpdir):
     with open(testpath, "w") as test_txt:
         test_txt.write(dedent(second_test))
 
-    with open(tmppath / ".gitignore", "w") as test_txt:
-        test_txt.write(".wily/")
-
-    index.add([str(testpath), ".gitignore"])
+    index.add([str(testpath)])
     index.commit("remove line", author=author, committer=committer)
 
     return tmpdir
@@ -84,7 +81,3 @@ def builddir(gitdir):
     assert result2.exit_code == 0, result2.stdout
 
     return gitdir
-
-
-def pytest_runtest_setup(item):
-    os.environ["HOME"] = tempfile.gettempdir()

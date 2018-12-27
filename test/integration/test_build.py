@@ -6,8 +6,10 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
+import os
 import sys
 import pathlib
+import tempfile
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -18,6 +20,12 @@ from wily.archivers import ALL_ARCHIVERS
 from wily.config import generate_cache_path
 
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+
+PATCHED_ENV = {
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8",
+    "HOME": tempfile.gettempdir(),
+}
 
 
 def test_build_not_git_repo(tmpdir):
@@ -67,7 +75,7 @@ def test_build_no_target(tmpdir):
 
 def test_build_crash(tmpdir):
     """
-    Test that build works in a basic repository.
+    Simulate a runtime error in the build.
     """
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir)
@@ -76,11 +84,8 @@ def test_build_crash(tmpdir):
     with open(tmppath / "test.py", "w") as test_txt:
         test_txt.write("import abc")
 
-    with open(tmppath / ".gitignore", "w") as test_txt:
-        test_txt.write(".wily/")
-
     index = repo.index
-    index.add(["test.py", ".gitignore"])
+    index.add(["test.py"])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
@@ -96,19 +101,8 @@ def test_build_crash(tmpdir):
         assert bar_finish.called_once
         assert result.exit_code == 1, result.stdout
 
-    with patch("wily.commands.build.logger") as logger:
-        logger.level = "DEBUG"
-        with patch.object(
-            wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")
-        ) as bar_finish:
-            runner = CliRunner()
-            result = runner.invoke(
-                main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
-            )
-            assert bar_finish.called_once
-            assert result.exit_code == 1, result.stdout
 
-
+@patch.dict("os.environ", values=PATCHED_ENV, clear=True)
 def test_build(tmpdir):
     """
     Test that build works in a basic repository.
@@ -127,10 +121,11 @@ def test_build(tmpdir):
     committer = Actor("A committer", "committer@example.com")
 
     commit = index.commit("basic test", author=author, committer=committer)
-
+    _home = tempfile.mkdtemp()
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", "test.py"]
+        main.cli, ["--debug", "--path", tmpdir, "build", "test.py"],
+        env={'HOME': _home}
     )
     assert result.exit_code == 0, result.stdout
 

@@ -26,7 +26,10 @@ def generate_cache_path(path):
     """
     logger.debug(f"Generating cache for {path}")
     sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
-    return str(pathlib.Path.home() / ".wily" / sha)
+    HOME = pathlib.Path.home()
+    cache_path = str(HOME / ".wily" / sha)
+    logger.debug(f"Cache path is {cache_path}")
+    return cache_path
 
 
 @dataclass
@@ -52,12 +55,13 @@ class WilyConfig(object):
 
     @property
     def cache_path(self):
-        if self._cache_path:
-            return self._cache_path
-        return generate_cache_path(pathlib.Path(self.path).absolute())
+        if not self._cache_path:
+            self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())
+        return self._cache_path
 
     @cache_path.setter
     def cache_path(self, value):
+        logger.debug(f"Setting custom cache path to {value}")
         self._cache_path = value
 
 

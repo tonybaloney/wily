@@ -39,7 +39,7 @@ def exists(config):
         if index["version"] != __version__:
             # TODO: Inspect the versions properly.
             logger.warning(
-                "! Wily cache is old, you may incur errors until you rebuild the cache."
+                "Wily cache is old, you may incur errors until you rebuild the cache."
             )
     else:
         logger.warning(
