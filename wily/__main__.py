@@ -8,7 +8,7 @@ import click
 from wily import logger, __version__
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
+from wily.config import DEFAULT_CONFIG_PATH
 from wily.config import load as load_config
 from wily.decorators import add_version
 from wily.operators import resolve_operators
@@ -71,7 +71,6 @@ def cli(ctx, debug, config, path):
     if path:
         logger.debug(f"Fixing path to {path}")
         ctx.obj["CONFIG"].path = path
-        ctx.obj["CONFIG"].cache_path = os.path.join(path, DEFAULT_CACHE_PATH)
     logger.debug(f"Loaded configuration from {config}")
 
 

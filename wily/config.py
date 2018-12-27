@@ -9,6 +9,7 @@ TODO : Better utilise default values and factory in @dataclass to replace DEFAUL
 import configparser
 import logging
 import pathlib
+import hashlib
 from dataclasses import dataclass, field
 from typing import Any, List
 
@@ -17,8 +18,14 @@ from wily.archivers import ARCHIVER_GIT
 
 logger = logging.getLogger(__name__)
 
-""" The default path name to the cache """
-DEFAULT_CACHE_PATH = ".wily"
+
+def generate_cache_path(path):
+    """
+    Generate the cache path
+    """
+    sha = hashlib.sha1(str(path).encode()).hexdigest()[:7]
+    cache_path = pathlib.Path.home() / ".wily" / sha
+    return str(cache_path)
 
 
 @dataclass
@@ -34,7 +41,7 @@ class WilyConfig(object):
     path: str
     max_revisions: int
     skip_ignore_check: bool = False
-    cache_path: str = DEFAULT_CACHE_PATH
+    cache_path: str = None
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
@@ -42,6 +49,8 @@ class WilyConfig(object):
         """Clone targets as a list of path."""
         if self.targets is None or "":
             self.targets = [self.path]
+        abs_path = pathlib.Path(self.path).absolute()
+        self.cache_path = generate_cache_path(abs_path)
 
 
 # Default values for Wily
