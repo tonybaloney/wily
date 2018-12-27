@@ -4,6 +4,7 @@ import wily.__main__ as main
 
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
+
 def test_report_no_cache(tmpdir):
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", tmpdir, "report", _path])
@@ -17,14 +18,7 @@ def test_report(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        [
-            "--path",
-            builddir,
-            "report",
-            _path,
-            "raw.multi",
-            "maintainability.rank",
-        ],
+        ["--path", builddir, "report", _path, "raw.multi", "maintainability.rank"],
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
@@ -89,8 +83,7 @@ def test_report_with_message(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--path", builddir, "report", _path, "raw.multi", "--message"],
+        main.cli, ["--path", builddir, "report", _path, "raw.multi", "--message"]
     )
     assert result.exit_code == 0, result.stdout
     assert "basic test" in result.stdout

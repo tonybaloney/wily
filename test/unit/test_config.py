@@ -5,7 +5,7 @@ import wily.config
 
 def test_config_empty_defaults(tmpdir):
     """
-    TEst that an empty config path sets to defaults.
+    Test that an empty config path sets to defaults.
     """
     config = """
     """
