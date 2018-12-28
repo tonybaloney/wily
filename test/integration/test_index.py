@@ -3,9 +3,9 @@ from click.testing import CliRunner
 import wily.__main__ as main
 
 
-def test_index_no_cache(tmpdir):
+def test_index_no_cache(tmpdir, cache_path):
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "index"])
+    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "index"])
     assert result.exit_code == 1, result.stdout
 
 

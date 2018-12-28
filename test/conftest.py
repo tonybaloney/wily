@@ -1,6 +1,8 @@
 import pathlib
 from textwrap import dedent
-
+import os
+import shutil
+import tempfile
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -58,13 +60,11 @@ def gitdir(tmpdir):
     with open(testpath, "w") as test_txt:
         test_txt.write(dedent(second_test))
 
-    with open(tmppath / ".gitignore", "w") as test_txt:
-        test_txt.write(".wily/")
-
-    index.add([str(testpath), ".gitignore"])
+    index.add([str(testpath)])
     index.commit("remove line", author=author, committer=committer)
 
-    return tmpdir
+    yield tmpdir
+    repo.close()
 
 
 @pytest.fixture
@@ -82,6 +82,15 @@ def builddir(gitdir):
     result2 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
     assert result2.exit_code == 0, result2.stdout
 
-    assert (tmppath / ".wily" / "git").exists()
-
     return gitdir
+
+
+@pytest.fixture(autouse=True)
+def cache_path(monkeypatch):
+    """
+    Configure wily cache and home path, clean up cache afterward
+    """
+    tmp = tempfile.mkdtemp()
+    monkeypatch.setenv("HOME", tmp)
+    yield tmp
+    shutil.rmtree(tmp)

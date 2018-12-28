@@ -5,7 +5,6 @@ Implementation of the archiver API for a standard directory (no revisions)
 """
 import logging
 import os.path
-from datetime import datetime
 import hashlib
 from wily.archivers import BaseArchiver, Revision
 

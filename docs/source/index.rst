@@ -46,10 +46,6 @@ You can install wily from PyPi using pip
 Wily needs an index of the project before any of the commands can be used. :doc:`commands/build` builds an index in a Git repository. Provide the path to your source code as the first argument.
 
 
-.. warning::
-
-   Before you run wily, add `.wily/` to your .gitignore file and commit it. Wily will warn you if this is missing.
-
 .. code-block:: console
 
    $ wily build src/

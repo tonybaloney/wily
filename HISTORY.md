@@ -2,6 +2,9 @@
 
 ## 1.9.0 (master)
 
+* Wily now supports Windows! Full test suite works on Windows, Mac OS and Linux
+* Wily no longer puts the .wily cache in the target path, cache is now stored in the $HOME path. This means you no longer need to add .wily to .gitignore before running a build. Wily will isolate cache folders based on the absolute path
+* Added a --cache flag to specify the path to the cache for shared cache's
 * Added `-V` version flag and added current version to `--help` header @DahlitzFlorian
 
 ## 1.8.2 (21st December 2018)
