@@ -156,7 +156,7 @@ def index(ctx, message):
 @click.option(
     "-f",
     "--format",
-    default="console",
+    default=ReportFormat.CONSOLE.name,
     help="Specify report format (console or html)",
     type=click.Choice(ReportFormat.get_all()),
 )

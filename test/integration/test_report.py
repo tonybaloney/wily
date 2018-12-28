@@ -127,7 +127,7 @@ def test_report_html_format(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "html"]
+        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "HTML"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
@@ -139,7 +139,7 @@ def test_report_console_format(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "console"]
+        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "CONSOLE"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
@@ -154,5 +154,5 @@ def test_report_not_existing_format(builddir):
         main.cli,
         ["--path", builddir, "report", "src/test.py", "--format", "non-existing"],
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 2, result.stdout
     assert "Not found" not in result.stdout

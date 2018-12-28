@@ -4,6 +4,8 @@ from mock import patch
 
 import wily.__main__ as main
 
+from wily.helper.custom_enums import ReportFormat
+
 
 def test_init():
     with patch.object(main, "cli", return_value=None) as cli:
@@ -139,7 +141,7 @@ def test_report():
                 assert report.called_once
                 assert check_cache.called_once
                 assert report.call_args[1]["path"] == "foo.py"
-                assert report.call_args[1]["format"] == "console"
+                assert report.call_args[1]["format"] == ReportFormat.CONSOLE
                 assert "maintainability.mi" in report.call_args[1]["metrics"]
                 assert gdf.called_once
 
@@ -161,7 +163,7 @@ def test_report_with_opts():
             assert report.call_args[1]["metrics"] == ("example_metric",)
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
-            assert report.call_args[1]["format"] == "console"
+            assert report.call_args[1]["format"] == ReportFormat.CONSOLE
 
 
 def test_report_html_format():
@@ -179,7 +181,7 @@ def test_report_html_format():
                     "example_metric",
                     "-n 101",
                     "--message",
-                    "--format=html",
+                    "--format=HTML",
                 ],
             )
             assert result.exit_code == 0, result.stdout
@@ -189,7 +191,7 @@ def test_report_html_format():
             assert report.call_args[1]["metrics"] == ("example_metric",)
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
-            assert report.call_args[1]["format"] == "html"
+            assert report.call_args[1]["format"] == ReportFormat.HTML
 
 
 def test_report_console_format():
@@ -207,7 +209,7 @@ def test_report_console_format():
                     "example_metric",
                     "-n 101",
                     "--message",
-                    "--format=console",
+                    "--format=CONSOLE",
                 ],
             )
             assert result.exit_code == 0, result.stdout
@@ -217,7 +219,7 @@ def test_report_console_format():
             assert report.call_args[1]["metrics"] == ("example_metric",)
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
-            assert report.call_args[1]["format"] == "console"
+            assert report.call_args[1]["format"] == ReportFormat.CONSOLE
 
 
 def test_report_not_existing_format():
@@ -238,14 +240,9 @@ def test_report_not_existing_format():
                     "--format=non-existing",
                 ],
             )
-            assert result.exit_code == 0, result.stdout
+            assert result.exit_code == 2, result.stdout
             assert report.called_once
             assert check_cache.called_once
-            assert report.call_args[1]["path"] == "foo.py"
-            assert report.call_args[1]["metrics"] == ("example_metric",)
-            assert report.call_args[1]["include_message"]
-            assert report.call_args[1]["n"] == 101
-            assert report.call_args[1]["format"] == "console"
 
 
 def test_report_html_format_with_output():
@@ -263,7 +260,7 @@ def test_report_html_format_with_output():
                     "example_metric",
                     "-n 101",
                     "--message",
-                    "--format=html",
+                    "--format=HTML",
                     "--output=reports/out.html",
                 ],
             )
@@ -274,7 +271,7 @@ def test_report_html_format_with_output():
             assert report.call_args[1]["metrics"] == ("example_metric",)
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
-            assert report.call_args[1]["format"] == "html"
+            assert report.call_args[1]["format"] == ReportFormat.HTML
             assert report.call_args[1]["output"] == "reports/out.html"
 
 
