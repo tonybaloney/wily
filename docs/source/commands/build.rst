@@ -51,14 +51,6 @@ Updating the index
 To update the wily cache with any recent commits, simply re-run the ``wily build`` command and it will
 
 
-Ignoring `.wily`
-----------------
-
-Before you run the build command, it is strongly recommended the ``.wily/`` directory be ignored from the git index. This can be achieved by adding
-``.wily/`` to ``.gitignore`` and committing changes to ``.gitignore`` before running ``wily build``.
-
-Without this, you will receive an error when running wily build, this is to prevent uncomitted changes being lost when switching revisions.
-
 Dirty repositories
 ------------------
 
