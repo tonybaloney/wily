@@ -22,7 +22,13 @@ logger = logging.getLogger(__name__)
 @lru_cache(maxsize=128)
 def generate_cache_path(path):
     """
-    Generate the cache path
+    Generate a reusable path to cache results.
+
+    Will use the --path of the target and hash into
+    a 9-character directory within the HOME folder.
+
+    :return: The cache path
+    :rtype: ``str``
     """
     logger.debug(f"Generating cache for {path}")
     sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
@@ -55,12 +61,14 @@ class WilyConfig(object):
 
     @property
     def cache_path(self):
+        """Path to the cache."""
         if not self._cache_path:
             self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())
         return self._cache_path
 
     @cache_path.setter
     def cache_path(self, value):
+        """Override the cache path."""
         logger.debug(f"Setting custom cache path to {value}")
         self._cache_path = value
 
