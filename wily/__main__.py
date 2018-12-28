@@ -11,6 +11,7 @@ from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
 from wily.config import load as load_config
 from wily.decorators import add_version
+from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 
 
@@ -157,7 +158,7 @@ def index(ctx, message):
     "--format",
     default="console",
     help="Specify report format (console or html)",
-    type=click.Choice(["html", "console"]),
+    type=click.Choice(ReportFormat.get_all()),
 )
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
@@ -185,7 +186,7 @@ def report(ctx, file, metrics, number, message, format, output):
         metrics=metrics,
         n=number,
         include_message=message,
-        format=format,
+        format=ReportFormat[format],
         output=output,
     )
 

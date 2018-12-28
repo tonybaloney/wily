@@ -12,12 +12,19 @@ from string import Template
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
+from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_metric, MetricType
 from wily.state import State
 
 
 def report(
-    config, path, metrics, n, include_message=False, format="console", output=None
+    config,
+    path,
+    metrics,
+    n,
+    include_message=False,
+    format=ReportFormat.CONSOLE,
+    output=None,
 ):
     """
     Show information about the cache and runtime.
@@ -38,7 +45,7 @@ def report(
     :type  include_message: ``bool``
 
     :param format: Output format
-    :type  format: ``str``
+    :type  format: ``ReportFormat``
 
     :param output: Output path
     :type  output: ``str``
@@ -137,7 +144,7 @@ def report(
     else:
         headers = ("Revision", "Author", "Date", *descriptions)
 
-    if format == "html":
+    if format == ReportFormat.HTML:
         report_path = Path.cwd()
         if output:
             output = Path(output)
