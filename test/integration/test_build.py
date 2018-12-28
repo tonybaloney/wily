@@ -22,14 +22,14 @@ from wily.config import generate_cache_path
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 
-def test_build_not_git_repo(tmpdir):
+def test_build_not_git_repo(tmpdir, cache_path):
     """
     Test that build defaults to filesystem in a non-git directory
     """
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
+    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"])
     assert result.exit_code == 0, result.stdout
-    cache_path = pathlib.Path(generate_cache_path(tmpdir))
+    cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
     index_path = cache_path / "filesystem" / "index.json"
     assert index_path.exists()
@@ -96,7 +96,7 @@ def test_build_crash(tmpdir):
         assert result.exit_code == 1, result.stdout
 
 
-def test_build(tmpdir):
+def test_build(tmpdir, cache_path):
     """
     Test that build works in a basic repository.
     """
@@ -114,15 +114,13 @@ def test_build(tmpdir):
     committer = Actor("A committer", "committer@example.com")
 
     commit = index.commit("basic test", author=author, committer=committer)
-    _home = tempfile.mkdtemp()
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", "test.py"],
-        env={'HOME': _home}
+        main.cli, ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"]
     )
     assert result.exit_code == 0, result.stdout
 
-    cache_path = pathlib.Path(generate_cache_path(tmpdir))
+    cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
     index_path = cache_path / "git" / "index.json"
     assert index_path.exists()
@@ -130,7 +128,7 @@ def test_build(tmpdir):
     assert rev_path.exists()
 
 
-def test_build_twice(tmpdir):
+def test_build_twice(tmpdir, cache_path):
     """
     Test that build works when run twice.
     """
@@ -150,10 +148,10 @@ def test_build_twice(tmpdir):
     commit = index.commit("basic test", author=author, committer=committer)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", "test.py"])
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"])
     assert result.exit_code == 0, result.stdout
 
-    cache_path = pathlib.Path(generate_cache_path(tmpdir)) / "git"
+    cache_path = pathlib.Path(cache_path) / "git"
     assert cache_path.exists()
     index_path = cache_path / "index.json"
     assert index_path.exists()
@@ -171,7 +169,6 @@ def test_build_twice(tmpdir):
     result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", "test.py"])
     assert result.exit_code == 0, result.stdout
 
-    cache_path = pathlib.Path(generate_cache_path(tmpdir)) / "git"
     assert cache_path.exists()
     index_path = cache_path / "index.json"
     assert index_path.exists()
@@ -219,17 +216,17 @@ archivers = {name for name in ALL_ARCHIVERS.keys()}
 
 
 @pytest.mark.parametrize("archiver", archivers)
-def test_build_archiver(gitdir, archiver):
+def test_build_archiver(gitdir, archiver, cache_path):
     """
     Test the build against each type of archiver
     """
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", gitdir, "build", _path, "-a", archiver]
+            main.cli, ["--path", gitdir, "--cache", cache_path, "build", _path, "-a", archiver]
         )
         assert result.exit_code == 0, result.stdout
-        cache_path = pathlib.Path(generate_cache_path(gitdir))
+        cache_path = pathlib.Path(cache_path)
         assert cache_path.exists()
         index_path = cache_path / archiver / "index.json"
         assert index_path.exists()

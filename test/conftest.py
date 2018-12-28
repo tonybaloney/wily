@@ -1,6 +1,7 @@
 import pathlib
 from textwrap import dedent
 import os
+import shutil
 import tempfile
 import pytest
 from click.testing import CliRunner
@@ -84,11 +85,11 @@ def builddir(gitdir):
 
 
 @pytest.fixture(autouse=True)
-def cache_cleanup(monkeypatch):
+def cache_path(monkeypatch):
     """
     Configure wily cache and home path, clean up cache afterward
     """
     tmp = tempfile.mkdtemp()
     monkeypatch.setenv("HOME", tmp)
-    yield
-    pathlib.Path(tmp).rmdir()
+    yield tmp
+    shutil.rmtree(tmp)

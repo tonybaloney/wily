@@ -31,8 +31,6 @@ def test_index(config):
     state = wily.state.State(config)
     assert state.index
     assert state.index["git"] is not None
-    assert len(state.index["git"]) == 3
-    assert len(state.index["git"].revision_keys) == 3
     for revision in state.index["git"].revisions:
         assert state.index["git"][revision.revision.key]
         assert revision.revision in state.index["git"]
