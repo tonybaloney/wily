@@ -21,12 +21,6 @@ from wily.config import generate_cache_path
 
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
-PATCHED_ENV = {
-    "LC_ALL": "C.UTF-8",
-    "LANG": "C.UTF-8",
-    "HOME": tempfile.gettempdir(),
-}
-
 
 def test_build_not_git_repo(tmpdir):
     """
@@ -102,7 +96,6 @@ def test_build_crash(tmpdir):
         assert result.exit_code == 1, result.stdout
 
 
-@patch.dict("os.environ", values=PATCHED_ENV, clear=True)
 def test_build(tmpdir):
     """
     Test that build works in a basic repository.

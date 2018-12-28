@@ -81,3 +81,14 @@ def builddir(gitdir):
     assert result2.exit_code == 0, result2.stdout
 
     return gitdir
+
+
+@pytest.fixture(autouse=True)
+def cache_cleanup(monkeypatch):
+    """
+    Configure wily cache and home path, clean up cache afterward
+    """
+    tmp = tempfile.mkdtemp()
+    monkeypatch.setenv("HOME", tmp)
+    yield
+    pathlib.Path(tmp).rmdir()
