@@ -153,7 +153,11 @@ def index(ctx, message):
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
 @click.option(
-    "-f", "--format", default="console", help="Specify report format (console or html)"
+    "-f",
+    "--format",
+    default="console",
+    help="Specify report format (console or html)",
+    type=click.Choice(["html", "console"]),
 )
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
@@ -169,14 +173,6 @@ def report(ctx, file, metrics, number, message, format, output):
     if not metrics:
         metrics = get_default_metrics(config)
         logger.info(f"Using default metrics {metrics}")
-
-    supported_formats = {"console", "html"}
-
-    if format not in supported_formats:
-        logger.info(
-            f"{format} is not supported as output format, console is used instead"
-        )
-        format = "console"
 
     from wily.commands.report import report
 
