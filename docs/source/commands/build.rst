@@ -50,7 +50,6 @@ Updating the index
 
 To update the wily cache with any recent commits, simply re-run the ``wily build`` command and it will
 
-
 Dirty repositories
 ------------------
 

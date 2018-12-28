@@ -27,12 +27,11 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip
-      pip install flit mock codecov pydocstyle pytest-cov
+      pip install pytest flit mock codecov pydocstyle pytest-cov
       flit install
     displayName: 'Install dependencies'
 
   - script: |
-      pip install pytest
       python -m pytest test/ --junitxml=junit/test-results.xml --cov=wily/
       codecov
     displayName: 'pytest'
