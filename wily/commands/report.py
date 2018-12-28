@@ -18,13 +18,7 @@ from wily.state import State
 
 
 def report(
-    config,
-    path,
-    metrics,
-    n,
-    include_message=False,
-    format=ReportFormat.CONSOLE,
-    output=None,
+    config, path, metrics, n, output, include_message=False, format=ReportFormat.CONSOLE
 ):
     """
     Show information about the cache and runtime.
@@ -41,14 +35,14 @@ def report(
     :param n: Number of items to list
     :type  n: ``int``
 
+    :param output: Output path
+    :type  output: ``Path``
+
     :param include_message: Include revision messages
     :type  include_message: ``bool``
 
     :param format: Output format
     :type  format: ``ReportFormat``
-
-    :param output: Output path
-    :type  output: ``str``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
@@ -145,18 +139,12 @@ def report(
         headers = ("Revision", "Author", "Date", *descriptions)
 
     if format == ReportFormat.HTML:
-        report_path = Path.cwd()
-        if output:
-            output = Path(output)
-            if output.suffix == ".html":
-                report_path /= output.parents[0]
-                report_output = report_path.joinpath(output.name)
-            else:
-                report_path /= output
-                report_output = report_path.joinpath("index.html")
+        if output.is_file and output.suffix == ".html":
+            report_path = output.parents[0]
+            report_output = output
         else:
-            report_path /= "wily_report"
-            report_output = report_path.joinpath("index.html")
+            report_path = output
+            report_output = output.joinpath("index.html")
 
         report_path.mkdir(exist_ok=True, parents=True)
         report_template = Template(open("wily/templates/report_template.html").read())

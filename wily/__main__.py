@@ -5,6 +5,8 @@ import os.path
 
 import click
 
+from pathlib import Path
+
 from wily import logger, __version__
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
@@ -175,6 +177,12 @@ def report(ctx, file, metrics, number, message, format, output):
         metrics = get_default_metrics(config)
         logger.info(f"Using default metrics {metrics}")
 
+    new_output = Path().cwd()
+    if output:
+        new_output = new_output / Path(output)
+    else:
+        new_output = new_output / "wily_report" / "index.html"
+
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
@@ -185,9 +193,9 @@ def report(ctx, file, metrics, number, message, format, output):
         path=file,
         metrics=metrics,
         n=number,
+        output=new_output,
         include_message=message,
         format=ReportFormat[format],
-        output=output,
     )
 
 

@@ -1,6 +1,8 @@
 import pytest
+
 from click.testing import CliRunner
 from mock import patch
+from pathlib import Path
 
 import wily.__main__ as main
 
@@ -184,6 +186,9 @@ def test_report_html_format():
                     "--format=HTML",
                 ],
             )
+            path = Path().cwd()
+            path = path / "wily_report" / "index.html"
+
             assert result.exit_code == 0, result.stdout
             assert report.called_once
             assert check_cache.called_once
@@ -192,6 +197,7 @@ def test_report_html_format():
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
             assert report.call_args[1]["format"] == ReportFormat.HTML
+            assert path.exists()
 
 
 def test_report_console_format():
@@ -264,6 +270,9 @@ def test_report_html_format_with_output():
                     "--output=reports/out.html",
                 ],
             )
+            path = Path().cwd()
+            path = path / Path(report.call_args[1]["output"])
+
             assert result.exit_code == 0, result.stdout
             assert report.called_once
             assert check_cache.called_once
@@ -272,7 +281,10 @@ def test_report_html_format_with_output():
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
             assert report.call_args[1]["format"] == ReportFormat.HTML
-            assert report.call_args[1]["output"] == "reports/out.html"
+            assert report.call_args[1]["output"] == Path().cwd() / Path(
+                "reports/out.html"
+            )
+            assert path.exists()
 
 
 def test_graph():

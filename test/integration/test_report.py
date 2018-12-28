@@ -1,5 +1,7 @@
 from click.testing import CliRunner
 
+from pathlib import Path
+
 import wily.__main__ as main
 
 
@@ -129,6 +131,10 @@ def test_report_html_format(builddir):
     result = runner.invoke(
         main.cli, ["--path", builddir, "report", "src/test.py", "--format", "HTML"]
     )
+    path = Path().cwd()
+    path = path / "wily_report" / "index.html"
+
+    assert path.exists()
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
