@@ -37,7 +37,7 @@ from wily.operators import resolve_operators
     "-c",
     "--cache",
     type=click.Path(resolve_path=True),
-    help="Override the default cache path (defaults to $HOME/.wily/HASH)"
+    help="Override the default cache path (defaults to $HOME/.wily/HASH)",
 )
 @click.pass_context
 @add_version

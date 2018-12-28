@@ -27,7 +27,9 @@ def test_build_not_git_repo(tmpdir, cache_path):
     Test that build defaults to filesystem in a non-git directory
     """
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"])
+    result = runner.invoke(
+        main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"]
+    )
     assert result.exit_code == 0, result.stdout
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
@@ -40,7 +42,9 @@ def test_build_custom_cache(tmpdir):
     Test that build defaults to filesystem in a non-git directory with custom cache path.
     """
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"])
+    result = runner.invoke(
+        main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"]
+    )
     assert result.exit_code == 0, result.stdout
     cache_path = tmpdir / ".wily"
     assert cache_path.exists()
@@ -116,7 +120,8 @@ def test_build(tmpdir, cache_path):
     commit = index.commit("basic test", author=author, committer=committer)
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"]
+        main.cli,
+        ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"],
     )
     assert result.exit_code == 0, result.stdout
 
@@ -148,7 +153,10 @@ def test_build_twice(tmpdir, cache_path):
     commit = index.commit("basic test", author=author, committer=committer)
 
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"])
+    result = runner.invoke(
+        main.cli,
+        ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"],
+    )
     assert result.exit_code == 0, result.stdout
 
     cache_path = pathlib.Path(cache_path) / "git"
@@ -223,7 +231,8 @@ def test_build_archiver(gitdir, archiver, cache_path):
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(
-            main.cli, ["--path", gitdir, "--cache", cache_path, "build", _path, "-a", archiver]
+            main.cli,
+            ["--path", gitdir, "--cache", cache_path, "build", _path, "-a", archiver],
         )
         assert result.exit_code == 0, result.stdout
         cache_path = pathlib.Path(cache_path)
