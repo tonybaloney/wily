@@ -89,6 +89,8 @@ def test_build_crash(tmpdir):
     committer = Actor("A committer", "committer@example.com")
 
     index.commit("basic test", author=author, committer=committer)
+    repo.close()
+
     import wily.commands.build
 
     with patch.object(
@@ -118,6 +120,8 @@ def test_build(tmpdir, cache_path):
     committer = Actor("A committer", "committer@example.com")
 
     commit = index.commit("basic test", author=author, committer=committer)
+    repo.close()
+
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
@@ -173,6 +177,7 @@ def test_build_twice(tmpdir, cache_path):
     index.add(["test.py"])
 
     commit2 = index.commit("basic test", author=author, committer=committer)
+    repo.close()
 
     result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", "test.py"])
     assert result.exit_code == 0, result.stdout
@@ -191,6 +196,7 @@ def test_build_no_commits(tmpdir):
     Test that build fails cleanly with no commits
     """
     repo = Repo.init(path=tmpdir)
+    repo.close()
 
     runner = CliRunner()
     result = runner.invoke(
@@ -214,6 +220,8 @@ def test_build_dirty_repo(builddir):
 
 def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
+    repo.close()
+
     with patch("wily.logger") as logger:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", _path])

@@ -29,6 +29,7 @@ def test_git_end_to_end(tmpdir):
         file1.write("print(1)")
     index.add(["test.py"])
     commit2 = index.commit("commit2", author=author, committer=committer)
+    repo.close()
 
     config = DEFAULT_CONFIG
     config.path = tmpdir
@@ -83,6 +84,7 @@ def test_dirty_git(tmpdir):
     with open(tmppath / "blah.py", "w") as ignore:
         ignore.write("*.py[co]\n")
     index.add(["blah.py"])
+    repo.close()
 
     config = DEFAULT_CONFIG
     config.path = tmpdir

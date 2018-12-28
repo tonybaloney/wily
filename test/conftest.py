@@ -63,7 +63,8 @@ def gitdir(tmpdir):
     index.add([str(testpath)])
     index.commit("remove line", author=author, committer=committer)
 
-    return tmpdir
+    yield tmpdir
+    repo.close()
 
 
 @pytest.fixture
