@@ -33,7 +33,7 @@ jobs:
 
   - script: |
       pip install pytest
-      pytest test --junitxml=junit/test-results.xml --cov=wily
+      python -m pytest test/ --junitxml=junit/test-results.xml --cov=wily/
       codecov
     displayName: 'pytest'
     env:
