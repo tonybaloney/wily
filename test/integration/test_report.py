@@ -5,9 +5,11 @@ import wily.__main__ as main
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 
-def test_report_no_cache(tmpdir):
+def test_report_no_cache(tmpdir, cache_path):
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "report", _path])
+    result = runner.invoke(
+        main.cli, ["--path", tmpdir, "--cache", cache_path, "report", _path]
+    )
     assert result.exit_code == 1, result.stdout
 
 

@@ -1,6 +1,6 @@
 import sys
 from mock import patch
-
+import tempfile
 from click.testing import CliRunner
 
 import wily.__main__ as main
@@ -8,14 +8,21 @@ import wily.__main__ as main
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 
-PATCHED_ENV = {"BROWSER": "echo %s", "LC_ALL": "C.UTF-8", "LANG": "C.UTF-8"}
+PATCHED_ENV = {
+    "BROWSER": "echo %s",
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8",
+    "HOME": tempfile.gettempdir(),
+}
 
 
-def test_graph_no_cache(tmpdir):
+def test_graph_no_cache(tmpdir, cache_path):
     runner = CliRunner()
-
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(main.cli, ["--path", tmpdir, "graph", _path, "raw.loc"])
+        result = runner.invoke(
+            main.cli,
+            ["--path", tmpdir, "--cache", cache_path, "graph", _path, "raw.loc"],
+        )
     assert result.exit_code == 1, result.stdout
 
 
