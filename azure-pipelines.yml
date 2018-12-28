@@ -33,16 +33,14 @@ jobs:
 
   - script: |
       pip install pytest
-      pytest test --junitxml=junit/test-results.xml --cov
+      pytest test --junitxml=junit/test-results.xml --cov=wily
+      codecov
     displayName: 'pytest'
+    env:
+      CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
   
   - script: pydocstyle --ignore=D301,D212,D203 wily
     displayName: 'pydocstyle'
-  
-  - script: codecov
-    displayName: 'codecov'
-    env:
-      CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
 
   - task: PublishTestResults@2
     inputs:
