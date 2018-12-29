@@ -147,7 +147,9 @@ def report(
             report_output = output.joinpath("index.html")
 
         report_path.mkdir(exist_ok=True, parents=True)
-        report_template = Template(open("wily/templates/report_template.html").read())
+
+        templates_dir = (Path(__file__).parents[1] / "templates").resolve()
+        report_template = Template((templates_dir / "report_template.html").read_text())
 
         table_headers = "".join([f"<th>{header}</th>" for header in headers])
         table_content = ""
@@ -165,7 +167,7 @@ def report(
             output.write(report_template)
 
         try:
-            copytree("wily/templates/css", str(report_path / "css"))
+            copytree(str(templates_dir / "css"), str(report_path / "css"))
         except FileExistsError:
             pass
 
