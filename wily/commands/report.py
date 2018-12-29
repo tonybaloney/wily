@@ -156,6 +156,10 @@ def report(
         for line in data[::-1]:
             table_content += "<tr>"
             for element in line:
+                element = element.replace("[32m", "<span class='green-color'>")
+                element = element.replace("[31m", "<span class='red-color'>")
+                element = element.replace("[33m", "<span class='orange-color'>")
+                element = element.replace("[0m", "</span>")
                 table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 

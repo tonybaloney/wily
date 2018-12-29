@@ -197,3 +197,15 @@ tr:hover {
     width: 100% !important;
   }
 }
+
+.green-color {
+  color: green;
+}
+
+.red-color {
+  color: darkred;
+}
+
+.orange-color {
+  color: darkorange;
+}
