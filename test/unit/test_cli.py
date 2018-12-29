@@ -198,6 +198,7 @@ def test_report_html_format():
             assert report.call_args[1]["n"] == 101
             assert report.call_args[1]["format"] == ReportFormat.HTML
             assert path.exists()
+            assert "<html>" in path.read_text()
 
 
 def test_report_console_format():
@@ -285,6 +286,7 @@ def test_report_html_format_with_output():
                 "reports/out.html"
             )
             assert path.exists()
+            assert "<html>" in path.read_text()
 
 
 def test_graph():

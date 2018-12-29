@@ -132,6 +132,7 @@ def test_report_html_format(builddir):
     path = path / "wily_report" / "index.html"
 
     assert path.exists()
+    assert "<html>" in path.read_text()
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
