@@ -126,7 +126,7 @@ def test_report_html_format(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "HTML"]
+        main.cli, ["--path", builddir, "report", _path, "--format", "HTML"]
     )
     path = Path().cwd()
     path = path / "wily_report" / "index.html"
@@ -143,7 +143,7 @@ def test_report_console_format(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "src/test.py", "--format", "CONSOLE"]
+        main.cli, ["--path", builddir, "report", _path, "--format", "CONSOLE"]
     )
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
@@ -156,7 +156,7 @@ def test_report_not_existing_format(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--path", builddir, "report", "src/test.py", "--format", "non-existing"],
+        ["--path", builddir, "report", _path, "--format", "non-existing"],
     )
     assert result.exit_code == 2, result.stdout
     assert "Not found" not in result.stdout
