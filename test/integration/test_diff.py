@@ -1,14 +1,17 @@
 import pathlib
+import sys
 from textwrap import dedent
 
 from click.testing import CliRunner
 
 import wily.__main__ as main
 
+_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+
 
 def test_diff_no_cache(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "diff", "src/test.py"])
+    result = runner.invoke(main.cli, ["--path", tmpdir, "diff", _path])
     assert result.exit_code == 1, result.stdout
 
 
@@ -21,9 +24,7 @@ def test_diff_no_path(tmpdir):
 def test_diff_output(builddir):
     """ Test the diff feature with no changes """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py"]
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "diff", _path])
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
 
@@ -32,7 +33,7 @@ def test_diff_output_all(builddir):
     """ Test the diff feature with no changes and the --all flag """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -56,7 +57,7 @@ def test_diff_output_remove_all(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
     )
     assert result.exit_code == 0, result.stdout
 
@@ -85,7 +86,7 @@ def test_diff_output_more_complex(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -112,7 +113,7 @@ def test_diff_output_less_complex(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", "src/test.py", "--all"]
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -131,8 +132,7 @@ def test_diff_output_loc(builddir):
 
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--debug", "--path", builddir, "diff", "src/test.py", "--metrics", "raw.loc"],
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc"]
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -155,7 +155,7 @@ def test_diff_output_rank(builddir):
             "--path",
             builddir,
             "diff",
-            "src/test.py",
+            _path,
             "--all",
             "--metrics",
             "maintainability.rank",
