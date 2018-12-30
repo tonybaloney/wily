@@ -1,6 +1,11 @@
 # Release History
 
-## 1.9.0 (master)
+## 1.10.0
+
+* Report command now has the ability to generate HTML reports with the `-f HTML` option @DahlitzFlorian
+* Halstead metrics enabled by default
+
+## 1.9.0 (28th December 2018)
 
 * Wily now supports Windows! Full test suite works on Windows, Mac OS and Linux
 * Wily no longer puts the .wily cache in the target path, cache is now stored in the $HOME path. This means you no longer need to add .wily to .gitignore before running a build. Wily will isolate cache folders based on the absolute path
