@@ -137,6 +137,40 @@ def test_report_html_format(builddir):
     assert "Not found" not in result.stdout
 
 
+def test_report_html_format_target_folder(builddir):
+    """
+    Test that report works with HTML as format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", _path, "--format", "HTML", "-o", "foo"]
+    )
+    path = Path().cwd()
+    path = path / "foo" / "index.html"
+
+    assert path.exists()
+    assert "<html>" in path.read_text()
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_html_format_target_file(builddir):
+    """
+    Test that report works with HTML as format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", _path, "--format", "HTML", "-o", "foo/bar.html"]
+    )
+    path = Path().cwd()
+    path = path / "foo" / "bar.html"
+
+    assert path.exists()
+    assert "<html>" in path.read_text()
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
 def test_report_console_format(builddir):
     """
     Test that report works with console as format
