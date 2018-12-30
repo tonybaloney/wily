@@ -1,5 +1,8 @@
-from click.testing import CliRunner
 import sys
+
+from click.testing import CliRunner
+from pathlib import Path
+
 import wily.__main__ as main
 
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
@@ -114,4 +117,46 @@ def test_report_low_metric(builddir):
         main.cli, ["--path", builddir, "report", _path, "maintainability.mi"]
     )
     assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_html_format(builddir):
+    """
+    Test that report works with HTML as format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", _path, "--format", "HTML"]
+    )
+    path = Path().cwd()
+    path = path / "wily_report" / "index.html"
+
+    assert path.exists()
+    assert "<html>" in path.read_text()
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_console_format(builddir):
+    """
+    Test that report works with console as format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", _path, "--format", "CONSOLE"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_not_existing_format(builddir):
+    """
+    Test that report works with non-existing format
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--path", builddir, "report", _path, "--format", "non-existing"],
+    )
+    assert result.exit_code == 2, result.stdout
     assert "Not found" not in result.stdout
