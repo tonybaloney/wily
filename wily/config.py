@@ -80,6 +80,7 @@ DEFAULT_OPERATORS = {
     operators.OPERATOR_RAW.name,
     operators.OPERATOR_MAINTAINABILITY.name,
     operators.OPERATOR_CYCLOMATIC.name,
+    operators.OPERATOR_HALSTEAD.name,
 }
 
 """ The name of the default archiver """

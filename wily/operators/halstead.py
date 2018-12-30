@@ -26,10 +26,10 @@ class HalsteadOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("h1", "h1 metric", int, MetricType.AimLow, sum),
-        Metric("h2", "h2 metric", int, MetricType.AimLow, sum),
-        Metric("N1", "N1 metric", int, MetricType.AimLow, sum),
-        Metric("N2", "N2 metric", int, MetricType.AimLow, sum),
+        Metric("h1", "Unique Operands", int, MetricType.AimLow, sum),
+        Metric("h2", "Unique Operators", int, MetricType.AimLow, sum),
+        Metric("N1", "Number of Operands", int, MetricType.AimLow, sum),
+        Metric("N2", "Number of Operators", int, MetricType.AimLow, sum),
         Metric(
             "vocabulary", "Unique vocabulary (h1 + h2)", int, MetricType.AimLow, sum
         ),
