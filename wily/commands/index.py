@@ -2,6 +2,8 @@
 Print command.
 
 Print information about the wily cache and what is in the index.
+
+MODULE:2-4
 """
 import tabulate
 

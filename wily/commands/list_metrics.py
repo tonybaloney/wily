@@ -2,6 +2,8 @@
 List available metrics across all providers.
 
 TODO : Only show metrics for the operators that the cache has?
+
+MODULE:2-5
 """
 import tabulate
 

@@ -2,6 +2,8 @@
 Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
+
+MODULE:2-3
 """
 import pathlib
 
