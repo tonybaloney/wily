@@ -2,6 +2,8 @@
 Git Archiver.
 
 Implementation of the archiver API for the gitpython module.
+
+MODULE:1-2
 """
 import logging
 import pathlib
