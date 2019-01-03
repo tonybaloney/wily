@@ -2,6 +2,7 @@
 Wily.
 
 A Python application for tracking, reporting on timing and complexity in tests and applications.
+MODULE:0-1
 """
 import colorlog
 import datetime

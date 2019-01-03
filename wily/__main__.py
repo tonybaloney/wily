@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
-"""Main command line."""
+"""Main command line.
+MODULE:0-1
+"""
 
 import os.path
 
