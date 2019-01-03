@@ -2,6 +2,8 @@
 Cyclomatic complexity metric for each function/method.
 
 Provided by the radon library.
+
+MODULE:3-1
 """
 import statistics
 

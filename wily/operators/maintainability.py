@@ -2,6 +2,8 @@
 Maintainability operator.
 
 Measures the "maintainability" using the Halstead index.
+
+MODULE:3-3
 """
 import statistics
 

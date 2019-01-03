@@ -1,4 +1,7 @@
-"""Models and types for "operators" the basic measure of a module that measures code."""
+"""Models and types for "operators" the basic measure of a module that measures code.
+
+MODULE:3-0
+"""
 
 from collections import namedtuple
 from enum import Enum
