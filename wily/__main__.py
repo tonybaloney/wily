@@ -5,19 +5,24 @@ Main command line.
 MODULE:0-1
 """
 
-import os.path
-
 import click
 
-from wily import logger
+from pathlib import Path
+
+from wily import logger, __version__
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
+from wily.config import DEFAULT_CONFIG_PATH
 from wily.config import load as load_config
+from wily.decorators import add_version
+from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 
 
 @click.group()
+@click.version_option(
+    __version__, "-V", "--version", message="\U0001F98A %(prog)s, version %(version)s"
+)
 @click.option(
     "--debug/--no-debug",
     default=False,
@@ -35,8 +40,15 @@ from wily.operators import resolve_operators
     default=".",
     help="Root path to the project folder to scan",
 )
+@click.option(
+    "-c",
+    "--cache",
+    type=click.Path(resolve_path=True),
+    help="Override the default cache path (defaults to $HOME/.wily/HASH)",
+)
 @click.pass_context
-def cli(ctx, debug, config, path):
+@add_version
+def cli(ctx, debug, config, path, cache):
     """
     \U0001F98A Inspect and search through the complexity of your source code.
 
@@ -67,7 +79,9 @@ def cli(ctx, debug, config, path):
     if path:
         logger.debug(f"Fixing path to {path}")
         ctx.obj["CONFIG"].path = path
-        ctx.obj["CONFIG"].cache_path = os.path.join(path, DEFAULT_CACHE_PATH)
+    if cache:
+        logger.debug(f"Fixing cache to {cache}")
+        ctx.obj["CONFIG"].cache_path = cache
     logger.debug(f"Loaded configuration from {config}")
 
 
@@ -93,13 +107,8 @@ def cli(ctx, debug, config, path):
     default="git",
     help="Archiver to use, defaults to git if git repo, else filesystem",
 )
-@click.option(
-    "--skip-gitignore-check/--gitignore-check",
-    default=False,
-    help="Skip checking of .gitignore for '.wily/'",
-)
 @click.pass_context
-def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver):
+def build(ctx, max_revisions, targets, operators, archiver):
     """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
@@ -117,7 +126,6 @@ def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver
         logger.debug(f"Fixing archiver to {archiver}")
         config.archiver = archiver
 
-    config.skip_ignore_check = skip_gitignore_check
     logger.debug(f"Fixing targets to {targets}")
     config.targets = targets
 
@@ -151,8 +159,18 @@ def index(ctx, message):
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-f",
+    "--format",
+    default=ReportFormat.CONSOLE.name,
+    help="Specify report format (console or html)",
+    type=click.Choice(ReportFormat.get_all()),
+)
+@click.option(
+    "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
+)
 @click.pass_context
-def report(ctx, file, metrics, number, message):
+def report(ctx, file, metrics, number, message, format, output):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -163,10 +181,26 @@ def report(ctx, file, metrics, number, message):
         metrics = get_default_metrics(config)
         logger.info(f"Using default metrics {metrics}")
 
+    new_output = Path().cwd()
+    if output:
+        new_output = new_output / Path(output)
+    else:
+        new_output = new_output / "wily_report" / "index.html"
+
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
-    report(config=config, path=file, metrics=metrics, n=number, include_message=message)
+    logger.debug(f"Output format is {format}")
+
+    report(
+        config=config,
+        path=file,
+        metrics=metrics,
+        n=number,
+        output=new_output,
+        include_message=message,
+        format=ReportFormat[format],
+    )
 
 
 @cli.command()

@@ -7,7 +7,6 @@ MODULE:1-1
 """
 import logging
 import os.path
-from datetime import datetime
 import hashlib
 from wily.archivers import BaseArchiver, Revision
 

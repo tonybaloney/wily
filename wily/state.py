@@ -207,3 +207,5 @@ class State(object):
             logger.debug("Wily cache not found, creating.")
             cache.create(self.config)
             logger.debug("Created wily cache")
+        else:
+            logger.debug(f"Cache {self.config.cache_path} exists")

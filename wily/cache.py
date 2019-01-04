@@ -5,6 +5,7 @@ This API is not intended to be public and should not be consumed directly.
 The API in this module is for archivers and commands to work with the local cache
 
 TODO: Version .wily/ cache folders?
+
 MODULE:0-2
 """
 
@@ -41,7 +42,7 @@ def exists(config):
         if index["version"] != __version__:
             # TODO: Inspect the versions properly.
             logger.warning(
-                "! Wily cache is old, you may incur errors until you rebuild the cache."
+                "Wily cache is old, you may incur errors until you rebuild the cache."
             )
     else:
         logger.warning(
@@ -73,7 +74,7 @@ def create(config):
         logger.debug("Wily cache exists, skipping")
         return config.cache_path
     logger.debug(f"Creating wily cache {config.cache_path}")
-    pathlib.Path(config.cache_path).mkdir()
+    pathlib.Path(config.cache_path).mkdir(parents=True, exist_ok=True)
     create_index(config)
     return config.cache_path
 

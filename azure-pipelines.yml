@@ -1,0 +1,82 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- master
+
+jobs:
+
+- job: 'Test_Linux'
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'
+    maxParallel: 2
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install pytest flit mock codecov pydocstyle pytest-cov
+      flit install
+    displayName: 'Install dependencies'
+
+  - script: |
+      python -m pytest test/ --junitxml=junit/test-results.xml --cov=wily/
+      codecov
+    displayName: 'pytest'
+    env:
+      CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
+  
+  - script: pydocstyle --ignore=D301,D212,D203 wily
+    displayName: 'pydocstyle'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/test-results.xml'
+      testRunTitle: 'Python $(python.version)'
+    condition: succeededOrFailed()
+
+- job: 'Test_Windows'
+  pool:
+    vmImage: 'vs2017-win2016'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'
+    maxParallel: 2
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+      architecture: 'x64'
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install flit mock
+      flit install
+    displayName: 'Install dependencies'
+
+  - script: |
+      pip install pytest
+      pytest test --junitxml=junit\test-results.xml
+    displayName: 'pytest'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**\test-results.xml'
+      testRunTitle: 'Python $(python.version)'
+    condition: succeededOrFailed()

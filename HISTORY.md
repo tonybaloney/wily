@@ -1,5 +1,21 @@
 # Release History
 
+## 1.10.0
+
+* Report command now has the ability to generate HTML reports with the `-f HTML` option @DahlitzFlorian
+* Halstead metrics enabled by default
+
+## 1.9.0 (28th December 2018)
+
+* Wily now supports Windows! Full test suite works on Windows, Mac OS and Linux
+* Wily no longer puts the .wily cache in the target path, cache is now stored in the $HOME path. This means you no longer need to add .wily to .gitignore before running a build. Wily will isolate cache folders based on the absolute path
+* Added a --cache flag to specify the path to the cache for shared cache's
+* Added `-V` version flag and added current version to `--help` header @DahlitzFlorian
+
+## 1.8.2 (21st December 2018)
+
+* [BUGFIX] Fixed an issue where the aggregation of the maintainability.rank metric would cause the build to crash if 2 files in the same directory had the same rank. 
+
 ## 1.8.1 (19th Decemember 2018)
 
 * [BUGFIX] Fixed an issue that occured if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.

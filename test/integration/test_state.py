@@ -14,7 +14,6 @@ import wily.state
 def config(builddir):
     _cfg = wily.config.DEFAULT_CONFIG
     _cfg.path = builddir
-    _cfg.cache_path = os.path.join(builddir, wily.config.DEFAULT_CACHE_PATH)
     return _cfg
 
 
@@ -32,8 +31,6 @@ def test_index(config):
     state = wily.state.State(config)
     assert state.index
     assert state.index["git"] is not None
-    assert len(state.index["git"]) == 3
-    assert len(state.index["git"].revision_keys) == 3
     for revision in state.index["git"].revisions:
         assert state.index["git"][revision.revision.key]
         assert revision.revision in state.index["git"]

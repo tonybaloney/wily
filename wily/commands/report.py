@@ -8,13 +8,20 @@ MODULE:2-6
 """
 import tabulate
 
+from pathlib import Path
+from shutil import copytree
+from string import Template
+
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.config import DEFAULT_GRID_STYLE
+from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_metric, MetricType
 from wily.state import State
 
 
-def report(config, path, metrics, n, include_message=False):
+def report(
+    config, path, metrics, n, output, include_message=False, format=ReportFormat.CONSOLE
+):
     """
     Show information about the cache and runtime.
 
@@ -30,8 +37,14 @@ def report(config, path, metrics, n, include_message=False):
     :param n: Number of items to list
     :type  n: ``int``
 
+    :param output: Output path
+    :type  output: ``Path``
+
     :param include_message: Include revision messages
     :type  include_message: ``bool``
+
+    :param format: Output format
+    :type  format: ``ReportFormat``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
@@ -126,9 +139,49 @@ def report(config, path, metrics, n, include_message=False):
         headers = ("Revision", "Message", "Author", "Date", *descriptions)
     else:
         headers = ("Revision", "Author", "Date", *descriptions)
-    print(
-        # But it still makes more sense to show the newest at the top, so reverse again
-        tabulate.tabulate(
-            headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
+
+    if format == ReportFormat.HTML:
+        if output.is_file and output.suffix == ".html":
+            report_path = output.parents[0]
+            report_output = output
+        else:
+            report_path = output
+            report_output = output.joinpath("index.html")
+
+        report_path.mkdir(exist_ok=True, parents=True)
+
+        templates_dir = (Path(__file__).parents[1] / "templates").resolve()
+        report_template = Template((templates_dir / "report_template.html").read_text())
+
+        table_headers = "".join([f"<th>{header}</th>" for header in headers])
+        table_content = ""
+        for line in data[::-1]:
+            table_content += "<tr>"
+            for element in line:
+                element = element.replace("[32m", "<span class='green-color'>")
+                element = element.replace("[31m", "<span class='red-color'>")
+                element = element.replace("[33m", "<span class='orange-color'>")
+                element = element.replace("[0m", "</span>")
+                table_content += f"<td>{element}</td>"
+            table_content += "</tr>"
+
+        report_template = report_template.safe_substitute(
+            headers=table_headers, content=table_content
         )
-    )
+
+        with report_output.open("w") as output:
+            output.write(report_template)
+
+        try:
+            copytree(str(templates_dir / "css"), str(report_path / "css"))
+        except FileExistsError:
+            pass
+
+        logger.info(f"wily report was saved to {report_path}")
+    else:
+        print(
+            # But it still makes more sense to show the newest at the top, so reverse again
+            tabulate.tabulate(
+                headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
+            )
+        )
