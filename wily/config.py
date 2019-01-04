@@ -4,7 +4,8 @@ Configuration of wily.
 TODO : Handle operator settings. Maybe a section for each operator and then pass kwargs to operators?
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
- MODULE:0-3
+
+MODULE:0-3
 """
 from functools import lru_cache
 import configparser
