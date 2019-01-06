@@ -23,6 +23,7 @@ from wily.state import State
 def aggregate_metric(metric_table: list):
     """
     Aggregate/total wily metrics in a tabular format.
+    
     Data is assumed to be in the tabular format of the rank function within the rank.py
     command.
 
@@ -31,7 +32,6 @@ def aggregate_metric(metric_table: list):
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
-
     # value in first draft is assumed to be the fifth item in the list.
     return ["Total", "---", "---", "---", sum(metric_table[4])]
 
@@ -54,7 +54,6 @@ def rank(config, path, metric="maintainability.index", revision_index=0):
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
-
     logger.debug("Running rank command")
     logger.info(f"-----------Rank for {metric}------------")
 
