@@ -11,14 +11,13 @@ from shutil import copytree
 from string import Template
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
-from wily.config import DEFAULT_GRID_STYLE
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_metric, MetricType
 from wily.state import State
 
 
 def report(
-    config, path, metrics, n, output, include_message=False, format=ReportFormat.CONSOLE
+    config, path, metrics, n, output, include_message=False, format=ReportFormat.CONSOLE, console_format=None,
 ):
     """
     Show information about the cache and runtime.
@@ -43,6 +42,9 @@ def report(
 
     :param format: Output format
     :type  format: ``ReportFormat``
+
+    :param console_format: Grid format style for tabulate
+    :type  console_format: ``str``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
@@ -180,6 +182,6 @@ def report(
         print(
             # But it still makes more sense to show the newest at the top, so reverse again
             tabulate.tabulate(
-                headers=headers, tabular_data=data[::-1], tablefmt=DEFAULT_GRID_STYLE
+                headers=headers, tabular_data=data[::-1], tablefmt=console_format
             )
         )

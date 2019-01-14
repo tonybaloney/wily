@@ -8,7 +8,7 @@ from pathlib import Path
 from wily import logger, __version__
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
-from wily.config import DEFAULT_CONFIG_PATH
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
 from wily.decorators import add_version
 from wily.helper.custom_enums import ReportFormat
@@ -163,10 +163,15 @@ def index(ctx, message):
     type=click.Choice(ReportFormat.get_all()),
 )
 @click.option(
+    "--console-format",
+    default=DEFAULT_GRID_STYLE,
+    help="Style for the console grid, see Tabulate Documentation for a list of styles."
+)
+@click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
 )
 @click.pass_context
-def report(ctx, file, metrics, number, message, format, output):
+def report(ctx, file, metrics, number, message, format, console_format, output):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -196,6 +201,7 @@ def report(ctx, file, metrics, number, message, format, output):
         output=new_output,
         include_message=message,
         format=ReportFormat[format],
+        console_format=console_format,
     )
 
 
