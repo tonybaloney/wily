@@ -1,5 +1,9 @@
 # Release History
 
+## 1.11.0 (14th January 2019)
+
+* Added a `--console-format` option to the report command to create Markdown, rST or other formats.
+
 ## 1.10.0
 
 * Report command now has the ability to generate HTML reports with the `-f HTML` option @DahlitzFlorian
