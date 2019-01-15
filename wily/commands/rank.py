@@ -23,7 +23,7 @@ from wily.state import State
 def aggregate_metric(metric_table: list):
     """
     Aggregate/total wily metrics in a tabular format.
-    
+
     Data is assumed to be in the tabular format of the rank function within the rank.py
     command.
 
