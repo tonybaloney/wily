@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 from enum import Enum
+from functools import lru_cache
 
 
 class MetricType(Enum):
@@ -118,6 +119,15 @@ ALL_OPERATORS = {
 }
 
 
+"""Set of all metrics"""
+ALL_METRICS = {
+    metric 
+    for operator in ALL_OPERATORS.values()
+    for metric in operator.cls.metrics
+}
+
+
+@lru_cache(maxsize=128)
 def resolve_operator(name):
     """
     Get the :namedtuple:`wily.operators.Operator` for a given name.
@@ -131,6 +141,7 @@ def resolve_operator(name):
         raise ValueError(f"Operator {name} not recognised.")
 
 
+@lru_cache(maxsize=128)
 def resolve_operators(operators):
     """
     Resolve a list of operator names to their corresponding types.
@@ -143,6 +154,7 @@ def resolve_operators(operators):
     return [resolve_operator(operator) for operator in operators]
 
 
+@lru_cache(maxsize=128)
 def resolve_metric(metric):
     """
     Resolve metric key to a given target.
@@ -152,9 +164,11 @@ def resolve_metric(metric):
 
     :rtype: :class:`Metric`
     """
-    operator, key = metric.split(".")
+    if "." in metric:
+        _, metric = metric.split(".")
+
     r = [
-        metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key
+        match for match in ALL_METRICS if match[0] == metric
     ]
     if not r or len(r) == 0:
         raise ValueError(f"Metric {metric} not recognised.")
