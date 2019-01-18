@@ -44,7 +44,7 @@ jobs:
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/test-results.xml'
-      testRunTitle: 'Python $(python.version)'
+      testRunTitle: 'Linux - Python $(python.version)'
     condition: succeededOrFailed()
 
 - job: 'Test_Windows'
@@ -78,5 +78,5 @@ jobs:
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**\test-results.xml'
-      testRunTitle: 'Python $(python.version)'
+      testRunTitle: 'Windows - Python $(python.version)'
     condition: succeededOrFailed()
