@@ -27,7 +27,7 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip
-      pip install pytest flit mock codecov pydocstyle pytest-cov
+      pip install pytest pytest-azurepipelines flit mock codecov pydocstyle pytest-cov
       flit install
     displayName: 'Install dependencies'
 
@@ -71,7 +71,7 @@ jobs:
     displayName: 'Install dependencies'
 
   - script: |
-      pip install pytest
+      pip install pytest pytest-azurepipelines
       pytest test --junitxml=junit\test-results.xml
     displayName: 'pytest'
 
