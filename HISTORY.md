@@ -1,5 +1,10 @@
 # Release History
 
+## 1.12.0 (25th January 2019)
+
+* [BUGFIX] Fixed an issue where path could not be set via the configuration file because it is required in the CLI
+* Metrics no longer need to be in full, e.g. 'raw.loc', but instead can simply be the name, e.g. 'loc' across all commands.
+
 ## 1.11.0 (14th January 2019)
 
 * Added a `--console-format` option to the report command to create Markdown, rST or other formats.

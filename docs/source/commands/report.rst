@@ -21,7 +21,7 @@ To change the metrics, provide the metric names (run ``wily list-metrics`` for a
 
 .. code-block:: none
 
-  $ wily report example.py raw.loc raw.sloc raw.comments
+  $ wily report example.py loc sloc comments
 
 Wily report will show all available revisions, to only show a set number, add the ``-n`` or ``--number`` flag
 

@@ -70,7 +70,7 @@ You can display any of the metrics in a HTML graph by running the graph command 
 
 .. code-block:: console
 
-   $ wily graph wily/__main__.py raw.loc
+   $ wily graph wily/__main__.py loc
 
 .. image:: _static/single_metric_graph.png
    :align: center
