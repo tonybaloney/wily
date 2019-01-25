@@ -6,10 +6,8 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
-import os
 import sys
 import pathlib
-import tempfile
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -132,16 +130,16 @@ def test_build_with_config(tmpdir, cache_path):
     """
     Test that build works in a basic repository and a configuration file.
     """
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
     config = """
     [wily]
     targets = test.py
     """
-    config_path = os.path.join(tmpdir, "wily.cfg")
+    config_path = tmppath / "wily.cfg"
     with open(config_path, "w") as config_f:
         config_f.write(config)
-
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
 
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
