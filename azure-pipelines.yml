@@ -27,12 +27,12 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip
-      pip install pytest flit mock codecov pydocstyle pytest-cov
+      pip install pytest pytest-azurepipelines flit mock codecov pydocstyle pytest-cov
       flit install
     displayName: 'Install dependencies'
 
   - script: |
-      python -m pytest test/ --junitxml=junit/test-results.xml --cov=wily/
+      python -m pytest test/ --cov=wily/
       codecov
     displayName: 'pytest'
     env:
@@ -40,12 +40,6 @@ jobs:
   
   - script: pydocstyle --ignore=D301,D212,D203 wily
     displayName: 'pydocstyle'
-
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/test-results.xml'
-      testRunTitle: 'Linux - Python $(python.version)'
-    condition: succeededOrFailed()
 
 - job: 'Test_Windows'
   pool:
@@ -71,12 +65,6 @@ jobs:
     displayName: 'Install dependencies'
 
   - script: |
-      pip install pytest
-      pytest test --junitxml=junit\test-results.xml
+      pip install pytest pytest-azurepipelines
+      pytest test
     displayName: 'pytest'
-
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**\test-results.xml'
-      testRunTitle: 'Windows - Python $(python.version)'
-    condition: succeededOrFailed()

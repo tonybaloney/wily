@@ -46,6 +46,16 @@ def test_graph_all(builddir):
     assert result.exit_code == 0, result.stdout
 
 
+def test_graph_all(builddir):
+    """ Test the graph feature with shorthand metric"""
+    runner = CliRunner()
+    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "graph", _path, "loc", "--all"]
+        )
+    assert result.exit_code == 0, result.stdout
+
+
 def test_graph_changes(builddir):
     """ Test the graph feature """
     runner = CliRunner()
