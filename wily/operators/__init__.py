@@ -121,7 +121,7 @@ ALL_OPERATORS = {
 
 """Set of all metrics"""
 ALL_METRICS = {
-    metric 
+    (operator, metric)
     for operator in ALL_OPERATORS.values()
     for metric in operator.cls.metrics
 }
@@ -163,11 +163,24 @@ def resolve_metric(metric):
 
     :rtype: :class:`Metric`
     """
+    return resolve_metric_as_tuple(metric)[1]
+
+
+@lru_cache(maxsize=128)
+def resolve_metric_as_tuple(metric):
+    """
+    Resolve metric key to a given target.
+
+    :param metric: the metric name.
+    :type  metric: ``str``
+
+    :rtype: :class:`Metric`
+    """
     if "." in metric:
         _, metric = metric.split(".")
 
     r = [
-        match for match in ALL_METRICS if match[0] == metric
+        (operator, match) for operator, match in ALL_METRICS if match[0] == metric
     ]
     if not r or len(r) == 0:
         raise ValueError(f"Metric {metric} not recognised.")

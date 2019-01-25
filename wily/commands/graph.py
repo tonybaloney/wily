@@ -9,8 +9,13 @@ import plotly.graph_objs as go
 import plotly.offline
 
 from wily import logger, format_datetime
-from wily.operators import resolve_metric
+from wily.operators import resolve_metric, resolve_metric_as_tuple
 from wily.state import State
+
+
+def metric_parts(metric):
+    operator, met = resolve_metric_as_tuple(metric)
+    return operator.name, met.name
 
 
 def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=False):
@@ -38,7 +43,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     if x_axis is None:
         x_axis = "history"
     else:
-        x_operator, x_key = x_axis.split(".")
+        x_operator, x_key = metric_parts(x_axis)
 
     if abs_path.is_dir():
         paths = [
@@ -47,12 +52,12 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     else:
         paths = [path]
 
-    operator, key = metrics[0].split(".")
+    operator, key = metric_parts(metrics[0])
     if len(metrics) == 1:  # only y-axis
         z_axis = None
     else:
         z_axis = resolve_metric(metrics[1])
-        z_operator, z_key = metrics[1].split(".")
+        z_operator, z_key = metric_parts(metrics[1])
     for path in paths:
         x = []
         y = []

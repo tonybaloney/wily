@@ -12,7 +12,7 @@ from string import Template
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.helper.custom_enums import ReportFormat
-from wily.operators import resolve_metric, MetricType
+from wily.operators import resolve_metric_as_tuple, MetricType
 from wily.state import State
 
 
@@ -53,8 +53,9 @@ def report(
     metric_metas = []
 
     for metric in metrics:
-        operator, key = metric.split(".")
-        metric = resolve_metric(metric)
+        operator, metric = resolve_metric_as_tuple(metric)
+        key = metric.name
+        operator = operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
             good_color = 32
