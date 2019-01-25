@@ -14,6 +14,7 @@ from wily.state import State
 
 
 def metric_parts(metric):
+    """Convert a metric name into the operator and metric names."""
     operator, met = resolve_metric_as_tuple(metric)
     return operator.name, met.name
 
