@@ -34,7 +34,7 @@ You can override the maximum number of commits recursed by using the ``-n`` or `
 
    $ wily build src/ test/ -n 100
 
-By default, wily will compile the cyclomatic complexity, maintainability and raw metrics. If you only want a subset of those, you can specify with comma-seperate ``--operator`` or ``-o`` flag
+By default, wily will compile the cyclomatic complexity, maintainability and raw metrics. If you only want a subset of those, you can specify with comma-separate ``--operator`` or ``-o`` flag
 
 .. code-block:: none
 

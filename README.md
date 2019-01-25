@@ -137,6 +137,7 @@ maintainability operator:
 You can put a `wily.cfg` file in your project directory and `wily` will override the runtime settings. Here are the available options:
 
 ```ini
+[wily]
 # list of operators, choose from cyclomatic, maintainability, mccabe and raw
 operators = cyclomatic,raw
 # archiver to use, defaults to git

@@ -126,6 +126,7 @@ def test_build(tmpdir, cache_path):
     assert rev_path.exists()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_build_with_config(tmpdir, cache_path):
     """
     Test that build works in a basic repository and a configuration file.
@@ -135,7 +136,7 @@ def test_build_with_config(tmpdir, cache_path):
 
     config = """
     [wily]
-    targets = test.py
+    path = test.py
     """
     config_path = tmppath / "wily.cfg"
     with open(config_path, "w") as config_f:
