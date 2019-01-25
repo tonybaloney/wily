@@ -6,10 +6,8 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
-import os
 import sys
 import pathlib
-import tempfile
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -60,15 +58,6 @@ def test_build_invalid_path():
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", "/fo/v/a", "build", "test.py"])
     assert result.exit_code == 1, result.stdout
-
-
-def test_build_no_target(tmpdir):
-    """
-    Test that build fails with no target
-    """
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
-    assert result.exit_code == 2, result.stdout
 
 
 def test_build_crash(tmpdir):
@@ -126,6 +115,50 @@ def test_build(tmpdir, cache_path):
     result = runner.invoke(
         main.cli,
         ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "test.py"],
+    )
+    assert result.exit_code == 0, result.stdout
+
+    cache_path = pathlib.Path(cache_path)
+    assert cache_path.exists()
+    index_path = cache_path / "git" / "index.json"
+    assert index_path.exists()
+    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
+    assert rev_path.exists()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+def test_build_with_config(tmpdir, cache_path):
+    """
+    Test that build works in a basic repository and a configuration file.
+    """
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
+    config = """
+    [wily]
+    path = test.py
+    """
+    config_path = tmppath / "wily.cfg"
+    with open(config_path, "w") as config_f:
+        config_f.write(config)
+
+    # Write a test file to the repo
+    with open(tmppath / "test.py", "w") as test_txt:
+        test_txt.write("import abc")
+
+    index = repo.index
+    index.add(["test.py"])
+
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    commit = index.commit("basic test", author=author, committer=committer)
+    repo.close()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--debug", "--config", config_path, "--path", tmpdir, "--cache", cache_path, "build"],
     )
     assert result.exit_code == 0, result.stdout
 
