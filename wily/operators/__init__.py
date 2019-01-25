@@ -141,7 +141,6 @@ def resolve_operator(name):
         raise ValueError(f"Operator {name} not recognised.")
 
 
-@lru_cache(maxsize=128)
 def resolve_operators(operators):
     """
     Resolve a list of operator names to their corresponding types.
@@ -151,7 +150,7 @@ def resolve_operators(operators):
 
     :rtype: ``list`` of :class:`Operator`
     """
-    return [resolve_operator(operator) for operator in operators]
+    return [resolve_operator(operator) for operator in iter(operators)]
 
 
 @lru_cache(maxsize=128)
