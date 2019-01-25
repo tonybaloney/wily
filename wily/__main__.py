@@ -89,7 +89,7 @@ def cli(ctx, debug, config, path, cache):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1, required=True)
+@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1, required=False)
 @click.option(
     "-o",
     "--operators",
@@ -122,8 +122,9 @@ def build(ctx, max_revisions, targets, operators, archiver):
         logger.debug(f"Fixing archiver to {archiver}")
         config.archiver = archiver
 
-    logger.debug(f"Fixing targets to {targets}")
-    config.targets = targets
+    if targets:
+        logger.debug(f"Fixing targets to {targets}")
+        config.targets = targets
 
     build(
         config=config,

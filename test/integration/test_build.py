@@ -62,15 +62,6 @@ def test_build_invalid_path():
     assert result.exit_code == 1, result.stdout
 
 
-def test_build_no_target(tmpdir):
-    """
-    Test that build fails with no target
-    """
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "build"])
-    assert result.exit_code == 2, result.stdout
-
-
 def test_build_crash(tmpdir):
     """
     Simulate a runtime error in the build.
