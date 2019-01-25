@@ -137,6 +137,49 @@ def test_build(tmpdir, cache_path):
     assert rev_path.exists()
 
 
+def test_build_with_config(tmpdir, cache_path):
+    """
+    Test that build works in a basic repository and a configuration file.
+    """
+    config = """
+    [wily]
+    targets = test.py
+    """
+    config_path = os.path.join(tmpdir, "wily.cfg")
+    with open(config_path, "w") as config_f:
+        config_f.write(config)
+
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
+    # Write a test file to the repo
+    with open(tmppath / "test.py", "w") as test_txt:
+        test_txt.write("import abc")
+
+    index = repo.index
+    index.add(["test.py"])
+
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    commit = index.commit("basic test", author=author, committer=committer)
+    repo.close()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--debug", "--config", config_path, "--path", tmpdir, "--cache", cache_path, "build"],
+    )
+    assert result.exit_code == 0, result.stdout
+
+    cache_path = pathlib.Path(cache_path)
+    assert cache_path.exists()
+    index_path = cache_path / "git" / "index.json"
+    assert index_path.exists()
+    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
+    assert rev_path.exists()
+
+
 def test_build_twice(tmpdir, cache_path):
     """
     Test that build works when run twice.
