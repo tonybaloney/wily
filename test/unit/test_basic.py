@@ -8,7 +8,7 @@ WILEY_MODULES = ("module_name", collect_wily_modules())
 @pytest.mark.parametrize(*WILEY_MODULES)
 def test_modules(module_name):
     """
-    Test the every module has a module number
+    Test that every module has a module number.
     """
     docstr = import_module(module_name).__doc__
     module_line = docstr.splitlines()[-1]

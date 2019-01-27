@@ -1,5 +1,5 @@
 """
-Miscelaionus utility methods for wily
+Miscellaneous utility methods for wily
 
 MODULE:3-2
 """
@@ -11,9 +11,7 @@ WILY_ROOT = pathlib.Path(__file__).joinpath("..", "..").resolve()
 
 
 def collect_wily_modules():
-    """
-    Return all wiley modules.
-    """
+    """Return all wiley modules."""
     wily_modules = set()
     for pkg in setuptools.find_packages():
         pkg_path = f"{WILY_ROOT.parent}/{pkg.replace('.', '/')}"
@@ -21,7 +19,3 @@ def collect_wily_modules():
             if not ispkg:
                 wily_modules.add(f"{pkg}.{name}")
     return wily_modules
-
-
-if __name__ == "__main__":
-    pytes.main("")
