@@ -1,7 +1,7 @@
 """
 Models and types for "operators" the basic measure of a module that measures code.
 
-MODULE:3-0
+MODULE:4-0
 """
 
 from collections import namedtuple

@@ -3,7 +3,7 @@ Raw statistics operator.
 
 Includes insights like lines-of-code, number of comments. Does not measure complexity.
 
-MODULE:3-4
+MODULE:4-4
 """
 import radon.cli.harvest as harvesters
 from radon.cli import Config

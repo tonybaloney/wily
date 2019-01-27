@@ -3,7 +3,7 @@ Halstead operator.
 
 Measures all of the halstead metrics (volume, vocab, difficulty)
 
-MODULE:3-2
+MODULE:4-2
 """
 import radon.cli.harvest as harvesters
 from radon.cli import Config

@@ -1,4 +1,8 @@
-"""A module containing custom enums for wily."""
+"""
+A module containing custom enums for wily.
+
+MODULE:3-1
+"""
 from enum import Enum
 
 

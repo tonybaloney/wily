@@ -3,7 +3,7 @@ For managing the state of the wily process.
 
 Contains a lazy revision, index and process state model.
 
-MODULE:0-4
+MODULE:0-5
 """
 from collections import OrderedDict
 from dataclasses import dataclass, asdict
