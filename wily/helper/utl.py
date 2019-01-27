@@ -1,5 +1,5 @@
 """
-Miscellaneous utility methods for wily
+Miscellaneous utility methods for wily.
 
 MODULE:3-2
 """
