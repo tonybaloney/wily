@@ -352,7 +352,6 @@ def handle_no_cache(context):
             max_revisions=revisions,
             targets=paths,
             operators=None,
-            skip_gitignore_check=False,
         )
 
 
