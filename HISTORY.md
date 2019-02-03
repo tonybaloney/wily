@@ -1,5 +1,9 @@
 # Release History
 
+## 1.12.1 (3rd February 2019)
+
+* [BUGFIX] Fixed an issue where calling a command without a wily index would run the CLI wizard prompt, but immediately crash because the --skip-git-ignore flag no longer exists (https://github.com/tonybaloney/wily/issues/61)
+
 ## 1.12.0 (25th January 2019)
 
 * [BUGFIX] Fixed an issue where path could not be set via the configuration file because it is required in the CLI
