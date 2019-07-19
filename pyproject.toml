@@ -1,15 +1,15 @@
 [build-system]
 requires = [
     "flit",
-    "gitpython",
-    "radon==2.4.0",
-    "click",
+    "gitpython>=2.1.11,<2.2.0",
+    "radon>=3.0.0,<3.1.0",
+    "click>=7.0,<8.0",
     "colorlog",
-    "tabulate",
-    "plotly",
+    "tabulate>=0.8.2,<1.0.0",
+    "plotly>=4.0.0,<5.0.0",
     "sphinx",
     "sphinx-click",
-    "progress",
+    "progress==1.4",
     "dataclasses; python_version == '3.6'",]
 build-backend = "flit.buildapi"
 
@@ -20,13 +20,13 @@ author-email = "anthonyshaw@apache.org"
 home-page = "https://github.com/tonybaloney/wily"
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 requires = [
-    "gitpython",
-    "radon",
-    "click==2.4.0",
+    "gitpython>=2.1.11,<2.2.0",
+    "radon>=3.0.0,<3.1.0",
+    "click>=7.0,<8.0",
     "colorlog",
-    "tabulate",
-    "plotly",
-    "progress",
+    "tabulate>=0.8.2,<1.0.0",
+    "plotly>=4.0.0,<5.0.0",
+    "progress==1.4",
     "dataclasses; python_version == '3.6'",]
 requires-python = ">=3.6"
 description-file = "README.md"
