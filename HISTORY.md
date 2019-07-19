@@ -1,5 +1,9 @@
 # Release History
 
+## 1.12.3
+
+* Pinned version of radon as newer version has API changes.
+
 ## 1.12.2 (14th March 2019)
 
 * [BUGFIX] Fixed an issue where illegal/unusual filepath characters within the git history would cause the halstead harvester to crash unrecoverably. Halstead will now handle and report the error but mark the file as missing in the index (https://github.com/tonybaloney/wily/issues/64) fixed in https://github.com/tonybaloney/wily/pull/63 by @abadger.
