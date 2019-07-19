@@ -2,7 +2,7 @@
 requires = [
     "flit",
     "gitpython",
-    "radon",
+    "radon==2.4.0",
     "click",
     "colorlog",
     "tabulate",
@@ -22,7 +22,7 @@ classifiers = ["License :: OSI Approved :: Apache Software License"]
 requires = [
     "gitpython",
     "radon",
-    "click",
+    "click==2.4.0",
     "colorlog",
     "tabulate",
     "plotly",
