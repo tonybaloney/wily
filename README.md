@@ -2,6 +2,7 @@
 
 A command-line application for tracking, reporting on complexity of Python tests and applications.
 
+[![Wily](https://img.shields.io/badge/%F0%9F%A6%8A%20wily-passing-brightgreen.svg)](https://wily.readthedocs.io/)
 [![Build Status](https://dev.azure.com/AnthonyShaw/wily/_apis/build/status/tonybaloney.wily?branchName=master)](https://dev.azure.com/AnthonyShaw/wily/_build/latest?definitionId=1?branchName=master)
 [![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily) [![Documentation Status](https://readthedocs.org/projects/wily/badge/?version=latest)](https://wily.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/wily.svg)](https://badge.fury.io/py/wily) ![black](https://img.shields.io/badge/code%20style-black-000000.svg)
 

@@ -1,70 +1,116 @@
-# Python package
-# Create and test a Python package on multiple Python versions.
-# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
 trigger:
 - master
+name: $(Year:yy)$(DayOfYear)$(Rev:r)
+variables:
+  majorVer: '1.13.0'
 
-jobs:
+stages:
+  - stage: Unit_Test
+    jobs:
 
-- job: 'Test_Linux'
-  pool:
-    vmImage: 'Ubuntu-16.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
-    maxParallel: 2
+    - job: 'Test_Linux'
+      pool:
+        vmImage: 'Ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+        maxParallel: 2
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pytest pytest-azurepipelines flit mock codecov pydocstyle pytest-cov
-      flit install
-    displayName: 'Install dependencies'
+      - script: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-azurepipelines flit mock codecov pydocstyle pytest-cov
+          flit install
+        displayName: 'Install dependencies'
 
-  - script: |
-      python -m pytest test/ --cov=wily/
-      codecov
-    displayName: 'pytest'
-    env:
-      CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
-  
-  - script: pydocstyle --ignore=D301,D212,D203 wily
-    displayName: 'pydocstyle'
+      - script: |
+          python -m pytest test/ --cov=wily/
+          codecov
+        displayName: 'pytest'
+        env:
+          CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
 
-- job: 'Test_Windows'
-  pool:
-    vmImage: 'vs2017-win2016'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
-    maxParallel: 2
+      - script: pydocstyle --ignore=D301,D212,D203 wily
+        displayName: 'pydocstyle'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-      architecture: 'x64'
+    - job: 'Test_Windows'
+      pool:
+        vmImage: 'vs2017-win2016'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+        maxParallel: 2
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install flit mock
-      flit install
-    displayName: 'Install dependencies'
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
 
-  - script: |
-      pip install pytest pytest-azurepipelines
-      pytest test
-    displayName: 'pytest'
+      - script: |
+          python -m pip install --upgrade pip
+          pip install flit mock
+          flit install
+        displayName: 'Install dependencies'
+
+      - script: |
+          pip install pytest pytest-azurepipelines
+          pytest test
+        displayName: 'pytest'
+
+  - stage: Package_Test
+    jobs:
+
+    - job: 'Test_Linux_Packaging'
+      pool:
+        vmImage: 'Ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+        maxParallel: 2
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: python -m pip install --upgrade pip flit
+
+      - script: "flit build"
+        displayName: 'Build package and dependencies'
+    - job: 'Test_Windows_Packaging'
+      pool:
+        vmImage: 'vs2017-win2016'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+        maxParallel: 2
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: python -m pip install --upgrade pip flit
+
+      - script: "flit build"
+        displayName: 'Build package and dependencies'
