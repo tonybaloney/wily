@@ -17,7 +17,14 @@ from wily.state import State
 
 
 def report(
-    config, path, metrics, n, output, include_message=False, format=ReportFormat.CONSOLE, console_format=None,
+    config,
+    path,
+    metrics,
+    n,
+    output,
+    include_message=False,
+    format=ReportFormat.CONSOLE,
+    console_format=None,
 ):
     """
     Show information about the cache and runtime.

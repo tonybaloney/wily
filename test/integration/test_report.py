@@ -113,9 +113,7 @@ def test_report_short_metric(builddir):
     Test that report works with a build on shorthand metric
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "sloc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "sloc"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -172,7 +170,8 @@ def test_report_html_format_target_file(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--format", "HTML", "-o", "foo/bar.html"]
+        main.cli,
+        ["--path", builddir, "report", _path, "--format", "HTML", "-o", "foo/bar.html"],
     )
     path = Path().cwd()
     path = path / "foo" / "bar.html"
@@ -201,8 +200,7 @@ def test_report_not_existing_format(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli,
-        ["--path", builddir, "report", _path, "--format", "non-existing"],
+        main.cli, ["--path", builddir, "report", _path, "--format", "non-existing"]
     )
     assert result.exit_code == 2, result.stdout
     assert "Not found" not in result.stdout

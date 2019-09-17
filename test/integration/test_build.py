@@ -158,7 +158,16 @@ def test_build_with_config(tmpdir, cache_path):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--config", config_path, "--path", tmpdir, "--cache", cache_path, "build"],
+        [
+            "--debug",
+            "--config",
+            config_path,
+            "--path",
+            tmpdir,
+            "--cache",
+            cache_path,
+            "build",
+        ],
     )
     assert result.exit_code == 0, result.stdout
 

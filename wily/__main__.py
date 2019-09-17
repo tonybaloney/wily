@@ -166,7 +166,7 @@ def index(ctx, message):
 @click.option(
     "--console-format",
     default=DEFAULT_GRID_STYLE,
-    help="Style for the console grid, see Tabulate Documentation for a list of styles."
+    help="Style for the console grid, see Tabulate Documentation for a list of styles.",
 )
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
@@ -347,12 +347,7 @@ def handle_no_cache(context):
         revisions = int(revisions)
         path = input("Path to your source files; comma-separated for multiple: ")
         paths = path.split(",")
-        context.invoke(
-            build,
-            max_revisions=revisions,
-            targets=paths,
-            operators=None,
-        )
+        context.invoke(build, max_revisions=revisions, targets=paths, operators=None)
 
 
 if __name__ == "__main__":

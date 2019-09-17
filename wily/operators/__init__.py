@@ -179,9 +179,7 @@ def resolve_metric_as_tuple(metric):
     if "." in metric:
         _, metric = metric.split(".")
 
-    r = [
-        (operator, match) for operator, match in ALL_METRICS if match[0] == metric
-    ]
+    r = [(operator, match) for operator, match in ALL_METRICS if match[0] == metric]
     if not r or len(r) == 0:
         raise ValueError(f"Metric {metric} not recognised.")
     else:
