@@ -5,7 +5,6 @@ Compares metrics between uncommitted files and indexed files.
 """
 import operator as op
 import os
-from collections import defaultdict
 
 import tabulate
 
@@ -52,7 +51,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
     metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     data = {}
     results = []
-    diffs = defaultdict(dict)
+    diffs = {}
     # Build a set of operators
     _operators = [operator.cls(config) for operator in operators]
 
@@ -100,9 +99,10 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
             if new != current:
                 has_changes = True
             if metric.type in (int, float) and new != "-" and current != "-":
-                diffs[file].update(
-                    {f"{operator}.{metric.name}": (current - new, metric.measure)}
-                )  # TODO save diff even when both metrics are non numeric
+                diffs.setdefault(
+                    file, {f"{operator}.{metric.name}": (current - new, metric.measure)}
+                )
+                # TODO save diff even when both metrics are non numeric
                 if current > new:
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
