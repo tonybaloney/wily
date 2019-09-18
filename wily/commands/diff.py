@@ -21,7 +21,7 @@ from wily.operators import (
 from wily.state import State
 
 
-def diff(config, files, metrics, changes_only=True, detail=True):
+def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None):
     """
     Show the differences in metrics for each of the files.
 
@@ -132,3 +132,16 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                 headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
             )
         )
+    errors = []
+    if thresholds:
+        for file, diff_ in diffs.items():
+            for threshold in thresholds:
+                if (
+                    threshold in diff_ and diff_[threshold] > thresholds[threshold]
+                ):  # TODO consider metric.measure for this and do not assume that higher is worse
+                    errors.append(
+                        f"File {file} has a threshold violation: allowed value is {thresholds[threshold]} and actual value is {diff_[threshold]}"
+                    )
+    if errors:
+        print("\n".join(errors))
+        exit(1)

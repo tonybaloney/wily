@@ -164,3 +164,26 @@ def test_diff_output_rank(builddir):
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
     assert "A -> A" in result.stdout
+
+
+def test_diff_with_threshold_failure(builddir):
+    """ Positively test the diff threshold feature"""
+
+    simple_test = """
+            import abc
+            foo = 1
+            def function1():
+                pass
+            class Class1(object):
+                def method(self):
+                    pass
+            """
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(dedent(simple_test))
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        f"--debug --path {builddir} diff {_path} --thresholds halstead.h1=1".split(),
+    )
+    assert result.exit_code == 1, result.stdout
+    assert "threshold violation" in result.stdout

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from wily import logger, __version__
 from wily.archivers import resolve_archiver
-from wily.cache import exists, get_default_metrics
+from wily.cache import exists, get_default_metrics, get_thresholds_dict
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
 from wily.decorators import add_version
@@ -166,7 +166,7 @@ def index(ctx, message):
 @click.option(
     "--console-format",
     default=DEFAULT_GRID_STYLE,
-    help="Style for the console grid, see Tabulate Documentation for a list of styles."
+    help="Style for the console grid, see Tabulate Documentation for a list of styles.",
 )
 @click.option(
     "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
@@ -223,8 +223,13 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
     default=True,
     help="Show function/class level metrics where available",
 )
+@click.option(
+    "--thresholds",
+    default=None,
+    help="comma-seperated list of threshold and value, separated by equal sign. See list-metrics for choices",
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail):
+def diff(ctx, files, metrics, all, detail, thresholds):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -238,11 +243,18 @@ def diff(ctx, files, metrics, all, detail):
         metrics = metrics.split(",")
         logger.info(f"Using specified metrics {metrics}")
 
+    if thresholds:
+        thresholds = get_thresholds_dict(thresholds)
     from wily.commands.diff import diff
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
     diff(
-        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+        config=config,
+        files=files,
+        metrics=metrics,
+        changes_only=not all,
+        detail=detail,
+        thresholds=thresholds,
     )
 
 
