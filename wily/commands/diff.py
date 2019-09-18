@@ -3,6 +3,7 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
+import operator as op
 import os
 from collections import defaultdict
 
@@ -17,6 +18,7 @@ from wily.operators import (
     GOOD_COLORS,
     BAD_COLORS,
     OperatorLevel,
+    MetricType,
 )
 from wily.state import State
 
@@ -99,7 +101,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
                 has_changes = True
             if metric.type in (int, float) and new != "-" and current != "-":
                 diffs[file].update(
-                    {f"{operator}.{metric.name}": current - new}
+                    {f"{operator}.{metric.name}": (current - new, metric.measure)}
                 )  # TODO save diff even when both metrics are non numeric
                 if current > new:
                     metrics_data.append(
@@ -138,13 +140,15 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
     if thresholds:
         for file, diff_ in diffs.items():
             for threshold in thresholds:
-                if (
-                    threshold in diff_ and diff_[threshold] > thresholds[threshold]
-                ):  # TODO consider metric.measure for this and do not assume that higher is worse
-                    errors.append(
-                        f"File {file} has a threshold violation: allowed value is {thresholds[threshold]}"
-                        f"and actual value is {diff_[threshold]}"
-                    )
+                if threshold in diff_:
+                    value, metric_type = diff_[threshold]
+                    threshold_ = thresholds[threshold]
+                    op_ = op.gt if metric_type is MetricType.AimLow else op.lt
+                    if op_(value, threshold_):
+                        errors.append(
+                            f"File {file} has a threshold violation: allowed value is {threshold_}"
+                            f"and actual value is {value}"
+                        )
     if errors:
         print("\n".join(errors))
         exit(1)
