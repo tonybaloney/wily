@@ -98,7 +98,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
             if new != current:
                 has_changes = True
             if metric.type in (int, float) and new != "-" and current != "-":
-                diffs[file].update({'{}.{}'.format(operator, metric.name): current - new})
+                diffs[file].update(
+                    {f"{operator}.{metric.name}": current - new}
+                )  # TODO save diff even when both metrics are non numeric
                 if current > new:
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
@@ -140,7 +142,8 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
                     threshold in diff_ and diff_[threshold] > thresholds[threshold]
                 ):  # TODO consider metric.measure for this and do not assume that higher is worse
                     errors.append(
-                        f"File {file} has a threshold violation: allowed value is {thresholds[threshold]} and actual value is {diff_[threshold]}"
+                        f"File {file} has a threshold violation: allowed value is {thresholds[threshold]}"
+                        f"and actual value is {diff_[threshold]}"
                     )
     if errors:
         print("\n".join(errors))
