@@ -277,7 +277,7 @@ def get(config, archiver, revision):
 
 def get_thresholds_dict(threshold):
     """
-    Returns a dict of threshold from a threshold string
+    Return a dict of threshold from a threshold string.
 
     :param threshold: A string representing desired thresholds
     :type threshold: ``str``
