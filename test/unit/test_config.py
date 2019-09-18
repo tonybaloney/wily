@@ -58,7 +58,7 @@ def test_config_operators(tmpdir):
     assert cfg.max_revisions == wily.config.DEFAULT_MAX_REVISIONS
 
 
-def test_config_archiver(tmpdir):
+def test_config_max_revisions(tmpdir):
     """
     Test that an max-revisions can be configured
     """
@@ -75,3 +75,19 @@ def test_config_archiver(tmpdir):
     assert cfg.archiver == wily.config.DEFAULT_ARCHIVER
     assert cfg.operators == wily.config.DEFAULT_OPERATORS
     assert cfg.max_revisions == 14
+
+
+def test_config_threshold(tmpdir):
+    """
+    Test that thresholds are parsed correctly from config.
+    """
+    config = """
+    [wily]
+    thresholds = raw.loc=1,halstead.h1=2
+    """
+    config_path = os.path.join(tmpdir, "wily.cfg")
+    with open(config_path, "w") as config_f:
+        config_f.write(config)
+
+    cfg = wily.config.load(config_path)
+    assert cfg.thresholds == {"raw.loc": 1, "halstead.h1": 2}

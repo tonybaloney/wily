@@ -15,6 +15,7 @@ from typing import Any, List
 
 import wily.operators as operators
 from wily.archivers import ARCHIVER_GIT
+from wily.cache import get_thresholds_dict
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ class WilyConfig(object):
     path: str
     max_revisions: int
     targets: List[str] = None
+    thresholds: dict = field(default_factory=dict)
     checkout_options: dict = field(default_factory=dict)
 
     def __post_init__(self):
@@ -137,7 +139,15 @@ def load(config_path=DEFAULT_CONFIG_PATH):
             fallback=DEFAULT_MAX_REVISIONS,
         )
     )
+    thresholds = config.get(
+        section=DEFAULT_CONFIG_SECTION, option="thresholds", fallback={}
+    )
+    thresholds = get_thresholds_dict(thresholds)
 
     return WilyConfig(
-        operators=operators, archiver=archiver, path=path, max_revisions=max_revisions
+        operators=operators,
+        archiver=archiver,
+        path=path,
+        max_revisions=max_revisions,
+        thresholds=thresholds,
     )
