@@ -51,7 +51,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
     metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     data = {}
     results = []
-    diffs = {}
+    deltas = {}
     # Build a set of operators
     _operators = [operator.cls(config) for operator in operators]
 
@@ -99,7 +99,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
             if new != current:
                 has_changes = True
             if metric.type in (int, float) and new != "-" and current != "-":
-                diffs.setdefault(
+                deltas.setdefault(
                     file, {f"{operator}.{metric.name}": (current - new, metric.measure)}
                 )
                 # TODO save diff even when both metrics are non numeric
@@ -138,10 +138,10 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
         )
     errors = []
     if thresholds:
-        for file, diff_ in diffs.items():
+        for file, delta in deltas.items():
             for threshold in thresholds:
-                if threshold in diff_:
-                    value, metric_type = diff_[threshold]
+                if threshold in delta:
+                    value, metric_type = delta[threshold]
                     threshold_ = thresholds[threshold]
                     op_ = op.gt if metric_type is MetricType.AimLow else op.lt
                     if op_(value, threshold_):
