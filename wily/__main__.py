@@ -359,12 +359,7 @@ def handle_no_cache(context):
         revisions = int(revisions)
         path = input("Path to your source files; comma-separated for multiple: ")
         paths = path.split(",")
-        context.invoke(
-            build,
-            max_revisions=revisions,
-            targets=paths,
-            operators=None,
-        )
+        context.invoke(build, max_revisions=revisions, targets=paths, operators=None)
 
 
 if __name__ == "__main__":
