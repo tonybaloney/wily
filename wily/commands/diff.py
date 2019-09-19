@@ -171,5 +171,4 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
                 headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
             )
         )
-
-    handle_thresholds(deltas, thresholds)
+    handle_thresholds(deltas, thresholds or config.thresholds)

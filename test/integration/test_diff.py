@@ -187,3 +187,20 @@ def test_diff_with_badly_passed_thresholds(builddir, simple_test):
     )
     assert result.exit_code == 2, result.stdout
     assert "Incorrect syntax of thresholds" in result.stdout
+
+
+def test_diff_with_threshold_from_config(builddir, simple_test):
+    config = """
+    [wily]
+    thresholds = halstead.h1=1
+    """
+    wily_conf = pathlib.Path(builddir) / "wily.cfg"
+    wily_conf.write_text(config)
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, f"--debug --path {builddir} --config {wily_conf} diff {_path}".split()
+    )
+    assert result.exit_code == 1, result.stdout
+    assert "threshold violation" in result.stdout
