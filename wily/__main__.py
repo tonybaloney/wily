@@ -16,14 +16,12 @@ from wily.operators import resolve_operators
 
 
 class ThresholdsParamType(click.ParamType):
-    """ Custom click type for diff thresholds"""
+    """Custom click type for diff thresholds."""
 
     name = "thresholds"
 
     def convert(self, value, param, ctx):
-        """
-        Try to convert passed string to a threshold dict.
-        """
+        """Try to convert passed string to a threshold dict."""
         try:
             return get_thresholds_dict(value)
         except Exception:
