@@ -95,21 +95,9 @@ def test_diff_output_more_complex(builddir):
     assert "- ->" not in result.stdout
 
 
-def test_diff_output_less_complex(builddir):
+def test_diff_output_less_complex(builddir, simple_test):
     """ Test the diff feature by making the test file more complicated """
-
-    simple_test = """
-            import abc
-            foo = 1
-            def function1():
-                pass
-            class Class1(object):
-                def method(self):
-                    pass
-            """
-
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
-        test_py.write(dedent(simple_test))
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
 
     runner = CliRunner()
     result = runner.invoke(
@@ -166,19 +154,9 @@ def test_diff_output_rank(builddir):
     assert "A -> A" in result.stdout
 
 
-def test_diff_with_threshold_failure(builddir):
+def test_diff_with_threshold_violation(builddir, simple_test):
     """ Positively test the diff threshold feature"""
-
-    simple_test = """
-            import abc
-            foo = 1
-            def function1():
-                pass
-            class Class1(object):
-                def method(self):
-                    pass
-            """
-    (pathlib.Path(builddir) / "src" / "test.py").write_text(dedent(simple_test))
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
 
     runner = CliRunner()
     result = runner.invoke(

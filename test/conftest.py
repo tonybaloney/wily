@@ -1,8 +1,8 @@
 import pathlib
-from textwrap import dedent
-import os
 import shutil
 import tempfile
+from textwrap import dedent
+
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -94,3 +94,18 @@ def cache_path(monkeypatch):
     monkeypatch.setenv("HOME", tmp)
     yield tmp
     shutil.rmtree(tmp)
+
+
+@pytest.fixture
+def simple_test():
+    return dedent(
+        """
+            import abc
+            foo = 1
+            def function1():
+                pass
+            class Class1(object):
+                def method(self):
+                    pass
+            """
+    )
