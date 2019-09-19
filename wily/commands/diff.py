@@ -136,19 +136,23 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
                 headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
             )
         )
+    if not thresholds:
+        exit()
+
     errors = []
-    if thresholds:
-        for file, delta in deltas.items():
-            for threshold in thresholds:
-                if threshold in delta:
-                    value, metric_type = delta[threshold]
-                    threshold_ = thresholds[threshold]
-                    op_ = op.gt if metric_type is MetricType.AimLow else op.lt
-                    if op_(value, threshold_):
-                        errors.append(
-                            f"File {file} has a threshold violation: allowed value is {threshold_}"
-                            f"and actual value is {value}"
-                        )
+    for file, delta in deltas.items():
+        for threshold in thresholds:
+            if threshold not in delta:
+                continue
+            value, metric_type = delta[threshold]
+            threshold_ = thresholds[threshold]
+            op_ = op.gt if metric_type is MetricType.AimLow else op.lt
+            if not op_(value, threshold_):
+                continue
+            errors.append(
+                f"File {file} has a threshold violation: allowed value is {threshold_}"
+                f"and actual value is {value}"
+            )
     if errors:
         print("\n".join(errors))
         exit(1)
