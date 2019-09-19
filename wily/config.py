@@ -140,7 +140,7 @@ def load(config_path=DEFAULT_CONFIG_PATH):
         )
     )
     thresholds = config.get(
-        section=DEFAULT_CONFIG_SECTION, option="thresholds", fallback={}
+        section=DEFAULT_CONFIG_SECTION, option="thresholds", fallback=""
     )
     thresholds = get_thresholds_dict(thresholds)
 
