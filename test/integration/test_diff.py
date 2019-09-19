@@ -2,6 +2,7 @@ import pathlib
 import sys
 from textwrap import dedent
 
+import pytest
 from click.testing import CliRunner
 
 import wily.__main__ as main
@@ -154,14 +155,22 @@ def test_diff_output_rank(builddir):
     assert "A -> A" in result.stdout
 
 
-def test_diff_with_threshold_violation(builddir, simple_test):
+@pytest.mark.parametrize(
+    "value, exit_code",
+    [
+        pytest.param(1, 1, id="Positive threshold violation"),
+        pytest.param(10, 0, id="Negative threshold violation"),
+    ],
+)
+def test_diff_with_threshold_violation(builddir, simple_test, value, exit_code):
     """ Positively test the diff threshold feature"""
     (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
 
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        f"--debug --path {builddir} diff {_path} --thresholds halstead.h1=1".split(),
+        f"--debug --path {builddir} diff {_path} --thresholds halstead.h1={value}".split(),
     )
-    assert result.exit_code == 1, result.stdout
-    assert "threshold violation" in result.stdout
+    assert result.exit_code == exit_code, result.stdout
+    if exit_code:
+        assert "threshold violation" in result.stdout
