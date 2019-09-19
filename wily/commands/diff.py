@@ -22,6 +22,38 @@ from wily.operators import (
 from wily.state import State
 
 
+def handle_thresholds(deltas, thresholds):
+    """
+    Go over diff results and given thresholds. Print all threshold violations and exit with the relevant exit code.
+
+    :param deltas: A dictionary contains the deltas between current and new values per metric operator per file.
+    :type deltas: ``dict``
+
+    :param thresholds: A dictionary containing the threshold configuration.
+    :type thresholds: ``dict``
+    """
+    if not thresholds:
+        return
+
+    errors = []
+    for file, delta in deltas.items():
+        for threshold in thresholds:
+            if threshold not in delta:
+                continue
+            value, metric_type = delta[threshold]
+            threshold_ = thresholds[threshold]
+            op_ = op.gt if metric_type is MetricType.AimLow else op.lt
+            if not op_(value, threshold_):
+                continue
+            errors.append(
+                f"File {file} has a threshold violation: allowed value is {threshold_}"
+                f"and actual value is {value}"
+            )
+    if errors:
+        print("\n".join(errors))
+        exit(1)
+
+
 def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None):
     """
     Show the differences in metrics for each of the files.
@@ -40,6 +72,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
 
     :param detail: Show details (function-level)
     :type  detail: ``bool``
+
+    :param thresholds: A dictionary containing the threshold configuration.
+    :type thresholds: ``dict``
     """
     config.targets = files
     files = list(files)
@@ -136,23 +171,5 @@ def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None
                 headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
             )
         )
-    if not thresholds:
-        exit()
 
-    errors = []
-    for file, delta in deltas.items():
-        for threshold in thresholds:
-            if threshold not in delta:
-                continue
-            value, metric_type = delta[threshold]
-            threshold_ = thresholds[threshold]
-            op_ = op.gt if metric_type is MetricType.AimLow else op.lt
-            if not op_(value, threshold_):
-                continue
-            errors.append(
-                f"File {file} has a threshold violation: allowed value is {threshold_}"
-                f"and actual value is {value}"
-            )
-    if errors:
-        print("\n".join(errors))
-        exit(1)
+    handle_thresholds(deltas, thresholds)
