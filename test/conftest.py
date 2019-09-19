@@ -98,6 +98,9 @@ def cache_path(monkeypatch):
 
 @pytest.fixture
 def simple_test():
+    """
+    Return a simple code structure for test reusability.
+    """
     return dedent(
         """
             import abc
