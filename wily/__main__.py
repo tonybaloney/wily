@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """Main command line."""
 
-import click
-
 from pathlib import Path
+
+import click
 
 from wily import logger, __version__
 from wily.archivers import resolve_archiver
@@ -13,6 +13,19 @@ from wily.config import load as load_config
 from wily.decorators import add_version
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
+
+
+class ThresholdsParamType(click.ParamType):
+    name = "thresholds"
+
+    def convert(self, value, param, ctx):
+        try:
+            return get_thresholds_dict(value)
+        except Exception:
+            self.fail(
+                "Incorrect syntax of thresholds. Please use the following syntax: "
+                "`--thresholds halstead.h1=1,raw.loc=2`"
+            )
 
 
 @click.group()
@@ -225,8 +238,9 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 )
 @click.option(
     "--thresholds",
+    type=ThresholdsParamType(),
     default=None,
-    help="comma-seperated list of threshold and value, separated by equal sign. See list-metrics for choices",
+    help="comma-separated list of threshold and value, separated by equal sign. See list-metrics for choices",
 )
 @click.pass_context
 def diff(ctx, files, metrics, all, detail, thresholds):
@@ -243,8 +257,6 @@ def diff(ctx, files, metrics, all, detail, thresholds):
         metrics = metrics.split(",")
         logger.info(f"Using specified metrics {metrics}")
 
-    if thresholds:
-        thresholds = get_thresholds_dict(thresholds)
     from wily.commands.diff import diff
 
     logger.debug(f"Running diff on {files} for metric {metrics}")

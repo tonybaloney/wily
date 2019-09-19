@@ -174,3 +174,16 @@ def test_diff_with_threshold_violation(builddir, simple_test, value, exit_code):
     assert result.exit_code == exit_code, result.stdout
     if exit_code:
         assert "threshold violation" in result.stdout
+
+
+def test_diff_with_badly_passed_thresholds(builddir, simple_test):
+    """ Test correct handling of bad threshold formatting via CLI"""
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        f"--debug --path {builddir} diff {_path} --thresholds halstead.h1:1".split(),
+    )
+    assert result.exit_code == 2, result.stdout
+    assert "Incorrect syntax of thresholds" in result.stdout
