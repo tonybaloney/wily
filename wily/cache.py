@@ -286,6 +286,9 @@ def get_thresholds_dict(threshold):
     :rtype: ``dict``
     """
     d = {}
+    if not threshold:
+        return d
+
     for v in threshold.split(","):
         key, value = v.split("=")
         d[key] = int(value) if value.isdigit() else value
