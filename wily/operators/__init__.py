@@ -190,8 +190,8 @@ def get_metric(revision, operator, path, key):
     """
     Get a metric from the cache.
 
-    :param revision: The revision id.
-    :type  revision: ``str``
+    :param revision: The revision data.
+    :type  revision: ``dict``
 
     :param operator: The operator name.
     :type  operator: ``str``
@@ -207,7 +207,7 @@ def get_metric(revision, operator, path, key):
     """
     if ":" in path:
         part, entry = path.split(":")
-        val = revision[operator][part][entry][key]
+        val = revision[operator][part]["detailed"][entry][key]
     else:
-        val = revision[operator][path][key]
+        val = revision[operator][path]["total"][key]
     return val

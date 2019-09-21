@@ -69,9 +69,9 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                     extra.extend(
                         [
                             f"{file}:{k}"
-                            for k in data[operator][file].keys()
+                            for k in data[operator][file]["detailed"].keys()
                             if k != metric.name
-                            and isinstance(data[operator][file][k], dict)
+                            and isinstance(data[operator][file]["detailed"][k], dict)
                         ]
                     )
                 except KeyError:
