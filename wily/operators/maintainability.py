@@ -75,4 +75,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         :rtype: ``dict``
         """
         logger.debug("Running maintainability harvester")
-        return dict(self.harvester.results)
+        results = {}
+        for filename, metrics in dict(self.harvester.results).items():
+            results[filename] = {"total": metrics}
+        return results
