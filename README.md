@@ -158,5 +158,7 @@ You can also override the path to the configuration with the `--config` flag on 
 
 - @wcooley (Wil Cooley)
 - @DahlitzFlorian (Florian Dahlitz)
+- @alegonz
+- @DanielChabrowski
 
 "cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)

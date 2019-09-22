@@ -1,6 +1,12 @@
 # Release History
 
-## 1.12.3
+## 1.12.4 (22nd September 2019)
+
+* [BUGFIX](https://github.com/tonybaloney/wily/issues/73) Fixed ``TypeError: unsupported operand type(s) for +: 'int' and 'dict'`` occurring when a file contains multiple functions with the same name.
+  Fixes [73](https://github.com/tonybaloney/wily/issues/73) by @alegonz
+* Updated code style to meet black requirements.
+
+## 1.12.3 (19th July 2019
 
 * Pinned version of radon as newer version has API changes.
 
