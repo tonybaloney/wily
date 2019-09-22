@@ -2,7 +2,7 @@
 requires = [
     "flit",
     "gitpython>=2.1.11,<2.2.0",
-    "radon>=3.0.0,<3.1.0",
+    "radon>=4.0.0,<4.1.0",
     "click>=7.0,<8.0",
     "colorlog",
     "tabulate>=0.8.2,<1.0.0",
@@ -21,7 +21,7 @@ home-page = "https://github.com/tonybaloney/wily"
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 requires = [
     "gitpython>=2.1.11,<2.2.0",
-    "radon>=3.0.0,<3.1.0",
+    "radon>=4.0.0,<4.1.0",
     "click>=7.0,<8.0",
     "colorlog",
     "tabulate>=0.8.2,<1.0.0",
