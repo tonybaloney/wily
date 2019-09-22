@@ -71,19 +71,20 @@ class HalsteadOperator(BaseOperator):
         logger.debug("Running halstead harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():
-            results[filename] = {}
+            results[filename] = {"detailed": {},
+                                 "total": {}}
             for instance in details:
                 if isinstance(instance, list):
                     for item in instance:
                         function, report = item
-                        results[filename][function] = self._report_to_dict(report)
+                        results[filename]["detailed"][function] = self._report_to_dict(report)
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.warning(
                             f"Failed to run Halstead harvester on {filename} : {details['error']}"
                         )
                         continue
-                    results[filename] = self._report_to_dict(instance)
+                    results[filename]["total"] = self._report_to_dict(instance)
         return results
 
     def _report_to_dict(self, report):

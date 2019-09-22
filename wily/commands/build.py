@@ -102,18 +102,18 @@ def build(config, archiver, operators):
                             for path in result.keys()
                             if root in pathlib.Path(path).parents
                         ]
-                        result[str(root)] = {}
+                        result[str(root)] = {"total": {}}
                         # aggregate values
                         for metric in resolve_operator(operator_name).cls.metrics:
                             func = metric.aggregate
                             values = [
-                                result[aggregate][metric.name]
+                                result[aggregate]["total"][metric.name]
                                 for aggregate in aggregates
                                 if aggregate in result
-                                and metric.name in result[aggregate]
+                                and metric.name in result[aggregate]["total"]
                             ]
                             if len(values) > 0:
-                                result[str(root)][metric.name] = func(values)
+                                result[str(root)]["total"][metric.name] = func(values)
 
                     stats["operator_data"][operator_name] = result
                     bar.next()

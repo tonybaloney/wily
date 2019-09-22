@@ -70,7 +70,8 @@ class CyclomaticComplexityOperator(BaseOperator):
         logger.debug("Running CC harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():
-            results[filename] = {}
+            results[filename] = {"detailed": {},
+                                 "total": {}}
             total = 0  # running CC total
             for instance in details:
                 if isinstance(instance, Class):
@@ -88,10 +89,10 @@ class CyclomaticComplexityOperator(BaseOperator):
                             f"Unexpected result from Radon : {instance} of {type(instance)}. Please report on Github."
                         )
                         continue
-                results[filename][i["fullname"]] = i
+                results[filename]["detailed"][i["fullname"]] = i
                 del i["fullname"]
                 total += i["complexity"]
-            results[filename]["complexity"] = total
+            results[filename]["total"]["complexity"] = total
         return results
 
     @staticmethod
