@@ -83,6 +83,9 @@ def build(config, archiver, operators):
                     run_operator,
                     [(operator, revision, config) for operator in operators],
                 )
+                for i in range(0, len(operators)):
+                    if i < len(data) and len(data[i]) >= 2 and len(data[i][1]) == 0:
+                        logger.warn(f"In revision {revision.key}, for operator {operators[i].name}: No data collected")
 
                 # Map the data back into a dictionary
                 for operator_name, result in data:
