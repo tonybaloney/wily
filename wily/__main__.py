@@ -144,9 +144,9 @@ def index(ctx, message):
 
 @cli.command()
 @click.argument("path", type=click.Path(resolve_path=False))
-@click.argument("metric", nargs=-2)
+@click.argument("metric", required=False)
 @click.option(
-    "--revision", help="Output report to specified HTML path, e.g. reports/out.html"
+    "--revision", type=click.INT, default=0, help="Revision index to start at"
 )
 @click.pass_context
 def rank(ctx, path, metric, revision):
@@ -155,9 +155,9 @@ def rank(ctx, path, metric, revision):
 
     Some common examples:
 
-    Rank all .py files within src/ for the maintainability.index metric
+    Rank all .py files within src/ for the maintainability.mi metric
 
-        $ wily rank src/ maintainability.index
+        $ wily rank src/ maintainability.mi
 
     Rank all .py files in the index for the default metrics across all archivers
 
@@ -168,15 +168,13 @@ def rank(ctx, path, metric, revision):
     if not exists(config):
         handle_no_cache(ctx)
 
+    if not metric:
+        metric = "maintainability.mi"
+
     from wily.commands.rank import rank
 
     logger.debug(f"Running rank on {path} for metric {metric} and revision {revision}")
-    rank(
-        config=config,
-        path=path,
-        metric=metric,
-        revision_index=revision,
-    )
+    rank(config=config, path=path, metric=metric, revision_index=revision)
 
 
 @cli.command()
