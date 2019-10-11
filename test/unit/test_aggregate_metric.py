@@ -1,4 +1,4 @@
-from pathlib import PosixPath
+from pathlib import Path
 
 import pytest
 
@@ -9,14 +9,14 @@ def test_aggregate_metric():
     # given
     data = [
         (
-            PosixPath("wily/config.py"),
+            Path("wily/config.py"),
             "27a96be",
             "an author",
             "2019-01-15",
             "82.41669266978485",
         ),
         (
-            PosixPath("wily/cache.py"),
+            Path("wily/cache.py"),
             "27a96be",
             "an author",
             "2019-01-15",
