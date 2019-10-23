@@ -71,7 +71,7 @@ def rank(config, path, metric, revision_index):
 
     # Assumption is there is only one metric (e.g., therefore list of metrics commented out)
     pth = Path(path)
-    if not pth.as_posix().endswith(".py"):
+    if not str(pth).endswith(".py"):
         items = pth.glob("**/*.py")
     else:
         items = [pth]
