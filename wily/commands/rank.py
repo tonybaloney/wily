@@ -71,7 +71,10 @@ def rank(config, path, metric, revision_index):
 
     # Assumption is there is only one metric (e.g., therefore list of metrics commented out)
     pth = Path(path)
-    items = pth.glob("**/*.py")
+    if not pth.as_posix().endswith(".py"):
+        items = pth.glob("**/*.py")
+    else:
+        items = [pth]
     for item in items:
         state = State(config)
         for archiver in state.archivers:
