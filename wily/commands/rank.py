@@ -82,10 +82,14 @@ def rank(config, path, metric, revision_index):
             rev = state.index[archiver].revisions[revision_index]
             try:
                 logger.debug(
-                    f"Fetching metric {metric_meta['key']} for {metric_meta['operator']} in {path}"
+                    f"Fetching metric {metric_meta['key']} for {metric_meta['operator']} in {str(item)}"
                 )
                 val = rev.get(
-                    config, archiver, metric_meta["operator"], path, metric_meta["key"]
+                    config,
+                    archiver,
+                    metric_meta["operator"],
+                    str(item),
+                    metric_meta["key"],
                 )
                 value = str(val)
             except KeyError as e:
