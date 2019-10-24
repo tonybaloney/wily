@@ -92,6 +92,19 @@ html_theme = "alabaster"
 #
 # html_theme_options = {}
 
+html_theme_options = {
+    'logo': 'logo_below.png',
+    'logo_name': False,
+    'logo_text_align': "center",
+    'github_user': 'tonybaloney',
+    'github_repo': 'wily',
+    'github_banner': True,
+    'github_button': False,
+    'fixed_sidebar': True,
+    'extra_nav_links': {'wily@PyPi': "https://pypi.python.org/pypi/wily/",
+                        'wily@github': "https://github.com/tonybaloney/wily"}
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -106,6 +119,7 @@ html_static_path = ["_static"]
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+html_sidebars = {'**': ['about.html', 'navigation.html', 'searchbox.html'], }
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
