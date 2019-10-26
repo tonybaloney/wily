@@ -79,6 +79,14 @@ Show a specific metric for a given file, requires that `.wily/` exists
 
 ![wily-report](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_report.png)
 
+#### `wily rank`
+
+Show the ranking for all files in a directory or a single file based on the metric provided, requires that `.wily/` exists
+
+`wily rank` will print a table of files and their metric values.
+
+![wily-rank](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_rank.png)
+
 #### `wily graph`
 
 Similar to `wily report` but instead of printing in the console, `wily` will print a graph in a browser.
