@@ -116,7 +116,7 @@ def rank(config, path, metric, revision_index):
     # Tack on the total row at the end
     data.append(aggregate_metric(data))
 
-    headers = ("File", "Revision", "Author", "Date", metric.name)
+    headers = ("File", "Revision", "Author", "Date", metric_meta["title"])
     print(
         tabulate.tabulate(
             headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
