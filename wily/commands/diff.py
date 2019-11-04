@@ -3,6 +3,7 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
+import operator as op
 import os
 
 import tabulate
@@ -16,11 +17,44 @@ from wily.operators import (
     GOOD_COLORS,
     BAD_COLORS,
     OperatorLevel,
+    MetricType,
 )
 from wily.state import State
 
 
-def diff(config, files, metrics, changes_only=True, detail=True):
+def handle_thresholds(deltas, thresholds):
+    """
+    Go over diff results and given thresholds. Print all threshold violations and exit with the relevant exit code.
+
+    :param deltas: A dictionary contains the deltas between current and new values per metric operator per file.
+    :type deltas: ``dict``
+
+    :param thresholds: A dictionary containing the threshold configuration.
+    :type thresholds: ``dict``
+    """
+    if not thresholds:
+        return
+
+    errors = []
+    for file, delta in deltas.items():
+        for threshold in thresholds:
+            if threshold not in delta:
+                continue
+            value, metric_type = delta[threshold]
+            threshold_ = thresholds[threshold]
+            op_ = op.gt if metric_type is MetricType.AimLow else op.lt
+            if not op_(value, threshold_):
+                continue
+            errors.append(
+                f"File {file} has a threshold violation: allowed value is {threshold_}"
+                f"and actual value is {value}"
+            )
+    if errors:
+        print("\n".join(errors))
+        exit(1)
+
+
+def diff(config, files, metrics, changes_only=True, detail=True, thresholds=None):
     """
     Show the differences in metrics for each of the files.
 
@@ -38,6 +72,9 @@ def diff(config, files, metrics, changes_only=True, detail=True):
 
     :param detail: Show details (function-level)
     :type  detail: ``bool``
+
+    :param thresholds: A dictionary containing the threshold configuration.
+    :type thresholds: ``dict``
     """
     config.targets = files
     files = list(files)
@@ -49,7 +86,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     data = {}
     results = []
-
+    deltas = {}
     # Build a set of operators
     _operators = [operator.cls(config) for operator in operators]
 
@@ -97,6 +134,10 @@ def diff(config, files, metrics, changes_only=True, detail=True):
             if new != current:
                 has_changes = True
             if metric.type in (int, float) and new != "-" and current != "-":
+                deltas.setdefault(
+                    file, {f"{operator}.{metric.name}": (current - new, metric.measure)}
+                )
+                # TODO save diff even when both metrics are non numeric
                 if current > new:
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
@@ -130,3 +171,4 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                 headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
             )
         )
+    handle_thresholds(deltas, thresholds or config.thresholds)

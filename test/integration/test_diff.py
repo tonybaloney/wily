@@ -2,6 +2,7 @@ import pathlib
 import sys
 from textwrap import dedent
 
+import pytest
 from click.testing import CliRunner
 
 import wily.__main__ as main
@@ -95,21 +96,9 @@ def test_diff_output_more_complex(builddir):
     assert "- ->" not in result.stdout
 
 
-def test_diff_output_less_complex(builddir):
+def test_diff_output_less_complex(builddir, simple_test):
     """ Test the diff feature by making the test file more complicated """
-
-    simple_test = """
-            import abc
-            foo = 1
-            def function1():
-                pass
-            class Class1(object):
-                def method(self):
-                    pass
-            """
-
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
-        test_py.write(dedent(simple_test))
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
 
     runner = CliRunner()
     result = runner.invoke(
@@ -164,3 +153,54 @@ def test_diff_output_rank(builddir):
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
     assert "A -> A" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "value, exit_code",
+    [
+        pytest.param(1, 1, id="Positive threshold violation"),
+        pytest.param(10, 0, id="Negative threshold violation"),
+    ],
+)
+def test_diff_with_threshold_violation(builddir, simple_test, value, exit_code):
+    """ Positively test the diff threshold feature"""
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        f"--debug --path {builddir} diff {_path} --thresholds halstead.h1={value}".split(),
+    )
+    assert result.exit_code == exit_code, result.stdout
+    if exit_code:
+        assert "threshold violation" in result.stdout
+
+
+def test_diff_with_badly_passed_thresholds(builddir, simple_test):
+    """ Test correct handling of bad threshold formatting via CLI"""
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        f"--debug --path {builddir} diff {_path} --thresholds halstead.h1:1".split(),
+    )
+    assert result.exit_code == 2, result.stdout
+    assert "Incorrect syntax of thresholds" in result.stdout
+
+
+def test_diff_with_threshold_from_config(builddir, simple_test):
+    config = """
+    [wily]
+    thresholds = halstead.h1=1
+    """
+    wily_conf = pathlib.Path(builddir) / "wily.cfg"
+    wily_conf.write_text(config)
+    (pathlib.Path(builddir) / "src" / "test.py").write_text(simple_test)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, f"--debug --path {builddir} --config {wily_conf} diff {_path}".split()
+    )
+    assert result.exit_code == 1, result.stdout
+    assert "threshold violation" in result.stdout

@@ -1,18 +1,34 @@
 # -*- coding: UTF-8 -*-
 """Main command line."""
 
-import click
-
 from pathlib import Path
+
+import click
 
 from wily import logger, __version__
 from wily.archivers import resolve_archiver
-from wily.cache import exists, get_default_metrics
+from wily.cache import exists, get_default_metrics, get_thresholds_dict
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
 from wily.decorators import add_version
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
+
+
+class ThresholdsParamType(click.ParamType):
+    """Custom click type for diff thresholds."""
+
+    name = "thresholds"
+
+    def convert(self, value, param, ctx):
+        """Try to convert passed string to a threshold dict."""
+        try:
+            return get_thresholds_dict(value)
+        except Exception:
+            self.fail(
+                "Incorrect syntax of thresholds. Please use the following syntax: "
+                "`--thresholds halstead.h1=1,raw.loc=2`"
+            )
 
 
 @click.group()
@@ -223,8 +239,14 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
     default=True,
     help="Show function/class level metrics where available",
 )
+@click.option(
+    "--thresholds",
+    type=ThresholdsParamType(),
+    default=None,
+    help="comma-separated list of threshold and value, separated by equal sign. See list-metrics for choices",
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail):
+def diff(ctx, files, metrics, all, detail, thresholds):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -242,7 +264,12 @@ def diff(ctx, files, metrics, all, detail):
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
     diff(
-        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+        config=config,
+        files=files,
+        metrics=metrics,
+        changes_only=not all,
+        detail=detail,
+        thresholds=thresholds,
     )
 
 

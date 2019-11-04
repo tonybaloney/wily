@@ -273,3 +273,23 @@ def get(config, archiver, revision):
     with (root / f"{revision}.json").open("r") as rev_f:
         index = json.load(rev_f)
     return index
+
+
+def get_thresholds_dict(threshold):
+    """
+    Return a dict of threshold from a threshold string.
+
+    :param threshold: A string representing desired thresholds
+    :type threshold: ``str``
+
+    :return: A dictionary of thresholds
+    :rtype: ``dict``
+    """
+    d = {}
+    if not threshold:
+        return d
+
+    for v in threshold.split(","):
+        key, value = v.split("=")
+        d[key] = int(value) if value.isdigit() else value
+    return d
