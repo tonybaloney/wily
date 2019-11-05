@@ -11,11 +11,7 @@ PATCHED_ENV = {"BROWSER": "echo %s", "LC_ALL": "C.UTF-8", "LANG": "C.UTF-8"}
 def test_rank_no_cache(tmpdir):
     """ Test the rank feature with no cache """
     runner = CliRunner()
-
-    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", tmpdir, "rank", "src/test.py", "maintainability.mi"]
-        )
+    result = runner.invoke(main.cli, ["--path", tmpdir, "rank", "src/test.py"])
     assert result.exit_code == 1, result.stdout
 
 
