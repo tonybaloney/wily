@@ -3,6 +3,7 @@ Builds a cache based on a source-control history.
 
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
+MODULE:2-1
 """
 import pathlib
 import multiprocessing

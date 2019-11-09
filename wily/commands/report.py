@@ -3,6 +3,8 @@ Report command.
 
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
+
+MODULE:2-6
 """
 import tabulate
 

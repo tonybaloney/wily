@@ -2,6 +2,8 @@
 Archivers module.
 
 Specifies a standard interface for finding revisions (versions) of a path and switching to them.
+
+MODULE:1-0
 """
 
 from collections import namedtuple

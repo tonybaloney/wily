@@ -2,6 +2,8 @@
 Diff command.
 
 Compares metrics between uncommitted files and indexed files.
+
+MODULE:2-2
 """
 import os
 

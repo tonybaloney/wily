@@ -2,6 +2,8 @@
 Filesystem Archiver.
 
 Implementation of the archiver API for a standard directory (no revisions)
+
+MODULE:1-1
 """
 import logging
 import os.path
