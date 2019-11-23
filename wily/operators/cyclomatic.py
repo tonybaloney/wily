@@ -26,6 +26,8 @@ class CyclomaticComplexityOperator(BaseOperator):
         "no_assert": True,
         "show_closures": False,
         "order": radon.complexity.SCORE,
+        "include_ipynb": True,
+        "ipynb_cells": True,
     }
 
     metrics = (
@@ -70,8 +72,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         logger.debug("Running CC harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():
-            results[filename] = {"detailed": {},
-                                 "total": {}}
+            results[filename] = {"detailed": {}, "total": {}}
             total = 0  # running CC total
             for instance in details:
                 if isinstance(instance, Class):

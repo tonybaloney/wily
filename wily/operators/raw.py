@@ -14,7 +14,13 @@ class RawMetricsOperator(BaseOperator):
     """Raw Metrics Operator."""
 
     name = "raw"
-    defaults = {"exclude": None, "ignore": None, "summary": False}
+    defaults = {
+        "exclude": None,
+        "ignore": None,
+        "summary": False,
+        "include_ipynb": True,
+        "ipynb_cells": True,
+    }
     metrics = (
         Metric("loc", "Lines of Code", int, MetricType.Informational, sum),
         Metric("lloc", "L Lines of Code", int, MetricType.AimLow, sum),
