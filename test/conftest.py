@@ -83,9 +83,7 @@ def builddir(gitdir):
 
     yield gitdir
 
-    result1 = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "clean", "-y"]
-    )
+    result1 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "clean", "-y"])
     assert result1.exit_code == 0, result1.stdout
 
 
@@ -124,7 +122,7 @@ def ipynbgitdir(tmpdir):
     (tmppath / "src").mkdir()
     # Write a test file to the repo
     with open(testpath, "w") as test_txt:
-        test_txt.write("{\"cells\": []," + _NB_FOOTER + "}")
+        test_txt.write('{"cells": [],' + _NB_FOOTER + "}")
 
     index = repo.index
     index.add([str(testpath)])
@@ -134,7 +132,8 @@ def ipynbgitdir(tmpdir):
 
     index.commit("empty notebook", author=author, committer=committer)
 
-    first_test = """{
+    first_test = (
+        """{
      "cells": [
       {
        "cell_type": "code",
@@ -155,14 +154,18 @@ def ipynbgitdir(tmpdir):
        "input": []
       }
       ],
-    """ + _NB_FOOTER + "}"
+    """
+        + _NB_FOOTER
+        + "}"
+    )
     with open(testpath, "w") as test_txt:
         test_txt.write(dedent(first_test))
 
     index.add([str(testpath)])
     index.commit("single cell", author=author, committer=committer)
 
-    second_test = """{
+    second_test = (
+        """{
      "cells": [
       {
        "cell_type": "code",
@@ -200,7 +203,10 @@ def ipynbgitdir(tmpdir):
        "input": []
       }
       ],
-    """ + _NB_FOOTER + "}"
+    """
+        + _NB_FOOTER
+        + "}"
+    )
 
     with open(testpath, "w") as test_txt:
         test_txt.write(dedent(second_test))
@@ -239,9 +245,7 @@ def ipynbbuilddir(ipynbgitdir):
 
     yield ipynbgitdir
 
-    result1 = runner.invoke(
-        main.cli, ["--debug", "--path", ipynbgitdir, "clean", "-y"]
-    )
+    result1 = runner.invoke(main.cli, ["--debug", "--path", ipynbgitdir, "clean", "-y"])
     assert result1.exit_code == 0, result1.stdout
 
 
