@@ -19,7 +19,7 @@ def test_index(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "index"])
-    assert result.stdout.count("An author") == 3
+    assert result.stdout.count("An author") >= 3
     assert result.exit_code == 0, result.stdout
 
 

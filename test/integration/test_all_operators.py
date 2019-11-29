@@ -70,7 +70,7 @@ def test_operator(operator, gitdir):
 
 
 @pytest.mark.parametrize("operator", operators)
-def test_operator_on_code_with_metric_named_objects(operator, tmpdir, cache_path):
+def test_operator_on_code_with_metric_named_objects(operator, tmpdir):
     code_with_metric_named_objects = """
 
     # CyclomaticComplexity
@@ -116,6 +116,6 @@ def test_operator_on_code_with_metric_named_objects(operator, tmpdir, cache_path
     runner = CliRunner()
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "--cache", cache_path, "build", str(testpath), "-o", operator]
+        main.cli, ["--debug", "--path", tmpdir, "build", str(testpath), "-o", operator]
     )
     assert result.exit_code == 0, result.stdout

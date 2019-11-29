@@ -12,7 +12,7 @@ def test_index_with_ipynb(ipynbbuilddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", ipynbbuilddir, "index"])
-    assert result.stdout.count("An author") == 3
+    assert result.stdout.count("An author") >= 3
     assert result.exit_code == 0, result.stdout
 
 
@@ -22,7 +22,7 @@ def test_index_and_message_with_ipynb(ipynbbuilddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", ipynbbuilddir, "index", "--message"])
-    assert result.stdout.count("An author") == 3
+    assert result.stdout.count("An author") >= 3
     assert "empty notebook" in result.stdout
     assert "single cell" in result.stdout
     assert "second cell" in result.stdout

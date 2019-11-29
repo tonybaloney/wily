@@ -81,7 +81,12 @@ def builddir(gitdir):
     result2 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
     assert result2.exit_code == 0, result2.stdout
 
-    return gitdir
+    yield gitdir
+
+    result1 = runner.invoke(
+        main.cli, ["--debug", "--path", gitdir, "clean", "-y"]
+    )
+    assert result1.exit_code == 0, result1.stdout
 
 
 @pytest.fixture
@@ -232,7 +237,12 @@ def ipynbbuilddir(ipynbgitdir):
     result2 = runner.invoke(main.cli, ["--debug", "--path", ipynbgitdir, "index"])
     assert result2.exit_code == 0, result2.stdout
 
-    return ipynbgitdir
+    yield ipynbgitdir
+
+    result1 = runner.invoke(
+        main.cli, ["--debug", "--path", ipynbgitdir, "clean", "-y"]
+    )
+    assert result1.exit_code == 0, result1.stdout
 
 
 @pytest.fixture(autouse=True)
