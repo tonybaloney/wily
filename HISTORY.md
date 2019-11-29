@@ -1,5 +1,10 @@
 # Release History
 
+## 1.13.0 (29th November 2019)
+
+* Updated radon to 4.0.0
+* Added support for IPython Notebooks (enabled by default)
+
 ## 1.12.4 (22nd September 2019)
 
 * [BUGFIX](https://github.com/tonybaloney/wily/issues/73) Fixed ``TypeError: unsupported operand type(s) for +: 'int' and 'dict'`` occurring when a file contains multiple functions with the same name.

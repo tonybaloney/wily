@@ -151,6 +151,13 @@ max_revisions = 20
 
 You can also override the path to the configuration with the `--config` flag on the command-line.
 
+## IPython/Jupyter Notebooks
+
+Wily will detect and scan all Python code in .ipynb files automatically. 
+
+You can disable this behaviour if you require by setting `ipynb_support = false` in the configuration.
+You can also disable the behaviour of reporting on individual cells by setting `ipynb_cells = false`.
+
 
 # Credits
 
