@@ -27,7 +27,9 @@ stages:
 
       - script: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-azurepipelines flit mock codecov pydocstyle pytest-cov
+          pip install pytest
+          pip install --pre pytest-azurepipelines==1.0.0rc1
+          pip install flit mock codecov pydocstyle pytest-cov
           flit install
         displayName: 'Install dependencies'
 
@@ -65,7 +67,7 @@ stages:
         displayName: 'Install dependencies'
 
       - script: |
-          pip install pytest pytest-azurepipelines
+          pip install pytest --pre pytest-azurepipelines==1.0.0rc1
           pytest test
         displayName: 'pytest'
 
