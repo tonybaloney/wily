@@ -47,7 +47,7 @@ repos:
 
 #### `wily build`
 
-The first step to using `wily` is to build a wily cache with all of the statistics of your project. 
+The first step to using `wily` is to build a wily cache with the statistics of your project. 
 
 ```
 Usage: __main__.py build [OPTIONS] [TARGETS]...
@@ -61,7 +61,7 @@ Options:
   --help                       Show this message and exit.
 ```
 
-By default, wily will assume your project folder is a `git` directory. Wily will not build a cache if the working copy is dirty (has changed files not commited).
+By default, wily will assume your project folder is a `git` directory. Wily will not build a cache if the working copy is dirty (has changed files not committed).
 
 ```console
  $ wily build src/
