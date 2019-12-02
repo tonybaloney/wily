@@ -17,10 +17,13 @@ from wily.archivers import FilesystemArchiver
 from wily.operators import resolve_operator
 
 
-def run_operator(operator, revision, config):
+def run_operator(operator, revision, config, seed):
     """Run an operator for the multiprocessing pool. Not called directly."""
     instance = operator.cls(config)
-    logger.debug(f"Running {operator.name} operator on {revision.key}")
+    if not seed:
+        config.targets = revision.files
+
+    logger.debug(f"Running {operator.name} operator on {revision.key}, seed={seed}")
     return operator.name, instance.run(revision, config)
 
 
@@ -71,6 +74,9 @@ def build(config, archiver, operators):
 
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
+
+    # Index all files the first time
+    seed = True
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             for revision in revisions:
@@ -78,10 +84,10 @@ def build(config, archiver, operators):
                 archiver.checkout(revision, config.checkout_options)
                 stats = {"operator_data": {}}
 
-                # Run each operator as a seperate process
+                # Run each operator as a separate process
                 data = pool.starmap(
                     run_operator,
-                    [(operator, revision, config) for operator in operators],
+                    [(operator, revision, config, seed) for operator in operators],
                 )
 
                 # Map the data back into a dictionary
@@ -118,6 +124,7 @@ def build(config, archiver, operators):
                     stats["operator_data"][operator_name] = result
                     bar.next()
 
+                seed = False
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver, stats)
         index.save()

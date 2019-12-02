@@ -107,6 +107,7 @@ def test_store_basic(tmpdir):
         author_email="anthony@test.com",
         date="17/01/1990",
         message="my changes",
+        files=[target_path]
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
     with open(fn) as cache_item:
@@ -130,6 +131,7 @@ def test_store_twice(tmpdir):
         author_email="anthony@test.com",
         date="17/01/1990",
         message="my changes",
+        files=[target_path]
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
     with pytest.raises(RuntimeError):
@@ -153,6 +155,7 @@ def test_store_relative_paths(tmpdir):
         author_email="anthony@test.com",
         date="17/01/1990",
         message="my changes",
+        files=[target_path]
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
     with open(fn) as cache_item:
@@ -170,7 +173,6 @@ def test_store_index(tmpdir):
     """
     config = DEFAULT_CONFIG
     cache_path = pathlib.Path(tmpdir) / ".wily"
-    target_path = pathlib.Path(tmpdir) / "foo" / "bar.py"
     cache_path.mkdir()
     config.cache_path = cache_path
     config.path = tmpdir

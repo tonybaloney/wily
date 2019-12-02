@@ -13,13 +13,19 @@ class MockAuthor(object):
     email = "test@test.com"
 
 
+class MockStats(object):
+    files = {}
+
+
 TEST_AUTHOR = MockAuthor()
+TEST_STATS = MockStats()
 
 
 class MockCommit(object):
     name_rev = "1234 bbb"
     author = TEST_AUTHOR
     committed_date = "1/1/1990"
+    stats = TEST_STATS
 
     def __init__(self, message):
         self.message = message
