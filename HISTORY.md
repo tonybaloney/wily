@@ -1,5 +1,9 @@
 # Release History
 
+## 1.13.1 (master)
+
+* Add Python 3.8 tests
+
 ## 1.13.0 (29th November 2019)
 
 * Updated radon to 4.0.0
