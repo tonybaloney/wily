@@ -2,7 +2,7 @@ trigger:
 - master
 name: $(Year:yy)$(DayOfYear)$(Rev:r)
 variables:
-  majorVer: '1.13.0'
+  majorVer: '1.13.1'
 
 stages:
   - stage: Unit_Test
@@ -17,7 +17,8 @@ stages:
             python.version: '3.6'
           Python37:
             python.version: '3.7'
-        maxParallel: 2
+          Python38:
+            python.version: '3.8'
 
       steps:
       - task: UsePythonVersion@0
@@ -52,7 +53,8 @@ stages:
             python.version: '3.6'
           Python37:
             python.version: '3.7'
-        maxParallel: 2
+          Python38:
+            python.version: '3.8'
 
       steps:
       - task: UsePythonVersion@0
@@ -83,7 +85,8 @@ stages:
             python.version: '3.6'
           Python37:
             python.version: '3.7'
-        maxParallel: 2
+          Python38:
+            python.version: '3.8'
 
       steps:
       - task: UsePythonVersion@0
@@ -104,7 +107,8 @@ stages:
             python.version: '3.6'
           Python37:
             python.version: '3.7'
-        maxParallel: 2
+          Python38:
+            python.version: '3.8'
 
       steps:
       - task: UsePythonVersion@0

@@ -41,7 +41,7 @@ wily = "wily.__main__:cli"
 legacy_tox_ini = """
 [tox]
 isolated_build = true
-envlist = py36, py37
+envlist = py36, py37, py38
 [testenv]
 passenv = CI TRAVIS TRAVIS_* HOME
 setenv =
