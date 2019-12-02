@@ -49,7 +49,7 @@ class MaintainabilityIndexOperator(BaseOperator):
 
     default_metric_index = 1  # MI
 
-    def __init__(self, config):
+    def __init__(self, config, targets):
         """
         Instantiate a new MI operator.
 
@@ -57,10 +57,10 @@ class MaintainabilityIndexOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {config.targets} with {self.defaults} for MI metrics")
+        logger.debug(f"Using {targets} with {self.defaults} for MI metrics")
 
         self.harvester = harvesters.MIHarvester(
-            config.targets, config=Config(**self.defaults)
+            targets, config=Config(**self.defaults)
         )
 
     def run(self, module, options):

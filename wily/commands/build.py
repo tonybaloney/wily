@@ -19,10 +19,12 @@ from wily.operators import resolve_operator
 
 def run_operator(operator, revision, config, seed):
     """Run an operator for the multiprocessing pool. Not called directly."""
-    instance = operator.cls(config)
-    if not seed:
-        config.targets = revision.files
+    if seed:
+        targets = config.targets
+    else:  # Only target changed files
+        targets = [str(pathlib.Path(config.path) / pathlib.Path(file)) for file in revision.files]
 
+    instance = operator.cls(config, targets)
     logger.debug(f"Running {operator.name} operator on {revision.key}, seed={seed}")
     return operator.name, instance.run(revision, config)
 
@@ -75,8 +77,9 @@ def build(config, archiver, operators):
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
 
-    # Index all files the first time
+    # Index all files the first time, only scan changes afterward
     seed = True
+    prev_roots = None
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             for revision in revisions:
@@ -92,14 +95,15 @@ def build(config, archiver, operators):
 
                 # Map the data back into a dictionary
                 for operator_name, result in data:
-                    # aggregate values to directories
-                    roots = []
-
                     # find all unique directories in the results
-                    for entry in result.keys():
-                        parent = pathlib.Path(entry).parents[0]
-                        if parent not in roots:
-                            roots.append(parent)
+                    roots = {pathlib.Path(entry).parents[0] for entry in result.keys()}
+
+                    # For a seed run, there is no previous change set, so use current
+                    if seed:
+                        prev_roots = roots
+
+                    logger.debug(f"Comparing {prev_roots} and {roots}")
+                    roots = prev_roots | roots
 
                     for root in roots:
                         # find all matching entries recursively
@@ -121,6 +125,7 @@ def build(config, archiver, operators):
                             if len(values) > 0:
                                 result[str(root)]["total"][metric.name] = func(values)
 
+                    prev_roots = set(roots)
                     stats["operator_data"][operator_name] = result
                     bar.next()
 

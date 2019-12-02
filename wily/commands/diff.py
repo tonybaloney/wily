@@ -51,7 +51,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     results = []
 
     # Build a set of operators
-    _operators = [operator.cls(config) for operator in operators]
+    _operators = [operator.cls(config, config.targets) for operator in operators]
 
     cwd = os.getcwd()
     os.chdir(config.path)
@@ -60,7 +60,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
         data[operator.name] = operator.run(None, config)
     os.chdir(cwd)
 
-    # Write a summary table..
+    # Write a summary table
     extra = []
     for operator, metric in metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
@@ -88,11 +88,11 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                 current = last_revision.get(
                     config, state.default_archiver, operator, file, metric.name
                 )
-            except KeyError as e:
+            except KeyError:
                 current = "-"
             try:
                 new = get_metric(data, operator, file, metric.name)
-            except KeyError as e:
+            except KeyError:
                 new = "-"
             if new != current:
                 has_changes = True

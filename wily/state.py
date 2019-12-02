@@ -30,7 +30,7 @@ class IndexedRevision(object):
             author_email=d["author_email"],
             date=d["date"],
             message=d["message"],
-            files=d["files"]
+            files=d["files"] if "files" in d else []
         )
         operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)

@@ -12,7 +12,7 @@ import wily.__main__ as main
 
 def test_skip_files(tmpdir, cache_path):
     """
-    Test that build works in a basic repository.
+    Test that files which were not changed are still added to each index
     """
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir) / "src"
@@ -32,15 +32,25 @@ def test_skip_files(tmpdir, cache_path):
     committer = Actor("A committer", "committer@example.com")
 
     commit = index.commit("commit two files", author=author, committer=committer)
+
+    # Change the second file and commit that
+    with open(tmppath / "test2.py", "w") as test2_txt:
+        test2_txt.write("import zzz\nprint(1)")
+
+    repo.index.add([str(tmppath / "test2.py")])
+    commit2 = repo.index.commit("commit the second file only", author=author, committer=committer)
+
     repo.close()
 
+    # build the wily cache and test its contents
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "src"],
+        ["--debug", "--path", tmpdir, "--cache", cache_path, "build", str(tmppath)],
     )
     assert result.exit_code == 0, result.stdout
 
+    # Check that the index files were created
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
     index_path = cache_path / "git" / "index.json"
@@ -48,13 +58,26 @@ def test_skip_files(tmpdir, cache_path):
     rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
     assert rev_path.exists()
 
+    # Inspect the contents of the index for the existence of both files
     with open(index_path) as index_file:
         index = json.load(index_file)
+    assert len(index) == 2
+    assert index[1]['files'] == ['src/test1.py', 'src/test2.py']
+    assert index[0]['files'] == ['src/test2.py']
 
-    assert len(index) == 1
-    assert index[0]['files'] == ['src/test1.py', 'src/test2.py']
+    # Look at the first commit
+    with open(rev_path) as rev_file:
+        data = json.load(rev_file)
+
+    assert "halstead" in data["operator_data"]
+    print(data)
+
+    # Look at the second commit
+    rev_path = cache_path / "git" / (commit2.name_rev.split(" ")[0] + ".json")
+    assert rev_path.exists()
 
     with open(rev_path) as rev_file:
         data = json.load(rev_file)
 
     assert "halstead" in data["operator_data"]
+    print(data)
