@@ -6,6 +6,7 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 
 from collections import namedtuple
 from dataclasses import dataclass
+from typing import List
 
 
 class BaseArchiver(object):
@@ -52,6 +53,7 @@ class Revision:
     author_email: str
     date: str
     message: str
+    files: List[str]
 
 
 from wily.archivers.git import GitArchiver

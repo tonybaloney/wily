@@ -47,6 +47,7 @@ class FilesystemArchiver(BaseArchiver):
                 author_email="-",  # as above
                 date=int(mtime),
                 message="None",
+                files=[]
             )
         ]
 
