@@ -50,6 +50,8 @@ class WilyConfig(object):
     archiver: Any
     path: str
     max_revisions: int
+    include_ipynb: bool = True
+    ipynb_cells: bool = True
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
@@ -130,14 +132,23 @@ def load(config_path=DEFAULT_CONFIG_PATH):
         section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER
     )
     path = config.get(section=DEFAULT_CONFIG_SECTION, option="path", fallback=".")
-    max_revisions = int(
-        config.get(
-            section=DEFAULT_CONFIG_SECTION,
-            option="max_revisions",
-            fallback=DEFAULT_MAX_REVISIONS,
-        )
+    max_revisions = config.getint(
+        section=DEFAULT_CONFIG_SECTION,
+        option="max_revisions",
+        fallback=DEFAULT_MAX_REVISIONS,
+    )
+    include_ipynb = config.getboolean(
+        section=DEFAULT_CONFIG_SECTION, option="include_ipynb", fallback=True
+    )
+    ipynb_cells = config.getboolean(
+        section=DEFAULT_CONFIG_SECTION, option="ipynb_cells", fallback=True
     )
 
     return WilyConfig(
-        operators=operators, archiver=archiver, path=path, max_revisions=max_revisions
+        operators=operators,
+        archiver=archiver,
+        path=path,
+        max_revisions=max_revisions,
+        include_ipynb=include_ipynb,
+        ipynb_cells=ipynb_cells,
     )

@@ -23,6 +23,8 @@ class HalsteadOperator(BaseOperator):
         "show": False,
         "sort": False,
         "by_function": True,
+        "include_ipynb": True,
+        "ipynb_cells": True,
     }
 
     metrics = (
@@ -71,13 +73,14 @@ class HalsteadOperator(BaseOperator):
         logger.debug("Running halstead harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():
-            results[filename] = {"detailed": {},
-                                 "total": {}}
+            results[filename] = {"detailed": {}, "total": {}}
             for instance in details:
                 if isinstance(instance, list):
                     for item in instance:
                         function, report = item
-                        results[filename]["detailed"][function] = self._report_to_dict(report)
+                        results[filename]["detailed"][function] = self._report_to_dict(
+                            report
+                        )
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.warning(

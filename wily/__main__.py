@@ -301,7 +301,8 @@ def clean(ctx, yes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx)
+        logger.info("Wily cache does not exist, nothing to remove.")
+        exit(0)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")

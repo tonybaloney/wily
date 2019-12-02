@@ -47,7 +47,7 @@ repos:
 
 #### `wily build`
 
-The first step to using `wily` is to build a wily cache with all of the statistics of your project. 
+The first step to using `wily` is to build a wily cache with the statistics of your project. 
 
 ```
 Usage: __main__.py build [OPTIONS] [TARGETS]...
@@ -61,7 +61,7 @@ Options:
   --help                       Show this message and exit.
 ```
 
-By default, wily will assume your project folder is a `git` directory. Wily will not build a cache if the working copy is dirty (has changed files not commited).
+By default, wily will assume your project folder is a `git` directory. Wily will not build a cache if the working copy is dirty (has changed files not committed).
 
 ```console
  $ wily build src/
@@ -150,6 +150,13 @@ max_revisions = 20
 ```
 
 You can also override the path to the configuration with the `--config` flag on the command-line.
+
+## IPython/Jupyter Notebooks
+
+Wily will detect and scan all Python code in .ipynb files automatically. 
+
+You can disable this behaviour if you require by setting `ipynb_support = false` in the configuration.
+You can also disable the behaviour of reporting on individual cells by setting `ipynb_cells = false`.
 
 
 # Credits

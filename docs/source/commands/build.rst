@@ -53,7 +53,7 @@ To update the wily cache with any recent commits, simply re-run the ``wily build
 Dirty repositories
 ------------------
 
-If you run ``wily build`` with any uncommited files, wily will give an error to protect those files being lost, stash or commit them first.
+If you run ``wily build`` with any uncommitted files, wily will give an error to protect those files being lost, stash or commit them first.
 
 .. code-block:: none
 

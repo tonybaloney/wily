@@ -26,7 +26,7 @@ def test_clean(builddir):
 def test_clean_no_cache(tmpdir):
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", tmpdir, "clean"])
-    assert result.exit_code == 1, result.stdout
+    assert result.exit_code == 0, result.stdout
 
 
 def test_list_metrics_no_cache(tmpdir):
