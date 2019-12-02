@@ -65,7 +65,7 @@ def build(config, archiver, operators):
     index = state.index[archiver.name]
 
     # remove existing revisions from the list
-    revisions = [revision for revision in revisions if revision not in index]
+    revisions = [revision for revision in revisions if revision not in index][::-1]
 
     logger.info(
         f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
@@ -97,10 +97,12 @@ def build(config, archiver, operators):
                 for operator_name, result in data:
                     # find all unique directories in the results
                     roots = {pathlib.Path(entry).parents[0] for entry in result.keys()}
+                    indices = set(result.keys())
 
                     # For a seed run, there is no previous change set, so use current
                     if seed:
                         prev_roots = roots
+                        prev_indices = indices
 
                     logger.debug(f"Comparing {prev_roots} and {roots}")
                     roots = prev_roots | roots
@@ -125,7 +127,8 @@ def build(config, archiver, operators):
                             if len(values) > 0:
                                 result[str(root)]["total"][metric.name] = func(values)
 
-                    prev_roots = set(roots)
+                    prev_indices = indices
+                    prev_roots = roots
                     stats["operator_data"][operator_name] = result
                     bar.next()
 
