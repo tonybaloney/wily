@@ -85,8 +85,7 @@ def report(
 
     state = State(config)
     for archiver in state.archivers:
-        # We have to do it backwards to get the deltas between releases
-        history = state.index[archiver].revisions[:n][::-1]
+        history = state.index[archiver].revisions[:n]
         last = {}
         for rev in history:
             vals = []

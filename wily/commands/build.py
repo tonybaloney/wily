@@ -103,10 +103,15 @@ def build(config, archiver, operators):
                     if seed:
                         prev_roots = roots
                         prev_indices = indices
-
-                    logger.debug(f"Comparing {prev_roots} and {roots}")
                     roots = prev_roots | roots
+                    all_indices = prev_indices | indices
 
+                    # Copy the ir from any unchanged files from the prev revision
+                    for missing in all_indices:
+                        if missing not in indices and pathlib.Path(missing).exists():
+                            result[missing] = prev_stats["operator_data"][operator_name][missing]
+
+                    # Aggregate metrics across all root paths using the aggregate function in the metric
                     for root in roots:
                         # find all matching entries recursively
                         aggregates = [
@@ -130,6 +135,7 @@ def build(config, archiver, operators):
                     prev_indices = indices
                     prev_roots = roots
                     stats["operator_data"][operator_name] = result
+                    prev_stats = stats
                     bar.next()
 
                 seed = False
