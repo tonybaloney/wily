@@ -4,6 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+import os
 import pathlib
 import multiprocessing
 from progress.bar import Bar
@@ -26,7 +27,17 @@ def run_operator(operator, revision, config, seed):
 
     instance = operator.cls(config, targets)
     logger.debug(f"Running {operator.name} operator on {revision.key}, seed={seed}")
-    return operator.name, instance.run(revision, config)
+
+    data = instance.run(revision, config)
+
+    # Normalise paths for non-seed passes
+    for key in list(data.keys()):
+        if os.path.isabs(key):
+            rel = os.path.relpath(key, config.path)
+            data[rel] = data[key]
+            del data[key]
+
+    return operator.name, data
 
 
 def build(config, archiver, operators):
@@ -104,12 +115,15 @@ def build(config, archiver, operators):
                         prev_roots = roots
                         prev_indices = indices
                     roots = prev_roots | roots
-                    all_indices = prev_indices | indices
-
+                    
                     # Copy the ir from any unchanged files from the prev revision
-                    for missing in all_indices:
-                        if missing not in indices and pathlib.Path(missing).exists():
-                            result[missing] = prev_stats["operator_data"][operator_name][missing]
+                    if not seed:
+                        missing_indices = prev_indices - indices
+                        # TODO: Check existence of file path.
+                        logger.debug(f"Mapping back metrics from {missing_indices}")
+                        for missing in missing_indices:
+                            if missing not in roots:
+                                result[missing] = prev_stats["operator_data"][operator_name][missing]
 
                     # Aggregate metrics across all root paths using the aggregate function in the metric
                     for root in roots:
@@ -132,19 +146,19 @@ def build(config, archiver, operators):
                             if len(values) > 0:
                                 result[str(root)]["total"][metric.name] = func(values)
 
-                    prev_indices = indices
+                    prev_indices = set(result.keys())
                     prev_roots = roots
                     stats["operator_data"][operator_name] = result
-                    prev_stats = stats
                     bar.next()
 
+                prev_stats = stats
                 seed = False
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver, stats)
         index.save()
         bar.finish()
     except Exception as e:
-        logger.error(f"Failed to build cache: '{e}'")
+        logger.error(f"Failed to build cache: {type(e)}: '{e}'")
         raise e
     finally:
         # Reset the archive after every run back to the head of the branch
