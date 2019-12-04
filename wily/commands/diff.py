@@ -42,7 +42,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     config.targets = files
     files = list(files)
     state = State(config)
-    last_revision = state.index[state.default_archiver].revisions[-1]
+    last_revision = state.index[state.default_archiver].revisions[0]
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}

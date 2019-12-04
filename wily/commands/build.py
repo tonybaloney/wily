@@ -44,6 +44,7 @@ def run_operator(operator, revision, config, seed):
         targets = [
             str(pathlib.Path(config.path) / pathlib.Path(file))
             for file in revision.files
+            if any([True for target in config.targets if target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
         ]
 
     instance = operator.cls(config, targets)
