@@ -85,7 +85,7 @@ def report(
 
     state = State(config)
     for archiver in state.archivers:
-        history = state.index[archiver].revisions[::-1][:n]
+        history = state.index[archiver].revisions[:n][::-1]
         last = {}
         for rev in history:
             vals = []
@@ -162,7 +162,7 @@ def report(
 
         table_headers = "".join([f"<th>{header}</th>" for header in headers])
         table_content = ""
-        for line in data:
+        for line in data[::-1]:
             table_content += "<tr>"
             for element in line:
                 element = element.replace("[32m", "<span class='green-color'>")
@@ -188,6 +188,6 @@ def report(
     else:
         print(
             tabulate.tabulate(
-                headers=headers, tabular_data=data, tablefmt=console_format
+                headers=headers, tabular_data=data[::-1], tablefmt=console_format
             )
         )

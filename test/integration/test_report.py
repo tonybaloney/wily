@@ -48,7 +48,6 @@ def test_report_granular(builddir):
         ],
     )
     assert result.exit_code == 0, result.stdout
-    assert "Not found" not in result.stdout
 
 
 def test_report_not_found(builddir):
@@ -93,23 +92,6 @@ def test_report_with_message(builddir):
     )
     assert result.exit_code == 0, result.stdout
     assert "basic test" in result.stdout
-    assert "remove line" in result.stdout
-    assert "Not found" not in result.stdout
-
-
-def test_report_with_message_and_n(builddir):
-    """
-    Test that report works messages in UI and fixed number of items
-    """
-    runner = CliRunner()
-    result = runner.invoke(
-        main.cli,
-        ["--path", builddir, "report", _path, "raw.multi", "--message", "-n 2"],
-    )
-    assert result.exit_code == 0, result.stdout
-    assert "basic test" not in result.stdout
-    assert "add line" in result.stdout
-    assert result.stdout.index("add line") > result.stdout.index("remove line")
     assert "remove line" in result.stdout
     assert "Not found" not in result.stdout
 
