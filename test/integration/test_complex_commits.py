@@ -77,7 +77,6 @@ def test_skip_files(tmpdir, cache_path):
     # assert index[0]['files'] == ['src/test1.py', 'src/test2.py']
     assert len(index) == 3
 
-
     # Look at the first commit
     with open(rev_path) as rev_file:
         data = json.load(rev_file)
