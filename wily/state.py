@@ -30,7 +30,7 @@ class IndexedRevision(object):
             author_email=d["author_email"],
             date=d["date"],
             message=d["message"],
-            files=d["files"] if "files" in d else []
+            files=d["files"] if "files" in d else [],
         )
         operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)
@@ -107,7 +107,9 @@ class Index(object):
             else []
         )
 
-        self._revisions = OrderedDict({d["key"]: IndexedRevision.fromdict(d) for d in self.data})
+        self._revisions = OrderedDict(
+            {d["key"]: IndexedRevision.fromdict(d) for d in self.data}
+        )
 
     def __len__(self):
         """Use length of revisions as len."""

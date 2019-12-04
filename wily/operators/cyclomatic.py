@@ -52,9 +52,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         # TODO: Import config for harvester from .wily.cfg
         logger.debug(f"Using {targets} with {self.defaults} for CC metrics")
 
-        self.harvester = harvesters.CCHarvester(
-            targets, config=Config(**self.defaults)
-        )
+        self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
         """

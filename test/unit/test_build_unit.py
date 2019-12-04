@@ -21,7 +21,7 @@ class MockArchiverCls(BaseArchiver):
                 author_email="-",  # as above
                 date=12_345_679,
                 message="None",
-                files=[]
+                files=[],
             )
         ]
 

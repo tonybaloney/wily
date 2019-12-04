@@ -53,9 +53,7 @@ class HalsteadOperator(BaseOperator):
         # TODO : Import config from wily.cfg
         logger.debug(f"Using {targets} with {self.defaults} for HC metrics")
 
-        self.harvester = harvesters.HCHarvester(
-            targets, config=Config(**self.defaults)
-        )
+        self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
         """

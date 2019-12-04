@@ -42,14 +42,18 @@ def test_skip_files(tmpdir, cache_path):
         test2_txt.write("import zzz\nprint(1)")
 
     repo.index.add([str(tmppath / "test2.py")])
-    commit2 = repo.index.commit("commit the second file only", author=author, committer=committer)
+    commit2 = repo.index.commit(
+        "commit the second file only", author=author, committer=committer
+    )
 
     # Change the first file and commit that
     with open(tmppath / "test1.py", "w") as test2_txt:
         test2_txt.write("import zzz\nprint(1)")
 
     repo.index.add([str(tmppath / "test1.py")])
-    commit3 = repo.index.commit("commit the first file only", author=author, committer=committer)
+    commit3 = repo.index.commit(
+        "commit the first file only", author=author, committer=committer
+    )
 
     repo.close()
 

@@ -59,9 +59,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         # TODO : Import config from wily.cfg
         logger.debug(f"Using {targets} with {self.defaults} for MI metrics")
 
-        self.harvester = harvesters.MIHarvester(
-            targets, config=Config(**self.defaults)
-        )
+        self.harvester = harvesters.MIHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
         """

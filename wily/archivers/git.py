@@ -80,7 +80,7 @@ class GitArchiver(BaseArchiver):
                 author_email=commit.author.email,
                 date=commit.committed_date,
                 message=commit.message,
-                files=list(commit.stats.files.keys())
+                files=list(commit.stats.files.keys()),
             )
             revisions.append(rev)
         return revisions

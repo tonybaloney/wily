@@ -103,14 +103,14 @@ def test_report_with_message_and_n(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "raw.multi", "--message", "-n 2"]
+        main.cli,
+        ["--path", builddir, "report", _path, "raw.multi", "--message", "-n 2"],
     )
     assert result.exit_code == 0, result.stdout
-    assert "basic test" in result.stdout
+    assert "basic test" not in result.stdout
     assert "add line" in result.stdout
-    assert result.stdout.index("basic test") < result.stdout.index("add line")
-
-    assert "remove line" not in result.stdout
+    assert result.stdout.index("add line") > result.stdout.index("remove line")
+    assert "remove line" in result.stdout
     assert "Not found" not in result.stdout
 
 
