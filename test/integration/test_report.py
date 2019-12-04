@@ -42,6 +42,7 @@ def test_report_granular(builddir):
             "report",
             _path + ":function1",
             "cyclomatic.complexity",
+            "--message",
             "-n",
             1,
         ],
@@ -93,6 +94,23 @@ def test_report_with_message(builddir):
     assert result.exit_code == 0, result.stdout
     assert "basic test" in result.stdout
     assert "remove line" in result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_with_message_and_n(builddir):
+    """
+    Test that report works messages in UI and fixed number of items
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", _path, "raw.multi", "--message", "-n 2"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "basic test" in result.stdout
+    assert "add line" in result.stdout
+    assert result.stdout.index("basic test") < result.stdout.index("add line")
+
+    assert "remove line" not in result.stdout
     assert "Not found" not in result.stdout
 
 

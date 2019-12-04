@@ -23,6 +23,7 @@ def run_operator(operator, revision, config, seed):
     if seed:
         targets = config.targets
     else:  # Only target changed files
+        # TODO : Check that changed files are children of the targets
         targets = [str(pathlib.Path(config.path) / pathlib.Path(file)) for file in revision.files]
 
     instance = operator.cls(config, targets)
@@ -120,10 +121,17 @@ def build(config, archiver, operators):
                     if not seed:
                         missing_indices = prev_indices - indices
                         # TODO: Check existence of file path.
-                        logger.debug(f"Mapping back metrics from {missing_indices}")
                         for missing in missing_indices:
-                            if missing not in roots:
-                                result[missing] = prev_stats["operator_data"][operator_name][missing]
+                            # dont copy aggregate keys as their values may have changed
+                            if missing in roots:
+                                continue
+                            # previous index may not have that operator
+                            if operator_name not in prev_stats["operator_data"]:
+                                continue
+                            # previous index may not have file either
+                            if missing not in prev_stats["operator_data"][operator_name]:
+                                continue
+                            result[missing] = prev_stats["operator_data"][operator_name][missing]
 
                     # Aggregate metrics across all root paths using the aggregate function in the metric
                     for root in roots:

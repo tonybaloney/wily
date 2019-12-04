@@ -107,9 +107,7 @@ class Index(object):
             else []
         )
 
-        self._revisions = OrderedDict()
-        for d in self.data:
-            self._revisions[d["key"]] = IndexedRevision.fromdict(d)
+        self._revisions = OrderedDict({d["key"]: IndexedRevision.fromdict(d) for d in self.data})
 
     def __len__(self):
         """Use length of revisions as len."""

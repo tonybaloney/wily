@@ -162,7 +162,7 @@ def report(
 
         table_headers = "".join([f"<th>{header}</th>" for header in headers])
         table_content = ""
-        for line in data[::-1]:
+        for line in data:
             table_content += "<tr>"
             for element in line:
                 element = element.replace("[32m", "<span class='green-color'>")
@@ -187,8 +187,7 @@ def report(
         logger.info(f"wily report was saved to {report_path}")
     else:
         print(
-            # But it still makes more sense to show the newest at the top, so reverse again
             tabulate.tabulate(
-                headers=headers, tabular_data=data[::-1], tablefmt=console_format
+                headers=headers, tabular_data=data, tablefmt=console_format
             )
         )
