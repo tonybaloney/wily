@@ -19,7 +19,24 @@ from wily.operators import resolve_operator
 
 
 def run_operator(operator, revision, config, seed):
-    """Run an operator for the multiprocessing pool. Not called directly."""
+    """
+    Run an operator for the multiprocessing pool
+
+    :param operator: The operator name
+    :type  operator: ``str``
+
+    :param revision: The revision index
+    :type  revision: :class:`Revision`
+
+    :param config: The runtime configuration
+    :type  config: :class:`WilyConfig`
+
+    :param seed: Scan all files, not just changed
+    :type  seed: ``bool``
+
+    :rtype: ``tuple``
+    :returns: A tuple of operator name (``str``), and data (``dict``)
+    """
     if seed:
         targets = config.targets
     else:  # Only target changed files
@@ -31,7 +48,7 @@ def run_operator(operator, revision, config, seed):
 
     data = instance.run(revision, config)
 
-    # Normalise paths for non-seed passes
+    # Normalize paths for non-seed passes
     for key in list(data.keys()):
         if os.path.isabs(key):
             rel = os.path.relpath(key, config.path)
@@ -122,7 +139,7 @@ def build(config, archiver, operators):
                         missing_indices = prev_indices - indices
                         # TODO: Check existence of file path.
                         for missing in missing_indices:
-                            # dont copy aggregate keys as their values may have changed
+                            # Don't copy aggregate keys as their values may have changed
                             if missing in roots:
                                 continue
                             # previous index may not have that operator
