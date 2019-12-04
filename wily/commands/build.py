@@ -20,7 +20,7 @@ from wily.operators import resolve_operator
 
 def run_operator(operator, revision, config, seed):
     """
-    Run an operator for the multiprocessing pool
+    Run an operator for the multiprocessing pool.
 
     :param operator: The operator name
     :type  operator: ``str``
