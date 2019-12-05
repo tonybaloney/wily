@@ -18,7 +18,7 @@ from wily.archivers import FilesystemArchiver
 from wily.operators import resolve_operator
 
 
-def run_operator(operator, revision, config, seed):
+def run_operator(operator, revision, config, targets):
     """
     Run an operator for the multiprocessing pool.
 
@@ -31,24 +31,14 @@ def run_operator(operator, revision, config, seed):
     :param config: The runtime configuration
     :type  config: :class:`WilyConfig`
 
-    :param seed: Scan all files, not just changed
-    :type  seed: ``bool``
+    :param targets: Files/paths to scan
+    :type  targets: ``list`` of ``str``
 
     :rtype: ``tuple``
     :returns: A tuple of operator name (``str``), and data (``dict``)
     """
-    if seed:
-        targets = config.targets
-    else:  # Only target changed files
-        # TODO : Check that changed files are children of the targets
-        targets = [
-            str(pathlib.Path(config.path) / pathlib.Path(file))
-            for file in revision.files
-            if any([True for target in config.targets if target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
-        ]
-
     instance = operator.cls(config, targets)
-    logger.debug(f"Running {operator.name} operator on {revision.key}, seed={seed}")
+    logger.debug(f"Running {operator.name} operator on {revision}")
 
     data = instance.run(revision, config)
 
@@ -120,10 +110,21 @@ def build(config, archiver, operators):
                 archiver.checkout(revision, config.checkout_options)
                 stats = {"operator_data": {}}
 
+                if seed:
+                    targets = config.targets
+                else:  # Only target changed files
+                    # TODO : Check that changed files are children of the targets
+                    targets = [
+                        str(pathlib.Path(config.path) / pathlib.Path(file))
+                        for file in revision.files
+                        if any([True for target in config.targets if
+                                target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
+                    ]
+
                 # Run each operator as a separate process
                 data = pool.starmap(
                     run_operator,
-                    [(operator, revision, config, seed) for operator in operators],
+                    [(operator, revision, config, targets) for operator in operators],
                 )
 
                 # Map the data back into a dictionary

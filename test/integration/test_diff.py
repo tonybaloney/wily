@@ -11,20 +11,20 @@ _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 def test_diff_no_cache(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "diff", _path])
+    result = runner.invoke(main.cli, ["--path", tmpdir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 1, result.stdout
 
 
 def test_diff_no_path(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "diff"])
+    result = runner.invoke(main.cli, ["--path", tmpdir, "diff"], catch_exceptions=False)
     assert result.exit_code == 2, result.stdout
 
 
 def test_diff_output(builddir):
     """ Test the diff feature with no changes """
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "diff", _path])
+    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
 
@@ -33,7 +33,8 @@ def test_diff_output_all(builddir):
     """ Test the diff feature with no changes and the --all flag """
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
+        main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"],
+        catch_exceptions=False
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -44,6 +45,7 @@ def test_diff_output_bad_path(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", builddir, "diff", "src/baz.py"]
+        , catch_exceptions=False
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
@@ -58,6 +60,7 @@ def test_diff_output_remove_all(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
+        , catch_exceptions=False
     )
     assert result.exit_code == 0, result.stdout
 
@@ -87,6 +90,7 @@ def test_diff_output_more_complex(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
+        , catch_exceptions=False
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -114,6 +118,7 @@ def test_diff_output_less_complex(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", builddir, "diff", _path, "--all"]
+        , catch_exceptions=False
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -133,6 +138,7 @@ def test_diff_output_loc(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc"]
+        , catch_exceptions=False
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -159,7 +165,7 @@ def test_diff_output_rank(builddir):
             "--all",
             "--metrics",
             "maintainability.rank",
-        ],
+        ], catch_exceptions = False
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout

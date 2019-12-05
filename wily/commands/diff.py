@@ -3,8 +3,7 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
-import os
-
+import multiprocessing
 import tabulate
 
 from wily import logger
@@ -17,6 +16,7 @@ from wily.operators import (
     BAD_COLORS,
     OperatorLevel,
 )
+from wily.commands.build import run_operator
 from wily.state import State
 
 
@@ -42,23 +42,22 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     config.targets = files
     files = list(files)
     state = State(config)
-    last_revision = state.index[state.default_archiver].revisions[0]
+    last_revision = state.index[state.default_archiver].last_revision
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
     metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
-    data = {}
     results = []
 
     # Build a set of operators
-    _operators = [operator.cls(config, config.targets) for operator in operators]
-
-    cwd = os.getcwd()
-    os.chdir(config.path)
-    for operator in _operators:
-        logger.debug(f"Running {operator.name} operator")
-        data[operator.name] = operator.run(None, config)
-    os.chdir(cwd)
+    with multiprocessing.Pool(processes=len(operators)) as pool:
+        operator_exec_out = pool.starmap(
+            run_operator,
+            [(operator, None, config, files) for operator in operators],
+        )
+    data = {}
+    for operator_name, result in operator_exec_out:
+        data[operator_name] = result
 
     # Write a summary table
     extra = []

@@ -116,6 +116,15 @@ class Index(object):
         return len(self._revisions)
 
     @property
+    def last_revision(self):
+        """
+        Return the most recent revision.
+
+        :rtype: ``list`` of :class:`LazyRevision`
+        """
+        return next(iter(self._revisions.values()))
+
+    @property
     def revisions(self):
         """
         List of all the revisions.

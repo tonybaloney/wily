@@ -1,9 +1,6 @@
 """
 This is really an integration test.
 """
-
-import os.path
-
 import pytest
 
 import wily.config
@@ -31,6 +28,10 @@ def test_index(config):
     state = wily.state.State(config)
     assert state.index
     assert state.index["git"] is not None
+
+    last_revision = state.index["git"].last_revision
+    assert last_revision.revision.message == "remove line"
+
     for revision in state.index["git"].revisions:
         assert state.index["git"][revision.revision.key]
         assert revision.revision in state.index["git"]

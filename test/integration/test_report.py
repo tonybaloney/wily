@@ -48,7 +48,7 @@ def test_report_granular(builddir):
         ],
     )
     assert result.exit_code == 0, result.stdout
-    assert "not found" not in result.stdout
+    assert "remove line" in result.stdout
 
 
 def test_report_not_found(builddir):
