@@ -117,8 +117,8 @@ def build(config, archiver, operators):
                     targets = [
                         str(pathlib.Path(config.path) / pathlib.Path(file))
                         for file in revision.files
-                        if any([True for target in config.targets if
-                                target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
+                        # if any([True for target in config.targets if
+                        #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
                     ]
 
                 # Run each operator as a separate process

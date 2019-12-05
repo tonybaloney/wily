@@ -5,9 +5,9 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import tabulate
-
+from pathlib import Path
 from wily import logger
-from wily.config import DEFAULT_GRID_STYLE
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.operators import (
     resolve_metric,
     resolve_operator,
@@ -42,6 +42,13 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     config.targets = files
     files = list(files)
     state = State(config)
+
+    # Resolve target paths when the cli has specified --path
+    if config.path != DEFAULT_PATH:
+        targets = [str(Path(config.path) / Path(file)) for file in files]
+    else:
+        targets = files
+
     last_revision = state.index[state.default_archiver].last_revision
 
     # Convert the list of metrics to a list of metric instances
@@ -53,7 +60,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     with multiprocessing.Pool(processes=len(operators)) as pool:
         operator_exec_out = pool.starmap(
             run_operator,
-            [(operator, None, config, files) for operator in operators],
+            [(operator, None, config, targets) for operator in operators],
         )
     data = {}
     for operator_name, result in operator_exec_out:
