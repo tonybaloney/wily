@@ -2,6 +2,8 @@
 
 ## 1.14.1 (6th December 2019)
 
+* Debug logs are always stored in a temporary local file, on the event of a crash, wily will suggest the user to upload this file to GitHub with a copy of the crash log
+* Unhandled exceptions raised by the operators (normally file formatting) are now debug events not warnings
 * Updated to flit 2.0 for packaging (development change, no impact to users)
 * Moved source code to src/ (development change, no impact to users)
 
