@@ -352,9 +352,9 @@ def handle_no_cache(context):
         context.invoke(build, max_revisions=revisions, targets=paths, operators=None)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     try:
-        cli()  # pragma: no cover
+        cli()
     except Exception as runtime:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
         logger.info(f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing.")
