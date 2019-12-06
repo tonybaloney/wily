@@ -64,13 +64,13 @@ stages:
 
       - script: |
           python -m pip install --upgrade pip
-          pip install flit mock codecov pytest pytest-cov
+          pip install flit mock pytest pytest-cov
           flit install
         displayName: 'Install dependencies'
 
       - script: |
           pip install --pre pytest-azurepipelines==1.0.0rc1
-          python -m pytest test --cov=wily
+          python -m pytest test
         displayName: 'pytest'
 
   - stage: Package_Test
