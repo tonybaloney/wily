@@ -1,5 +1,10 @@
 # Release History
 
+## 1.14.1 (6th December 2019)
+
+* Updated to flit 2.0 for packaging (development change, no impact to users)
+* Moved source code to src/ (development change, no impact to users)
+
 ## 1.14.0 (6th December 2019)
 
 * The build process uses the metadata from Git to only scan the files that have changed for each revision. Significantly speeds up build times (25x>).

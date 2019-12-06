@@ -2,7 +2,7 @@ trigger:
 - master
 name: $(Year:yy)$(DayOfYear)$(Rev:r)
 variables:
-  majorVer: '1.13.1'
+  majorVer: '1.14.1'
 
 stages:
   - stage: Unit_Test
@@ -35,13 +35,13 @@ stages:
         displayName: 'Install dependencies'
 
       - script: |
-          python -m pytest test/ --cov=wily/
+          python -m pytest test/ --cov=wily
           codecov
         displayName: 'pytest'
         env:
           CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
 
-      - script: pydocstyle --ignore=D301,D212,D203 wily
+      - script: pydocstyle --ignore=D301,D212,D203 src/wily
         displayName: 'pydocstyle'
 
     - job: 'Test_Windows'
