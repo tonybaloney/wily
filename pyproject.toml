@@ -51,8 +51,9 @@ envlist = py36, py37, py38
 [testenv]
 passenv = CI TRAVIS TRAVIS_* HOME
 setenv =
-    PYTHONPATH = {toxinidir}/src
+    PYTHONPATH = {toxinidir}
 deps =
+    pip>=19.1
     pytest
     pytest-cov
     codecov

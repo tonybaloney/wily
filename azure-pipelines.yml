@@ -35,7 +35,7 @@ stages:
         displayName: 'Install dependencies'
 
       - script: |
-          python -m pytest test/ --cov=src/wily/
+          python -m pytest test/ --cov=wily
           codecov
         displayName: 'pytest'
         env:
@@ -70,7 +70,7 @@ stages:
 
       - script: |
           pip install --pre pytest-azurepipelines==1.0.0rc1
-          python -m pytest test --cov=src/wily
+          python -m pytest test --cov=wily
         displayName: 'pytest'
 
   - stage: Package_Test
