@@ -43,7 +43,7 @@ class HalsteadOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config):
+    def __init__(self, config, targets):
         """
         Instantiate a new HC operator.
 
@@ -51,11 +51,9 @@ class HalsteadOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {config.targets} with {self.defaults} for HC metrics")
+        logger.debug(f"Using {targets} with {self.defaults} for HC metrics")
 
-        self.harvester = harvesters.HCHarvester(
-            config.targets, config=Config(**self.defaults)
-        )
+        self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
         """

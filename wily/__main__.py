@@ -2,7 +2,7 @@
 """Main command line."""
 
 import click
-
+import traceback
 from pathlib import Path
 
 from wily import logger, __version__
@@ -352,4 +352,8 @@ def handle_no_cache(context):
 
 
 if __name__ == "__main__":
-    cli()  # pragma: no cover
+    try:
+        cli()  # pragma: no cover
+    except Exception as runtime:
+        logger.error("Wily crashed!")
+        logger.debug(traceback.format_exc())

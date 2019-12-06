@@ -2,6 +2,8 @@ import pathlib
 from textwrap import dedent
 import shutil
 import tempfile
+from time import time
+
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
@@ -26,7 +28,7 @@ def gitdir(tmpdir):
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
 
-    index.commit("basic test", author=author, committer=committer)
+    index.commit("basic test", author=author, committer=committer, author_date="Thu, 07 Apr 2019 22:13:13 +0200", commit_date="Thu, 07 Apr 2019 22:13:13 +0200")
 
     first_test = """
     import abc
@@ -42,7 +44,7 @@ def gitdir(tmpdir):
         test_txt.write(dedent(first_test))
 
     index.add([str(testpath)])
-    index.commit("add line", author=author, committer=committer)
+    index.commit("add line", author=author, committer=committer, author_date="Mon, 10 Apr 2019 22:13:13 +0200", commit_date="Mon, 10 Apr 2019 22:13:13 +0200")
 
     second_test = """
     import abc
@@ -60,7 +62,7 @@ def gitdir(tmpdir):
         test_txt.write(dedent(second_test))
 
     index.add([str(testpath)])
-    index.commit("remove line", author=author, committer=committer)
+    index.commit("remove line", author=author, committer=committer, author_date="Thu, 14 Apr 2019 22:13:13 +0200", commit_date="Thu, 14 Apr 2019 22:13:13 +0200")
 
     yield tmpdir
     repo.close()

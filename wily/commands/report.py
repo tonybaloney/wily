@@ -85,7 +85,6 @@ def report(
 
     state = State(config)
     for archiver in state.archivers:
-        # We have to do it backwards to get the deltas between releases
         history = state.index[archiver].revisions[:n][::-1]
         last = {}
         for rev in history:
@@ -188,7 +187,6 @@ def report(
         logger.info(f"wily report was saved to {report_path}")
     else:
         print(
-            # But it still makes more sense to show the newest at the top, so reverse again
             tabulate.tabulate(
                 headers=headers, tabular_data=data[::-1], tablefmt=console_format
             )

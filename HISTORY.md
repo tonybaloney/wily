@@ -1,8 +1,12 @@
 # Release History
 
-## 1.13.1 (master)
+## 1.14.0 (6th December 2019)
 
-* Add Python 3.8 tests
+* The build process uses the metadata from Git to only scan the files that have changed for each revision. Significantly speeds up build times (25x>).
+* The diff process uses multiprocessing to make it 3-4x faster to complete.
+* Officially add support for Python 3.8.
+* Process crashes are now captured and output on the console in the debug log.
+* State index building is 10-20% faster.
 
 ## 1.13.0 (29th November 2019)
 
