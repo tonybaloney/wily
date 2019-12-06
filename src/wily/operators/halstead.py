@@ -81,7 +81,7 @@ class HalsteadOperator(BaseOperator):
                         )
                 else:
                     if isinstance(instance, str) and instance == "error":
-                        logger.warning(
+                        logger.debug(
                             f"Failed to run Halstead harvester on {filename} : {details['error']}"
                         )
                         continue
