@@ -79,7 +79,7 @@ class CyclomaticComplexityOperator(BaseOperator):
                     i = self._dict_from_function(instance)
                 else:
                     if isinstance(instance, str) and instance == "error":
-                        logger.warning(
+                        logger.debug(
                             f"Failed to run CC harvester on {filename} : {details['error']}"
                         )
                         continue

@@ -5,7 +5,7 @@ import click
 import traceback
 from pathlib import Path
 
-from wily import logger, __version__
+from wily import logger, __version__, WILY_LOG_NAME
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
@@ -79,6 +79,7 @@ def cli(ctx, debug, config, path, cache):
         logger.debug(f"Fixing cache to {cache}")
         ctx.obj["CONFIG"].cache_path = cache
     logger.debug(f"Loaded configuration from {config}")
+    logger.debug(f"Capturing logs to {WILY_LOG_NAME}")
 
 
 @cli.command()
@@ -355,5 +356,6 @@ if __name__ == "__main__":
     try:
         cli()  # pragma: no cover
     except Exception as runtime:
-        logger.error("Wily crashed!")
+        logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
+        logger.info(f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing.")
         logger.debug(traceback.format_exc())
