@@ -72,6 +72,34 @@ stages:
           pip install --pre pytest-azurepipelines==1.0.0rc1
           python -m pytest test
         displayName: 'pytest'
+    - job: 'Test_Conda'
+      pool:
+        vmImage: 'Ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+          Python38:
+            python.version: '3.8'
+      steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+
+      - bash: conda create --yes --quiet --name wilyEnv
+        displayName: Create Anaconda environment
+
+      - bash: |
+          source activate wilyEnv
+          conda install --yes --quiet --name wilyEnv python=$PYTHON_VERSION flit mock pytest-azurepipelines
+        displayName: Install Anaconda packages
+
+      - bash: |
+          source activate wilyEnv
+          flit install
+          python -m pytest test/ --cov=wily
+        displayName: 'Install Dependencies and test'
 
   - stage: Package_Test
     jobs:
