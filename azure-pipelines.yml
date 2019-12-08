@@ -87,17 +87,20 @@ stages:
       - bash: echo "##vso[task.prependpath]$CONDA/bin"
         displayName: Add conda to PATH
 
-      - bash: conda create --yes --quiet --name wilyEnv
+      - bash: |
+          conda create --yes --quiet --name wilyEnv
+          conda config --add channels conda-forge
         displayName: Create Anaconda environment
 
       - bash: |
           source activate wilyEnv
-          conda install --yes --quiet --name wilyEnv python=$PYTHON_VERSION flit mock pytest-azurepipelines
+          conda install -c conda-forge/label/main flit flit-core
+          conda install --yes --name wilyEnv python=$PYTHON_VERSION flit mock pytest-azurepipelines
+          flit install
         displayName: Install Anaconda packages
 
       - bash: |
           source activate wilyEnv
-          flit install
           python -m pytest test/ --cov=wily
         displayName: 'Install Dependencies and test'
 
