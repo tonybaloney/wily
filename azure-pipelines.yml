@@ -94,9 +94,9 @@ stages:
 
       - bash: |
           source activate wilyEnv
-          conda install --yes --name wilyEnv -c conda-forge/label/main flit flit-core
-          conda install --yes --name wilyEnv python=$PYTHON_VERSION flit mock pytest-azurepipelines
-          flit install --python=$PYTHON_VERSION
+          conda install --yes --quiet --name wilyEnv python=$PYTHON_VERSION -c conda-forge/label/main flit flit-core
+          conda install --yes --quiet --name wilyEnv python=$PYTHON_VERSION mock pytest-azurepipelines
+          flit install --env
         displayName: Install Anaconda packages
 
       - bash: |
