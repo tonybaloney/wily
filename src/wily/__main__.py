@@ -139,7 +139,7 @@ def build(ctx, max_revisions, targets, operators, archiver):
 
 @cli.command()
 @click.pass_context
-@click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option("-m", "--message/--no-message", default=False, help="Include revision message")
 def index(ctx, message):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
@@ -156,7 +156,7 @@ def index(ctx, message):
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option("-m", "--message/--no-message", default=False, help="Include revision message")
 @click.option(
     "-f",
     "--format",
@@ -210,12 +210,12 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False), nargs=-1, required=True)
 @click.option(
-    "--metrics",
+    "-m", "--metrics",
     default=None,
     help="comma-seperated list of metrics, see list-metrics for choices",
 )
 @click.option(
-    "--all/--changes-only",
+    "-a/-c", "--all/--changes-only",
     default=False,
     help="Show all files, instead of changes only",
 )

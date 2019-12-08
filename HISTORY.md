@@ -1,5 +1,12 @@
 # Release History
 
+## 1.15.0 (master)
+
+* `wily diff` argument for `--all`/`--changes-only` has shorter `-a`/`-c` also.
+* `wily diff` argument for `--metrics` has shorter `-m` also.
+* `wily report` argument for `--message` has shorter `-m` also.
+* `wily index` argument for `--message` has shorter `-m` also.
+
 ## 1.14.1 (6th December 2019)
 
 * Debug logs are always stored in a temporary local file, on the event of a crash, wily will suggest the user to upload this file to GitHub with a copy of the crash log
