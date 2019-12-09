@@ -2,6 +2,7 @@
 
 ## 1.15.0 (master)
 
+* Add argument to `wily diff` to specify a target revision to compare with, can be a Git SHA or a Git reference, e.g. `HEAD^1`
 * `wily diff` argument for `--all`/`--changes-only` has shorter `-a`/`-c` also.
 * `wily diff` argument for `--metrics` has shorter `-m` also.
 * `wily report` argument for `--message` has shorter `-m` also.

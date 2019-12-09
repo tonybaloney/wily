@@ -6,7 +6,7 @@ Compares metrics between uncommitted files and indexed files.
 import multiprocessing
 import tabulate
 from pathlib import Path
-from wily import logger
+from wily import logger, format_revision, format_date
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.operators import (
@@ -59,6 +59,10 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
         target_revision = state.index[state.default_archiver][rev.key]
 
+    logger.info(
+        f"Comparing current with {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}."
+    )
+
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
     metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
@@ -67,8 +71,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     # Build a set of operators
     with multiprocessing.Pool(processes=len(operators)) as pool:
         operator_exec_out = pool.starmap(
-            run_operator,
-            [(operator, None, config, targets) for operator in operators],
+            run_operator, [(operator, None, config, targets) for operator in operators]
         )
     data = {}
     for operator_name, result in operator_exec_out:
