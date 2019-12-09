@@ -8,6 +8,7 @@
 * `wily diff` argument for `--metrics` has shorter `-m` also.
 * `wily report` argument for `--message` has shorter `-m` also.
 * `wily index` argument for `--message` has shorter `-m` also.
+* Added examples, tests and documentation for CICD patterns.
 
 ## 1.14.1 (6th December 2019)
 
