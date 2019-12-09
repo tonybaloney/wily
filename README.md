@@ -23,9 +23,27 @@ Wily can be used via a command line interface, `wily`.
 
 ```console
  $ wily --help
- 
  ```
+
 ![help-screen](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_help.png)
+
+## Using Wily in a CI/CD pipeline
+
+Wily can be used in a CI/CD workflow to compare the complexity of the current files against a particular revision.
+
+By default wily will compare against the previous revision (for a git-pre-commit hook) but you can also give a Git ref, for example `HEAD^1` is the commit before the HEAD reference.
+
+.. code-block:: console
+
+    $ wily build src/
+    $ wily diff src/ -r HEAD^1
+
+Or, to compare against
+
+.. code-block:: shell
+
+    $ wily build src/
+    $ wily diff src/ -r master
 
 ## pre-commit plugin
 
