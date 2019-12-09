@@ -39,7 +39,7 @@ Wily can be used via a command line interface, `wily`.
 
 Here is a demo of wily analysing a Python project, giving a summary of changes to complexity in the last 10 commits and then showing changes against a specific git revision: 
 
-![demo](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/termtosvg_leo0ur6s.svg)
+![demo](./docs/source/_static/termtosvg_leo0ur6s.svg)
 
 ## Using Wily in a CI/CD pipeline
 
