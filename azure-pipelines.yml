@@ -45,8 +45,8 @@ stages:
         displayName: 'pydocstyle'
 
       - script: |
-          wily build src/ -n 4
-          wily diff src/ -r HEAD^1
+          wily --debug build src/ -n 4
+          wily --debug diff src/ -r HEAD^1
         displayName: Compare previous commit
 
     - job: 'Test_Windows'
