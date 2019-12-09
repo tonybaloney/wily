@@ -57,6 +57,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         target_revision = state.index[state.default_archiver].last_revision
     else:
         rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
         try:
             target_revision = state.index[state.default_archiver][rev.key]
         except KeyError:
