@@ -15,6 +15,14 @@ and often willing to use tricks to achieve an aim.
 
 Wily uses git to go through each revision (commit) in a branch and run complexity and code-analysis metrics over the code. You can use this to limit your code or report on trends for complexity, length etc.
 
+## Installation
+
+Wily can be installed via pip from Python 3.6 and above:
+
+```console
+ $ pip install wily
+```
+
 ## Usage
 
 See the [Documentation Site](https://wily.readthedocs.io/) for full usage guides.
@@ -26,6 +34,12 @@ Wily can be used via a command line interface, `wily`.
  ```
 
 ![help-screen](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_help.png)
+
+## Demo
+
+Here is a demo of wily analysing a Python project, giving a summary of changes to complexity in the last 10 commits and then showing changes against a specific git revision: 
+
+![demo](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/termtosvg_leo0ur6s.svg)
 
 ## Using Wily in a CI/CD pipeline
 
