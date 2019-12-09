@@ -120,7 +120,7 @@ class Index(object):
         """
         Return the most recent revision.
 
-        :rtype: ``list`` of :class:`LazyRevision`
+        :rtype: Instance of :class:`IndexedRevision`
         """
         return next(iter(self._revisions.values()))
 

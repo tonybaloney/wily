@@ -224,8 +224,9 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
     default=True,
     help="Show function/class level metrics where available",
 )
+@click.option("-r", "--revision", help="Compare against specific revision", type=click.STRING)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail):
+def diff(ctx, files, metrics, all, detail, revision):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -243,7 +244,7 @@ def diff(ctx, files, metrics, all, detail):
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
     diff(
-        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail, revision=revision
     )
 
 
