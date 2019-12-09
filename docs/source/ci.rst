@@ -17,7 +17,7 @@ Or, to compare against
     $ wily build src/
     $ wily diff src/ -r master
 
-.. image:: ../_static/diff_ref.png
+.. image:: _static/diff_ref.png
    :align: center
 
 The `wily diff` command takes additional arguments, such as a list of metrics, if you want to see a specific metric.
