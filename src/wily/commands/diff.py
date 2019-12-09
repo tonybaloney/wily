@@ -57,7 +57,11 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         target_revision = state.index[state.default_archiver].last_revision
     else:
         rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
-        target_revision = state.index[state.default_archiver][rev.key]
+        try:
+            target_revision = state.index[state.default_archiver][rev.key]
+        except KeyError:
+            logger.error(f"Revision {revision} is not in the cache, make sure you have run wily build.")
+            exit(1)
 
     logger.info(
         f"Comparing current with {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}."
