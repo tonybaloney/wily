@@ -45,9 +45,10 @@ stages:
         displayName: 'pydocstyle'
 
       - script: |
-          wily build src/ -n 2
+          wily build src/
           wily diff src/ -r HEAD^1
         displayName: Compare previous commit
+        continueOnError: true
 
     - job: 'Test_Windows'
       pool:

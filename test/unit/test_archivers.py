@@ -31,11 +31,16 @@ class MockCommit(object):
         self.message = message
 
 
+class MockHead(object):
+    is_detached = False
+
+
 class MockRepo(object):
     active_branch = "master"
     bare = False
     _is_dirty = False
     commits = [MockCommit("commit-1"), MockCommit("commit-2")]
+    head = MockHead()
 
     def is_dirty(self):
         return self._is_dirty

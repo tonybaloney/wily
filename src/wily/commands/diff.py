@@ -4,7 +4,9 @@ Diff command.
 Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
+import os
 import tabulate
+
 from pathlib import Path
 from wily import logger, format_revision, format_date
 from wily.archivers import resolve_archiver
@@ -19,6 +21,8 @@ from wily.operators import (
 )
 from wily.commands.build import run_operator
 from wily.state import State
+
+import radon.cli.harvest
 
 
 def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
@@ -53,14 +57,21 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     else:
         targets = files
 
+    # Expand directories to paths
+    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+    logger.debug(f"Targeting - {files}")
+
     if not revision:
         target_revision = state.index[state.default_archiver].last_revision
     else:
         rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
         try:
             target_revision = state.index[state.default_archiver][rev.key]
         except KeyError:
-            logger.error(f"Revision {revision} is not in the cache, make sure you have run wily build.")
+            logger.error(
+                f"Revision {revision} is not in the cache, make sure you have run wily build."
+            )
             exit(1)
 
     logger.info(

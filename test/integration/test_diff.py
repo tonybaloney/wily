@@ -166,7 +166,17 @@ def test_diff_output_loc_and_revision(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc", "-r", "HEAD^1"],
+        [
+            "--debug",
+            "--path",
+            builddir,
+            "diff",
+            _path,
+            "--metrics",
+            "raw.loc",
+            "-r",
+            "HEAD^1",
+        ],
         catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout
