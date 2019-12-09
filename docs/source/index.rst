@@ -21,6 +21,7 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
    :maxdepth: 1
    :caption: Contents:
 
+   ci
    commands/build
    commands/diff
    commands/graph
