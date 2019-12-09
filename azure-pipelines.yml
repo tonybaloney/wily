@@ -100,8 +100,8 @@ stages:
 
       - bash: |
           source activate wilyEnv
-          python -m pytest test/ --cov=wily
-        displayName: 'Install Dependencies and test'
+          python -m pytest test/
+        displayName: 'Test package'
 
   - stage: Package_Test
     jobs:
