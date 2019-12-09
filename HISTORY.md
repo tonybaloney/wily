@@ -1,6 +1,6 @@
 # Release History
 
-## 1.15.0 (master)
+## 1.15.0 (9th December 2019)
 
 * Add argument to `wily diff` to specify a target revision to compare with, can be a Git SHA or a Git reference, e.g. `HEAD^1`
 * `wily diff` argument for `--all`/`--changes-only` has shorter `-a`/`-c` also.
