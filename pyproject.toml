@@ -19,7 +19,16 @@ module = "wily"
 author = "Anthony Shaw"
 author-email = "anthonyshaw@apache.org"
 home-page = "https://github.com/tonybaloney/wily"
-classifiers = ["License :: OSI Approved :: Apache Software License"]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3 :: Only",
+    ]
 requires = [
     "gitpython>=2.1.11,<2.2.0",
     "radon>=4.0.0,<4.1.0",
