@@ -139,7 +139,9 @@ def build(ctx, max_revisions, targets, operators, archiver):
 
 @cli.command()
 @click.pass_context
-@click.option("-m", "--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-m", "--message/--no-message", default=False, help="Include revision message"
+)
 def index(ctx, message):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
@@ -156,7 +158,9 @@ def index(ctx, message):
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option("-m", "--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-m", "--message/--no-message", default=False, help="Include revision message"
+)
 @click.option(
     "-f",
     "--format",
@@ -210,12 +214,14 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False), nargs=-1, required=True)
 @click.option(
-    "-m", "--metrics",
+    "-m",
+    "--metrics",
     default=None,
     help="comma-seperated list of metrics, see list-metrics for choices",
 )
 @click.option(
-    "-a/-c", "--all/--changes-only",
+    "-a/-c",
+    "--all/--changes-only",
     default=False,
     help="Show all files, instead of changes only",
 )
@@ -224,8 +230,11 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
     default=True,
     help="Show function/class level metrics where available",
 )
+@click.option(
+    "-r", "--revision", help="Compare against specific revision", type=click.STRING
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail):
+def diff(ctx, files, metrics, all, detail, revision):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -243,7 +252,12 @@ def diff(ctx, files, metrics, all, detail):
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
     diff(
-        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+        config=config,
+        files=files,
+        metrics=metrics,
+        changes_only=not all,
+        detail=detail,
+        revision=revision,
     )
 
 
@@ -357,5 +371,7 @@ if __name__ == "__main__":  # pragma: no cover
         cli()
     except Exception as runtime:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
-        logger.info(f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing.")
+        logger.info(
+            f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."
+        )
         logger.debug(traceback.format_exc())

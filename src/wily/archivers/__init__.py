@@ -43,6 +43,18 @@ class BaseArchiver(object):
         """Clean up any state if processing completed/failed."""
         pass
 
+    def find(self, search):
+        """
+        Search a string and return a single revision.
+
+        :param search: The search term.
+        :type  search: ``str``
+
+        :return: An instance of revision.
+        :rtype: Instance of :class:`Revision`
+        """
+        raise NotImplementedError
+
 
 @dataclass
 class Revision:

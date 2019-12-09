@@ -31,17 +31,21 @@ operators = (
 def test_operator(operator, gitdir):
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "build", "src", "-o", operator]
-        , catch_exceptions=False
+        main.cli,
+        ["--debug", "--path", gitdir, "build", "src", "-o", operator],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout
 
-    result = runner.invoke(main.cli, ["--debug", "--path", gitdir, "report", _path], catch_exceptions=False)
+    result = runner.invoke(
+        main.cli, ["--debug", "--path", gitdir, "report", _path], catch_exceptions=False
+    )
     assert result.exit_code == 0, result.stdout
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "diff", _path, "--all"]
-        , catch_exceptions=False
+        main.cli,
+        ["--debug", "--path", gitdir, "diff", _path, "--all"],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -66,8 +70,9 @@ def test_operator(operator, gitdir):
         test_py.write(dedent(complex_test))
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "diff", _path, "--all"]
-        , catch_exceptions=False
+        main.cli,
+        ["--debug", "--path", gitdir, "diff", _path, "--all"],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
@@ -120,7 +125,8 @@ def test_operator_on_code_with_metric_named_objects(operator, tmpdir):
     runner = CliRunner()
 
     result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", str(testpath), "-o", operator]
-        , catch_exceptions=False
+        main.cli,
+        ["--debug", "--path", tmpdir, "build", str(testpath), "-o", operator],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout

@@ -6,7 +6,8 @@ Compares metrics between uncommitted files and indexed files.
 import multiprocessing
 import tabulate
 from pathlib import Path
-from wily import logger
+from wily import logger, format_revision, format_date
+from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.operators import (
     resolve_metric,
@@ -20,7 +21,7 @@ from wily.commands.build import run_operator
 from wily.state import State
 
 
-def diff(config, files, metrics, changes_only=True, detail=True):
+def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     """
     Show the differences in metrics for each of the files.
 
@@ -38,6 +39,9 @@ def diff(config, files, metrics, changes_only=True, detail=True):
 
     :param detail: Show details (function-level)
     :type  detail: ``bool``
+
+    :param revision: Compare with specific revision
+    :type  revision: ``str``
     """
     config.targets = files
     files = list(files)
@@ -49,7 +53,15 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     else:
         targets = files
 
-    last_revision = state.index[state.default_archiver].last_revision
+    if not revision:
+        target_revision = state.index[state.default_archiver].last_revision
+    else:
+        rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        target_revision = state.index[state.default_archiver][rev.key]
+
+    logger.info(
+        f"Comparing current with {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}."
+    )
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
@@ -59,8 +71,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
     # Build a set of operators
     with multiprocessing.Pool(processes=len(operators)) as pool:
         operator_exec_out = pool.starmap(
-            run_operator,
-            [(operator, None, config, targets) for operator in operators],
+            run_operator, [(operator, None, config, targets) for operator in operators]
         )
     data = {}
     for operator_name, result in operator_exec_out:
@@ -91,7 +102,7 @@ def diff(config, files, metrics, changes_only=True, detail=True):
         has_changes = False
         for operator, metric in metrics:
             try:
-                current = last_revision.get(
+                current = target_revision.get(
                     config, state.default_archiver, operator, file, metric.name
                 )
             except KeyError:
