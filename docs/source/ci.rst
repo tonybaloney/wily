@@ -36,7 +36,7 @@ Wily can be run as a separate test environment:
     deps =
         wily
     commands =
-        wily build src/ -n 2
+        wily build src/
         wily diff src/ -r HEAD^1
 
 Azure Pipelines
@@ -48,7 +48,7 @@ Wily can be called as two separate tasks within a job:
 
   - script: |
     pip install wily
-    wily build src/ -n 2
+    wily build src/
     displayName: Install Wily and compile cache
 
   - script: "wily diff src/ -r HEAD^1"
@@ -63,5 +63,5 @@ Wily can be called after your tests have completed.
 
   after_success:
     - pip install wily
-    - wily build src/ -n 2
+    - wily build src/
     - wily diff src/ -r HEAD^1

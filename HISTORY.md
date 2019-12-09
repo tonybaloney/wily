@@ -2,11 +2,13 @@
 
 ## 1.15.0 (9th December 2019)
 
+* Git archiver now supports a detached head state. Means that wily build can run in a detached head, will checkout the reference after build.
 * Add argument to `wily diff` to specify a target revision to compare with, can be a Git SHA or a Git reference, e.g. `HEAD^1`
 * `wily diff` argument for `--all`/`--changes-only` has shorter `-a`/`-c` also.
 * `wily diff` argument for `--metrics` has shorter `-m` also.
 * `wily report` argument for `--message` has shorter `-m` also.
 * `wily index` argument for `--message` has shorter `-m` also.
+* Added examples, tests and documentation for CICD patterns.
 
 ## 1.14.1 (6th December 2019)
 

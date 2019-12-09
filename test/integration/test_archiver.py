@@ -92,3 +92,36 @@ def test_dirty_git(tmpdir):
     with pytest.raises(DirtyGitRepositoryError):
         archiver = GitArchiver(config)
         archiver.revisions(tmpdir, 2)
+
+
+def test_detached_head(tmpdir):
+    """ Check that repo can initialize in detached head state"""
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
+    index = repo.index
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    # First commit
+    with open(tmppath / "test.py", "w") as ignore:
+        ignore.write("print('hello world')")
+
+    index.add(["test.py"])
+    commit1 = index.commit("commit1", author=author, committer=committer)
+
+    # Second commit
+    with open(tmppath / "test.py", "w") as ignore:
+        ignore.write("print('hello world')\nprint(1)")
+
+    index.add(["test.py"])
+    commit2 = index.commit("commit2", author=author, committer=committer)
+
+    repo.git.checkout(commit2.hexsha)
+    repo.close()
+
+    config = DEFAULT_CONFIG
+    config.path = tmpdir
+
+    archiver = GitArchiver(config)
+    assert archiver.revisions(tmpdir, 1) is not None
