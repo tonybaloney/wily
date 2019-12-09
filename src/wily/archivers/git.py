@@ -51,7 +51,10 @@ class GitArchiver(BaseArchiver):
             raise InvalidGitRepositoryError from e
 
         self.config = config
-        self.current_branch = self.repo.active_branch
+        if self.repo.head.is_detached:
+            self.current_branch = self.repo.head.object.hexsha
+        else:
+            self.current_branch = self.repo.active_branch
         assert not self.repo.bare, "Not a Git repository"
 
     def revisions(self, path, max_revisions):
