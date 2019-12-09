@@ -45,8 +45,8 @@ stages:
         displayName: 'pydocstyle'
 
       - script: |
-          wily --debug build src/
-          wily --debug diff src/ -r HEAD^1
+          wily build src/
+          wily diff src/ -r HEAD^1
         displayName: Compare previous commit
         continueOnError: true
 
