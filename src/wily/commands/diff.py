@@ -60,7 +60,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         try:
             target_revision = state.index[state.default_archiver][rev.key]
         except KeyError:
-            logger.error(f"Revision {revision} is not in the cache, make sure you have run wily build.")
+            logger.error(
+                f"Revision {revision} is not in the cache, make sure you have run wily build."
+            )
             exit(1)
 
     logger.info(
