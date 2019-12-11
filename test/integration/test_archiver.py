@@ -3,62 +3,8 @@ import pathlib
 import pytest
 from git import Repo, Actor
 
-from wily.archivers.git import (
-    GitArchiver,
-    WilyIgnoreGitRepositoryError,
-    DirtyGitRepositoryError,
-)
+from wily.archivers.git import GitArchiver, DirtyGitRepositoryError
 from wily.config import DEFAULT_CONFIG
-
-
-def test_gitignore_missing(tmpdir):
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
-
-    # Write a test file to the repo
-    with open(tmppath / ".gitignore", "w") as ignore:
-        ignore.write("*.py[co]\n")
-
-    index = repo.index
-    index.add([".gitignore"])
-
-    author = Actor("An author", "author@example.com")
-    committer = Actor("A committer", "committer@example.com")
-
-    index.commit("ignore python cache", author=author, committer=committer)
-
-    config = DEFAULT_CONFIG
-    config.path = tmpdir
-
-    with pytest.raises(WilyIgnoreGitRepositoryError):
-        archiver = GitArchiver(config)
-
-
-gitignore_combinations = (".wily/", ".wily", ".wily/*")
-
-
-@pytest.mark.parametrize("ignore", gitignore_combinations)
-def test_gitignore(tmpdir, ignore, **kwargs):
-    repo = Repo.init(path=tmpdir)
-    tmppath = pathlib.Path(tmpdir)
-
-    # Write a test file to the repo
-    with open(tmppath / ".gitignore", "w") as ignore_f:
-        ignore_f.write(ignore)
-
-    index = repo.index
-    index.add([".gitignore"])
-
-    author = Actor("An author", "author@example.com")
-    committer = Actor("A committer", "committer@example.com")
-
-    index.commit("ignore python cache", author=author, committer=committer)
-
-    config = DEFAULT_CONFIG
-    config.path = tmpdir
-
-    archiver = GitArchiver(config)
-    assert archiver.config == config
 
 
 def test_git_end_to_end(tmpdir):
@@ -83,6 +29,7 @@ def test_git_end_to_end(tmpdir):
         file1.write("print(1)")
     index.add(["test.py"])
     commit2 = index.commit("commit2", author=author, committer=committer)
+    repo.close()
 
     config = DEFAULT_CONFIG
     config.path = tmpdir
@@ -137,6 +84,7 @@ def test_dirty_git(tmpdir):
     with open(tmppath / "blah.py", "w") as ignore:
         ignore.write("*.py[co]\n")
     index.add(["blah.py"])
+    repo.close()
 
     config = DEFAULT_CONFIG
     config.path = tmpdir
@@ -144,3 +92,36 @@ def test_dirty_git(tmpdir):
     with pytest.raises(DirtyGitRepositoryError):
         archiver = GitArchiver(config)
         archiver.revisions(tmpdir, 2)
+
+
+def test_detached_head(tmpdir):
+    """ Check that repo can initialize in detached head state"""
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+
+    index = repo.index
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    # First commit
+    with open(tmppath / "test.py", "w") as ignore:
+        ignore.write("print('hello world')")
+
+    index.add(["test.py"])
+    commit1 = index.commit("commit1", author=author, committer=committer)
+
+    # Second commit
+    with open(tmppath / "test.py", "w") as ignore:
+        ignore.write("print('hello world')\nprint(1)")
+
+    index.add(["test.py"])
+    commit2 = index.commit("commit2", author=author, committer=committer)
+
+    repo.git.checkout(commit2.hexsha)
+    repo.close()
+
+    config = DEFAULT_CONFIG
+    config.path = tmpdir
+
+    archiver = GitArchiver(config)
+    assert archiver.revisions(tmpdir, 1) is not None

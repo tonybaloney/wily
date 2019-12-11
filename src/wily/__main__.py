@@ -1,19 +1,24 @@
 # -*- coding: UTF-8 -*-
 """Main command line."""
 
-import os.path
-
 import click
+import traceback
+from pathlib import Path
 
-from wily import logger
+from wily import logger, __version__, WILY_LOG_NAME
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_CACHE_PATH
+from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
+from wily.decorators import add_version
+from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 
 
 @click.group()
+@click.version_option(
+    __version__, "-V", "--version", message="\U0001F98A %(prog)s, version %(version)s"
+)
 @click.option(
     "--debug/--no-debug",
     default=False,
@@ -31,8 +36,15 @@ from wily.operators import resolve_operators
     default=".",
     help="Root path to the project folder to scan",
 )
+@click.option(
+    "-c",
+    "--cache",
+    type=click.Path(resolve_path=True),
+    help="Override the default cache path (defaults to $HOME/.wily/HASH)",
+)
 @click.pass_context
-def cli(ctx, debug, config, path):
+@add_version
+def cli(ctx, debug, config, path, cache):
     """
     \U0001F98A Inspect and search through the complexity of your source code.
 
@@ -63,8 +75,11 @@ def cli(ctx, debug, config, path):
     if path:
         logger.debug(f"Fixing path to {path}")
         ctx.obj["CONFIG"].path = path
-        ctx.obj["CONFIG"].cache_path = os.path.join(path, DEFAULT_CACHE_PATH)
+    if cache:
+        logger.debug(f"Fixing cache to {cache}")
+        ctx.obj["CONFIG"].cache_path = cache
     logger.debug(f"Loaded configuration from {config}")
+    logger.debug(f"Capturing logs to {WILY_LOG_NAME}")
 
 
 @cli.command()
@@ -75,7 +90,7 @@ def cli(ctx, debug, config, path):
     type=click.INT,
     help="The maximum number of historical commits to archive",
 )
-@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1, required=True)
+@click.argument("targets", type=click.Path(resolve_path=True), nargs=-1, required=False)
 @click.option(
     "-o",
     "--operators",
@@ -89,13 +104,8 @@ def cli(ctx, debug, config, path):
     default="git",
     help="Archiver to use, defaults to git if git repo, else filesystem",
 )
-@click.option(
-    "--skip-gitignore-check/--gitignore-check",
-    default=False,
-    help="Skip checking of .gitignore for '.wily/'",
-)
 @click.pass_context
-def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver):
+def build(ctx, max_revisions, targets, operators, archiver):
     """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
@@ -113,9 +123,9 @@ def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver
         logger.debug(f"Fixing archiver to {archiver}")
         config.archiver = archiver
 
-    config.skip_ignore_check = skip_gitignore_check
-    logger.debug(f"Fixing targets to {targets}")
-    config.targets = targets
+    if targets:
+        logger.debug(f"Fixing targets to {targets}")
+        config.targets = targets
 
     build(
         config=config,
@@ -129,7 +139,9 @@ def build(ctx, max_revisions, targets, operators, skip_gitignore_check, archiver
 
 @cli.command()
 @click.pass_context
-@click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-m", "--message/--no-message", default=False, help="Include revision message"
+)
 def index(ctx, message):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
@@ -181,9 +193,26 @@ def rank(ctx, path, metric, revision):
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-m", "--message/--no-message", default=False, help="Include revision message"
+)
+@click.option(
+    "-f",
+    "--format",
+    default=ReportFormat.CONSOLE.name,
+    help="Specify report format (console or html)",
+    type=click.Choice(ReportFormat.get_all()),
+)
+@click.option(
+    "--console-format",
+    default=DEFAULT_GRID_STYLE,
+    help="Style for the console grid, see Tabulate Documentation for a list of styles.",
+)
+@click.option(
+    "-o", "--output", help="Output report to specified HTML path, e.g. reports/out.html"
+)
 @click.pass_context
-def report(ctx, file, metrics, number, message):
+def report(ctx, file, metrics, number, message, format, console_format, output):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -194,20 +223,39 @@ def report(ctx, file, metrics, number, message):
         metrics = get_default_metrics(config)
         logger.info(f"Using default metrics {metrics}")
 
+    new_output = Path().cwd()
+    if output:
+        new_output = new_output / Path(output)
+    else:
+        new_output = new_output / "wily_report" / "index.html"
+
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
-    report(config=config, path=file, metrics=metrics, n=number, include_message=message)
+    logger.debug(f"Output format is {format}")
+
+    report(
+        config=config,
+        path=file,
+        metrics=metrics,
+        n=number,
+        output=new_output,
+        include_message=message,
+        format=ReportFormat[format],
+        console_format=console_format,
+    )
 
 
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False), nargs=-1, required=True)
 @click.option(
+    "-m",
     "--metrics",
     default=None,
     help="comma-seperated list of metrics, see list-metrics for choices",
 )
 @click.option(
+    "-a/-c",
     "--all/--changes-only",
     default=False,
     help="Show all files, instead of changes only",
@@ -217,8 +265,11 @@ def report(ctx, file, metrics, number, message):
     default=True,
     help="Show function/class level metrics where available",
 )
+@click.option(
+    "-r", "--revision", help="Compare against specific revision", type=click.STRING
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail):
+def diff(ctx, files, metrics, all, detail, revision):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -236,7 +287,12 @@ def diff(ctx, files, metrics, all, detail):
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
     diff(
-        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+        config=config,
+        files=files,
+        metrics=metrics,
+        changes_only=not all,
+        detail=detail,
+        revision=revision,
     )
 
 
@@ -295,7 +351,8 @@ def clean(ctx, yes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx)
+        logger.info("Wily cache does not exist, nothing to remove.")
+        exit(0)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
@@ -341,14 +398,15 @@ def handle_no_cache(context):
         revisions = int(revisions)
         path = input("Path to your source files; comma-separated for multiple: ")
         paths = path.split(",")
-        context.invoke(
-            build,
-            max_revisions=revisions,
-            targets=paths,
-            operators=None,
-            skip_gitignore_check=False,
+        context.invoke(build, max_revisions=revisions, targets=paths, operators=None)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    try:
+        cli()
+    except Exception as runtime:
+        logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
+        logger.info(
+            f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."
         )
-
-
-if __name__ == "__main__":
-    cli()  # pragma: no cover
+        logger.debug(traceback.format_exc())

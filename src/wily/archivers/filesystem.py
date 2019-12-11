@@ -5,7 +5,6 @@ Implementation of the archiver API for a standard directory (no revisions)
 """
 import logging
 import os.path
-from datetime import datetime
 import hashlib
 from wily.archivers import BaseArchiver, Revision
 
@@ -48,6 +47,7 @@ class FilesystemArchiver(BaseArchiver):
                 author_email="-",  # as above
                 date=int(mtime),
                 message="None",
+                files=[],
             )
         ]
 

@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 from enum import Enum
+from functools import lru_cache
 
 
 class MetricType(Enum):
@@ -118,6 +119,15 @@ ALL_OPERATORS = {
 }
 
 
+"""Set of all metrics"""
+ALL_METRICS = {
+    (operator, metric)
+    for operator in ALL_OPERATORS.values()
+    for metric in operator.cls.metrics
+}
+
+
+@lru_cache(maxsize=128)
 def resolve_operator(name):
     """
     Get the :namedtuple:`wily.operators.Operator` for a given name.
@@ -140,9 +150,10 @@ def resolve_operators(operators):
 
     :rtype: ``list`` of :class:`Operator`
     """
-    return [resolve_operator(operator) for operator in operators]
+    return [resolve_operator(operator) for operator in iter(operators)]
 
 
+@lru_cache(maxsize=128)
 def resolve_metric(metric):
     """
     Resolve metric key to a given target.
@@ -152,10 +163,23 @@ def resolve_metric(metric):
 
     :rtype: :class:`Metric`
     """
-    operator, key = metric.split(".")
-    r = [
-        metric for metric in resolve_operator(operator).cls.metrics if metric[0] == key
-    ]
+    return resolve_metric_as_tuple(metric)[1]
+
+
+@lru_cache(maxsize=128)
+def resolve_metric_as_tuple(metric):
+    """
+    Resolve metric key to a given target.
+
+    :param metric: the metric name.
+    :type  metric: ``str``
+
+    :rtype: :class:`Metric`
+    """
+    if "." in metric:
+        _, metric = metric.split(".")
+
+    r = [(operator, match) for operator, match in ALL_METRICS if match[0] == metric]
     if not r or len(r) == 0:
         raise ValueError(f"Metric {metric} not recognised.")
     else:
@@ -166,8 +190,8 @@ def get_metric(revision, operator, path, key):
     """
     Get a metric from the cache.
 
-    :param revision: The revision id.
-    :type  revision: ``str``
+    :param revision: The revision data.
+    :type  revision: ``dict``
 
     :param operator: The operator name.
     :type  operator: ``str``
@@ -183,7 +207,7 @@ def get_metric(revision, operator, path, key):
     """
     if ":" in path:
         part, entry = path.split(":")
-        val = revision[operator][part][entry][key]
+        val = revision[operator][part]["detailed"][entry][key]
     else:
-        val = revision[operator][path][key]
+        val = revision[operator][path]["total"][key]
     return val

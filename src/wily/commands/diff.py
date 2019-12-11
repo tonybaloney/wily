@@ -3,12 +3,14 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
+import multiprocessing
 import os
-
 import tabulate
 
-from wily import logger
-from wily.config import DEFAULT_GRID_STYLE
+from pathlib import Path
+from wily import logger, format_revision, format_date
+from wily.archivers import resolve_archiver
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.operators import (
     resolve_metric,
     resolve_operator,
@@ -17,10 +19,13 @@ from wily.operators import (
     BAD_COLORS,
     OperatorLevel,
 )
+from wily.commands.build import run_operator
 from wily.state import State
 
+import radon.cli.harvest
 
-def diff(config, files, metrics, changes_only=True, detail=True):
+
+def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     """
     Show the differences in metrics for each of the files.
 
@@ -38,29 +43,56 @@ def diff(config, files, metrics, changes_only=True, detail=True):
 
     :param detail: Show details (function-level)
     :type  detail: ``bool``
+
+    :param revision: Compare with specific revision
+    :type  revision: ``str``
     """
     config.targets = files
     files = list(files)
     state = State(config)
-    last_revision = state.index[state.default_archiver].revisions[0]
+
+    # Resolve target paths when the cli has specified --path
+    if config.path != DEFAULT_PATH:
+        targets = [str(Path(config.path) / Path(file)) for file in files]
+    else:
+        targets = files
+
+    # Expand directories to paths
+    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+    logger.debug(f"Targeting - {files}")
+
+    if not revision:
+        target_revision = state.index[state.default_archiver].last_revision
+    else:
+        rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
+        try:
+            target_revision = state.index[state.default_archiver][rev.key]
+        except KeyError:
+            logger.error(
+                f"Revision {revision} is not in the cache, make sure you have run wily build."
+            )
+            exit(1)
+
+    logger.info(
+        f"Comparing current with {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}."
+    )
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
     metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
-    data = {}
     results = []
 
     # Build a set of operators
-    _operators = [operator.cls(config) for operator in operators]
+    with multiprocessing.Pool(processes=len(operators)) as pool:
+        operator_exec_out = pool.starmap(
+            run_operator, [(operator, None, config, targets) for operator in operators]
+        )
+    data = {}
+    for operator_name, result in operator_exec_out:
+        data[operator_name] = result
 
-    cwd = os.getcwd()
-    os.chdir(config.path)
-    for operator in _operators:
-        logger.debug(f"Running {operator.name} operator")
-        data[operator.name] = operator.run(None, config)
-    os.chdir(cwd)
-
-    # Write a summary table..
+    # Write a summary table
     extra = []
     for operator, metric in metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
@@ -69,9 +101,9 @@ def diff(config, files, metrics, changes_only=True, detail=True):
                     extra.extend(
                         [
                             f"{file}:{k}"
-                            for k in data[operator][file].keys()
+                            for k in data[operator][file]["detailed"].keys()
                             if k != metric.name
-                            and isinstance(data[operator][file][k], dict)
+                            and isinstance(data[operator][file]["detailed"][k], dict)
                         ]
                     )
                 except KeyError:
@@ -85,14 +117,14 @@ def diff(config, files, metrics, changes_only=True, detail=True):
         has_changes = False
         for operator, metric in metrics:
             try:
-                current = last_revision.get(
+                current = target_revision.get(
                     config, state.default_archiver, operator, file, metric.name
                 )
-            except KeyError as e:
+            except KeyError:
                 current = "-"
             try:
                 new = get_metric(data, operator, file, metric.name)
-            except KeyError as e:
+            except KeyError:
                 new = "-"
             if new != current:
                 has_changes = True

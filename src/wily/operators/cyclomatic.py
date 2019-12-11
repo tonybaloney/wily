@@ -26,6 +26,8 @@ class CyclomaticComplexityOperator(BaseOperator):
         "no_assert": True,
         "show_closures": False,
         "order": radon.complexity.SCORE,
+        "include_ipynb": True,
+        "ipynb_cells": True,
     }
 
     metrics = (
@@ -40,7 +42,7 @@ class CyclomaticComplexityOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config):
+    def __init__(self, config, targets):
         """
         Instantiate a new Cyclomatic Complexity operator.
 
@@ -48,11 +50,9 @@ class CyclomaticComplexityOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO: Import config for harvester from .wily.cfg
-        logger.debug(f"Using {config.targets} with {self.defaults} for CC metrics")
+        logger.debug(f"Using {targets} with {self.defaults} for CC metrics")
 
-        self.harvester = harvesters.CCHarvester(
-            config.targets, config=Config(**self.defaults)
-        )
+        self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
         """
@@ -70,7 +70,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         logger.debug("Running CC harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():
-            results[filename] = {}
+            results[filename] = {"detailed": {}, "total": {}}
             total = 0  # running CC total
             for instance in details:
                 if isinstance(instance, Class):
@@ -78,11 +78,20 @@ class CyclomaticComplexityOperator(BaseOperator):
                 elif isinstance(instance, Function):
                     i = self._dict_from_function(instance)
                 else:
-                    raise TypeError
-                results[filename][i["fullname"]] = i
+                    if isinstance(instance, str) and instance == "error":
+                        logger.debug(
+                            f"Failed to run CC harvester on {filename} : {details['error']}"
+                        )
+                        continue
+                    else:
+                        logger.warning(
+                            f"Unexpected result from Radon : {instance} of {type(instance)}. Please report on Github."
+                        )
+                        continue
+                results[filename]["detailed"][i["fullname"]] = i
                 del i["fullname"]
                 total += i["complexity"]
-            results[filename]["complexity"] = total
+            results[filename]["total"]["complexity"] = total
         return results
 
     @staticmethod

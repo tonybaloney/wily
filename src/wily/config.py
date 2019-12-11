@@ -5,10 +5,11 @@ TODO : Handle operator settings. Maybe a section for each operator and then pass
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
 """
-
+from functools import lru_cache
 import configparser
 import logging
 import pathlib
+import hashlib
 from dataclasses import dataclass, field
 from typing import Any, List
 
@@ -17,8 +18,24 @@ from wily.archivers import ARCHIVER_GIT
 
 logger = logging.getLogger(__name__)
 
-""" The default path name to the cache """
-DEFAULT_CACHE_PATH = ".wily"
+
+@lru_cache(maxsize=128)
+def generate_cache_path(path):
+    """
+    Generate a reusable path to cache results.
+
+    Will use the --path of the target and hash into
+    a 9-character directory within the HOME folder.
+
+    :return: The cache path
+    :rtype: ``str``
+    """
+    logger.debug(f"Generating cache for {path}")
+    sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
+    HOME = pathlib.Path.home()
+    cache_path = str(HOME / ".wily" / sha)
+    logger.debug(f"Cache path is {cache_path}")
+    return cache_path
 
 
 @dataclass
@@ -33,8 +50,8 @@ class WilyConfig(object):
     archiver: Any
     path: str
     max_revisions: int
-    skip_ignore_check: bool = False
-    cache_path: str = DEFAULT_CACHE_PATH
+    include_ipynb: bool = True
+    ipynb_cells: bool = True
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
@@ -42,6 +59,20 @@ class WilyConfig(object):
         """Clone targets as a list of path."""
         if self.targets is None or "":
             self.targets = [self.path]
+        self._cache_path = None
+
+    @property
+    def cache_path(self):
+        """Path to the cache."""
+        if not self._cache_path:
+            self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())
+        return self._cache_path
+
+    @cache_path.setter
+    def cache_path(self, value):
+        """Override the cache path."""
+        logger.debug(f"Setting custom cache path to {value}")
+        self._cache_path = value
 
 
 # Default values for Wily
@@ -51,6 +82,7 @@ DEFAULT_OPERATORS = {
     operators.OPERATOR_RAW.name,
     operators.OPERATOR_MAINTAINABILITY.name,
     operators.OPERATOR_CYCLOMATIC.name,
+    operators.OPERATOR_HALSTEAD.name,
 }
 
 """ The name of the default archiver """
@@ -100,14 +132,23 @@ def load(config_path=DEFAULT_CONFIG_PATH):
         section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER
     )
     path = config.get(section=DEFAULT_CONFIG_SECTION, option="path", fallback=".")
-    max_revisions = int(
-        config.get(
-            section=DEFAULT_CONFIG_SECTION,
-            option="max_revisions",
-            fallback=DEFAULT_MAX_REVISIONS,
-        )
+    max_revisions = config.getint(
+        section=DEFAULT_CONFIG_SECTION,
+        option="max_revisions",
+        fallback=DEFAULT_MAX_REVISIONS,
+    )
+    include_ipynb = config.getboolean(
+        section=DEFAULT_CONFIG_SECTION, option="include_ipynb", fallback=True
+    )
+    ipynb_cells = config.getboolean(
+        section=DEFAULT_CONFIG_SECTION, option="ipynb_cells", fallback=True
     )
 
     return WilyConfig(
-        operators=operators, archiver=archiver, path=path, max_revisions=max_revisions
+        operators=operators,
+        archiver=archiver,
+        path=path,
+        max_revisions=max_revisions,
+        include_ipynb=include_ipynb,
+        ipynb_cells=ipynb_cells,
     )

@@ -10,7 +10,7 @@ Examples
 
 .. code-block:: none
 
-   $ wily graph example.py raw.loc
+   $ wily graph example.py loc
 
 .. image:: ../_static/single_metric_graph.png
    :align: center
@@ -19,7 +19,7 @@ You can provide a second metric which will be used to control the size of the bu
 
 .. code-block:: none
 
-   $ wily graph example.py raw.loc cyclomatic.complexity
+   $ wily graph example.py loc complexity
 
 .. image:: ../_static/two_metric_graph.png
    :align: center
@@ -28,7 +28,7 @@ The x-axis will be the historic revisions (typically git commits) on a scale of 
 
 .. code-block:: none
 
-   $ wily graph example.py raw.loc cyclomatic.complexity --x-axis raw.sloc
+   $ wily graph example.py loc complexity --x-axis sloc
 
 .. image:: ../_static/custom_x_axis_graph.png
    :align: center
@@ -38,7 +38,7 @@ To save the output to a specific HTML file and not open it, provide the ``-o`` f
 
 .. code-block:: none
 
-   $ wily report example.py raw.loc -o example.html
+   $ wily report example.py loc -o example.html
 
 
 Command Line Usage

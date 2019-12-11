@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: _static/logo.png
-   :align: center
+Wily
+++++
 
-A Python application for tracking, reporting on timing and complexity in tests and applications.
+Wily is an application for tracking the complexity of Python code in tests and applications.
 
 .. image:: https://readthedocs.org/projects/wily/badge/?version=latest
     :target: https://wily.readthedocs.io/en/latest/?badge=latest
@@ -21,6 +21,7 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
    :maxdepth: 1
    :caption: Contents:
 
+   ci
    commands/build
    commands/diff
    commands/graph
@@ -46,10 +47,6 @@ You can install wily from PyPi using pip
 Wily needs an index of the project before any of the commands can be used. :doc:`commands/build` builds an index in a Git repository. Provide the path to your source code as the first argument.
 
 
-.. warning::
-
-   Before you run wily, add `.wily/` to your .gitignore file and commit it. Wily will warn you if this is missing.
-
 .. code-block:: console
 
    $ wily build src/
@@ -74,7 +71,7 @@ You can display any of the metrics in a HTML graph by running the graph command 
 
 .. code-block:: console
 
-   $ wily graph wily/__main__.py raw.loc
+   $ wily graph wily/__main__.py loc
 
 .. image:: _static/single_metric_graph.png
    :align: center
@@ -106,4 +103,4 @@ You can install wily as a pre-commit plugin.
             additional_dependencies: [wily]
 
 
-"cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)
+"cute animal doing dabbing" `Designed by Freepik <https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm>`_

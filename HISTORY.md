@@ -1,6 +1,83 @@
 # Release History
 
-## 1.8.0 (master)
+## 1.15.0 (9th December 2019)
+
+* Git archiver now supports a detached head state. Means that wily build can run in a detached head, will checkout the reference after build.
+* Add argument to `wily diff` to specify a target revision to compare with, can be a Git SHA or a Git reference, e.g. `HEAD^1`
+* `wily diff` argument for `--all`/`--changes-only` has shorter `-a`/`-c` also.
+* `wily diff` argument for `--metrics` has shorter `-m` also.
+* `wily report` argument for `--message` has shorter `-m` also.
+* `wily index` argument for `--message` has shorter `-m` also.
+* Added examples, tests and documentation for CICD patterns.
+
+## 1.14.1 (6th December 2019)
+
+* Debug logs are always stored in a temporary local file, on the event of a crash, wily will suggest the user to upload this file to GitHub with a copy of the crash log
+* Unhandled exceptions raised by the operators (normally file formatting) are now debug events not warnings
+* Updated to flit 2.0 for packaging (development change, no impact to users)
+* Moved source code to src/ (development change, no impact to users)
+
+## 1.14.0 (6th December 2019)
+
+* The build process uses the metadata from Git to only scan the files that have changed for each revision. Significantly speeds up build times (25x>).
+* The diff process uses multiprocessing to make it 3-4x faster to complete.
+* Officially add support for Python 3.8.
+* Process crashes are now captured and output on the console in the debug log.
+* State index building is 10-20% faster.
+
+## 1.13.0 (29th November 2019)
+
+* Updated radon to 4.0.0
+* Added support for IPython Notebooks (enabled by default)
+
+## 1.12.4 (22nd September 2019)
+
+* [BUGFIX](https://github.com/tonybaloney/wily/issues/73) Fixed ``TypeError: unsupported operand type(s) for +: 'int' and 'dict'`` occurring when a file contains multiple functions with the same name.
+  Fixes [73](https://github.com/tonybaloney/wily/issues/73) by @alegonz
+* Updated code style to meet black requirements.
+
+## 1.12.3 (19th July 2019
+
+* Pinned version of radon as newer version has API changes.
+
+## 1.12.2 (14th March 2019)
+
+* [BUGFIX] Fixed an issue where illegal/unusual filepath characters within the git history would cause the halstead harvester to crash unrecoverably. Halstead will now handle and report the error but mark the file as missing in the index (https://github.com/tonybaloney/wily/issues/64) fixed in https://github.com/tonybaloney/wily/pull/63 by @abadger.
+
+## 1.12.1 (3rd February 2019)
+
+* [BUGFIX] Fixed an issue where calling a command without a wily index would run the CLI wizard prompt, but immediately crash because the --skip-git-ignore flag no longer exists (https://github.com/tonybaloney/wily/issues/61)
+
+## 1.12.0 (25th January 2019)
+
+* [BUGFIX] Fixed an issue where path could not be set via the configuration file because it is required in the CLI
+* Metrics no longer need to be in full, e.g. 'raw.loc', but instead can simply be the name, e.g. 'loc' across all commands.
+
+## 1.11.0 (14th January 2019)
+
+* Added a `--console-format` option to the report command to create Markdown, rST or other formats.
+
+## 1.10.0
+
+* Report command now has the ability to generate HTML reports with the `-f HTML` option @DahlitzFlorian
+* Halstead metrics enabled by default
+
+## 1.9.0 (28th December 2018)
+
+* Wily now supports Windows! Full test suite works on Windows, Mac OS and Linux
+* Wily no longer puts the .wily cache in the target path, cache is now stored in the $HOME path. This means you no longer need to add .wily to .gitignore before running a build. Wily will isolate cache folders based on the absolute path
+* Added a --cache flag to specify the path to the cache for shared cache's
+* Added `-V` version flag and added current version to `--help` header @DahlitzFlorian
+
+## 1.8.2 (21st December 2018)
+
+* [BUGFIX] Fixed an issue where the aggregation of the maintainability.rank metric would cause the build to crash if 2 files in the same directory had the same rank. 
+
+## 1.8.1 (19th Decemember 2018)
+
+* [BUGFIX] Fixed an issue that occured if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
+
+## 1.8.0 (14th December 2018)
 
 * Build process is now run with a multiprocess pool, build times are 50-70% faster (depending on number of operators)
 * Build process will now create a stub for each directory so you can run report on any directory and it will give you aggregate metrics. Each metric specifies it's own aggregation function.

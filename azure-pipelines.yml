@@ -1,0 +1,158 @@
+trigger:
+- master
+name: $(Year:yy)$(DayOfYear)$(Rev:r)
+variables:
+  majorVer: '1.15.0'
+
+stages:
+  - stage: Unit_Test
+    jobs:
+
+    - job: 'Test_Linux'
+      pool:
+        vmImage: 'Ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+          Python38:
+            python.version: '3.8'
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install --pre pytest-azurepipelines==1.0.0rc1
+          pip install flit mock codecov pydocstyle pytest-cov
+          flit install
+        displayName: 'Install dependencies'
+
+      - script: |
+          python -m pytest test/ --cov=wily
+          codecov
+        displayName: 'pytest'
+        env:
+          CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
+
+      - script: pydocstyle --ignore=D301,D212,D203 src/wily
+        displayName: 'pydocstyle'
+
+      - script: |
+          wily build src/
+          wily diff src/ -r HEAD^1
+        displayName: Compare previous commit
+        continueOnError: true
+
+    - job: 'Test_Windows'
+      pool:
+        vmImage: 'vs2017-win2016'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+          Python38:
+            python.version: '3.8'
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: |
+          python -m pip install --upgrade pip
+          pip install flit mock pytest pytest-cov
+          flit install
+        displayName: 'Install dependencies'
+
+      - script: |
+          pip install --pre pytest-azurepipelines==1.0.0rc1
+          python -m pytest test
+        displayName: 'pytest'
+    - job: 'Test_Conda'
+      pool:
+        vmImage: 'Ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+          Python38:
+            python.version: '3.8'
+      steps:
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+
+      - bash: |
+          conda create --yes --quiet --name wilyEnv python=$PYTHON_VERSION
+          conda config --add channels conda-forge
+        displayName: Create Anaconda environment
+
+      - bash: |
+          source activate wilyEnv
+          conda install --yes --quiet --name wilyEnv mock pytest-azurepipelines flit=2.1.0 flit-core=2.1.0
+          flit install --env
+        displayName: Install Anaconda packages
+
+      - bash: |
+          source activate wilyEnv
+          python -m pytest test/
+        displayName: 'Test package'
+
+  - stage: Package_Test
+    jobs:
+
+    - job: 'Test_Linux_Packaging'
+      pool:
+        vmImage: 'Ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+          Python38:
+            python.version: '3.8'
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: python -m pip install --upgrade pip flit
+
+      - script: "flit build"
+        displayName: 'Build package and dependencies'
+    - job: 'Test_Windows_Packaging'
+      pool:
+        vmImage: 'vs2017-win2016'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
+          Python38:
+            python.version: '3.8'
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+
+      - script: python -m pip install --upgrade pip flit
+
+      - script: "flit build"
+        displayName: 'Build package and dependencies'

@@ -30,6 +30,7 @@ class IndexedRevision(object):
             author_email=d["author_email"],
             date=d["date"],
             message=d["message"],
+            files=d["files"] if "files" in d else [],
         )
         operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)
@@ -106,13 +107,22 @@ class Index(object):
             else []
         )
 
-        self._revisions = OrderedDict()
-        for d in self.data:
-            self._revisions[d["key"]] = IndexedRevision.fromdict(d)
+        self._revisions = OrderedDict(
+            {d["key"]: IndexedRevision.fromdict(d) for d in self.data}
+        )
 
     def __len__(self):
         """Use length of revisions as len."""
         return len(self._revisions)
+
+    @property
+    def last_revision(self):
+        """
+        Return the most recent revision.
+
+        :rtype: Instance of :class:`IndexedRevision`
+        """
+        return next(iter(self._revisions.values()))
 
     @property
     def revisions(self):
@@ -206,3 +216,5 @@ class State(object):
             logger.debug("Wily cache not found, creating.")
             cache.create(self.config)
             logger.debug("Created wily cache")
+        else:
+            logger.debug(f"Cache {self.config.cache_path} exists")
