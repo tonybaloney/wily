@@ -10,14 +10,18 @@ TODO: Refactor individual file work into a separate function
 TODO: Layer on Click invocation in operators section, __main__.py file
 TODO: Is the a better way to retrieve the revision number than via index?
 """
+import os
 import tabulate
 import operator as op
 from pathlib import Path
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
-from wily.config import DEFAULT_GRID_STYLE
+from wily.archivers import resolve_archiver
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.operators import resolve_metric, MetricType
 from wily.state import State
+
+import radon.cli.harvest
 
 
 def aggregate_metric(metric_table: list):
@@ -69,22 +73,38 @@ def rank(config, path, metric, revision_index):
         "wily_metric_type": metric.measure.name,  # AimHigh, AimLow, Informational
     }
 
-    # Assumption is there is only one metric (e.g., therefore list of metrics commented out)
-    pth = Path(path)
-    if not str(pth).endswith(".py"):
-        items = pth.glob("**/*.py")
+    state = State(config)
+
+    # Resolve target paths when the cli has specified --path
+    if config.path != DEFAULT_PATH:
+        targets = [str(Path(config.path) / Path(file)) for file in path]
     else:
-        items = [pth]
-    for item in items:
-        state = State(config)
+        targets = [path]
+
+    # Expand directories to paths
+    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+    logger.debug(f"Targeting - {files}")
+
+    if not revision_index:
+        target_revision = state.index[state.default_archiver].last_revision
+    else:
+        rev = resolve_archiver(state.default_archiver).cls(config).find(revision_index)
+        logger.debug(f"Resolved {revision_index} to {rev.key} ({rev.message})")
+        try:
+            target_revision = state.index[state.default_archiver][rev.key]
+        except KeyError:
+            logger.error(
+                f"Revision {revision_index} is not in the cache, make sure you have run wily build."
+            )
+            exit(1)
+
+    for item in files:
         for archiver in state.archivers:
-            # Last revision in the list is the first item (ordered Newest to Oldest => 0 to -1 index.
-            rev = state.index[archiver].revisions[revision_index]
             try:
                 logger.debug(
                     f"Fetching metric {metric_meta['key']} for {metric_meta['operator']} in {str(item)}"
                 )
-                val = rev.get(
+                val = target_revision.get(
                     config,
                     archiver,
                     metric_meta["operator"],
@@ -98,9 +118,9 @@ def rank(config, path, metric, revision_index):
             data.append(
                 (
                     item,
-                    format_revision(rev.revision.key),
-                    rev.revision.author_name,
-                    format_date(rev.revision.date),
+                    format_revision(target_revision.revision.key),
+                    target_revision.revision.author_name,
+                    format_date(target_revision.revision.date),
                     value,
                 )
             )
