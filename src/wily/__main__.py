@@ -155,10 +155,10 @@ def index(ctx, message):
 
 
 @cli.command()
-@click.argument("path", type=click.Path(resolve_path=False))
-@click.argument("metric", required=False)
+@click.argument("path", type=click.Path(resolve_path=False), required=False)
+@click.argument("metric", required=False, default="maintainability.mi")
 @click.option(
-    "--revision", type=click.INT, default=0, help="Revision index to start at"
+    "-r", "--revision", help="Compare against specific revision", type=click.STRING
 )
 @click.pass_context
 def rank(ctx, path, metric, revision):
@@ -179,9 +179,6 @@ def rank(ctx, path, metric, revision):
 
     if not exists(config):
         handle_no_cache(ctx)
-
-    if not metric:
-        metric = "maintainability.mi"
 
     from wily.commands.rank import rank
 

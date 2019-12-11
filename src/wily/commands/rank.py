@@ -5,17 +5,15 @@ The report command gives a table of files sorted according their ranking scheme
 of a specified metric.
 Will compare the values between files and return a sorted table.
 
-
-TODO: Refactor individual file work into a separate function
 TODO: Layer on Click invocation in operators section, __main__.py file
-TODO: Is the a better way to retrieve the revision number than via index?
 """
 import os
+
 import tabulate
 import operator as op
 from pathlib import Path
 
-from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
+from wily import logger, format_date, format_revision
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.operators import resolve_metric, MetricType
@@ -75,16 +73,6 @@ def rank(config, path, metric, revision_index):
 
     state = State(config)
 
-    # Resolve target paths when the cli has specified --path
-    if config.path != DEFAULT_PATH:
-        targets = [str(Path(config.path) / Path(file)) for file in path]
-    else:
-        targets = [path]
-
-    # Expand directories to paths
-    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
-    logger.debug(f"Targeting - {files}")
-
     if not revision_index:
         target_revision = state.index[state.default_archiver].last_revision
     else:
@@ -97,6 +85,20 @@ def rank(config, path, metric, revision_index):
                 f"Revision {revision_index} is not in the cache, make sure you have run wily build."
             )
             exit(1)
+
+    if path is None:
+        files = target_revision.get_paths(config, state.default_archiver, operator)
+        logger.debug(f"Analysing {files}")
+    else:
+        # Resolve target paths when the cli has specified --path
+        if config.path != DEFAULT_PATH:
+            targets = [str(Path(config.path) / Path(path))]
+        else:
+            targets = [path]
+
+        # Expand directories to paths
+        files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+        logger.debug(f"Targeting - {files}")
 
     for item in files:
         for archiver in state.archivers:
@@ -112,21 +114,19 @@ def rank(config, path, metric, revision_index):
                     metric_meta["key"],
                 )
                 value = str(val)
-            except KeyError as e:
-                value = f"Not found {e}"
-            # Assumption is there is only one metric (e.g., value versus val* as in report.py command
-            data.append(
-                (
-                    item,
-                    format_revision(target_revision.revision.key),
-                    target_revision.revision.author_name,
-                    format_date(target_revision.revision.date),
-                    value,
+                data.append(
+                    (
+                        item,
+                        format_revision(target_revision.revision.key),
+                        target_revision.revision.author_name,
+                        format_date(target_revision.revision.date),
+                        value,
+                    )
                 )
-            )
-    # before moving towards the print tabular data - the values are sorted according to the metric type
-    # The "value" is assumed to be the fourth item in an individual data row. An alternative that may
-    # be more readable is the op.attrgetter.
+            except KeyError:
+                logger.debug(f"Could not find file {item} in index")
+
+    # Sort by ideal value
     if metric_meta["wily_metric_type"] == "AimHigh":
         # AimHigh is sorted lowest to highest
         data.sort(key=op.itemgetter(4))
@@ -136,7 +136,7 @@ def rank(config, path, metric, revision_index):
     # Tack on the total row at the end
     data.append(aggregate_metric(data))
 
-    headers = ("File", "Revision", "Author", "Date", metric_meta["title"])
+    headers = ("File", "Revision", "Last Author", "Date", metric_meta["title"])
     print(
         tabulate.tabulate(
             headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
