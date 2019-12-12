@@ -13,29 +13,13 @@ import tabulate
 import operator as op
 from pathlib import Path
 
-from wily import logger, format_date, format_revision
+from wily import logger, format_revision, format_date
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
-from wily.operators import resolve_metric, MetricType
 from wily.state import State
+from wily.operators import resolve_metric_as_tuple, MetricType
 
 import radon.cli.harvest
-
-
-def aggregate_metric(metric_table: list):
-    """
-    Aggregate/total wily metrics in a tabular format.
-
-    Data is assumed to be in the tabular format of the rank function within the rank.py
-    command.
-
-    :param metric_table: table with list of wily metrics across multiple files.
-    :type metric_table: ''list''
-
-    :return: Sorted table of all files in path, sorted in order of metric.
-    """
-    # value in first draft is assumed to be the fifth item in the list.
-    return ["Total", "---", "---", "---", sum(float(rev[4]) for rev in metric_table)]
 
 
 def rank(config, path, metric, revision_index):
@@ -57,19 +41,11 @@ def rank(config, path, metric, revision_index):
     :return: Sorted table of all files in path, sorted in order of metric.
     """
     logger.debug("Running rank command")
-    logger.info(f"-----------Rank for {metric}------------")
 
     data = []
 
-    operator, key = metric.split(".")
-    metric = resolve_metric(metric)
-    metric_meta = {
-        "key": key,
-        "operator": operator,
-        "title": metric.description,
-        "type": metric.type,
-        "wily_metric_type": metric.measure.name,  # AimHigh, AimLow, Informational
-    }
+    operator, metric = resolve_metric_as_tuple(metric)
+    operator = operator.name
 
     state = State(config)
 
@@ -85,6 +61,9 @@ def rank(config, path, metric, revision_index):
                 f"Revision {revision_index} is not in the cache, make sure you have run wily build."
             )
             exit(1)
+
+    logger.info(
+        f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------")
 
     if path is None:
         files = target_revision.get_paths(config, state.default_archiver, operator)
@@ -104,22 +83,19 @@ def rank(config, path, metric, revision_index):
         for archiver in state.archivers:
             try:
                 logger.debug(
-                    f"Fetching metric {metric_meta['key']} for {metric_meta['operator']} in {str(item)}"
+                    f"Fetching metric {metric.name} for {operator} in {str(item)}"
                 )
                 val = target_revision.get(
                     config,
                     archiver,
-                    metric_meta["operator"],
+                    operator,
                     str(item),
-                    metric_meta["key"],
+                    metric.name,
                 )
-                value = str(val)
+                value = val
                 data.append(
                     (
                         item,
-                        format_revision(target_revision.revision.key),
-                        target_revision.revision.author_name,
-                        format_date(target_revision.revision.date),
                         value,
                     )
                 )
@@ -127,16 +103,13 @@ def rank(config, path, metric, revision_index):
                 logger.debug(f"Could not find file {item} in index")
 
     # Sort by ideal value
-    if metric_meta["wily_metric_type"] == "AimHigh":
-        # AimHigh is sorted lowest to highest
-        data.sort(key=op.itemgetter(4))
-    elif metric_meta["wily_metric_type"] == "AimLow":
-        # AimLow is sorted highest to lowest
-        data.sort(key=op.itemgetter(4), reverse=True)
-    # Tack on the total row at the end
-    data.append(aggregate_metric(data))
+    reverse = metric.type == MetricType.AimLow
+    data = sorted(data, key=op.itemgetter(1), reverse=reverse)
 
-    headers = ("File", "Revision", "Last Author", "Date", metric_meta["title"])
+    # Tack on the total row at the end
+    data.append(["Total", metric.aggregate(rev[1] for rev in data)])
+
+    headers = ("File", metric.description)
     print(
         tabulate.tabulate(
             headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
