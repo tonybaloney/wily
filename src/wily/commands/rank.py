@@ -63,7 +63,8 @@ def rank(config, path, metric, revision_index):
             exit(1)
 
     logger.info(
-        f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------")
+        f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
+    )
 
     if path is None:
         files = target_revision.get_paths(config, state.default_archiver, operator)
@@ -76,7 +77,10 @@ def rank(config, path, metric, revision_index):
             targets = [path]
 
         # Expand directories to paths
-        files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+        files = [
+            os.path.relpath(fn, config.path)
+            for fn in radon.cli.harvest.iter_filenames(targets)
+        ]
         logger.debug(f"Targeting - {files}")
 
     for item in files:
@@ -86,19 +90,10 @@ def rank(config, path, metric, revision_index):
                     f"Fetching metric {metric.name} for {operator} in {str(item)}"
                 )
                 val = target_revision.get(
-                    config,
-                    archiver,
-                    operator,
-                    str(item),
-                    metric.name,
+                    config, archiver, operator, str(item), metric.name
                 )
                 value = val
-                data.append(
-                    (
-                        item,
-                        value,
-                    )
-                )
+                data.append((item, value))
             except KeyError:
                 logger.debug(f"Could not find file {item} in index")
 
