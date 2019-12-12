@@ -49,11 +49,11 @@ def test_rank_directory_default_invalid_revision(builddir):
 def test_rank_directory_default_unindexed_revision(builddir):
     """ Test the rank feature with an unindexed revision. """
     repo = Repo(builddir)
-    with open(builddir / 'test.py', "w") as test_txt:
+    with open(builddir / "test.py", "w") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
-    index.add([str(builddir / 'test.py')])
+    index.add([str(builddir / "test.py")])
 
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
@@ -91,9 +91,7 @@ def test_rank_directory_custom_metric(builddir):
 def test_rank_directory_no_path_target(builddir):
     """ Test the rank feature with no path target """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["rank", "src/", "raw.comments"]
-    )
+    result = runner.invoke(main.cli, ["rank", "src/", "raw.comments"])
     assert result.exit_code == 0, result.stdout
 
 
