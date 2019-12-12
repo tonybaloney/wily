@@ -1,5 +1,9 @@
 # Release History
 
+## 1.16.0 (master)
+
+* Added a `rank` command to show files either matching a pattern or all in the index sorted by a particular metric.
+
 ## 1.15.0 (9th December 2019)
 
 * Git archiver now supports a detached head state. Means that wily build can run in a detached head, will checkout the reference after build.

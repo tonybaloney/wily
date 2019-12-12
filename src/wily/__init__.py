@@ -10,7 +10,7 @@ import datetime
 
 WILY_LOG_NAME = tempfile.mktemp(suffix="wily_log")
 
-__version__ = "1.15.0"
+__version__ = "1.16.0"
 
 _handler = colorlog.StreamHandler()
 _handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s%(message)s"))
