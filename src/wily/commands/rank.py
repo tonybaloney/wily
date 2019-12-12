@@ -22,7 +22,7 @@ from wily.operators import resolve_metric_as_tuple, MetricType
 import radon.cli.harvest
 
 
-def rank(config, path, metric, revision_index):
+def rank(config, path, metric, revision_index, limit, descending):
     """
     Rank command ordering files, methods or functions using metrics.
 
@@ -36,7 +36,10 @@ def rank(config, path, metric, revision_index):
     :type metric: ''str''
 
     :param revision_index: Version of git repository to revert to.
-    :type revision_index: ''int''
+    :type revision_index: ``str``
+
+    :param limit: Limit the number of items in the table
+    :type  limit: ``int``
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -98,8 +101,10 @@ def rank(config, path, metric, revision_index):
                 logger.debug(f"Could not find file {item} in index")
 
     # Sort by ideal value
-    reverse = metric.type == MetricType.AimLow
-    data = sorted(data, key=op.itemgetter(1), reverse=reverse)
+    data = sorted(data, key=op.itemgetter(1), reverse=descending)
+
+    if limit:
+        data = data[:limit]
 
     # Tack on the total row at the end
     data.append(["Total", metric.aggregate(rev[1] for rev in data)])

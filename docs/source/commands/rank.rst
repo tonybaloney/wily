@@ -9,11 +9,17 @@ The rank command will show a CLI table of files in order of their respective met
 Examples
 --------
 
-To display a file ranking, simply provide the path to a file or directory or the name of it.
+To show all files in the index, simply use ``wily rank`` without arguments.
 
 .. code-block:: none
 
-  $ wily rank example.py
+  $ wily rank
+
+To display a file ranking, simply provide the path to a directory.
+
+.. code-block:: none
+
+  $ wily rank src/
 
 By default, wily will show the default metric (maintainability index).
 
@@ -21,13 +27,13 @@ To change the metric, provide the metric name (run ``wily list-metrics`` for a l
 
 .. code-block:: none
 
-  $ wily rank example.py raw.loc
+  $ wily rank src/ loc
 
-Wily rank will show the last revision by default. If you want to show a specific revision, you can provide the index of the revision via ``--revision``.
+Wily rank will show the last revision by default. If you want to show a specific revision, you can provide the reference of a revision via ``--revision``.
 
 .. code-block:: none
 
-  $ wily rank example.py --revision 2
+  $ wily rank src/ --revision HEAD^2
 
 Command Line Usage
 ------------------

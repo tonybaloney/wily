@@ -160,8 +160,14 @@ def index(ctx, message):
 @click.option(
     "-r", "--revision", help="Compare against specific revision", type=click.STRING
 )
+@click.option("-l", "--limit", help="Limit the number of results shown", type=click.INT)
+@click.option(
+    "--desc/--asc",
+    help="Order to show results (ascending or descending)",
+    default=False,
+)
 @click.pass_context
-def rank(ctx, path, metric, revision):
+def rank(ctx, path, metric, revision, limit, desc):
     """
     Rank files, methods and functions in order of any metrics, e.g. complexity.
 
@@ -183,7 +189,14 @@ def rank(ctx, path, metric, revision):
     from wily.commands.rank import rank
 
     logger.debug(f"Running rank on {path} for metric {metric} and revision {revision}")
-    rank(config=config, path=path, metric=metric, revision_index=revision)
+    rank(
+        config=config,
+        path=path,
+        metric=metric,
+        revision_index=revision,
+        limit=limit,
+        descending=desc,
+    )
 
 
 @cli.command()
