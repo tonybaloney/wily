@@ -58,7 +58,10 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         targets = files
 
     # Expand directories to paths
-    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+    files = [
+        os.path.relpath(fn, config.path)
+        for fn in radon.cli.harvest.iter_filenames(targets)
+    ]
     logger.debug(f"Targeting - {files}")
 
     if not revision:

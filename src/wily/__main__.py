@@ -155,6 +155,51 @@ def index(ctx, message):
 
 
 @cli.command()
+@click.argument("path", type=click.Path(resolve_path=False), required=False)
+@click.argument("metric", required=False, default="maintainability.mi")
+@click.option(
+    "-r", "--revision", help="Compare against specific revision", type=click.STRING
+)
+@click.option("-l", "--limit", help="Limit the number of results shown", type=click.INT)
+@click.option(
+    "--desc/--asc",
+    help="Order to show results (ascending or descending)",
+    default=False,
+)
+@click.pass_context
+def rank(ctx, path, metric, revision, limit, desc):
+    """
+    Rank files, methods and functions in order of any metrics, e.g. complexity.
+
+    Some common examples:
+
+    Rank all .py files within src/ for the maintainability.mi metric
+
+        $ wily rank src/ maintainability.mi
+
+    Rank all .py files in the index for the default metrics across all archivers
+
+        $ wily rank
+    """
+    config = ctx.obj["CONFIG"]
+
+    if not exists(config):
+        handle_no_cache(ctx)
+
+    from wily.commands.rank import rank
+
+    logger.debug(f"Running rank on {path} for metric {metric} and revision {revision}")
+    rank(
+        config=config,
+        path=path,
+        metric=metric,
+        revision_index=revision,
+        limit=limit,
+        descending=desc,
+    )
+
+
+@cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)

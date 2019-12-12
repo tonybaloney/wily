@@ -67,6 +67,26 @@ class IndexedRevision(object):
         logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
         return get_metric(self._data, operator, path, key)
 
+    def get_paths(self, config, archiver, operator):
+        """
+        Get the indexed paths for this indexed revision.
+
+        :param config: The wily config.
+        :type  config: :class:`wily.config.WilyConfig`
+
+        :param archiver: The archiver.
+        :type  archiver: :class:`wily.archivers.Archiver`
+
+        :param operator: The operator to find
+        :type  operator: ``str``
+        """
+        if not self._data:
+            self._data = cache.get(
+                config=config, archiver=archiver, revision=self.revision.key
+            )["operator_data"]
+        logger.debug(f"Fetching keys")
+        return list(self._data[operator].keys())
+
     def store(self, config, archiver, stats):
         """
         Store the stats for this indexed revision.

@@ -47,17 +47,17 @@ Wily can be used in a CI/CD workflow to compare the complexity of the current fi
 
 By default wily will compare against the previous revision (for a git-pre-commit hook) but you can also give a Git ref, for example `HEAD^1` is the commit before the HEAD reference.
 
-.. code-block:: console
-
-    $ wily build src/
-    $ wily diff src/ -r HEAD^1
+```console
+ $ wily build src/
+ $ wily diff src/ -r HEAD^1
+```
 
 Or, to compare against
 
-.. code-block:: shell
-
-    $ wily build src/
-    $ wily diff src/ -r master
+```console
+ $ wily build src/
+ $ wily diff src/ -r master
+```
 
 ## pre-commit plugin
 
@@ -111,6 +111,14 @@ Show a specific metric for a given file, requires that `.wily/` exists
 `wily report` will print the metric and the delta between each revision.
 
 ![wily-report](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_report.png)
+
+#### `wily rank`
+
+Show the ranking for all files in a directory or a single file based on the metric provided, requires that `.wily/` exists
+
+`wily rank` will print a table of files and their metric values.
+
+![wily-rank](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_rank.png)
 
 #### `wily graph`
 
