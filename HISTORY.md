@@ -1,5 +1,39 @@
 # Release History
 
+## 1.16.0 (12th December 2019)
+
+* Added a `rank` command to show files either matching a pattern or all in the index sorted by a particular metric.
+
+## 1.15.0 (9th December 2019)
+
+* Git archiver now supports a detached head state. Means that wily build can run in a detached head, will checkout the reference after build.
+* Add argument to `wily diff` to specify a target revision to compare with, can be a Git SHA or a Git reference, e.g. `HEAD^1`
+* `wily diff` argument for `--all`/`--changes-only` has shorter `-a`/`-c` also.
+* `wily diff` argument for `--metrics` has shorter `-m` also.
+* `wily report` argument for `--message` has shorter `-m` also.
+* `wily index` argument for `--message` has shorter `-m` also.
+* Added examples, tests and documentation for CICD patterns.
+
+## 1.14.1 (6th December 2019)
+
+* Debug logs are always stored in a temporary local file, on the event of a crash, wily will suggest the user to upload this file to GitHub with a copy of the crash log
+* Unhandled exceptions raised by the operators (normally file formatting) are now debug events not warnings
+* Updated to flit 2.0 for packaging (development change, no impact to users)
+* Moved source code to src/ (development change, no impact to users)
+
+## 1.14.0 (6th December 2019)
+
+* The build process uses the metadata from Git to only scan the files that have changed for each revision. Significantly speeds up build times (25x>).
+* The diff process uses multiprocessing to make it 3-4x faster to complete.
+* Officially add support for Python 3.8.
+* Process crashes are now captured and output on the console in the debug log.
+* State index building is 10-20% faster.
+
+## 1.13.0 (29th November 2019)
+
+* Updated radon to 4.0.0
+* Added support for IPython Notebooks (enabled by default)
+
 ## 1.12.4 (22nd September 2019)
 
 * [BUGFIX](https://github.com/tonybaloney/wily/issues/73) Fixed ``TypeError: unsupported operand type(s) for +: 'int' and 'dict'`` occurring when a file contains multiple functions with the same name.

@@ -13,25 +13,22 @@ class MockCC(object):
 @mock.patch("wily.operators.cyclomatic.harvesters.CCHarvester", return_value=MockCC)
 def test_cyclomatic_bad_entry_data(harvester):
     MockCC.results = {"test.py": [{"complexity": 5}]}
-    op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG)
+    op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG, ["."])
     results = op.run("test.py", {})
-    assert results == {"test.py": {"detailed": {},
-                                   "total": {"complexity": 0}}}
+    assert results == {"test.py": {"detailed": {}, "total": {"complexity": 0}}}
 
 
 @mock.patch("wily.operators.cyclomatic.harvesters.CCHarvester", return_value=MockCC)
 def test_cyclomatic_error_case(harvester):
     MockCC.results = {"test.py": {"error": "bad data"}}
-    op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG)
+    op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG, ["."])
     results = op.run("test.py", {})
-    assert results == {"test.py": {"detailed": {},
-                                   "total": {"complexity": 0}}}
+    assert results == {"test.py": {"detailed": {}, "total": {"complexity": 0}}}
 
 
 @mock.patch("wily.operators.cyclomatic.harvesters.CCHarvester", return_value=MockCC)
 def test_cyclomatic_error_case_unexpected(harvester):
     MockCC.results = {"test.py": [1234]}
-    op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG)
+    op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG, ["."])
     results = op.run("test.py", {})
-    assert results == {"test.py": {"detailed": {},
-                                   "total": {"complexity": 0}}}
+    assert results == {"test.py": {"detailed": {}, "total": {"complexity": 0}}}

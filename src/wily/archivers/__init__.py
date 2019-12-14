@@ -6,6 +6,7 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 
 from collections import namedtuple
 from dataclasses import dataclass
+from typing import List
 
 
 class BaseArchiver(object):
@@ -42,6 +43,18 @@ class BaseArchiver(object):
         """Clean up any state if processing completed/failed."""
         pass
 
+    def find(self, search):
+        """
+        Search a string and return a single revision.
+
+        :param search: The search term.
+        :type  search: ``str``
+
+        :return: An instance of revision.
+        :rtype: Instance of :class:`Revision`
+        """
+        raise NotImplementedError
+
 
 @dataclass
 class Revision:
@@ -52,6 +65,7 @@ class Revision:
     author_email: str
     date: str
     message: str
+    files: List[str]
 
 
 from wily.archivers.git import GitArchiver

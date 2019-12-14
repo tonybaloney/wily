@@ -23,6 +23,8 @@ class HalsteadOperator(BaseOperator):
         "show": False,
         "sort": False,
         "by_function": True,
+        "include_ipynb": True,
+        "ipynb_cells": True,
     }
 
     metrics = (
@@ -41,7 +43,7 @@ class HalsteadOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config):
+    def __init__(self, config, targets):
         """
         Instantiate a new HC operator.
 
@@ -49,11 +51,9 @@ class HalsteadOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {config.targets} with {self.defaults} for HC metrics")
+        logger.debug(f"Using {targets} with {self.defaults} for HC metrics")
 
-        self.harvester = harvesters.HCHarvester(
-            config.targets, config=Config(**self.defaults)
-        )
+        self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
         """
@@ -71,16 +71,17 @@ class HalsteadOperator(BaseOperator):
         logger.debug("Running halstead harvester")
         results = {}
         for filename, details in dict(self.harvester.results).items():
-            results[filename] = {"detailed": {},
-                                 "total": {}}
+            results[filename] = {"detailed": {}, "total": {}}
             for instance in details:
                 if isinstance(instance, list):
                     for item in instance:
                         function, report = item
-                        results[filename]["detailed"][function] = self._report_to_dict(report)
+                        results[filename]["detailed"][function] = self._report_to_dict(
+                            report
+                        )
                 else:
                     if isinstance(instance, str) and instance == "error":
-                        logger.warning(
+                        logger.debug(
                             f"Failed to run Halstead harvester on {filename} : {details['error']}"
                         )
                         continue

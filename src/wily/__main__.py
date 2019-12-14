@@ -2,10 +2,10 @@
 """Main command line."""
 
 import click
-
+import traceback
 from pathlib import Path
 
-from wily import logger, __version__
+from wily import logger, __version__, WILY_LOG_NAME
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
@@ -79,6 +79,7 @@ def cli(ctx, debug, config, path, cache):
         logger.debug(f"Fixing cache to {cache}")
         ctx.obj["CONFIG"].cache_path = cache
     logger.debug(f"Loaded configuration from {config}")
+    logger.debug(f"Capturing logs to {WILY_LOG_NAME}")
 
 
 @cli.command()
@@ -138,7 +139,9 @@ def build(ctx, max_revisions, targets, operators, archiver):
 
 @cli.command()
 @click.pass_context
-@click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-m", "--message/--no-message", default=False, help="Include revision message"
+)
 def index(ctx, message):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
@@ -152,10 +155,57 @@ def index(ctx, message):
 
 
 @cli.command()
+@click.argument("path", type=click.Path(resolve_path=False), required=False)
+@click.argument("metric", required=False, default="maintainability.mi")
+@click.option(
+    "-r", "--revision", help="Compare against specific revision", type=click.STRING
+)
+@click.option("-l", "--limit", help="Limit the number of results shown", type=click.INT)
+@click.option(
+    "--desc/--asc",
+    help="Order to show results (ascending or descending)",
+    default=False,
+)
+@click.pass_context
+def rank(ctx, path, metric, revision, limit, desc):
+    """
+    Rank files, methods and functions in order of any metrics, e.g. complexity.
+
+    Some common examples:
+
+    Rank all .py files within src/ for the maintainability.mi metric
+
+        $ wily rank src/ maintainability.mi
+
+    Rank all .py files in the index for the default metrics across all archivers
+
+        $ wily rank
+    """
+    config = ctx.obj["CONFIG"]
+
+    if not exists(config):
+        handle_no_cache(ctx)
+
+    from wily.commands.rank import rank
+
+    logger.debug(f"Running rank on {path} for metric {metric} and revision {revision}")
+    rank(
+        config=config,
+        path=path,
+        metric=metric,
+        revision_index=revision,
+        limit=limit,
+        descending=desc,
+    )
+
+
+@cli.command()
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option("--message/--no-message", default=False, help="Include revision message")
+@click.option(
+    "-m", "--message/--no-message", default=False, help="Include revision message"
+)
 @click.option(
     "-f",
     "--format",
@@ -209,11 +259,13 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 @cli.command()
 @click.argument("files", type=click.Path(resolve_path=False), nargs=-1, required=True)
 @click.option(
+    "-m",
     "--metrics",
     default=None,
     help="comma-seperated list of metrics, see list-metrics for choices",
 )
 @click.option(
+    "-a/-c",
     "--all/--changes-only",
     default=False,
     help="Show all files, instead of changes only",
@@ -223,8 +275,11 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
     default=True,
     help="Show function/class level metrics where available",
 )
+@click.option(
+    "-r", "--revision", help="Compare against specific revision", type=click.STRING
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail):
+def diff(ctx, files, metrics, all, detail, revision):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -242,7 +297,12 @@ def diff(ctx, files, metrics, all, detail):
 
     logger.debug(f"Running diff on {files} for metric {metrics}")
     diff(
-        config=config, files=files, metrics=metrics, changes_only=not all, detail=detail
+        config=config,
+        files=files,
+        metrics=metrics,
+        changes_only=not all,
+        detail=detail,
+        revision=revision,
     )
 
 
@@ -301,7 +361,8 @@ def clean(ctx, yes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
-        handle_no_cache(ctx)
+        logger.info("Wily cache does not exist, nothing to remove.")
+        exit(0)
 
     if not yes:
         p = input("Are you sure you want to delete wily cache? [y/N]")
@@ -350,5 +411,12 @@ def handle_no_cache(context):
         context.invoke(build, max_revisions=revisions, targets=paths, operators=None)
 
 
-if __name__ == "__main__":
-    cli()  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
+    try:
+        cli()
+    except Exception as runtime:
+        logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
+        logger.info(
+            f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."
+        )
+        logger.debug(traceback.format_exc())

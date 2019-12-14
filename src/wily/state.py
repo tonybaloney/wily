@@ -30,6 +30,7 @@ class IndexedRevision(object):
             author_email=d["author_email"],
             date=d["date"],
             message=d["message"],
+            files=d["files"] if "files" in d else [],
         )
         operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)
@@ -65,6 +66,26 @@ class IndexedRevision(object):
             )["operator_data"]
         logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
         return get_metric(self._data, operator, path, key)
+
+    def get_paths(self, config, archiver, operator):
+        """
+        Get the indexed paths for this indexed revision.
+
+        :param config: The wily config.
+        :type  config: :class:`wily.config.WilyConfig`
+
+        :param archiver: The archiver.
+        :type  archiver: :class:`wily.archivers.Archiver`
+
+        :param operator: The operator to find
+        :type  operator: ``str``
+        """
+        if not self._data:
+            self._data = cache.get(
+                config=config, archiver=archiver, revision=self.revision.key
+            )["operator_data"]
+        logger.debug(f"Fetching keys")
+        return list(self._data[operator].keys())
 
     def store(self, config, archiver, stats):
         """
@@ -106,13 +127,22 @@ class Index(object):
             else []
         )
 
-        self._revisions = OrderedDict()
-        for d in self.data:
-            self._revisions[d["key"]] = IndexedRevision.fromdict(d)
+        self._revisions = OrderedDict(
+            {d["key"]: IndexedRevision.fromdict(d) for d in self.data}
+        )
 
     def __len__(self):
         """Use length of revisions as len."""
         return len(self._revisions)
+
+    @property
+    def last_revision(self):
+        """
+        Return the most recent revision.
+
+        :rtype: Instance of :class:`IndexedRevision`
+        """
+        return next(iter(self._revisions.values()))
 
     @property
     def revisions(self):

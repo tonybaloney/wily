@@ -3,17 +3,24 @@ Wily.
 
 A Python application for tracking, reporting on timing and complexity in tests and applications.
 """
+import tempfile
 import colorlog
+import logging
 import datetime
 
+WILY_LOG_NAME = tempfile.mktemp(suffix="wily_log")
 
-__version__ = "1.12.4"
+__version__ = "1.16.0"
 
 _handler = colorlog.StreamHandler()
 _handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s%(message)s"))
 
+_filehandler = logging.FileHandler(WILY_LOG_NAME, mode="w+")
+_filehandler.setLevel(logging.DEBUG)
+
 logger = colorlog.getLogger(__name__)
 logger.addHandler(_handler)
+logger.addHandler(_filehandler)
 
 """ Max number of characters of the Git commit to print """
 MAX_MESSAGE_WIDTH = 50

@@ -51,7 +51,10 @@ class GitArchiver(BaseArchiver):
             raise InvalidGitRepositoryError from e
 
         self.config = config
-        self.current_branch = self.repo.active_branch
+        if self.repo.head.is_detached:
+            self.current_branch = self.repo.head.object.hexsha
+        else:
+            self.current_branch = self.repo.active_branch
         assert not self.repo.bare, "Not a Git repository"
 
     def revisions(self, path, max_revisions):
@@ -80,6 +83,7 @@ class GitArchiver(BaseArchiver):
                 author_email=commit.author.email,
                 date=commit.committed_date,
                 message=commit.message,
+                files=list(commit.stats.files.keys()),
             )
             revisions.append(rev)
         return revisions
@@ -105,3 +109,24 @@ class GitArchiver(BaseArchiver):
         """
         self.repo.git.checkout(self.current_branch)
         self.repo.close()
+
+    def find(self, search):
+        """
+        Search a string and return a single revision.
+
+        :param search: The search term.
+        :type  search: ``str``
+
+        :return: An instance of revision.
+        :rtype: Instance of :class:`Revision`
+        """
+        commit = self.repo.commit(search)
+
+        return Revision(
+            key=commit.name_rev.split(" ")[0],
+            author_name=commit.author.name,
+            author_email=commit.author.email,
+            date=commit.committed_date,
+            message=commit.message,
+            files=list(commit.stats.files.keys()),
+        )

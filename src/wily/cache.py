@@ -124,7 +124,10 @@ def store(config, archiver, revision, stats):
             if operator_data:
                 new_operator_data = operator_data.copy()
                 for k, v in list(operator_data.items()):
-                    new_key = os.path.relpath(str(k), str(config.path))
+                    if os.path.isabs(k):
+                        new_key = os.path.relpath(str(k), str(config.path))
+                    else:
+                        new_key = str(k)
                     del new_operator_data[k]
                     new_operator_data[new_key] = v
                 del stats["operator_data"][operator]
