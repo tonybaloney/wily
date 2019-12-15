@@ -1,5 +1,6 @@
 """A module containing custom enums for wily."""
 from enum import Enum
+from typing import List
 
 
 class ReportFormat(Enum):
@@ -9,6 +10,6 @@ class ReportFormat(Enum):
     HTML = 2
 
     @classmethod
-    def get_all(cls):
+    def get_all(cls) -> List[ReportFormat]:
         """Return a list with all Enumerations."""
         return [format.name for format in cls]

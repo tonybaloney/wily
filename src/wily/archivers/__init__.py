@@ -9,10 +9,22 @@ from dataclasses import dataclass
 from typing import List
 
 
+@dataclass
+class Revision:
+    """Represents a revision in the archiver."""
+
+    key: str
+    author_name: str
+    author_email: str
+    date: str
+    message: str
+    files: List[str]
+
+
 class BaseArchiver(object):
     """Abstract Archiver Class."""
 
-    def revisions(self, path, max_revisions):
+    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
         """
         Get the list of revisions.
 
@@ -56,18 +68,6 @@ class BaseArchiver(object):
         raise NotImplementedError
 
 
-@dataclass
-class Revision:
-    """Represents a revision in the archiver."""
-
-    key: str
-    author_name: str
-    author_email: str
-    date: str
-    message: str
-    files: List[str]
-
-
 from wily.archivers.git import GitArchiver
 from wily.archivers.filesystem import FilesystemArchiver
 
@@ -88,12 +88,11 @@ ARCHIVER_FILESYSTEM = Archiver(
 ALL_ARCHIVERS = {a.name: a for a in [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]}
 
 
-def resolve_archiver(name):
+def resolve_archiver(name: str) -> Archiver:
     """
     Get the :class:`wily.archivers.Archiver` for a given name.
 
     :param name: The name of the archiver
-    :type  name: ``str``
     :return: The archiver type
     """
     if name not in ALL_ARCHIVERS:

@@ -3,14 +3,16 @@ For managing the state of the wily process.
 
 Contains a lazy revision, index and process state model.
 """
+import pathlib
 from collections import OrderedDict
 from dataclasses import dataclass, asdict
-from typing import List
+from typing import List, Dict, Union
 
 import wily.cache as cache
 from wily import logger
-from wily.archivers import Revision, resolve_archiver
-from wily.operators import get_metric
+from wily.archivers import Revision, resolve_archiver, Archiver
+from wily.config import WilyConfig
+from wily.operators import get_metric, Operator
 
 
 @dataclass
@@ -22,7 +24,7 @@ class IndexedRevision(object):
     _data = None
 
     @staticmethod
-    def fromdict(d):
+    def fromdict(d: Dict):
         """Instantiate from a dictionary."""
         rev = Revision(
             key=d["key"],
@@ -35,13 +37,13 @@ class IndexedRevision(object):
         operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)
 
-    def asdict(self):
+    def asdict(self) -> Dict:
         """Convert to dictionary."""
         d = asdict(self.revision)
         d["operators"] = self.operators
         return d
 
-    def get(self, config, archiver, operator, path, key):
+    def get(self, config: WilyConfig, archiver: Archiver, operator: str, path: pathlib.Path, key: str) -> object:
         """
         Get the metric data for this indexed revision.
 
@@ -67,7 +69,7 @@ class IndexedRevision(object):
         logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
         return get_metric(self._data, operator, path, key)
 
-    def get_paths(self, config, archiver, operator):
+    def get_paths(self, config: WilyConfig, archiver: Archiver, operator: str) -> List[str]:
         """
         Get the indexed paths for this indexed revision.
 
@@ -87,7 +89,7 @@ class IndexedRevision(object):
         logger.debug(f"Fetching keys")
         return list(self._data[operator].keys())
 
-    def store(self, config, archiver, stats):
+    def store(self, config: WilyConfig, archiver: Archiver, stats: Dict):
         """
         Store the stats for this indexed revision.
 
@@ -109,7 +111,7 @@ class Index(object):
 
     operators = None
 
-    def __init__(self, config, archiver):
+    def __init__(self, config: WilyConfig, archiver: Archiver):
         """
         Instantiate a new index.
 
@@ -122,8 +124,8 @@ class Index(object):
         self.config = config
         self.archiver = archiver
         self.data = (
-            cache.get_archiver_index(config, archiver.name)
-            if cache.has_archiver_index(config, archiver.name)
+            cache.get_archiver_index(config, archiver)
+            if cache.has_archiver_index(config, archiver)
             else []
         )
 
@@ -136,7 +138,7 @@ class Index(object):
         return len(self._revisions)
 
     @property
-    def last_revision(self):
+    def last_revision(self) -> IndexedRevision:
         """
         Return the most recent revision.
 
@@ -145,7 +147,7 @@ class Index(object):
         return next(iter(self._revisions.values()))
 
     @property
-    def revisions(self):
+    def revisions(self) -> List[IndexedRevision]:
         """
         List of all the revisions.
 
@@ -154,7 +156,7 @@ class Index(object):
         return list(self._revisions.values())
 
     @property
-    def revision_keys(self):
+    def revision_keys(self) -> List[str]:
         """
         List of all the revision indexes.
 
@@ -162,7 +164,7 @@ class Index(object):
         """
         return list(self._revisions.keys())
 
-    def __contains__(self, item):
+    def __contains__(self, item: Union[str, Revision, IndexedRevision]) -> bool:
         """
         Check if index contains `item`.
 
@@ -178,11 +180,11 @@ class Index(object):
         else:
             raise TypeError("Invalid type for __contains__ in Index.")
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: str) -> IndexedRevision:
         """Get the revision for a specific index."""
         return self._revisions[index]
 
-    def add(self, revision, operators):
+    def add(self, revision: Revision, operators: List[Operator]):
         """
         Add a revision to the index.
 

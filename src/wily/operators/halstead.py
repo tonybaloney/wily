@@ -3,10 +3,13 @@ Halstead operator.
 
 Measures all of the halstead metrics (volume, vocab, difficulty)
 """
+from typing import List, Dict
+
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 
 from wily import logger
+from wily.config import WilyConfig
 from wily.operators import BaseOperator, MetricType, Metric
 
 
@@ -43,7 +46,7 @@ class HalsteadOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config, targets):
+    def __init__(self, config: WilyConfig, targets: List[str]):
         """
         Instantiate a new HC operator.
 
@@ -55,7 +58,7 @@ class HalsteadOperator(BaseOperator):
 
         self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict) -> Dict:
         """
         Run the operator.
 
@@ -88,7 +91,7 @@ class HalsteadOperator(BaseOperator):
                     results[filename]["total"] = self._report_to_dict(instance)
         return results
 
-    def _report_to_dict(self, report):
+    def _report_to_dict(self, report) -> Dict:
         return {
             "h1": report.h1,
             "h2": report.h2,

@@ -10,7 +10,7 @@ from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
-from wily.decorators import add_version
+from wily.helper.decorators import add_version
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 

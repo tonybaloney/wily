@@ -3,6 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
+from typing import Dict, Tuple, List
 
 
 class MetricType(Enum):
@@ -39,21 +40,21 @@ class BaseOperator(object):
     """Abstract Operator Class."""
 
     """Name of the operator."""
-    name = "abstract"
+    name: str = "abstract"
 
     """Default settings."""
-    defaults = {}
+    defaults: Dict = {}
 
     """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)."""
-    metrics = ()
+    metrics: Tuple[str, str, type, MetricType] = ()
 
     """Which metric is the default to display in the report command."""
-    default_metric_index = None
+    default_metric_index: Metric = None
 
     """Level at which the operator goes to."""
-    level = OperatorLevel.File
+    level: OperatorLevel = OperatorLevel.File
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict) -> Dict:
         """
         Run the operator.
 
@@ -128,7 +129,7 @@ ALL_METRICS = {
 
 
 @lru_cache(maxsize=128)
-def resolve_operator(name):
+def resolve_operator(name: str) -> Operator:
     """
     Get the :namedtuple:`wily.operators.Operator` for a given name.
 
@@ -141,7 +142,7 @@ def resolve_operator(name):
         raise ValueError(f"Operator {name} not recognised.")
 
 
-def resolve_operators(operators):
+def resolve_operators(operators: List[str]) -> List[Operator]:
     """
     Resolve a list of operator names to their corresponding types.
 
@@ -154,7 +155,7 @@ def resolve_operators(operators):
 
 
 @lru_cache(maxsize=128)
-def resolve_metric(metric):
+def resolve_metric(metric: str) -> Metric:
     """
     Resolve metric key to a given target.
 

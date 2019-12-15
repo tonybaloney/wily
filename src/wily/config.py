@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=128)
-def generate_cache_path(path):
+def generate_cache_path(path: pathlib.Path) -> pathlib.Path:
     """
     Generate a reusable path to cache results.
 
@@ -62,14 +62,14 @@ class WilyConfig(object):
         self._cache_path = None
 
     @property
-    def cache_path(self):
+    def cache_path(self) -> pathlib.Path:
         """Path to the cache."""
         if not self._cache_path:
             self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())
         return self._cache_path
 
     @cache_path.setter
-    def cache_path(self, value):
+    def cache_path(self, value: pathlib.Path):
         """Override the cache path."""
         logger.debug(f"Setting custom cache path to {value}")
         self._cache_path = value
@@ -111,7 +111,7 @@ DEFAULT_CONFIG = WilyConfig(
 DEFAULT_GRID_STYLE = "fancy_grid"
 
 
-def load(config_path=DEFAULT_CONFIG_PATH):
+def load(config_path: pathlib.Path = DEFAULT_CONFIG_PATH) -> WilyConfig:
     """
     Load config file and set values to defaults where no present.
 

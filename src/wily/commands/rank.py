@@ -17,7 +17,7 @@ from wily import logger, format_revision, format_date
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
 from wily.state import State
-from wily.operators import resolve_metric_as_tuple, MetricType
+from wily.operators import resolve_metric_as_tuple
 
 import radon.cli.harvest
 

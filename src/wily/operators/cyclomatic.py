@@ -4,6 +4,7 @@ Cyclomatic complexity metric for each function/method.
 Provided by the radon library.
 """
 import statistics
+from typing import List, Dict
 
 import radon
 import radon.cli.harvest as harvesters
@@ -11,6 +12,7 @@ from radon.cli import Config
 from radon.visitors import Function, Class
 
 from wily import logger
+from wily.config import WilyConfig
 from wily.operators import BaseOperator, Metric, MetricType
 
 
@@ -42,7 +44,7 @@ class CyclomaticComplexityOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config, targets):
+    def __init__(self, config: WilyConfig, targets: List[str]):
         """
         Instantiate a new Cyclomatic Complexity operator.
 
@@ -54,7 +56,7 @@ class CyclomaticComplexityOperator(BaseOperator):
 
         self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict) -> Dict:
         """
         Run the operator.
 
@@ -95,7 +97,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         return results
 
     @staticmethod
-    def _dict_from_function(l):
+    def _dict_from_function(l) -> Dict:
         return {
             "name": l.name,
             "is_method": l.is_method,
@@ -107,7 +109,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         }
 
     @staticmethod
-    def _dict_from_class(l):
+    def _dict_from_class(l) -> Dict:
         return {
             "name": l.name,
             "inner_classes": l.inner_classes,
