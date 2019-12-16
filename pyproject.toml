@@ -64,14 +64,9 @@ setenv =
 deps =
     pip>=19.1
     pytest
-    pytest-cov
-    codecov
     mock
-    pydocstyle
 commands =
-    pytest --cov=wily
-    codecov
-    pydocstyle --ignore=D301,D212,D203 wily
+    pytest
 """
 
 [tool.black]

@@ -232,9 +232,15 @@ class State(object):
             logger.debug(f"Cache {self.config.cache_path} exists")
 
     def get_index(self, archiver: Union[str, Archiver]) -> Index:
+        """
+        Get the index dictionary for an archiver.
+
+        :param archiver: The target archiver
+        """
         if isinstance(archiver, (Archiver, BaseArchiver)):
             return self.index[archiver.name]
         return self.index[str(archiver)]
 
     def get_default_index(self) -> Index:
+        """Get the index for the default archiver."""
         return self.get_index(self.default_archiver)

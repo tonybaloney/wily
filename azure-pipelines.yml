@@ -21,7 +21,7 @@ stages:
               architecture: 'x64'
           - script: |
               python -m pip install --upgrade pip
-              pip install pydocstyle mypy
+              pip install pydocstyle mypy black
             displayName: 'Install dependencies'
           - script: mypy --ignore-missing-imports --junit-xml mypy.xml --follow-imports=skip src/
             displayName: 'mypy'
@@ -36,6 +36,8 @@ stages:
              publishRunAttachments: true
           - script: pydocstyle --ignore=D301,D212,D203 src/wily
             displayName: 'pydocstyle'
+          - script: black --check src/ test/
+            displayName: 'black'
   - stage: Unit_Test
     jobs:
 
@@ -71,8 +73,6 @@ stages:
         displayName: 'pytest'
         env:
           CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
-
-
       - script: |
           wily build src/
           wily diff src/ -r HEAD^1

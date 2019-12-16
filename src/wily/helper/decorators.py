@@ -2,9 +2,7 @@
 A module including decorators for wily.
 
 This API is not intended to be public and should not be consumed directly.
-
 """
-
 from wily import __version__
 
 

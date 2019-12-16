@@ -36,6 +36,7 @@ class DirtyGitRepositoryError(Exception):
 
 class GitArchiver(BaseArchiver):
     """Gitpython implementation of the base archiver."""
+
     repo: Repo
     name: str = "git"
 

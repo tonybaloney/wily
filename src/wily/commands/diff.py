@@ -19,7 +19,8 @@ from wily.operators import (
     GOOD_COLORS,
     BAD_COLORS,
     OperatorLevel,
-    Metric)
+    Metric,
+)
 from wily.commands.build import run_operator
 from wily.state import State
 
@@ -80,7 +81,9 @@ def diff(
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    _metrics: List[Tuple[str, Metric]] = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    _metrics: List[Tuple[str, Metric]] = [
+        (metric.split(".")[0], resolve_metric(metric)) for metric in metrics
+    ]
     results = []
 
     # Build a set of operators
