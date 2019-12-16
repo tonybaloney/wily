@@ -116,6 +116,12 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
                     run_operator,
                     [(operator, revision, config, targets) for operator in operators],
                 )
+                # data is a list of tuples, where for each operator, it is a tuple of length 2,
+                operator_data_len = 2
+                # second element in the tuple, i.e data[i][1]) has the collected data
+                for i in range(0, len(operators)):
+                    if i < len(data) and len(data[i]) >= operator_data_len and len(data[i][1]) == 0:
+                        logger.warn(f"In revision {revision.key}, for operator {operators[i].name}: No data collected")
 
                 # Map the data back into a dictionary
                 for operator_name, result in data:
