@@ -23,8 +23,16 @@ stages:
               python -m pip install --upgrade pip
               pip install pydocstyle mypy
             displayName: 'Install dependencies'
-          - script: dmypy run -- --ignore-missing-imports --follow-imports=skip src/
+          - script: mypy --ignore-missing-imports --junit-xml mypy.xml --follow-imports=skip src/
             displayName: 'mypy'
+          - task: PublishTestResults@2
+            inputs:
+             testResultsFormat: 'JUnit'
+             testResultsFiles: '**/mypy.xml'
+             mergeTestResults: true
+             failTaskOnFailedTests: false
+             testRunTitle: 'MyPy'
+             publishRunAttachments: true
           - script: pydocstyle --ignore=D301,D212,D203 src/wily
             displayName: 'pydocstyle'
   - stage: Unit_Test

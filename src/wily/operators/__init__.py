@@ -3,7 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 
 
 class MetricType(Enum):
@@ -46,10 +46,10 @@ class BaseOperator(object):
     defaults: Dict = {}
 
     """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)."""
-    metrics: Tuple[str, str, type, MetricType] = ()
+    metrics: Tuple[Metric, ...] = ()
 
     """Which metric is the default to display in the report command."""
-    default_metric_index: int = None
+    default_metric_index: Optional[int] = None
 
     """Level at which the operator goes to."""
     level: OperatorLevel = OperatorLevel.File

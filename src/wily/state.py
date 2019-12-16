@@ -6,7 +6,7 @@ Contains a lazy revision, index and process state model.
 import pathlib
 from collections import OrderedDict
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 import wily.cache as cache
 from wily import logger
@@ -21,7 +21,7 @@ class IndexedRevision(object):
 
     revision: Revision
     operators: List
-    _data: Dict = None
+    _data: Optional[Dict] = None
 
     @staticmethod
     def fromdict(d: Dict):
@@ -48,7 +48,7 @@ class IndexedRevision(object):
         config: WilyConfig,
         archiver: Archiver,
         operator: str,
-        path: pathlib.Path,
+        path: Union[pathlib.Path, str],
         key: str,
     ) -> object:
         """
@@ -83,13 +83,8 @@ class IndexedRevision(object):
         Get the indexed paths for this indexed revision.
 
         :param config: The wily config.
-        :type  config: :class:`wily.config.WilyConfig`
-
         :param archiver: The archiver.
-        :type  archiver: :class:`wily.archivers.Archiver`
-
         :param operator: The operator to find
-        :type  operator: ``str``
         """
         if not self._data:
             self._data = cache.get(
@@ -103,13 +98,8 @@ class IndexedRevision(object):
         Store the stats for this indexed revision.
 
         :param config: The wily config.
-        :type  config: :class:`wily.config.WilyConfig`
-
         :param archiver: The archiver.
-        :type  archiver: :class:`wily.archivers.Archiver`
-
         :param stats: The data
-        :type  stats: ``dict``
         """
         self._data = stats
         return cache.store(config, archiver, self.revision, stats)
@@ -173,7 +163,6 @@ class Index(object):
         Check if index contains `item`.
 
         :param item: The item to search for
-        :type  item: ``str``, :class:`Revision` or :class:`LazyRevision`
 
         :return: ``True`` for contains, ``False`` for not.
         """
@@ -192,8 +181,8 @@ class Index(object):
         """
         Add a revision to the index.
 
-        :param revision: The revision.
-        :type  revision: :class:`Revision` or :class:`LazyRevision`
+        :param revision: The revision to add to the index
+        :param operators: List of operators to add
         """
         ir = IndexedRevision(
             revision=revision, operators=[operator.name for operator in operators]

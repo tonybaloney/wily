@@ -70,7 +70,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         :rtype: ``dict``
         """
         logger.debug("Running CC harvester")
-        results = {}
+        results: Dict[str, Dict] = {}
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {"detailed": {}, "total": {}}
             total = 0  # running CC total

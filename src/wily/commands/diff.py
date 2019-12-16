@@ -5,13 +5,12 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
-from typing import List
+from typing import List, Tuple
 
 import tabulate
 
 from pathlib import Path
 from wily import logger, format_revision, format_date
-from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH, WilyConfig
 from wily.operators import (
     resolve_metric,
@@ -20,7 +19,7 @@ from wily.operators import (
     GOOD_COLORS,
     BAD_COLORS,
     OperatorLevel,
-)
+    Metric)
 from wily.commands.build import run_operator
 from wily.state import State
 
@@ -81,7 +80,7 @@ def diff(
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    _metrics: List[Tuple[str, Metric]] = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     results = []
 
     # Build a set of operators
@@ -95,7 +94,7 @@ def diff(
 
     # Write a summary table
     extra = []
-    for operator, metric in metrics:
+    for operator, metric in _metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
             for file in files:
                 try:
@@ -114,9 +113,9 @@ def diff(
     files.extend(extra)
     logger.debug(files)
     for file in files:
-        metrics_data = []
+        metrics_data: List[str] = []
         has_changes = False
-        for operator, metric in metrics:
+        for operator, metric in _metrics:
             try:
                 current = target_revision.get(
                     config, state.default_archiver, operator, file, metric.name
@@ -154,7 +153,7 @@ def diff(
         else:
             logger.debug(metrics_data)
 
-    descriptions = [metric.description for operator, metric in metrics]
+    descriptions = [metric.description for operator, metric in _metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
         print(

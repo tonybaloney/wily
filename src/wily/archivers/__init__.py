@@ -6,7 +6,7 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
 
 @dataclass
@@ -16,7 +16,7 @@ class Revision:
     key: str
     author_name: str
     author_email: str
-    date: str
+    date: int
     message: str
     files: List[str]
 
@@ -39,15 +39,12 @@ class BaseArchiver(object):
         """
         raise NotImplementedError
 
-    def checkout(self, revision, **options):
+    def checkout(self, revision: Revision, options: Dict):
         """
         Checkout a specific revision.
 
         :param revision: The revision identifier.
-        :type  revision: :class:`Revision`
-
         :param options: Any additional options.
-        :type  options: ``dict``
         """
         raise NotImplementedError
 
@@ -55,15 +52,13 @@ class BaseArchiver(object):
         """Clean up any state if processing completed/failed."""
         pass
 
-    def find(self, search):
+    def find(self, search: str):
         """
         Search a string and return a single revision.
 
         :param search: The search term.
-        :type  search: ``str``
 
         :return: An instance of revision.
-        :rtype: Instance of :class:`Revision`
         """
         raise NotImplementedError
 

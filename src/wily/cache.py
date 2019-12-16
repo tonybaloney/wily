@@ -59,7 +59,7 @@ def create_index(config: WilyConfig):
         out.write(json.dumps(index, indent=2))
 
 
-def create(config: WilyConfig) -> str:
+def create(config: WilyConfig) -> pathlib.Path:
     """
     Create a wily cache.
 

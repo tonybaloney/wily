@@ -11,7 +11,7 @@ import logging
 import pathlib
 import hashlib
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any, List, Union, Set, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +42,13 @@ class WilyConfig(object):
     A data class to reflect the configurable options within Wily.
     """
 
-    operators: List
+    operators: Set[str]
     archiver: Any
     path: str
     max_revisions: int
+    targets: Optional[List[str]] = None
     include_ipynb: bool = True
     ipynb_cells: bool = True
-    targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
     def __post_init__(self):
@@ -102,7 +102,7 @@ DEFAULT_CONFIG = WilyConfig(
 DEFAULT_GRID_STYLE = "fancy_grid"
 
 
-def load(config_path: pathlib.Path = DEFAULT_CONFIG_PATH) -> WilyConfig:
+def load(config_path: Union[str, pathlib.Path] = DEFAULT_CONFIG_PATH) -> WilyConfig:
     """
     Load config file and set values to defaults where no present.
 
