@@ -25,6 +25,7 @@ stages:
             displayName: 'Install dependencies'
           - script: mypy --ignore-missing-imports --junit-xml mypy.xml --follow-imports=skip src/
             displayName: 'mypy'
+            continueOnError: true
           - task: PublishTestResults@2
             inputs:
              testResultsFormat: 'JUnit'
