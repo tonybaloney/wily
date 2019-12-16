@@ -6,7 +6,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import os
 import pathlib
 import multiprocessing
-from typing import List, Tuple, Dict, Optional, Set
+from typing import List, Tuple, Dict, Optional, Set, Any
 
 from progress.bar import Bar
 
@@ -93,6 +93,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     # Index all files the first time, only scan changes afterward
     seed = True
     prev_roots: Optional[Set] = None
+    prev_stats: Optional[Dict[Any, Any]] = None
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             for revision in revisions:

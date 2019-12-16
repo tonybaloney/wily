@@ -42,6 +42,10 @@ stages:
 
           - script: black --check --diff src/ test/
             displayName: 'black'
+
+          - script: flake8 --ignore=E501,E203,E266,E501,W503,E402 src/
+              displayName: 'flake8'
+
   - stage: Unit_Test
     jobs:
 

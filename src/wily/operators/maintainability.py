@@ -18,7 +18,7 @@ from wily.operators import BaseOperator, MetricType, Metric
 def mode(data: Iterable[object]) -> object:
     """
     Return the modal value of a iterable with discrete values.
-    
+
     If there is more than 1 modal value, arbritrarily return the first top n.
     """
     c = Counter(data)

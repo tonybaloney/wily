@@ -1,7 +1,7 @@
 """
 Configuration of wily.
 
-TODO : Handle operator settings. Maybe a section for each operator and then pass kwargs to operators?
+TODO : Handle operator settings.
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
 """

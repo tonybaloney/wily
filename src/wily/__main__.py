@@ -414,7 +414,7 @@ def handle_no_cache(context):
 if __name__ == "__main__":  # pragma: no cover
     try:
         cli()
-    except Exception as runtime:
+    except Exception:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
         logger.info(
             f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."

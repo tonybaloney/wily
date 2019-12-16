@@ -11,7 +11,7 @@ import plotly.offline
 
 from wily import logger, format_datetime
 from wily.config import WilyConfig
-from wily.operators import resolve_metric, resolve_metric_as_tuple, Metric
+from wily.operators import resolve_metric, resolve_metric_as_tuple
 from wily.state import State
 
 
