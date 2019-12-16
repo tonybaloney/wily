@@ -10,6 +10,6 @@ class ReportFormat(Enum):
     HTML = 2
 
     @classmethod
-    def get_all(cls) -> List[ReportFormat]:
+    def get_all(cls) -> List[str]:
         """Return a list with all Enumerations."""
         return [format.name for format in cls]

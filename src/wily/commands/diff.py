@@ -5,12 +5,14 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
+from typing import List
+
 import tabulate
 
 from pathlib import Path
 from wily import logger, format_revision, format_date
 from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH, WilyConfig
 from wily.operators import (
     resolve_metric,
     resolve_operator,
@@ -25,31 +27,27 @@ from wily.state import State
 import radon.cli.harvest
 
 
-def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
+def diff(
+    config: WilyConfig,
+    files: List[str],
+    metrics: List[str],
+    changes_only: bool = True,
+    detail: bool = True,
+    revision: str = None,
+):
     """
     Show the differences in metrics for each of the files.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param files: The files to compare.
-    :type  files: ``list`` of ``str``
-
     :param metrics: The metrics to measure.
-    :type  metrics: ``list`` of ``str``
-
     :param changes_only: Only include changes files in output.
-    :type  changes_only: ``bool``
-
     :param detail: Show details (function-level)
-    :type  detail: ``bool``
-
     :param revision: Compare with specific revision
-    :type  revision: ``str``
     """
     config.targets = files
     files = list(files)
-    state = State(config)
+    state: State = State(config)
 
     # Resolve target paths when the cli has specified --path
     if config.path != DEFAULT_PATH:
@@ -65,12 +63,12 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     logger.debug(f"Targeting - {files}")
 
     if not revision:
-        target_revision = state.index[state.default_archiver].last_revision
+        target_revision = state.get_default_index().last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        rev = state.default_archiver.cls(config).find(revision)
         logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
         try:
-            target_revision = state.index[state.default_archiver][rev.key]
+            target_revision = state.get_default_index()[rev.key]
         except KeyError:
             logger.error(
                 f"Revision {revision} is not in the cache, make sure you have run wily build."

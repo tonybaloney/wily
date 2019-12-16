@@ -85,7 +85,7 @@ def build(config, archiver, operators):
     # Check for existence of cache, else provision
     state.ensure_exists()
 
-    index = state.index[archiver.name]
+    index = state.get_index(archiver)
 
     # remove existing revisions from the list
     revisions = [revision for revision in revisions if revision not in index][::-1]

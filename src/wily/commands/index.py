@@ -31,7 +31,7 @@ def index(config, include_message=False):
 
     data = []
     for archiver in state.archivers:
-        for rev in state.index[archiver].revisions:
+        for rev in state.get_index(archiver).revisions:
             if include_message:
                 data.append(
                     (

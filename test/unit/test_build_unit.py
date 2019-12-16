@@ -53,6 +53,5 @@ def config():
 
 def test_build_simple(config):
     _test_operators = (MockOperator,)
-    with patch("wily.state.resolve_archiver", return_value=MockArchiver):
-        result = build.build(config, MockArchiver, _test_operators)
+    result = build.build(config, MockArchiver, _test_operators)
     assert result is None

@@ -19,7 +19,7 @@ def test_state_defaults(config):
     state = wily.state.State(config)
     assert state.index
     assert "git" in state.index
-    assert state.default_archiver == "git"
+    assert state.default_archiver.name == "git"
     assert state.config is config
 
 

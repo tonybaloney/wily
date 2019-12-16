@@ -4,7 +4,7 @@ Maintainability operator.
 Measures the "maintainability" using the Halstead index.
 """
 import statistics
-from typing import Iterable, Tuple, List, Dict
+from typing import Iterable, List, Dict
 from collections import Counter
 
 import radon.cli.harvest as harvesters
@@ -15,14 +15,14 @@ from wily import logger
 from wily.operators import BaseOperator, MetricType, Metric
 
 
-def mode(data: Iterable[object]) -> Tuple[object, int]:
+def mode(data: Iterable[object]) -> object:
     """
     Return the modal value of a iterable with discrete values.
     
     If there is more than 1 modal value, arbritrarily return the first top n.
     """
     c = Counter(data)
-    mode, freq = c.most_common(1)[0]
+    mode, _ = c.most_common(1)[0]
     return mode
 
 

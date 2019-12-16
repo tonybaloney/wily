@@ -53,12 +53,12 @@ def rank(config, path, metric, revision_index, limit, descending):
     state = State(config)
 
     if not revision_index:
-        target_revision = state.index[state.default_archiver].last_revision
+        target_revision = state.get_default_index().last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision_index)
+        rev = state.default_archiver.cls(config).find(revision_index)
         logger.debug(f"Resolved {revision_index} to {rev.key} ({rev.message})")
         try:
-            target_revision = state.index[state.default_archiver][rev.key]
+            target_revision = state.get_default_index()[rev.key]
         except KeyError:
             logger.error(
                 f"Revision {revision_index} is not in the cache, make sure you have run wily build."

@@ -4,8 +4,10 @@ import sys
 import pytest
 
 import wily.cache as cache
-from wily.archivers import Revision
-from wily.config import DEFAULT_CONFIG, ARCHIVER_GIT
+from wily.archivers import Revision, resolve_archiver
+from wily.config import DEFAULT_CONFIG, DEFAULT_ARCHIVER
+
+_ARCHIVER = resolve_archiver(DEFAULT_ARCHIVER)
 
 
 def test_exists(tmpdir):
@@ -109,7 +111,7 @@ def test_store_basic(tmpdir):
         message="my changes",
         files=[target_path],
     )
-    fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+    fn = cache.store(config, _ARCHIVER, _TEST_REVISION, _TEST_STATS)
     with open(fn) as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, dict)
@@ -133,9 +135,9 @@ def test_store_twice(tmpdir):
         message="my changes",
         files=[target_path],
     )
-    fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+    fn = cache.store(config, _ARCHIVER, _TEST_REVISION, _TEST_STATS)
     with pytest.raises(RuntimeError):
-        cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+        cache.store(config, _ARCHIVER, _TEST_REVISION, _TEST_STATS)
 
 
 def test_store_relative_paths(tmpdir):
@@ -157,7 +159,7 @@ def test_store_relative_paths(tmpdir):
         message="my changes",
         files=[target_path],
     )
-    fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
+    fn = cache.store(config, _ARCHIVER, _TEST_REVISION, _TEST_STATS)
     with open(fn) as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, dict)
@@ -177,7 +179,7 @@ def test_store_index(tmpdir):
     config.cache_path = cache_path
     config.path = tmpdir
     _TEST_INDEX = [{"message": "a", "date": 1234}, {"message": "b", "date": 1345}]
-    fn = cache.store_archiver_index(config, ARCHIVER_GIT, _TEST_INDEX)
+    fn = cache.store_archiver_index(config, _ARCHIVER, _TEST_INDEX)
     with open(fn) as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, list)

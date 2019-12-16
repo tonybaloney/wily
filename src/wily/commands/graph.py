@@ -65,7 +65,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
         z = []
         labels = []
         last_y = None
-        for rev in state.index[state.default_archiver].revisions:
+        for rev in state.get_default_index().revisions:
             labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
             try:
                 val = rev.get(config, state.default_archiver, operator, str(path), key)
@@ -104,7 +104,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
             y=y,
             mode="lines+markers+text" if text else "lines+markers",
             name=f"{path}",
-            ids=state.index[state.default_archiver].revision_keys,
+            ids=state.get_default_index().revision_keys,
             text=labels,
             marker=dict(
                 size=0 if z_axis is None else z,

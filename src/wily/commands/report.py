@@ -85,7 +85,7 @@ def report(
 
     state = State(config)
     for archiver in state.archivers:
-        history = state.index[archiver].revisions[:n][::-1]
+        history = state.get_index(archiver).revisions[:n][::-1]
         last = {}
         for rev in history:
             vals = []

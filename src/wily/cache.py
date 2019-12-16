@@ -64,10 +64,8 @@ def create(config: WilyConfig) -> str:
     Create a wily cache.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
 
     :return: The path to the cache
-    :rtype: ``str``
     """
     if exists(config):
         logger.debug("Wily cache exists, skipping")
@@ -83,8 +81,6 @@ def clean(config: WilyConfig):
     Delete a wily cache.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     """
     if not exists(config):
         logger.debug("Wily cache does not exist, skipping")
@@ -93,26 +89,18 @@ def clean(config: WilyConfig):
     logger.debug("Deleted wily cache")
 
 
-def store(config: WilyConfig, archiver: Archiver, revision: Revision, stats: Dict) -> pathlib.Path:
+def store(
+    config: WilyConfig, archiver: Archiver, revision: Revision, stats: Dict
+) -> pathlib.Path:
     """
     Store a revision record within an archiver folder.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param archiver: The type of archiver
-    :type  archiver: :class:`Archiver`
-    
     :param revision: The revision ID
-    :type  revision: ``str``
-    
     :param stats: The collected data
-    :type  stats: ``dict``
-    
-    :return: The absolute path to the created file
-    :rtype: ``str``
 
-    :rtype: `pathlib.Path`
+    :return: The absolute path to the created file
     """
     root = pathlib.Path(config.cache_path) / archiver.name
 
@@ -144,20 +132,15 @@ def store(config: WilyConfig, archiver: Archiver, revision: Revision, stats: Dic
     return filename
 
 
-def store_archiver_index(config: WilyConfig, archiver: Archiver, index: Dict) -> pathlib.Path:
+def store_archiver_index(
+    config: WilyConfig, archiver: Archiver, index: Dict
+) -> pathlib.Path:
     """
     Store an archiver's index record for faster search.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param archiver: The archiver type
-    :type  archiver: :class:`Archiver`
-    
     :param index: The archiver index record
-    :type  index: ``dict``
-
-    :rtype: `pathlib.Path`
     """
     root = pathlib.Path(config.cache_path) / archiver.name
 
@@ -174,21 +157,19 @@ def store_archiver_index(config: WilyConfig, archiver: Archiver, index: Dict) ->
     return filename
 
 
-def list_archivers(config: WilyConfig) -> List[str]:
+def list_archivers(config: WilyConfig) -> List[Archiver]:
     """
     List the names of archivers with data.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
 
     :return: A list of archiver names
-    :rtype: ``list`` of ``str``
     """
     root = pathlib.Path(config.cache_path)
     result = []
-    for name in ALL_ARCHIVERS.keys():
+    for name, archiver in ALL_ARCHIVERS.items():
         if (root / name).exists():
-            result.append(name)
+            result.append(archiver)
     return result
 
 
@@ -197,10 +178,8 @@ def get_default_metrics(config: WilyConfig) -> List[str]:
     Get the default metrics for a configuration.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
 
     :return: Return the list of default metrics in this index
-    :rtype: ``list`` of ``str``
     """
     archivers = list_archivers(config)
     default_metrics = []
@@ -247,7 +226,7 @@ def get_archiver_index(config: WilyConfig, archiver: Archiver) -> Dict:
 
     :param archiver: The archiver type
     :type  archiver: :class:`Archiver`
-    
+
     :return: The index data
     :rtype: ``dict``
     """
@@ -266,10 +245,10 @@ def get(config: WilyConfig, archiver: Archiver, revision: str) -> Dict:
 
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
-    
+
     :param revision: The revision ID
     :type  revision: ``str``
-    
+
     :return: The data record for that revision
     :rtype: ``dict``
     """

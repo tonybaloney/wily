@@ -13,9 +13,6 @@ import hashlib
 from dataclasses import dataclass, field
 from typing import Any, List
 
-import wily.operators as operators
-from wily.archivers import ARCHIVER_GIT
-
 logger = logging.getLogger(__name__)
 
 
@@ -28,12 +25,11 @@ def generate_cache_path(path: pathlib.Path) -> pathlib.Path:
     a 9-character directory within the HOME folder.
 
     :return: The cache path
-    :rtype: ``str``
     """
     logger.debug(f"Generating cache for {path}")
     sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
     HOME = pathlib.Path.home()
-    cache_path = str(HOME / ".wily" / sha)
+    cache_path = HOME / ".wily" / sha
     logger.debug(f"Cache path is {cache_path}")
     return cache_path
 
@@ -78,15 +74,10 @@ class WilyConfig(object):
 # Default values for Wily
 
 """ The default operators """
-DEFAULT_OPERATORS = {
-    operators.OPERATOR_RAW.name,
-    operators.OPERATOR_MAINTAINABILITY.name,
-    operators.OPERATOR_CYCLOMATIC.name,
-    operators.OPERATOR_HALSTEAD.name,
-}
+DEFAULT_OPERATORS = {"raw", "maintainability", "cyclomatic", "halstead"}
 
 """ The name of the default archiver """
-DEFAULT_ARCHIVER = ARCHIVER_GIT.name
+DEFAULT_ARCHIVER = "git"
 
 """ The default configuration file name """
 DEFAULT_CONFIG_PATH = "wily.cfg"

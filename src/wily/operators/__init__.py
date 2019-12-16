@@ -49,7 +49,7 @@ class BaseOperator(object):
     metrics: Tuple[str, str, type, MetricType] = ()
 
     """Which metric is the default to display in the report command."""
-    default_metric_index: Metric = None
+    default_metric_index: int = None
 
     """Level at which the operator goes to."""
     level: OperatorLevel = OperatorLevel.File
