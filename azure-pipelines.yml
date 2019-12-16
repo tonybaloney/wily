@@ -23,9 +23,11 @@ stages:
               python -m pip install --upgrade pip
               pip install pydocstyle mypy black
             displayName: 'Install dependencies'
+
           - script: mypy --ignore-missing-imports --junit-xml mypy.xml --follow-imports=skip src/
             displayName: 'mypy'
             continueOnError: true
+
           - task: PublishTestResults@2
             inputs:
              testResultsFormat: 'JUnit'
@@ -34,9 +36,11 @@ stages:
              failTaskOnFailedTests: false
              testRunTitle: 'MyPy'
              publishRunAttachments: true
+
           - script: pydocstyle --ignore=D301,D212,D203 src/wily
             displayName: 'pydocstyle'
-          - script: black --check src/ test/
+
+          - script: black --check --diff src/ test/
             displayName: 'black'
   - stage: Unit_Test
     jobs:
