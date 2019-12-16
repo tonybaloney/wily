@@ -6,19 +6,16 @@ Print information about the wily cache and what is in the index.
 import tabulate
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
-from wily.config import DEFAULT_GRID_STYLE
+from wily.config import DEFAULT_GRID_STYLE, WilyConfig
 from wily.state import State
 
 
-def index(config, include_message=False):
+def index(config: WilyConfig, include_message: bool = False):
     """
     Show information about the cache and runtime.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param include_message: Include revision messages
-    :type  include_message: ``bool``
     """
     state = State(config=config)
     logger.debug("Running show command")

@@ -15,31 +15,30 @@ from pathlib import Path
 
 from wily import logger, format_revision, format_date
 from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH, WilyConfig
 from wily.state import State
 from wily.operators import resolve_metric_as_tuple
 
 import radon.cli.harvest
 
 
-def rank(config, path, metric, revision_index, limit, descending):
+def rank(
+    config: WilyConfig,
+    path: str,
+    metric: str,
+    revision_index: str,
+    limit: int,
+    descending: bool,
+):
     """
     Rank command ordering files, methods or functions using metrics.
 
     :param config: The configuration
-    :type config: :class:'wily.config.WilyConfig'
-
     :param path: The path to the file
-    :type path ''str''
-
     :param metric: Name of the metric to report on
-    :type metric: ''str''
-
     :param revision_index: Version of git repository to revert to.
-    :type revision_index: ``str``
-
     :param limit: Limit the number of items in the table
-    :type  limit: ``int``
+    :param descending: Sort in opposite order
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
