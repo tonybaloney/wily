@@ -132,16 +132,24 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
             if new != current:
                 has_changes = True
             if metric.type in (int, float) and new != "-" and current != "-":
+                if metric.name == 'mi':
+                    GREATER_COLORS = GOOD_COLORS
+                    LESS_COLORS = BAD_COLORS
+                else:
+                    GREATER_COLORS = BAD_COLORS
+                    LESS_COLORS = GOOD_COLORS
                 if current > new:
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
-                            current, new, BAD_COLORS[metric.measure]
+                            #current, new, BAD_COLORS[metric.measure]
+                            current, new, GREATER_COLORS[metric.measure]
                         )
                     )
                 elif current < new:
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
-                            current, new, GOOD_COLORS[metric.measure]
+                            #current, new, GOOD_COLORS[metric.measure]
+                            current, new, LESS_COLORS[metric.measure]
                         )
                     )
                 else:
