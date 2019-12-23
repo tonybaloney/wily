@@ -30,12 +30,12 @@ stages:
 
           - task: PublishTestResults@2
             inputs:
-             testResultsFormat: 'JUnit'
-             testResultsFiles: '**/mypy.xml'
-             mergeTestResults: true
-             failTaskOnFailedTests: false
-             testRunTitle: 'MyPy'
-             publishRunAttachments: true
+               testResultsFormat: 'JUnit'
+               testResultsFiles: '**/mypy.xml'
+               mergeTestResults: true
+               failTaskOnFailedTests: false
+               testRunTitle: 'MyPy'
+               publishRunAttachments: true
 
           - script: pydocstyle --ignore=D301,D212,D203 src/wily
             displayName: 'pydocstyle'
@@ -44,7 +44,7 @@ stages:
             displayName: 'black'
 
           - script: flake8 --ignore=E501,E203,E266,E501,W503,E402 src/
-              displayName: 'flake8'
+            displayName: 'flake8'
 
   - stage: Unit_Test
     jobs:
