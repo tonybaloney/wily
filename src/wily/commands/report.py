@@ -4,6 +4,8 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+from typing import Any, Dict
+
 import tabulate
 
 from pathlib import Path
@@ -45,10 +47,10 @@ def report(
     data = []
     metric_metas = []
 
-    for metric in metrics:
-        operator, metric = resolve_metric_as_tuple(metric)
+    for metric_name in metrics:
+        _operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
-        operator = operator.name
+        operator_name = _operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
             good_color = 32
@@ -61,7 +63,7 @@ def report(
             bad_color = 33
         metric_meta = {
             "key": key,
-            "operator": operator,
+            "operator": operator_name,
             "good_color": good_color,
             "bad_color": bad_color,
             "title": metric.description,
@@ -72,7 +74,7 @@ def report(
     state = State(config)
     for archiver in state.archivers:
         history = state.get_index(archiver).revisions[:n][::-1]
-        last = {}
+        last: Dict[str, Any] = {}
         for rev in history:
             vals = []
             for meta in metric_metas:
@@ -158,12 +160,10 @@ def report(
                 table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 
-        report_template = report_template.safe_substitute(
-            headers=table_headers, content=table_content
-        )
-
-        with report_output.open("w") as output:
-            output.write(report_template)
+        with report_output.open("w") as output_f:
+            output_f.write(report_template.safe_substitute(
+                headers=table_headers, content=table_content
+            ))
 
         try:
             copytree(str(templates_dir / "css"), str(report_path / "css"))

@@ -192,7 +192,7 @@ def rank(ctx, path, metric, revision, limit, desc):
     rank(
         config=config,
         path=path,
-        metric=metric,
+        _metric=metric,
         revision_index=revision,
         limit=limit,
         descending=desc,

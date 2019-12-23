@@ -45,7 +45,7 @@ def rank(
 
     data = []
 
-    operator, metric = resolve_metric_as_tuple(metric)
+    operator, _metric = resolve_metric_as_tuple(metric)
     operator = operator.name
 
     state = State(config)
@@ -64,7 +64,7 @@ def rank(
             exit(1)
 
     logger.info(
-        f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
+        f"-----------Rank for {_metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
     )
 
     if path is None:
@@ -88,10 +88,10 @@ def rank(
         for archiver in state.archivers:
             try:
                 logger.debug(
-                    f"Fetching metric {metric.name} for {operator} in {str(item)}"
+                    f"Fetching metric {_metric.name} for {operator} in {str(item)}"
                 )
                 val = target_revision.get(
-                    config, archiver, operator, str(item), metric.name
+                    config, archiver, operator, str(item), _metric.name
                 )
                 value = val
                 data.append((item, value))
@@ -105,9 +105,9 @@ def rank(
         data = data[:limit]
 
     # Tack on the total row at the end
-    data.append(["Total", metric.aggregate(rev[1] for rev in data)])
+    data.append(["Total", _metric.aggregate(rev[1] for rev in data)])
 
-    headers = ("File", metric.description)
+    headers = ("File", _metric.description)
     print(
         tabulate.tabulate(
             headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
