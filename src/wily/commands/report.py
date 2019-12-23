@@ -161,9 +161,11 @@ def report(
             table_content += "</tr>"
 
         with report_output.open("w") as output_f:
-            output_f.write(report_template.safe_substitute(
-                headers=table_headers, content=table_content
-            ))
+            output_f.write(
+                report_template.safe_substitute(
+                    headers=table_headers, content=table_content
+                )
+            )
 
         try:
             copytree(str(templates_dir / "css"), str(report_path / "css"))
