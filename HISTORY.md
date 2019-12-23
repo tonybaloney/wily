@@ -1,5 +1,9 @@
 # Release History
 
+## master
+
+* Fixed the color of the maintainability index so higher is better (green)
+
 ## 1.16.0 (12th December 2019)
 
 * Added a `rank` command to show files either matching a pattern or all in the index sorted by a particular metric.
