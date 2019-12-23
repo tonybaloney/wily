@@ -21,7 +21,7 @@ stages:
               architecture: 'x64'
           - script: |
               python -m pip install --upgrade pip
-              pip install pydocstyle mypy black
+              pip install pydocstyle mypy black flake8
             displayName: 'Install dependencies'
 
           - script: mypy --ignore-missing-imports --junit-xml mypy.xml --follow-imports=skip src/
