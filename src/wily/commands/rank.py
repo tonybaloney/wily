@@ -22,7 +22,7 @@ from wily.operators import resolve_metric_as_tuple, MetricType
 import radon.cli.harvest
 
 
-def rank(config, path, metric, revision_index, limit, descending):
+def rank(config, path, metric, revision_index, limit, threshold, descending):
     """
     Rank command ordering files, methods or functions using metrics.
 
@@ -40,6 +40,9 @@ def rank(config, path, metric, revision_index, limit, descending):
 
     :param limit: Limit the number of items in the table
     :type  limit: ``int``
+
+    :param threshold: For total values beneath the threshold return a non-zero exit code
+    :type  threshold: ``int``
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -107,7 +110,8 @@ def rank(config, path, metric, revision_index, limit, descending):
         data = data[:limit]
 
     # Tack on the total row at the end
-    data.append(["Total", metric.aggregate(rev[1] for rev in data)])
+    total = metric.aggregate(rev[1] for rev in data)
+    data.append(["Total", total])
 
     headers = ("File", metric.description)
     print(
@@ -115,3 +119,9 @@ def rank(config, path, metric, revision_index, limit, descending):
             headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
         )
     )
+
+    if threshold and total < threshold:
+        logger.error(
+            f"Total value below the specified threshold: {total} < {threshold}"
+        )
+        exit(1)
