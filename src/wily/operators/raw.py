@@ -3,10 +3,13 @@ Raw statistics operator.
 
 Includes insights like lines-of-code, number of comments. Does not measure complexity.
 """
+from typing import List, Dict
+
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 
 from wily import logger
+from wily.config import WilyConfig
 from wily.operators import BaseOperator, MetricType, Metric
 
 
@@ -38,7 +41,7 @@ class RawMetricsOperator(BaseOperator):
     )
     default_metric_index = 0  # LOC
 
-    def __init__(self, config, targets):
+    def __init__(self, config: WilyConfig, targets: List[str]):
         """
         Instantiate a new raw operator.
 
@@ -51,7 +54,7 @@ class RawMetricsOperator(BaseOperator):
             targets, config=Config(**self.defaults)
         )
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict) -> Dict:
         """
         Run the operator.
 

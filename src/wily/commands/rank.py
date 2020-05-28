@@ -14,32 +14,30 @@ import operator as op
 from pathlib import Path
 
 from wily import logger, format_revision, format_date
-from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH, WilyConfig
 from wily.state import State
-from wily.operators import resolve_metric_as_tuple, MetricType
+from wily.operators import resolve_metric_as_tuple
 
 import radon.cli.harvest
 
 
-def rank(config, path, metric, revision_index, limit, descending):
+def rank(
+    config: WilyConfig,
+    path: str,
+    metric: str,
+    revision_index: str,
+    limit: int,
+    descending: bool,
+):
     """
     Rank command ordering files, methods or functions using metrics.
 
     :param config: The configuration
-    :type config: :class:'wily.config.WilyConfig'
-
     :param path: The path to the file
-    :type path ''str''
-
     :param metric: Name of the metric to report on
-    :type metric: ''str''
-
     :param revision_index: Version of git repository to revert to.
-    :type revision_index: ``str``
-
     :param limit: Limit the number of items in the table
-    :type  limit: ``int``
+    :param descending: Sort in opposite order
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -47,18 +45,18 @@ def rank(config, path, metric, revision_index, limit, descending):
 
     data = []
 
-    operator, metric = resolve_metric_as_tuple(metric)
+    operator, _metric = resolve_metric_as_tuple(metric)
     operator = operator.name
 
     state = State(config)
 
     if not revision_index:
-        target_revision = state.index[state.default_archiver].last_revision
+        target_revision = state.get_default_index().last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision_index)
+        rev = state.default_archiver.cls(config).find(revision_index)
         logger.debug(f"Resolved {revision_index} to {rev.key} ({rev.message})")
         try:
-            target_revision = state.index[state.default_archiver][rev.key]
+            target_revision = state.get_default_index()[rev.key]
         except KeyError:
             logger.error(
                 f"Revision {revision_index} is not in the cache, make sure you have run wily build."
@@ -66,7 +64,7 @@ def rank(config, path, metric, revision_index, limit, descending):
             exit(1)
 
     logger.info(
-        f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
+        f"-----------Rank for {_metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
     )
 
     if path is None:
@@ -90,10 +88,10 @@ def rank(config, path, metric, revision_index, limit, descending):
         for archiver in state.archivers:
             try:
                 logger.debug(
-                    f"Fetching metric {metric.name} for {operator} in {str(item)}"
+                    f"Fetching metric {_metric.name} for {operator} in {str(item)}"
                 )
                 val = target_revision.get(
-                    config, archiver, operator, str(item), metric.name
+                    config, archiver, operator, str(item), _metric.name
                 )
                 value = val
                 data.append((item, value))
@@ -107,9 +105,9 @@ def rank(config, path, metric, revision_index, limit, descending):
         data = data[:limit]
 
     # Tack on the total row at the end
-    data.append(["Total", metric.aggregate(rev[1] for rev in data)])
+    data.append(["Total", _metric.aggregate(rev[1] for rev in data)])
 
-    headers = ("File", metric.description)
+    headers = ("File", _metric.description)
     print(
         tabulate.tabulate(
             headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE

@@ -4,6 +4,8 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+from typing import Any, Dict
+
 import tabulate
 
 from pathlib import Path
@@ -11,47 +13,33 @@ from shutil import copytree
 from string import Template
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
+from wily.config import WilyConfig
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_metric_as_tuple, MetricType
 from wily.state import State
 
 
 def report(
-    config,
-    path,
-    metrics,
-    n,
-    output,
-    include_message=False,
-    format=ReportFormat.CONSOLE,
-    console_format=None,
+    config: WilyConfig,
+    path: str,
+    metrics: str,
+    n: int,
+    output: Path,
+    include_message: bool = False,
+    format: ReportFormat = ReportFormat.CONSOLE,
+    console_format: str = None,
 ):
     """
     Show information about the cache and runtime.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param path: The path to the file
-    :type  path: ``str``
-
     :param metrics: Name of the metric to report on
-    :type  metrics: ``str``
-
     :param n: Number of items to list
-    :type  n: ``int``
-
     :param output: Output path
-    :type  output: ``Path``
-
     :param include_message: Include revision messages
-    :type  include_message: ``bool``
-
     :param format: Output format
-    :type  format: ``ReportFormat``
-
     :param console_format: Grid format style for tabulate
-    :type  console_format: ``str``
     """
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
@@ -59,10 +47,10 @@ def report(
     data = []
     metric_metas = []
 
-    for metric in metrics:
-        operator, metric = resolve_metric_as_tuple(metric)
+    for metric_name in metrics:
+        _operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
-        operator = operator.name
+        operator_name = _operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
             good_color = 32
@@ -75,7 +63,7 @@ def report(
             bad_color = 33
         metric_meta = {
             "key": key,
-            "operator": operator,
+            "operator": operator_name,
             "good_color": good_color,
             "bad_color": bad_color,
             "title": metric.description,
@@ -85,8 +73,8 @@ def report(
 
     state = State(config)
     for archiver in state.archivers:
-        history = state.index[archiver].revisions[:n][::-1]
-        last = {}
+        history = state.get_index(archiver).revisions[:n][::-1]
+        last: Dict[str, Any] = {}
         for rev in history:
             vals = []
             for meta in metric_metas:
@@ -172,12 +160,12 @@ def report(
                 table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 
-        report_template = report_template.safe_substitute(
-            headers=table_headers, content=table_content
-        )
-
-        with report_output.open("w") as output:
-            output.write(report_template)
+        with report_output.open("w") as output_f:
+            output_f.write(
+                report_template.safe_substitute(
+                    headers=table_headers, content=table_content
+                )
+            )
 
         try:
             copytree(str(templates_dir / "css"), str(report_path / "css"))

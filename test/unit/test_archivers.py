@@ -67,7 +67,7 @@ def test_basearchiver():
         archiver.revisions("", 10)
 
     with pytest.raises(NotImplementedError):
-        archiver.checkout("")
+        archiver.checkout("", None)
 
 
 def test_defaults():

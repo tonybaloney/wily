@@ -5,12 +5,13 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
+from typing import List, Tuple
+
 import tabulate
 
 from pathlib import Path
 from wily import logger, format_revision, format_date
-from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH, WilyConfig
 from wily.operators import (
     resolve_metric,
     resolve_operator,
@@ -18,6 +19,7 @@ from wily.operators import (
     GOOD_COLORS,
     BAD_COLORS,
     OperatorLevel,
+    Metric,
 )
 from wily.commands.build import run_operator
 from wily.state import State
@@ -25,31 +27,27 @@ from wily.state import State
 import radon.cli.harvest
 
 
-def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
+def diff(
+    config: WilyConfig,
+    files: List[str],
+    metrics: List[str],
+    changes_only: bool = True,
+    detail: bool = True,
+    revision: str = None,
+):
     """
     Show the differences in metrics for each of the files.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param files: The files to compare.
-    :type  files: ``list`` of ``str``
-
     :param metrics: The metrics to measure.
-    :type  metrics: ``list`` of ``str``
-
     :param changes_only: Only include changes files in output.
-    :type  changes_only: ``bool``
-
     :param detail: Show details (function-level)
-    :type  detail: ``bool``
-
     :param revision: Compare with specific revision
-    :type  revision: ``str``
     """
     config.targets = files
     files = list(files)
-    state = State(config)
+    state: State = State(config)
 
     # Resolve target paths when the cli has specified --path
     if config.path != DEFAULT_PATH:
@@ -65,12 +63,12 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     logger.debug(f"Targeting - {files}")
 
     if not revision:
-        target_revision = state.index[state.default_archiver].last_revision
+        target_revision = state.get_default_index().last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        rev = state.default_archiver.cls(config).find(revision)
         logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
         try:
-            target_revision = state.index[state.default_archiver][rev.key]
+            target_revision = state.get_default_index()[rev.key]
         except KeyError:
             logger.error(
                 f"Revision {revision} is not in the cache, make sure you have run wily build."
@@ -83,7 +81,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    _metrics: List[Tuple[str, Metric]] = [
+        (metric.split(".")[0], resolve_metric(metric)) for metric in metrics
+    ]
     results = []
 
     # Build a set of operators
@@ -97,7 +97,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
 
     # Write a summary table
     extra = []
-    for operator, metric in metrics:
+    for operator, metric in _metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
             for file in files:
                 try:
@@ -116,9 +116,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     files.extend(extra)
     logger.debug(files)
     for file in files:
-        metrics_data = []
+        metrics_data: List[str] = []
         has_changes = False
-        for operator, metric in metrics:
+        for operator, metric in _metrics:
             try:
                 current = target_revision.get(
                     config, state.default_archiver, operator, file, metric.name
@@ -156,7 +156,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         else:
             logger.debug(metrics_data)
 
-    descriptions = [metric.description for operator, metric in metrics]
+    descriptions = [metric.description for operator, metric in _metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
         print(

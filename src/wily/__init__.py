@@ -26,16 +26,16 @@ logger.addHandler(_filehandler)
 MAX_MESSAGE_WIDTH = 50
 
 
-def format_date(timestamp):
+def format_date(timestamp: int) -> str:
     """Reusable timestamp -> date."""
     return datetime.date.fromtimestamp(timestamp).isoformat()
 
 
-def format_datetime(timestamp):
+def format_datetime(timestamp: int) -> str:
     """Reusable timestamp -> datetime."""
     return datetime.datetime.fromtimestamp(timestamp).isoformat()
 
 
-def format_revision(sha):
+def format_revision(sha: str) -> str:
     """Return a shorter git sha."""
     return sha[:7]

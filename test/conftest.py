@@ -2,7 +2,6 @@ import pathlib
 from textwrap import dedent
 import shutil
 import tempfile
-from time import time
 
 import pytest
 from click.testing import CliRunner
@@ -94,16 +93,22 @@ def builddir(gitdir):
     tmppath = pathlib.Path(gitdir)
     runner = CliRunner()
     result1 = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "build", str(tmppath / "src")]
+        main.cli,
+        ["--debug", "--path", gitdir, "build", str(tmppath / "src")],
+        catch_exceptions=False,
     )
     assert result1.exit_code == 0, result1.stdout
 
-    result2 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
+    result2 = runner.invoke(
+        main.cli, ["--debug", "--path", gitdir, "index"], catch_exceptions=False
+    )
     assert result2.exit_code == 0, result2.stdout
 
     yield gitdir
 
-    result1 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "clean", "-y"])
+    result1 = runner.invoke(
+        main.cli, ["--debug", "--path", gitdir, "clean", "-y"], catch_exceptions=False
+    )
     assert result1.exit_code == 0, result1.stdout
 
 

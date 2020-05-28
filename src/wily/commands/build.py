@@ -2,39 +2,34 @@
 Builds a cache based on a source-control history.
 
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
-
 """
 import os
 import pathlib
 import multiprocessing
+from typing import List, Tuple, Dict, Optional, Set, Any
+
 from progress.bar import Bar
 
 from wily import logger
+from wily.config import WilyConfig
 from wily.state import State
 
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.archivers import FilesystemArchiver
+from wily.archivers import FilesystemArchiver, Revision, Archiver
 
-from wily.operators import resolve_operator
+from wily.operators import resolve_operator, Operator
 
 
-def run_operator(operator, revision, config, targets):
+def run_operator(
+    operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]
+) -> Tuple[str, Dict]:
     """
     Run an operator for the multiprocessing pool.
 
     :param operator: The operator name
-    :type  operator: ``str``
-
     :param revision: The revision index
-    :type  revision: :class:`Revision`
-
     :param config: The runtime configuration
-    :type  config: :class:`WilyConfig`
-
     :param targets: Files/paths to scan
-    :type  targets: ``list`` of ``str``
-
-    :rtype: ``tuple``
     :returns: A tuple of operator name (``str``), and data (``dict``)
     """
     instance = operator.cls(config, targets)
@@ -52,28 +47,23 @@ def run_operator(operator, revision, config, targets):
     return operator.name, data
 
 
-def build(config, archiver, operators):
+def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     """
     Build the history given a archiver and collection of operators.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
-    :param archiver: The archiver to use
-    :type  archiver: :namedtuple:`wily.archivers.Archiver`
-
+    :param _archiver: The archiver to use
     :param operators: The list of operators to execute
-    :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
     try:
         logger.debug(f"Using {archiver.name} archiver module")
-        archiver = archiver.cls(config)
-        revisions = archiver.revisions(config.path, config.max_revisions)
+        _archiver = archiver.cls(config)
+        revisions = _archiver.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
         # TODO: This logic shouldn't really be here (SoC)
         logger.info(f"Defaulting back to the filesystem archiver, not a valid git repo")
-        archiver = FilesystemArchiver(config)
-        revisions = archiver.revisions(config.path, config.max_revisions)
+        _archiver = FilesystemArchiver(config)
+        revisions = _archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
         if hasattr(e, "message"):
             logger.error(f"Failed to setup archiver: '{e.message}'")
@@ -81,17 +71,17 @@ def build(config, archiver, operators):
             logger.error(f"Failed to setup archiver: '{type(e)} - {e}'")
         exit(1)
 
-    state = State(config, archiver=archiver)
+    state = State(config, archiver=_archiver)
     # Check for existence of cache, else provision
     state.ensure_exists()
 
-    index = state.index[archiver.name]
+    index = state.get_index(_archiver)
 
     # remove existing revisions from the list
     revisions = [revision for revision in revisions if revision not in index][::-1]
 
     logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
+        f"Found {len(revisions)} revisions from '{_archiver.name}' archiver in '{config.path}'."
     )
 
     _op_desc = ",".join([operator.name for operator in operators])
@@ -102,13 +92,14 @@ def build(config, archiver, operators):
 
     # Index all files the first time, only scan changes afterward
     seed = True
-    prev_roots = None
+    prev_roots: Optional[Set] = None
+    prev_stats: Optional[Dict[Any, Any]] = None
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             for revision in revisions:
                 # Checkout target revision
-                archiver.checkout(revision, config.checkout_options)
-                stats = {"operator_data": {}}
+                _archiver.checkout(revision, config.checkout_options)
+                stats: Dict = {"operator_data": {}}
 
                 if seed:
                     targets = config.targets
@@ -130,8 +121,14 @@ def build(config, archiver, operators):
                 operator_data_len = 2
                 # second element in the tuple, i.e data[i][1]) has the collected data
                 for i in range(0, len(operators)):
-                    if i < len(data) and len(data[i]) >= operator_data_len and len(data[i][1]) == 0:
-                        logger.warn(f"In revision {revision.key}, for operator {operators[i].name}: No data collected")
+                    if (
+                        i < len(data)
+                        and len(data[i]) >= operator_data_len
+                        and len(data[i][1]) == 0
+                    ):
+                        logger.warn(
+                            f"In revision {revision.key}, for operator {operators[i].name}: No data collected"
+                        )
 
                 # Map the data back into a dictionary
                 for operator_name, result in data:
@@ -195,7 +192,7 @@ def build(config, archiver, operators):
                 prev_stats = stats
                 seed = False
                 ir = index.add(revision, operators=operators)
-                ir.store(config, archiver, stats)
+                ir.store(config, _archiver, stats)
         index.save()
         bar.finish()
     except Exception as e:
@@ -203,4 +200,4 @@ def build(config, archiver, operators):
         raise e
     finally:
         # Reset the archive after every run back to the head of the branch
-        archiver.finish()
+        _archiver.finish()

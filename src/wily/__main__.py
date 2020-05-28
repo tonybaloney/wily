@@ -10,7 +10,7 @@ from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
-from wily.decorators import add_version
+from wily.helper.decorators import add_version
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 
@@ -192,7 +192,7 @@ def rank(ctx, path, metric, revision, limit, desc):
     rank(
         config=config,
         path=path,
-        metric=metric,
+        _metric=metric,
         revision_index=revision,
         limit=limit,
         descending=desc,
@@ -414,7 +414,7 @@ def handle_no_cache(context):
 if __name__ == "__main__":  # pragma: no cover
     try:
         cli()
-    except Exception as runtime:
+    except Exception:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
         logger.info(
             f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."

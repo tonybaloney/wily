@@ -35,7 +35,9 @@ def test_rank_directory_default_metric_no_path(builddir):
 def test_rank_directory_default_metric_master(builddir):
     """ Test the rank feature with a specific revision. """
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", builddir, "rank", "-r", "master"])
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "rank", "-r", "master"], catch_exceptions=False
+    )
     assert result.exit_code == 0, result.stdout
 
 

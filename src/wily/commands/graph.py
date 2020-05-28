@@ -4,36 +4,42 @@ Draw graph in HTML for a specific metric.
 TODO: Add multiple lines for multiple files
 """
 import pathlib
+from typing import Tuple
 
 import plotly.graph_objs as go
 import plotly.offline
 
 from wily import logger, format_datetime
+from wily.config import WilyConfig
 from wily.operators import resolve_metric, resolve_metric_as_tuple
 from wily.state import State
 
 
-def metric_parts(metric):
+def metric_parts(metric: str):
     """Convert a metric name into the operator and metric names."""
     operator, met = resolve_metric_as_tuple(metric)
     return operator.name, met.name
 
 
-def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=False):
+def graph(
+    config: WilyConfig,
+    path: str,
+    metrics: Tuple[str, str],
+    output: str = None,
+    x_axis: str = None,
+    changes: bool = True,
+    text: bool = False,
+):
     """
     Graph information about the cache and runtime.
 
     :param config: The configuration.
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param path: The path to the files.
-    :type  path: ``list``
-
     :param metrics: The Y and Z-axis metrics to report on.
-    :type  metrics: ``tuple``
-
     :param output: Save report to specified path instead of opening browser.
-    :type  output: ``str``
+    :param text:
+    :param changes: Only show changes
+    :param x_axis: Custom X-axis metric
     """
     logger.debug("Running report command")
 
@@ -65,7 +71,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
         z = []
         labels = []
         last_y = None
-        for rev in state.index[state.default_archiver].revisions:
+        for rev in state.get_default_index().revisions:
             labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
             try:
                 val = rev.get(config, state.default_archiver, operator, str(path), key)
@@ -104,7 +110,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
             y=y,
             mode="lines+markers+text" if text else "lines+markers",
             name=f"{path}",
-            ids=state.index[state.default_archiver].revision_keys,
+            ids=state.get_default_index().revision_keys,
             text=labels,
             marker=dict(
                 size=0 if z_axis is None else z,

@@ -1,7 +1,7 @@
 """
 Configuration of wily.
 
-TODO : Handle operator settings. Maybe a section for each operator and then pass kwargs to operators?
+TODO : Handle operator settings.
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
 """
@@ -11,16 +11,13 @@ import logging
 import pathlib
 import hashlib
 from dataclasses import dataclass, field
-from typing import Any, List
-
-import wily.operators as operators
-from wily.archivers import ARCHIVER_GIT
+from typing import Any, List, Union, Set, Optional
 
 logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=128)
-def generate_cache_path(path):
+def generate_cache_path(path: pathlib.Path) -> pathlib.Path:
     """
     Generate a reusable path to cache results.
 
@@ -28,12 +25,11 @@ def generate_cache_path(path):
     a 9-character directory within the HOME folder.
 
     :return: The cache path
-    :rtype: ``str``
     """
     logger.debug(f"Generating cache for {path}")
     sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
     HOME = pathlib.Path.home()
-    cache_path = str(HOME / ".wily" / sha)
+    cache_path = HOME / ".wily" / sha
     logger.debug(f"Cache path is {cache_path}")
     return cache_path
 
@@ -46,13 +42,13 @@ class WilyConfig(object):
     A data class to reflect the configurable options within Wily.
     """
 
-    operators: List
+    operators: Set[str]
     archiver: Any
     path: str
     max_revisions: int
+    targets: Optional[List[str]] = None
     include_ipynb: bool = True
     ipynb_cells: bool = True
-    targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
 
     def __post_init__(self):
@@ -62,14 +58,14 @@ class WilyConfig(object):
         self._cache_path = None
 
     @property
-    def cache_path(self):
+    def cache_path(self) -> pathlib.Path:
         """Path to the cache."""
         if not self._cache_path:
             self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())
         return self._cache_path
 
     @cache_path.setter
-    def cache_path(self, value):
+    def cache_path(self, value: pathlib.Path):
         """Override the cache path."""
         logger.debug(f"Setting custom cache path to {value}")
         self._cache_path = value
@@ -78,15 +74,10 @@ class WilyConfig(object):
 # Default values for Wily
 
 """ The default operators """
-DEFAULT_OPERATORS = {
-    operators.OPERATOR_RAW.name,
-    operators.OPERATOR_MAINTAINABILITY.name,
-    operators.OPERATOR_CYCLOMATIC.name,
-    operators.OPERATOR_HALSTEAD.name,
-}
+DEFAULT_OPERATORS = {"raw", "maintainability", "cyclomatic", "halstead"}
 
 """ The name of the default archiver """
-DEFAULT_ARCHIVER = ARCHIVER_GIT.name
+DEFAULT_ARCHIVER = "git"
 
 """ The default configuration file name """
 DEFAULT_CONFIG_PATH = "wily.cfg"
@@ -111,7 +102,7 @@ DEFAULT_CONFIG = WilyConfig(
 DEFAULT_GRID_STYLE = "fancy_grid"
 
 
-def load(config_path=DEFAULT_CONFIG_PATH):
+def load(config_path: Union[str, pathlib.Path] = DEFAULT_CONFIG_PATH) -> WilyConfig:
     """
     Load config file and set values to defaults where no present.
 
