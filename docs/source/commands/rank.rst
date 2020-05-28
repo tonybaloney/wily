@@ -35,6 +35,12 @@ Wily rank will show the last revision by default. If you want to show a specific
 
   $ wily rank src/ --revision HEAD^2
 
+Wily rank will exit with 0 by default if no error occurs. However, you can set a custom threshold. If the total value is below the specified threshold,
+the rank command will return a non-zero exit code.
+
+.. code-block:: none
+  $ wily rank --threshold=80
+
 Command Line Usage
 ------------------
 
