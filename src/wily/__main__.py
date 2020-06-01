@@ -166,8 +166,13 @@ def index(ctx, message):
     help="Order to show results (ascending or descending)",
     default=False,
 )
+@click.option(
+    "--threshold",
+    help="Return a non-zero exit code under the specified threshold",
+    type=click.INT,
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc):
+def rank(ctx, path, metric, revision, limit, desc, threshold):
     """
     Rank files, methods and functions in order of any metrics, e.g. complexity.
 
@@ -180,6 +185,11 @@ def rank(ctx, path, metric, revision, limit, desc):
     Rank all .py files in the index for the default metrics across all archivers
 
         $ wily rank
+
+    Rank all .py files in the index for the default metrics across all archivers
+    and return a non-zero exit code if the total is below the given threshold
+
+        $ wily rank --threshold=80
     """
     config = ctx.obj["CONFIG"]
 
@@ -195,6 +205,7 @@ def rank(ctx, path, metric, revision, limit, desc):
         metric=metric,
         revision_index=revision,
         limit=limit,
+        threshold=threshold,
         descending=desc,
     )
 
