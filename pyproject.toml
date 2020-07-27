@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "flit>=2.0",
-    "gitpython>=2.1.11,<2.2.0",
+    "gitpython>=3.0.0,<4.0.0",
     "radon>=4.0.0,<4.1.0",
     "click>=7.0,<8.0",
     "nbformat>=4.4.0,<4.5.0",
@@ -30,7 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     ]
 requires = [
-    "gitpython>=2.1.11,<2.2.0",
+    "gitpython>=3.0.0,<4.0.0",
     "radon>=4.0.0,<4.1.0",
     "click>=7.0,<8.0",
     "nbformat>=4.4.0,<4.5.0",
