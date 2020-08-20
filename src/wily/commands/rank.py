@@ -34,7 +34,7 @@ def rank(
 
     :param config: The configuration
     :param path: The path to the file
-    :param metric: Name of the metric to report on
+    :param _metric: Name of the metric to report on
     :param revision_index: Version of git repository to revert to.
     :param limit: Limit the number of items in the table
     :param descending: Sort in opposite order

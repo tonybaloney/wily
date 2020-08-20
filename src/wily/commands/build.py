@@ -88,12 +88,12 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     logger.info(f"Running operators - {_op_desc}")
 
     bar = Bar("Processing", max=len(revisions) * len(operators))
-    state.operators = operators
 
     # Index all files the first time, only scan changes afterward
     seed = True
     prev_roots: Optional[Set] = None
-    prev_stats: Optional[Dict[Any, Any]] = None
+    prev_stats: Dict[Any, Any]
+
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             for revision in revisions:

@@ -8,7 +8,7 @@ import colorlog
 import logging
 import datetime
 
-WILY_LOG_NAME = tempfile.mktemp(suffix="wily_log")
+WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 
 __version__ = "1.16.0"
 

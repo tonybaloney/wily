@@ -50,7 +50,7 @@ def report(
     for metric_name in metrics:
         _operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
-        operator_name = _operator.name
+        operator = operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
             good_color = 32
@@ -63,7 +63,7 @@ def report(
             bad_color = 33
         metric_meta = {
             "key": key,
-            "operator": operator_name,
+            "operator": operator,
             "good_color": good_color,
             "bad_color": bad_color,
             "title": metric.description,
