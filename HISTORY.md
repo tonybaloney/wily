@@ -1,5 +1,9 @@
 # Release History
 
+## 1.17.1 (20th August 2020)
+
+* Fixed bug in use of mkstemp in log files
+
 ## 1.17.0 (20th August 2020)
 
 * Fixed the color of the maintainability index so higher is better (green)
