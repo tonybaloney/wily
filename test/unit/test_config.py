@@ -68,7 +68,7 @@ def test_config_operators(tmpdir, raw_operators, expected_operators):
     assert cfg.max_revisions == wily.config.DEFAULT_MAX_REVISIONS
 
 
-def test_config_archiver(tmpdir):
+def test_config_max_revisions(tmpdir):
     """
     Test that an max-revisions can be configured
     """
