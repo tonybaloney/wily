@@ -137,6 +137,7 @@ def test_build_with_config(tmpdir, cache_path):
     config = """
     [wily]
     path = test.py
+    operators = raw, maintainability
     """
     config_path = tmppath / "wily.cfg"
     with open(config_path, "w") as config_f:

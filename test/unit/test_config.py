@@ -1,3 +1,4 @@
+import pytest
 import os.path
 
 import wily.config
@@ -39,13 +40,22 @@ def test_config_archiver(tmpdir):
     assert cfg.max_revisions == wily.config.DEFAULT_MAX_REVISIONS
 
 
-def test_config_operators(tmpdir):
+@pytest.mark.parametrize(
+    ("raw_operators", "expected_operators"),
+    [
+        ("foo,bar", ["foo", "bar"]),
+        ("foo, bar", ["foo", "bar"]),
+        ("foo, bar,", ["foo", "bar"]),
+        ("   foo,bar   , baz", ["foo", "bar", "baz"]),
+    ],
+)
+def test_config_operators(tmpdir, raw_operators, expected_operators):
     """
     Test that operators can be configured
     """
-    config = """
+    config = f"""
     [wily]
-    operators = foo,baz
+    operators = {raw_operators}
     """
     config_path = os.path.join(tmpdir, "wily.cfg")
     with open(config_path, "w") as config_f:
@@ -54,7 +64,7 @@ def test_config_operators(tmpdir):
     cfg = wily.config.load(config_path)
 
     assert cfg.archiver == wily.config.DEFAULT_ARCHIVER
-    assert cfg.operators == "foo,baz"
+    assert cfg.operators == expected_operators
     assert cfg.max_revisions == wily.config.DEFAULT_MAX_REVISIONS
 
 
