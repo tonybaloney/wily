@@ -18,7 +18,7 @@ from wily.lang import _
 
 @click.group()
 @click.version_option(
-    __version__, "-V", "--version", message="\U0001F98A %(prog)s, version %(version)s"
+    __version__, "-V", "--version", message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version"))
 )
 @click.option(
     "--debug/--no-debug",

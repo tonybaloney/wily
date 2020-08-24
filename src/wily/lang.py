@@ -1,7 +1,9 @@
 # -*- coding: UTF-8 -*-
 
 import gettext
+import os
 
-trans = gettext.translation('messages', localedir='locales', languages=['en', 'en_AU', 'ja'], fallback='en')
+localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locales')
+trans = gettext.translation('messages', localedir=localedir, fallback=True)
 trans.install()
 _ = trans.gettext

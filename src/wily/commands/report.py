@@ -14,6 +14,7 @@ from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_metric_as_tuple, MetricType
 from wily.state import State
+from wily.lang import _
 
 
 def report(
@@ -143,9 +144,9 @@ def report(
                 )
     descriptions = [meta["title"] for meta in metric_metas]
     if include_message:
-        headers = ("Revision", "Message", "Author", "Date", *descriptions)
+        headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
     else:
-        headers = ("Revision", "Author", "Date", *descriptions)
+        headers = (_("Revision"), _("Author"), _("Date"), *descriptions)
 
     if format == ReportFormat.HTML:
         if output.is_file and output.suffix == ".html":
