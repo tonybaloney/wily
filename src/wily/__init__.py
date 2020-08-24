@@ -41,9 +41,9 @@ import colorlog
 import logging
 import datetime
 
-_, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
-
 __version__ = "1.17.1"
+
+_, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 
 _handler = colorlog.StreamHandler()
 _handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s%(message)s"))
