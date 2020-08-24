@@ -56,11 +56,7 @@ class WilyConfig(object):
     checkout_options: dict = field(default_factory=dict)
 
     def __post_init__(self):
-        """Post process config's values.
-
-        Parse operators string to list and clone targets as a list of path.
-
-        """
+        """Parse operators string to list and clone targets as a list of path."""
         if isinstance(self.operators, str):
             self.operators = self._parse_to_list(self.operators)
         if self.targets is None or "":
