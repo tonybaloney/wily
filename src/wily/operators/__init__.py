@@ -3,6 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
+from wily.lang import _
 
 
 class MetricType(Enum):
@@ -81,28 +82,28 @@ Operator = namedtuple("Operator", "name cls description level")
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
     cls=CyclomaticComplexityOperator,
-    description="Cyclomatic Complexity of modules",
+    description=_("Cyclomatic Complexity of modules"),
     level=OperatorLevel.Object,
 )
 
 OPERATOR_RAW = Operator(
     name="raw",
     cls=RawMetricsOperator,
-    description="Raw Python statistics",
+    description=_("Raw Python statistics"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
     cls=MaintainabilityIndexOperator,
-    description="Maintainability index (lines of code and branching)",
+    description=_("Maintainability index (lines of code and branching)"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_HALSTEAD = Operator(
     name="halstead",
     cls=HalsteadOperator,
-    description="Halstead metrics",
+    description=_("Halstead metrics"),
     level=OperatorLevel.Object,
 )
 

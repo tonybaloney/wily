@@ -14,6 +14,7 @@ import shutil
 from wily import logger, __version__
 from wily.archivers import ALL_ARCHIVERS
 from wily.operators import resolve_operator
+from wily.lang import _
 
 
 def exists(config):
@@ -207,7 +208,7 @@ def get_default_metrics(config):
         index = get_archiver_index(config, archiver)
 
         if len(index) == 0:
-            logger.warning("No records found in the index, no metrics available")
+            logger.warning(_("No records found in the index, no metrics available"))
             return []
 
         operators = index[0]["operators"]

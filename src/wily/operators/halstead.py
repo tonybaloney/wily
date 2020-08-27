@@ -8,6 +8,7 @@ from radon.cli import Config
 
 from wily import logger
 from wily.operators import BaseOperator, MetricType, Metric
+from wily.lang import _
 
 
 class HalsteadOperator(BaseOperator):
@@ -28,17 +29,17 @@ class HalsteadOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("h1", "Unique Operands", int, MetricType.AimLow, sum),
-        Metric("h2", "Unique Operators", int, MetricType.AimLow, sum),
-        Metric("N1", "Number of Operands", int, MetricType.AimLow, sum),
-        Metric("N2", "Number of Operators", int, MetricType.AimLow, sum),
+        Metric("h1", _("Unique Operands"), int, MetricType.AimLow, sum),
+        Metric("h2", _("Unique Operators"), int, MetricType.AimLow, sum),
+        Metric("N1", _("Number of Operands"), int, MetricType.AimLow, sum),
+        Metric("N2", _("Number of Operators"), int, MetricType.AimLow, sum),
         Metric(
-            "vocabulary", "Unique vocabulary (h1 + h2)", int, MetricType.AimLow, sum
+            "vocabulary", _("Unique vocabulary (h1 + h2)"), int, MetricType.AimLow, sum
         ),
-        Metric("length", "Length of application", int, MetricType.AimLow, sum),
-        Metric("volume", "Code volume", float, MetricType.AimLow, sum),
-        Metric("difficulty", "Difficulty", float, MetricType.AimLow, sum),
-        Metric("effort", "Effort", float, MetricType.AimLow, sum),
+        Metric("length", _("Length of application"), int, MetricType.AimLow, sum),
+        Metric("volume", _("Code volume"), float, MetricType.AimLow, sum),
+        Metric("difficulty", _("Difficulty"), float, MetricType.AimLow, sum),
+        Metric("effort", _("Effort"), float, MetricType.AimLow, sum),
     )
 
     default_metric_index = 0  # MI

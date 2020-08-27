@@ -15,8 +15,27 @@ from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 from wily.lang import _
 
+help_header = _("""
+    \U0001F98A Inspect and search through the complexity of your source code.
+    To get started, run setup:
+    
+      $ wily setup
+      
+    To reindex any changes in your source code:
+    
+      $ wily build <src>
+      
+   Then explore basic metrics with:
+    
+      $ wily report <file>
+      
+    You can also graph specific metrics in a browser with:
+    
+      $ wily graph <file> <metric>
+      
+    """)
 
-@click.group()
+@click.group(help=help_header)
 @click.version_option(
     __version__, "-V", "--version", message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version"))
 )
@@ -44,27 +63,7 @@ from wily.lang import _
     help=_("Override the default cache path (defaults to $HOME/.wily/HASH)"),
 )
 @click.pass_context
-@add_version
 def cli(ctx, debug, config, path, cache):
-    """
-    \U0001F98A Inspect and search through the complexity of your source code.
-
-    To get started, run setup:
-
-      $ wily setup
-
-    To reindex any changes in your source code:
-
-      $ wily build <src>
-
-    Then explore basic metrics with:
-
-      $ wily report <file>
-
-    You can also graph specific metrics in a browser with:
-
-      $ wily graph <file> <metric>
-    """
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
     if debug:
@@ -83,7 +82,7 @@ def cli(ctx, debug, config, path, cache):
     logger.debug(f"Capturing logs to {WILY_LOG_NAME}")
 
 
-@cli.command()
+@cli.command(help=_("""Build the wily cache."""))
 @click.option(
     "-n",
     "--max-revisions",
@@ -107,7 +106,6 @@ def cli(ctx, debug, config, path, cache):
 )
 @click.pass_context
 def build(ctx, max_revisions, targets, operators, archiver):
-    """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
     from wily.commands.build import build
@@ -138,13 +136,12 @@ def build(ctx, max_revisions, targets, operators, archiver):
     )
 
 
-@cli.command()
+@cli.command(help=_("""Show the history archive in the .wily/ folder."""))
 @click.pass_context
 @click.option(
     "-m", "--message/--no-message", default=False, help=_("Include revision message")
 )
 def index(ctx, message):
-    """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -155,7 +152,24 @@ def index(ctx, message):
     index(config=config, include_message=message)
 
 
-@cli.command()
+@cli.command(help = """
+    Rank files, methods and functions in order of any metrics, e.g. complexity.
+
+    Some common examples:
+
+    Rank all .py files within src/ for the maintainability.mi metric
+
+        $ wily rank src/ maintainability.mi
+
+    Rank all .py files in the index for the default metrics across all archivers
+
+        $ wily rank
+
+    Rank all .py files in the index for the default metrics across all archivers
+    and return a non-zero exit code if the total is below the given threshold
+
+        $ wily rank --threshold=80
+    """)
 @click.argument("path", type=click.Path(resolve_path=False), required=False)
 @click.argument("metric", required=False, default="maintainability.mi")
 @click.option(
@@ -174,24 +188,6 @@ def index(ctx, message):
 )
 @click.pass_context
 def rank(ctx, path, metric, revision, limit, desc, threshold):
-    """
-    Rank files, methods and functions in order of any metrics, e.g. complexity.
-
-    Some common examples:
-
-    Rank all .py files within src/ for the maintainability.mi metric
-
-        $ wily rank src/ maintainability.mi
-
-    Rank all .py files in the index for the default metrics across all archivers
-
-        $ wily rank
-
-    Rank all .py files in the index for the default metrics across all archivers
-    and return a non-zero exit code if the total is below the given threshold
-
-        $ wily rank --threshold=80
-    """
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -211,7 +207,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
     )
 
 
-@cli.command()
+@cli.command(help=_("""Show metrics for a given file."""))
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
@@ -235,7 +231,6 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
 )
 @click.pass_context
 def report(ctx, file, metrics, number, message, format, console_format, output):
-    """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -268,7 +263,7 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
     )
 
 
-@cli.command()
+@cli.command(help=_("""Show the differences in metrics for each file."""))
 @click.argument("files", type=click.Path(resolve_path=False), nargs=-1, required=True)
 @click.option(
     "-m",
@@ -292,7 +287,6 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 )
 @click.pass_context
 def diff(ctx, files, metrics, all, detail, revision):
-    """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -318,19 +312,7 @@ def diff(ctx, files, metrics, all, detail, revision):
     )
 
 
-@cli.command()
-@click.argument("path", type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=-2, required=True)
-@click.option(
-    "-o", "--output", help=_("Output report to specified HTML path, e.g. reports/out.html")
-)
-@click.option("-x", "--x-axis", help=_("Metric to use on x-axis, defaults to history."))
-@click.option(
-    "-a/-c", "--changes/--all", default=True, help=_("All commits or changes only")
-)
-@click.pass_context
-def graph(ctx, path, metrics, output, x_axis, changes):
-    """
+@cli.command(help=_("""
     Graph a specific metric for a given file, if a path is given, all files within path will be graphed.
 
     Some common examples:
@@ -346,7 +328,18 @@ def graph(ctx, path, metrics, output, x_axis, changes):
     Graph test.py against raw.loc and raw.sloc on the x-axis
 
         $ wily graph src/test.py raw.loc --x-axis raw.sloc
-    """
+    """))
+@click.argument("path", type=click.Path(resolve_path=False))
+@click.argument("metrics", nargs=-2, required=True)
+@click.option(
+    "-o", "--output", help=_("Output report to specified HTML path, e.g. reports/out.html")
+)
+@click.option("-x", "--x-axis", help=_("Metric to use on x-axis, defaults to history."))
+@click.option(
+    "-a/-c", "--changes/--all", default=True, help=_("All commits or changes only")
+)
+@click.pass_context
+def graph(ctx, path, metrics, output, x_axis, changes):
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -365,11 +358,10 @@ def graph(ctx, path, metrics, output, x_axis, changes):
     )
 
 
-@cli.command()
+@cli.command(help=_("""Clear the .wily/ folder."""))
 @click.option("-y/-p", "--yes/--prompt", default=False, help=_("Skip prompt"))
 @click.pass_context
 def clean(ctx, yes):
-    """Clear the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -386,10 +378,9 @@ def clean(ctx, yes):
     clean(config)
 
 
-@cli.command("list-metrics")
+@cli.command("list-metrics", help=_("""List the available metrics."""))
 @click.pass_context
 def list_metrics(ctx):
-    """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -400,10 +391,9 @@ def list_metrics(ctx):
     list_metrics()
 
 
-@cli.command("setup")
+@cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))
 @click.pass_context
 def setup(ctx):
-    """Run a guided setup to build the wily cache."""
     handle_no_cache(ctx)
 
 

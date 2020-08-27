@@ -11,6 +11,7 @@ from radon.cli import Config
 
 from wily import logger
 from wily.operators import BaseOperator, MetricType, Metric
+from wily.lang import _
 
 
 def mode(data):
@@ -41,9 +42,9 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("rank", "Maintainability Ranking", str, MetricType.Informational, mode),
+        Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational, mode),
         Metric(
-            "mi", "Maintainability Index", float, MetricType.AimHigh, statistics.mean
+            "mi", _("Maintainability Index"), float, MetricType.AimHigh, statistics.mean
         ),
     )
 

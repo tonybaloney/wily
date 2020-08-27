@@ -12,6 +12,7 @@ from radon.visitors import Function, Class
 
 from wily import logger
 from wily.operators import BaseOperator, Metric, MetricType
+from wily.lang import _
 
 
 class CyclomaticComplexityOperator(BaseOperator):
@@ -33,7 +34,7 @@ class CyclomaticComplexityOperator(BaseOperator):
     metrics = (
         Metric(
             "complexity",
-            "Cyclomatic Complexity",
+            _("Cyclomatic Complexity"),
             float,
             MetricType.AimLow,
             statistics.mean,
