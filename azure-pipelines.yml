@@ -41,7 +41,7 @@ stages:
         env:
           CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
       - script: |
-          python -m pytest test/
+          python -m pytest test/unit
         displayName: 'Test in japanese'
         env:
           LANGUAGE: 'ja'
@@ -82,7 +82,7 @@ stages:
           python -m pytest test
         displayName: 'pytest'
       - script: |
-          python -m pytest test/
+          python -m pytest test/unit
         displayName: 'Test in japanese'
         env:
           LANGUAGE: 'ja'
