@@ -135,7 +135,7 @@ def build(config, archiver, operators):
                         and len(data[i]) >= operator_data_len
                         and len(data[i][1]) == 0
                     ):
-                        logger.warn(
+                        logger.warning(
                             f"In revision {revision.key}, for operator {operators[i].name}: No data collected"
                         )
 
