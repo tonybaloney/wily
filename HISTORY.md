@@ -1,5 +1,10 @@
 # Release History
 
+## 1.18.0 (28th August 2020)
+
+* Added infrastructure for international languages in CLI
+* Fixed bug on configuration of operators [PR#116](https://github.com/tonybaloney/wily/pull/116) by @skarzi
+
 ## 1.17.1 (20th August 2020)
 
 * Fixed bug in use of mkstemp in log files
