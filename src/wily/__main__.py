@@ -37,8 +37,10 @@ help_header = _("""
 
 @click.group(help=help_header)
 @click.version_option(
-    __version__, "-V", "--version", message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version"))
+    __version__, "-V", "--version", message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version")),
+    help=_("Show the version and exit.")
 )
+@click.help_option(help=_("Show this message and exit."))
 @click.option(
     "--debug/--no-debug",
     default=False,
@@ -155,7 +157,7 @@ def index(ctx, message):
     index(config=config, include_message=message)
 
 
-@cli.command(help = """
+@cli.command(help = _("""
     Rank files, methods and functions in order of any metrics, e.g. complexity.
 
     Some common examples:
@@ -172,7 +174,7 @@ def index(ctx, message):
     and return a non-zero exit code if the total is below the given threshold
 
         $ wily rank --threshold=80
-    """)
+    """))
 @click.argument("path", type=click.Path(resolve_path=False), required=False)
 @click.argument("metric", required=False, default="maintainability.mi")
 @click.option(
