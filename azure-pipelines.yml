@@ -83,7 +83,7 @@ stages:
         displayName: 'pytest'
       - script: |
           python -m pytest test/
-          displayName: 'Test in japanese'
+        displayName: 'Test in japanese'
         env:
           LANGUAGE: 'ja'
     - job: 'Test_Conda'
