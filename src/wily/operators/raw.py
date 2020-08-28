@@ -22,15 +22,15 @@ class RawMetricsOperator(BaseOperator):
         "ipynb_cells": True,
     }
     metrics = (
-        Metric("loc", "Lines of Code", int, MetricType.Informational, sum),
-        Metric("lloc", "L Lines of Code", int, MetricType.AimLow, sum),
-        Metric("sloc", "S Lines of Code", int, MetricType.AimLow, sum),
-        Metric("comments", "Multi-line comments", int, MetricType.AimHigh, sum),
-        Metric("multi", "Multi lines", int, MetricType.Informational, sum),
-        Metric("blank", "blank lines", int, MetricType.Informational, sum),
+        Metric("loc", _("Lines of Code"), int, MetricType.Informational, sum),
+        Metric("lloc", _("L Lines of Code"), int, MetricType.AimLow, sum),
+        Metric("sloc", _("S Lines of Code"), int, MetricType.AimLow, sum),
+        Metric("comments", _("Multi-line comments"), int, MetricType.AimHigh, sum),
+        Metric("multi", _("Multi lines"), int, MetricType.Informational, sum),
+        Metric("blank", _("blank lines"), int, MetricType.Informational, sum),
         Metric(
             "single_comments",
-            "Single comment lines",
+            _("Single comment lines"),
             int,
             MetricType.Informational,
             sum,

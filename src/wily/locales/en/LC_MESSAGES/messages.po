@@ -1,0 +1,138 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-24 16:49+1000\n"
+"PO-Revision-Date: 2020-08-24 16:59+1000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en\n"
+
+#: src/wily/__main__.py:25
+msgid "Print debug information, used for development"
+msgstr "Print debug information, used for development"
+
+#: src/wily/__main__.py:30
+msgid "Path to configuration file, defaults to wily.cfg"
+msgstr "Path to configuration file, defaults to wily.cfg"
+
+#: src/wily/__main__.py:37
+msgid "Root path to the project folder to scan"
+msgstr "Root path to the project folder to scan"
+
+#: src/wily/__main__.py:43
+msgid "Override the default cache path (defaults to $HOME/.wily/HASH)"
+msgstr "Override the default cache path (defaults to $HOME/.wily/HASH)"
+
+#: src/wily/__main__.py:91
+msgid "The maximum number of historical commits to archive"
+msgstr "The maximum number of historical commits to archive"
+
+#: src/wily/__main__.py:98
+msgid "List of operators, separated by commas"
+msgstr "List of operators, separated by commas"
+
+#: src/wily/__main__.py:105
+msgid "Archiver to use, defaults to git if git repo, else filesystem"
+msgstr "Archiver to use, defaults to git if git repo, else filesystem"
+
+#: src/wily/__main__.py:136
+msgid ""
+"Completed building wily history, run `wily report <file>` or `wily index` to "
+"see more."
+msgstr ""
+"Completed building wily history, run `wily report <file>` or `wily index` to "
+"see more."
+
+#: src/wily/__main__.py:143 src/wily/__main__.py:218
+msgid "Include revision message"
+msgstr "Include revision message"
+
+#: src/wily/__main__.py:161 src/wily/__main__.py:290
+msgid "Compare against specific revision"
+msgstr "Compare against specific revision"
+
+#: src/wily/__main__.py:163
+msgid "Limit the number of results shown"
+msgstr "Limit the number of results shown"
+
+#: src/wily/__main__.py:166
+msgid "Order to show results (ascending or descending)"
+msgstr "Order to show results (ascending or descending)"
+
+#: src/wily/__main__.py:171
+msgid "Return a non-zero exit code under the specified threshold"
+msgstr "Return a non-zero exit code under the specified threshold"
+
+#: src/wily/__main__.py:224
+msgid "Specify report format (console or html)"
+msgstr "Specify report format (console or html)"
+
+#: src/wily/__main__.py:230
+msgid ""
+"Style for the console grid, see Tabulate Documentation for a list of styles."
+msgstr ""
+"Style for the console grid, see Tabulate Documentation for a list of styles."
+
+#: src/wily/__main__.py:233 src/wily/__main__.py:324
+msgid "Output report to specified HTML path, e.g. reports/out.html"
+msgstr "Output report to specified HTML path, e.g. reports/out.html"
+
+#: src/wily/__main__.py:276
+msgid "comma-seperated list of metrics, see list-metrics for choices"
+msgstr "comma-seperated list of metrics, see list-metrics for choices"
+
+#: src/wily/__main__.py:282
+msgid "Show all files, instead of changes only"
+msgstr "Show all files, instead of changes only"
+
+#: src/wily/__main__.py:287
+msgid "Show function/class level metrics where available"
+msgstr "Show function/class level metrics where available"
+
+#: src/wily/__main__.py:326
+msgid "Metric to use on x-axis, defaults to history."
+msgstr "Metric to use on x-axis, defaults to history."
+
+#: src/wily/__main__.py:328
+msgid "All commits or changes only"
+msgstr "All commits or changes only"
+
+#: src/wily/__main__.py:368
+msgid "Skip prompt"
+msgstr "Skip prompt"
+
+#: src/wily/__main__.py:375
+msgid "Wily cache does not exist, nothing to remove."
+msgstr "Wily cache does not exist, nothing to remove."
+
+#: src/wily/__main__.py:379
+msgid "Are you sure you want to delete wily cache? [y/N]"
+msgstr "Are you sure you want to delete wily cache? [y/N]"
+
+#: src/wily/__main__.py:412
+msgid "Could not locate wily cache, the cache is required to provide insights."
+msgstr ""
+"Could not locate wily cache, the cache is required to provide insights."
+
+#: src/wily/__main__.py:414
+msgid "Do you want to run setup and index your project now? [y/N]"
+msgstr "Do you want to run setup and index your project now? [y/N]"
+
+#: src/wily/__main__.py:418
+msgid "How many previous git revisions do you want to index? : "
+msgstr "How many previous git revisions do you want to index? : "
+
+#: src/wily/__main__.py:420
+msgid "Path to your source files; comma-separated for multiple: "
+msgstr "Path to your source files; comma-separated for multiple: "

@@ -1,0 +1,354 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-28 15:19+1000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/wily/operators/maintainability.py:45
+msgid "Maintainability Ranking"
+msgstr ""
+
+#: src/wily/operators/maintainability.py:47
+msgid "Maintainability Index"
+msgstr ""
+
+#: src/wily/operators/raw.py:25
+msgid "Lines of Code"
+msgstr ""
+
+#: src/wily/operators/raw.py:26
+msgid "L Lines of Code"
+msgstr ""
+
+#: src/wily/operators/raw.py:27
+msgid "S Lines of Code"
+msgstr ""
+
+#: src/wily/operators/raw.py:28
+msgid "Multi-line comments"
+msgstr ""
+
+#: src/wily/operators/raw.py:29
+msgid "Multi lines"
+msgstr ""
+
+#: src/wily/operators/raw.py:30
+msgid "blank lines"
+msgstr ""
+
+#: src/wily/operators/raw.py:33
+msgid "Single comment lines"
+msgstr ""
+
+#: src/wily/operators/__init__.py:85
+msgid "Cyclomatic Complexity of modules"
+msgstr ""
+
+#: src/wily/operators/__init__.py:92
+msgid "Raw Python statistics"
+msgstr ""
+
+#: src/wily/operators/__init__.py:99
+msgid "Maintainability index (lines of code and branching)"
+msgstr ""
+
+#: src/wily/operators/__init__.py:106
+msgid "Halstead metrics"
+msgstr ""
+
+#: src/wily/operators/cyclomatic.py:37
+msgid "Cyclomatic Complexity"
+msgstr ""
+
+#: src/wily/operators/halstead.py:32
+msgid "Unique Operands"
+msgstr ""
+
+#: src/wily/operators/halstead.py:33
+msgid "Unique Operators"
+msgstr ""
+
+#: src/wily/operators/halstead.py:34
+msgid "Number of Operands"
+msgstr ""
+
+#: src/wily/operators/halstead.py:35
+msgid "Number of Operators"
+msgstr ""
+
+#: src/wily/operators/halstead.py:37
+msgid "Unique vocabulary (h1 + h2)"
+msgstr ""
+
+#: src/wily/operators/halstead.py:39
+msgid "Length of application"
+msgstr ""
+
+#: src/wily/operators/halstead.py:40
+msgid "Code volume"
+msgstr ""
+
+#: src/wily/operators/halstead.py:41
+msgid "Difficulty"
+msgstr ""
+
+#: src/wily/operators/halstead.py:42
+msgid "Effort"
+msgstr ""
+
+#: src/wily/cache.py:211
+msgid "No records found in the index, no metrics available"
+msgstr ""
+
+#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
+msgid "Revision"
+msgstr ""
+
+#: src/wily/commands/report.py:147
+msgid "Message"
+msgstr ""
+
+#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
+msgid "Author"
+msgstr ""
+
+#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
+msgid "Date"
+msgstr ""
+
+#: src/wily/__main__.py:19
+msgid ""
+"\\U0001F98A Inspect and search through the complexity of your source code.\n"
+"To get started, run setup:\n"
+"\n"
+"  $ wily setup\n"
+"  \n"
+"To reindex any changes in your source code:\n"
+"\n"
+"  $ wily build <src>\n"
+"  \n"
+"Then explore basic metrics with:\n"
+"\n"
+"  $ wily report <file>\n"
+"  \n"
+"You can also graph specific metrics in a browser with:\n"
+"\n"
+"  $ wily graph <file> <metric>\n"
+"  \n"
+msgstr ""
+
+#: src/wily/__main__.py:40
+msgid "version"
+msgstr ""
+
+#: src/wily/__main__.py:41
+msgid "Show the version and exit."
+msgstr ""
+
+#: src/wily/__main__.py:43
+msgid "Show this message and exit."
+msgstr ""
+
+#: src/wily/__main__.py:47
+msgid "Print debug information, used for development"
+msgstr ""
+
+#: src/wily/__main__.py:52
+msgid "Path to configuration file, defaults to wily.cfg"
+msgstr ""
+
+#: src/wily/__main__.py:59
+msgid "Root path to the project folder to scan"
+msgstr ""
+
+#: src/wily/__main__.py:65
+msgid "Override the default cache path (defaults to $HOME/.wily/HASH)"
+msgstr ""
+
+#: src/wily/__main__.py:88
+msgid "Build the wily cache."
+msgstr ""
+
+#: src/wily/__main__.py:94
+msgid "The maximum number of historical commits to archive"
+msgstr ""
+
+#: src/wily/__main__.py:101
+msgid "List of operators, separated by commas"
+msgstr ""
+
+#: src/wily/__main__.py:108
+msgid "Archiver to use, defaults to git if git repo, else filesystem"
+msgstr ""
+
+#: src/wily/__main__.py:139
+msgid ""
+"Completed building wily history, run `wily report <file>` or `wily index` to "
+"see more."
+msgstr ""
+
+#: src/wily/__main__.py:143
+msgid "Show the history archive in the .wily/ folder."
+msgstr ""
+
+#: src/wily/__main__.py:146 src/wily/__main__.py:221
+msgid "Include revision message"
+msgstr ""
+
+#: src/wily/__main__.py:160
+msgid ""
+"\n"
+"    Rank files, methods and functions in order of any metrics, e.g. "
+"complexity.\n"
+"\n"
+"    Some common examples:\n"
+"\n"
+"    Rank all .py files within src/ for the maintainability.mi metric\n"
+"\n"
+"        $ wily rank src/ maintainability.mi\n"
+"\n"
+"    Rank all .py files in the index for the default metrics across all "
+"archivers\n"
+"\n"
+"        $ wily rank\n"
+"\n"
+"    Rank all .py files in the index for the default metrics across all "
+"archivers\n"
+"    and return a non-zero exit code if the total is below the given "
+"threshold\n"
+"\n"
+"        $ wily rank --threshold=80\n"
+"    "
+msgstr ""
+
+#: src/wily/__main__.py:181 src/wily/__main__.py:293
+msgid "Compare against specific revision"
+msgstr ""
+
+#: src/wily/__main__.py:183
+msgid "Limit the number of results shown"
+msgstr ""
+
+#: src/wily/__main__.py:186
+msgid "Order to show results (ascending or descending)"
+msgstr ""
+
+#: src/wily/__main__.py:191
+msgid "Return a non-zero exit code under the specified threshold"
+msgstr ""
+
+#: src/wily/__main__.py:216
+msgid "Show metrics for a given file."
+msgstr ""
+
+#: src/wily/__main__.py:227
+msgid "Specify report format (console or html)"
+msgstr ""
+
+#: src/wily/__main__.py:233
+msgid ""
+"Style for the console grid, see Tabulate Documentation for a list of styles."
+msgstr ""
+
+#: src/wily/__main__.py:236 src/wily/__main__.py:343
+msgid "Output report to specified HTML path, e.g. reports/out.html"
+msgstr ""
+
+#: src/wily/__main__.py:273
+msgid "Show the differences in metrics for each file."
+msgstr ""
+
+#: src/wily/__main__.py:279
+msgid "comma-seperated list of metrics, see list-metrics for choices"
+msgstr ""
+
+#: src/wily/__main__.py:285
+msgid "Show all files, instead of changes only"
+msgstr ""
+
+#: src/wily/__main__.py:290
+msgid "Show function/class level metrics where available"
+msgstr ""
+
+#: src/wily/__main__.py:323
+msgid ""
+"\n"
+"    Graph a specific metric for a given file, if a path is given, all files "
+"within path will be graphed.\n"
+"\n"
+"    Some common examples:\n"
+"\n"
+"    Graph all .py files within src/ for the raw.loc metric\n"
+"\n"
+"        $ wily graph src/ raw.loc\n"
+"\n"
+"    Graph test.py against raw.loc and cyclomatic.complexity metrics\n"
+"\n"
+"        $ wily graph src/test.py raw.loc cyclomatic.complexity\n"
+"\n"
+"    Graph test.py against raw.loc and raw.sloc on the x-axis\n"
+"\n"
+"        $ wily graph src/test.py raw.loc --x-axis raw.sloc\n"
+"    "
+msgstr ""
+
+#: src/wily/__main__.py:345
+msgid "Metric to use on x-axis, defaults to history."
+msgstr ""
+
+#: src/wily/__main__.py:347
+msgid "All commits or changes only"
+msgstr ""
+
+#: src/wily/__main__.py:370
+msgid "Clear the .wily/ folder."
+msgstr ""
+
+#: src/wily/__main__.py:371
+msgid "Skip prompt"
+msgstr ""
+
+#: src/wily/__main__.py:378
+msgid "Wily cache does not exist, nothing to remove."
+msgstr ""
+
+#: src/wily/__main__.py:382
+msgid "Are you sure you want to delete wily cache? [y/N]"
+msgstr ""
+
+#: src/wily/__main__.py:391
+msgid "List the available metrics."
+msgstr ""
+
+#: src/wily/__main__.py:405
+msgid "Run a guided setup to build the wily cache."
+msgstr ""
+
+#: src/wily/__main__.py:415
+msgid "Could not locate wily cache, the cache is required to provide insights."
+msgstr ""
+
+#: src/wily/__main__.py:417
+msgid "Do you want to run setup and index your project now? [y/N]"
+msgstr ""
+
+#: src/wily/__main__.py:421
+msgid "How many previous git revisions do you want to index? : "
+msgstr ""
+
+#: src/wily/__main__.py:423
+msgid "Path to your source files; comma-separated for multiple: "
+msgstr ""
