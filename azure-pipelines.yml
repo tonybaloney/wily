@@ -40,10 +40,13 @@ stages:
         displayName: 'pytest'
         env:
           CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
-
+      - script: |
+          python -m pytest test/
+        displayName: 'Test in japanese'
+        env:
+          LANGUAGE: 'ja'
       - script: pydocstyle --ignore=D301,D212,D203 src/wily
         displayName: 'pydocstyle'
-
       - script: |
           wily build src/
           wily diff src/ -r HEAD^1
@@ -78,6 +81,11 @@ stages:
           pip install --pre pytest-azurepipelines==1.0.0rc1
           python -m pytest test
         displayName: 'pytest'
+      - script: |
+          python -m pytest test/
+          displayName: 'Test in japanese'
+        env:
+          LANGUAGE: 'ja'
     - job: 'Test_Conda'
       pool:
         vmImage: 'Ubuntu-16.04'

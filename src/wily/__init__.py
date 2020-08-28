@@ -1,6 +1,4 @@
-"""
-A Python application for tracking, reporting on timing and complexity in tests and applications.
-"""
+"""A Python application for tracking, reporting on timing and complexity in tests and applications."""
 import tempfile
 import colorlog
 import logging

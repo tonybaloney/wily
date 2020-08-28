@@ -1,3 +1,4 @@
+"""Language/i18n support for the CLI."""
 # -*- coding: UTF-8 -*-
 
 import gettext

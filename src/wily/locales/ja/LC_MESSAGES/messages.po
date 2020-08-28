@@ -197,7 +197,7 @@ msgstr ""
 
 #: src/wily/__main__.py:394
 msgid "Run a guided setup to build the wily cache."
-msgstr ""
+msgstr "wilyキャッシュを構築する"
 
 #: src/wily/__main__.py:403
 msgid "Could not locate wily cache, the cache is required to provide insights."

@@ -64,6 +64,7 @@ help_header = _("""
 )
 @click.pass_context
 def cli(ctx, debug, config, path, cache):
+    """CLI entry point."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
     if debug:
@@ -106,6 +107,7 @@ def cli(ctx, debug, config, path, cache):
 )
 @click.pass_context
 def build(ctx, max_revisions, targets, operators, archiver):
+    """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
     from wily.commands.build import build
@@ -142,6 +144,7 @@ def build(ctx, max_revisions, targets, operators, archiver):
     "-m", "--message/--no-message", default=False, help=_("Include revision message")
 )
 def index(ctx, message):
+    """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -188,6 +191,7 @@ def index(ctx, message):
 )
 @click.pass_context
 def rank(ctx, path, metric, revision, limit, desc, threshold):
+    """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -231,6 +235,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
 )
 @click.pass_context
 def report(ctx, file, metrics, number, message, format, console_format, output):
+    """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -287,6 +292,7 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 )
 @click.pass_context
 def diff(ctx, files, metrics, all, detail, revision):
+    """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -340,6 +346,7 @@ def diff(ctx, files, metrics, all, detail, revision):
 )
 @click.pass_context
 def graph(ctx, path, metrics, output, x_axis, changes):
+    """Output report to specified HTML path, e.g. reports/out.html."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -362,6 +369,7 @@ def graph(ctx, path, metrics, output, x_axis, changes):
 @click.option("-y/-p", "--yes/--prompt", default=False, help=_("Skip prompt"))
 @click.pass_context
 def clean(ctx, yes):
+    """Clear the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -381,6 +389,7 @@ def clean(ctx, yes):
 @cli.command("list-metrics", help=_("""List the available metrics."""))
 @click.pass_context
 def list_metrics(ctx):
+    """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
@@ -394,6 +403,7 @@ def list_metrics(ctx):
 @cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))
 @click.pass_context
 def setup(ctx):
+    """Run a guided setup to build the wily cache."""
     handle_no_cache(ctx)
 
 
