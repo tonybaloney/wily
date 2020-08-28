@@ -1,4 +1,41 @@
-"""A Python application for tracking, reporting on timing and complexity in tests and applications."""
+"""
+A Python application for tracking, reporting on timing and complexity in tests and applications.
+
+           B        BB*
+         BBBB      BBB
+       BBBBBB%$%*SBBB&
+      BBBBS&@$@$SBBBB
+     BBS@$$$$@@$#BBB. .
+    BB&$$@@@@@@$$@#! !..
+    B&$*$@@@*.@@@$$@&&@&$             BB
+    %$$!$@$@$$@@@@@@@@@$$B       SBBBBS###B
+    %$@@$$$$@@$$$@&$@@@$$    SBBBBBBBBSSSSSB
+     %$@#BBBBBBS&&@@@@@$$$%#BBBBBBBBBBBBBBB
+  *@BBBBBBBBBBBBS@$@@@@@@@%SBBBBBBBBBBBBBB
+@$$@BBBBBBBBBBB#@$@@@@@@@@$#BBBBBBBBBB                  BBBBBBBBBBB    BBB    BBBBBBBBBBBB   BBBBBBB
+@$$$SBBBBSSS&!  *@@@@@@@@@$$#BBBBB#                     BBBBBBBBBBB    BBB    BBBBBBBBBBBB   BBBBBBB
+@$@$$@&&$@&%S   $@@@@@@@@@@@$$#                            BBBBBB     BBBBB      BBB  BBBB     BBBBB
+@$$$$$$$$&BBB. $#&&@@@@@@@@@$                               BBBBB    BBBBBBB    BBB     BB     BBBBB BBB   BBB  BB  BB
+  %%$$@@$$@@*!@@*!*$@@@@@$$*                                 BBBBB   BBBBBBB    BBB BBBBBB     BBBBB BBBBBBBBB  BBBBBBB
+     $$$$$$$@&*     .$@@@$$                                  BBBBB  BBB BBBBB  BBB  BBBBBB     BBBBB   BBBBB     BBBB
+         %$$@@        $@@$$                                   BBBBB BBB BBBBB  BBB    BBBB     BBBBB    BBBBB    BBB
+           $$@*        @@$$                                   BBBBB BB   BBBBBBBB     BBBB     BBBBB     BBBBB  BBB
+            %@$        %@@$%                                   BBBBBBB    BBBBBB      BBBB     BBBBB      BBBBBBBB
+             @!        %@@$$@$$$$$$$$                           BBBBB     BBBBBB      BBBB     BBBBB       BBBBBB   BBB
+            $@!       !@@@@@@@@@@@@@@$$$$$$                     BBBBB      BBBB     BBBBBBBB BBBBBBBBB      BBBBB  BBBBB
+           $$@@*.   !$&@@@@@@@@@@@@@@@@@@@@@@S                   BBB        BBB     BBBBBBBB BBBBBBBBB      BBBB   BBBBB
+           $$@@@@@@@&@@@@@@@@@@@@@@@@@@&&&&@!!$@                                                           BBBB
+         *$$@@@@@@@@@@@@@@@@@@@@@@@@@@@$ .*@!  %                                                          BBBB
+        @$$@@@@@@@$*@@@@@@@@$$$@@@@@@@&&%   .      .                                                  BB BBBB
+        %$@@$$@@@%   $@@@$$$$$$$@@@@@$*%@@*                                                          BBBBBBB
+        $$$$$@@$      $@@#BBBBBB@@@&&@%!.........                                                    BBBBBB
+        *&SBBBBBB       $BBBBBBB#@&@$$$%%*!........
+         BBBBBBBB*       #BBBBBBB*
+          BBBBBBBB        BBBBBBBB
+      %$%%BBBBBBS%$$$$$$$$%&BBBBBBS@$$$$$%%$$$$$$%$$$&B*%
+      %%$%$&&S#&$$@@@@@@@@@$$@&&&@$@@@@@@@@@@@@@@@@$$%%$$
+               .%%$$$$%%%$%%%%***%%%%%$%%$$$$$%%$%*&
+"""
 import tempfile
 import colorlog
 import logging
