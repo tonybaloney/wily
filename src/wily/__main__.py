@@ -15,25 +15,25 @@ from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 from wily.lang import _
 
-help_header = _("""
-    \U0001F98A Inspect and search through the complexity of your source code.
-    To get started, run setup:
-    
-      $ wily setup
-      
-    To reindex any changes in your source code:
-    
-      $ wily build <src>
-      
-   Then explore basic metrics with:
-    
-      $ wily report <file>
-      
-    You can also graph specific metrics in a browser with:
-    
-      $ wily graph <file> <metric>
-      
-    """)
+help_header = _(
+"""\U0001F98A Inspect and search through the complexity of your source code.
+To get started, run setup:
+
+  $ wily setup
+  
+To reindex any changes in your source code:
+
+  $ wily build <src>
+  
+Then explore basic metrics with:
+
+  $ wily report <file>
+  
+You can also graph specific metrics in a browser with:
+
+  $ wily graph <file> <metric>
+  
+""")
 
 @click.group(help=help_header)
 @click.version_option(
