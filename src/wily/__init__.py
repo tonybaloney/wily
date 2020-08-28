@@ -1,4 +1,6 @@
 """
+A Python application for tracking, reporting on timing and complexity in tests and applications.
+
            B        BB*
          BBBB      BBB
        BBBBBB%$%*SBBB&
@@ -33,8 +35,6 @@
       %$%%BBBBBBS%$$$$$$$$%&BBBBBBS@$$$$$%%$$$$$$%$$$&B*%
       %%$%$&&S#&$$@@@@@@@@@$$@&&&@$@@@@@@@@@@@@@@@@$$%%$$
                .%%$$$$%%%$%%%%***%%%%%$%%$$$$$%%$%*&
-
-A Python application for tracking, reporting on timing and complexity in tests and applications.
 """
 import tempfile
 import colorlog

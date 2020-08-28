@@ -46,7 +46,7 @@ class WilyConfig(object):
     A data class to reflect the configurable options within Wily.
     """
 
-    operators: List
+    operators: List[str]
     archiver: Any
     path: str
     max_revisions: int
@@ -56,7 +56,9 @@ class WilyConfig(object):
     checkout_options: dict = field(default_factory=dict)
 
     def __post_init__(self):
-        """Clone targets as a list of path."""
+        """Parse operators string to list and clone targets as a list of path."""
+        if isinstance(self.operators, str):
+            self.operators = self._parse_to_list(self.operators)
         if self.targets is None or "":
             self.targets = [self.path]
         self._cache_path = None
@@ -73,6 +75,15 @@ class WilyConfig(object):
         """Override the cache path."""
         logger.debug(f"Setting custom cache path to {value}")
         self._cache_path = value
+
+    @staticmethod
+    def _parse_to_list(string, separator=","):
+        items = []
+        for raw_item in string.split(separator):
+            item = raw_item.strip()
+            if item:
+                items.append(item)
+        return items
 
 
 # Default values for Wily
