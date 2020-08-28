@@ -3,20 +3,19 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-08-28 14:33+1000\n"
-"PO-Revision-Date: 2020-08-28 14:23+1000\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: ja\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.1\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: src/wily/operators/maintainability.py:45
 msgid "Maintainability Ranking"
@@ -116,7 +115,7 @@ msgstr ""
 
 #: src/wily/commands/report.py:147 src/wily/commands/report.py:149
 msgid "Revision"
-msgstr "リビジョン"
+msgstr ""
 
 #: src/wily/commands/report.py:147
 msgid "Message"
@@ -128,7 +127,7 @@ msgstr ""
 
 #: src/wily/commands/report.py:147 src/wily/commands/report.py:149
 msgid "Date"
-msgstr "日付"
+msgstr ""
 
 #: src/wily/__main__.py:18
 msgid ""
@@ -153,87 +152,64 @@ msgid ""
 "      \n"
 "    "
 msgstr ""
-"\n"
-"    \\U0001F98A Inspect and search through the complexity of your source "
-"code.\n"
-"    wilyキャッシュを構築する:\n"
-"    \n"
-"      $ wily setup\n"
-"      \n"
-"    To reindex any changes in your source code:\n"
-"    \n"
-"      $ wily build <src>\n"
-"      \n"
-"   Then explore basic metrics with:\n"
-"    \n"
-"      $ wily report <file>\n"
-"      \n"
-"    You can also graph specific metrics in a browser with:\n"
-"    \n"
-"      $ wily graph <file> <metric>\n"
-"      \n"
-"    "
 
 #: src/wily/__main__.py:40
 msgid "version"
-msgstr "バージョン"
+msgstr ""
 
 #: src/wily/__main__.py:41
 msgid "Show the version and exit."
-msgstr "版を展示する。"
+msgstr ""
 
 #: src/wily/__main__.py:43
 msgid "Show this message and exit."
-msgstr "ヘルプを展示する。"
+msgstr ""
 
 #: src/wily/__main__.py:47
 msgid "Print debug information, used for development"
-msgstr "開発に使用されるデバッグ情報を印刷する。"
+msgstr ""
 
 #: src/wily/__main__.py:52
 msgid "Path to configuration file, defaults to wily.cfg"
-msgstr "構成ファイルへのパス(デフォルトは wily.cfg)"
+msgstr ""
 
 #: src/wily/__main__.py:59
 msgid "Root path to the project folder to scan"
-msgstr "スキャンするプロジェクトフォルダへのルートパス"
+msgstr ""
 
 #: src/wily/__main__.py:65
 msgid "Override the default cache path (defaults to $HOME/.wily/HASH)"
 msgstr ""
-"デフォルトのキャッシュパスを上書きします（デフォルトは $HOME/.wily/HASH です"
 
 #: src/wily/__main__.py:88
 msgid "Build the wily cache."
-msgstr "wilyキャッシュを構築する。"
+msgstr ""
 
 #: src/wily/__main__.py:94
 msgid "The maximum number of historical commits to archive"
-msgstr "アーカイブする履歴コミットの最大数"
+msgstr ""
 
 #: src/wily/__main__.py:101
 msgid "List of operators, separated by commas"
-msgstr "カンマで区切られた演算子のリスト"
+msgstr ""
 
 #: src/wily/__main__.py:108
 msgid "Archiver to use, defaults to git if git repo, else filesystem"
-msgstr "どのアーカイバー"
+msgstr ""
 
 #: src/wily/__main__.py:139
 msgid ""
 "Completed building wily history, run `wily report <file>` or `wily index` to "
 "see more."
 msgstr ""
-"wilyヒストリの構築が完了。それから `wily report <file>` または `wily index`を"
-"実行。"
 
 #: src/wily/__main__.py:143
 msgid "Show the history archive in the .wily/ folder."
-msgstr "wilyヒストリを展示する。"
+msgstr ""
 
 #: src/wily/__main__.py:146 src/wily/__main__.py:221
 msgid "Include revision message"
-msgstr "リビジョンの伝言を含めて"
+msgstr ""
 
 #: src/wily/__main__.py:160
 msgid ""
@@ -342,7 +318,7 @@ msgstr ""
 
 #: src/wily/__main__.py:370
 msgid "Clear the .wily/ folder."
-msgstr "wilyキャッシュを破壊する。"
+msgstr ""
 
 #: src/wily/__main__.py:371
 msgid "Skip prompt"
@@ -358,11 +334,11 @@ msgstr ""
 
 #: src/wily/__main__.py:391
 msgid "List the available metrics."
-msgstr "wilyメトリックの情報を展示する。"
+msgstr ""
 
 #: src/wily/__main__.py:405
 msgid "Run a guided setup to build the wily cache."
-msgstr "wilyキャッシュを構築する。"
+msgstr ""
 
 #: src/wily/__main__.py:415
 msgid "Could not locate wily cache, the cache is required to provide insights."

@@ -9,4 +9,4 @@ extract_messages:
 	msgmerge src/wily/locales/ja/LC_MESSAGES/messages.po -U src/wily/locales/messages.pot
 
 compile_messages:
-	find src/wily/locales -name \*.po -execdir msgfmt messages.po -o messages.mo \;
+	find src/wily/locales -name \*.po -execdir msgfmt {} -o messages.mo \;
