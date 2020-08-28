@@ -18,6 +18,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: en\n"
 
+#: src/wily/__main__.py:18
+msgid "Version: "
+msgstr "Version: "
+
 #: src/wily/__main__.py:25
 msgid "Print debug information, used for development"
 msgstr "Print debug information, used for development"
