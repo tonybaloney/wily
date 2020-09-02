@@ -10,12 +10,12 @@ from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
-from wily.decorators import add_version
 from wily.helper.custom_enums import ReportFormat
 from wily.operators import resolve_operators
 from wily.lang import _
 
-help_header = _(
+version_text = _("Version: ") + __version__ + "\n\n"
+help_header = version_text + _(
 """\U0001F98A Inspect and search through the complexity of your source code.
 To get started, run setup:
 

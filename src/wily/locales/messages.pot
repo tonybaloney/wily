@@ -113,6 +113,10 @@ msgstr ""
 msgid "No records found in the index, no metrics available"
 msgstr ""
 
+#: src/wily/__main__.py:17
+msgid "Version: "
+msgstr ""
+
 #: src/wily/__main__.py:19
 msgid ""
 "\\U0001F98A Inspect and search through the complexity of your source code.\n"
