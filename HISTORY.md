@@ -1,5 +1,10 @@
 # Release History
 
+## 1.19.0 (2nd September 2020)
+
+* Added a German translation (@DahlitzFlorian)
+* Added the version number to the help text (@DahlitzFlorian)
+
 ## 1.18.0 (28th August 2020)
 
 * Added infrastructure for international languages in CLI
