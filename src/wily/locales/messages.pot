@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-30 19:13+0200\n"
+"POT-Creation-Date: 2020-09-02 16:14+1000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,42 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/wily/operators/maintainability.py:45
+msgid "Maintainability Ranking"
+msgstr ""
+
+#: src/wily/operators/maintainability.py:47
+msgid "Maintainability Index"
+msgstr ""
+
+#: src/wily/operators/raw.py:25
+msgid "Lines of Code"
+msgstr ""
+
+#: src/wily/operators/raw.py:26
+msgid "L Lines of Code"
+msgstr ""
+
+#: src/wily/operators/raw.py:27
+msgid "S Lines of Code"
+msgstr ""
+
+#: src/wily/operators/raw.py:28
+msgid "Multi-line comments"
+msgstr ""
+
+#: src/wily/operators/raw.py:29
+msgid "Multi lines"
+msgstr ""
+
+#: src/wily/operators/raw.py:30
+msgid "blank lines"
+msgstr ""
+
+#: src/wily/operators/raw.py:33
+msgid "Single comment lines"
+msgstr ""
 
 #: src/wily/operators/__init__.py:85
 msgid "Cyclomatic Complexity of modules"
@@ -31,6 +67,10 @@ msgstr ""
 
 #: src/wily/operators/__init__.py:106
 msgid "Halstead metrics"
+msgstr ""
+
+#: src/wily/operators/cyclomatic.py:37
+msgid "Cyclomatic Complexity"
 msgstr ""
 
 #: src/wily/operators/halstead.py:32
@@ -69,48 +109,24 @@ msgstr ""
 msgid "Effort"
 msgstr ""
 
-#: src/wily/operators/cyclomatic.py:37
-msgid "Cyclomatic Complexity"
-msgstr ""
-
-#: src/wily/operators/raw.py:25
-msgid "Lines of Code"
-msgstr ""
-
-#: src/wily/operators/raw.py:26
-msgid "L Lines of Code"
-msgstr ""
-
-#: src/wily/operators/raw.py:27
-msgid "S Lines of Code"
-msgstr ""
-
-#: src/wily/operators/raw.py:28
-msgid "Multi-line comments"
-msgstr ""
-
-#: src/wily/operators/raw.py:29
-msgid "Multi lines"
-msgstr ""
-
-#: src/wily/operators/raw.py:30
-msgid "blank lines"
-msgstr ""
-
-#: src/wily/operators/raw.py:33
-msgid "Single comment lines"
-msgstr ""
-
-#: src/wily/operators/maintainability.py:45
-msgid "Maintainability Ranking"
-msgstr ""
-
-#: src/wily/operators/maintainability.py:47
-msgid "Maintainability Index"
-msgstr ""
-
 #: src/wily/cache.py:211
 msgid "No records found in the index, no metrics available"
+msgstr ""
+
+#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
+msgid "Revision"
+msgstr ""
+
+#: src/wily/commands/report.py:147
+msgid "Message"
+msgstr ""
+
+#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
+msgid "Author"
+msgstr ""
+
+#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
+msgid "Date"
 msgstr ""
 
 #: src/wily/__main__.py:17
@@ -339,20 +355,4 @@ msgstr ""
 
 #: src/wily/__main__.py:423
 msgid "Path to your source files; comma-separated for multiple: "
-msgstr ""
-
-#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
-msgid "Revision"
-msgstr ""
-
-#: src/wily/commands/report.py:147
-msgid "Message"
-msgstr ""
-
-#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
-msgid "Author"
-msgstr ""
-
-#: src/wily/commands/report.py:147 src/wily/commands/report.py:149
-msgid "Date"
 msgstr ""

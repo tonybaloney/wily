@@ -31,7 +31,7 @@ Wily can be used via a command line interface, `wily`.
 
 ```console
  $ wily --help
- ```
+```
 
 ![help-screen](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_help.png)
 
