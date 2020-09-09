@@ -85,3 +85,22 @@ def test_config_max_revisions(tmpdir):
     assert cfg.archiver == wily.config.DEFAULT_ARCHIVER
     assert cfg.operators == wily.config.DEFAULT_OPERATORS
     assert cfg.max_revisions == 14
+
+
+def test_config_cache_path(tmpdir):
+    """
+    Test that a cache-path can be configured
+    """
+    config = """
+    [wily]
+    cache_path = .wily/
+    """
+    config_path = os.path.join(tmpdir, "wily.cfg")
+    with open(config_path, "w") as config_f:
+        config_f.write(config)
+
+    cfg = wily.config.load(config_path)
+
+    assert cfg.archiver == wily.config.DEFAULT_ARCHIVER
+    assert cfg.operators == wily.config.DEFAULT_OPERATORS
+    assert cfg.cache_path == ".wily/"

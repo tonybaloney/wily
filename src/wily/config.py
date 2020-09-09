@@ -10,7 +10,7 @@ import configparser
 import logging
 import pathlib
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import Any, List
 
 import wily.operators as operators
@@ -54,14 +54,15 @@ class WilyConfig(object):
     ipynb_cells: bool = True
     targets: List[str] = None
     checkout_options: dict = field(default_factory=dict)
+    _cache_path: InitVar[str] = ""
 
-    def __post_init__(self):
+    def __post_init__(self, _cache_path):
         """Parse operators string to list and clone targets as a list of path."""
         if isinstance(self.operators, str):
             self.operators = self._parse_to_list(self.operators)
         if self.targets is None or "":
             self.targets = [self.path]
-        self._cache_path = None
+        self._cache_path = _cache_path
 
     @property
     def cache_path(self):
@@ -143,6 +144,9 @@ def load(config_path=DEFAULT_CONFIG_PATH):
         section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER
     )
     path = config.get(section=DEFAULT_CONFIG_SECTION, option="path", fallback=".")
+    cache_path = config.get(
+        section=DEFAULT_CONFIG_SECTION, option="cache_path", fallback=""
+    )
     max_revisions = config.getint(
         section=DEFAULT_CONFIG_SECTION,
         option="max_revisions",
@@ -159,6 +163,7 @@ def load(config_path=DEFAULT_CONFIG_PATH):
         operators=operators,
         archiver=archiver,
         path=path,
+        _cache_path=cache_path,
         max_revisions=max_revisions,
         include_ipynb=include_ipynb,
         ipynb_cells=ipynb_cells,
