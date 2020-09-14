@@ -31,7 +31,7 @@ classifiers = [
     ]
 requires = [
     "gitpython>=3.0.0,<4.0.0",
-    "radon>=4.0.0,<4.1.0",
+    "https://github.com/tonybaloney/radon/archive/faster_tokens.zip",
     "click>=7.0,<8.0",
     "nbformat>=4.4.0,<4.5.0",
     "colorlog>=4.0.0,<5.0.0",
