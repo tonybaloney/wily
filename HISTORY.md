@@ -1,5 +1,9 @@
 # Release History
 
+## 1.20.0 (master)
+
+* Added cache_path to configuration options (@skarzi)
+
 ## 1.19.0 (2nd September 2020)
 
 * Added a German translation (@DahlitzFlorian)
