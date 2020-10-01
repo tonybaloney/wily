@@ -208,5 +208,6 @@ You can also disable the behaviour of reporting on individual cells by setting `
 - @alegonz
 - @DanielChabrowski
 - @jwattier
+- @skarzi
 
 "cute animal doing dabbing" [Designed by Freepik](https://www.freepik.com/free-vector/cute-animal-doing-dabbing_2462508.htm)
