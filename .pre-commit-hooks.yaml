@@ -1,0 +1,7 @@
+-   id: wily
+    name: wily
+    description: '`wily` is a command-line application for tracking, reporting on complexity of Python tests and applications.'
+    entry: wily
+    language: python
+    types: [python]
+    require_serial: true
