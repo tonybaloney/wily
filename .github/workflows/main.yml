@@ -1,0 +1,53 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install flit mock codecov pydocstyle pytest-cov
+          flit install
+    - name: Test with pytest
+      run: |
+        python -m pytest test/ --cov=wily
+        codecov
+      env:
+          CODECOV_TOKEN: '48f9ff3a-6358-4607-aa5d-9cb7cada539c'
+    - name: Test in German
+      run: |
+        python -m pytest test/unit
+      env:
+          LANGUAGE: de 
+    - name: Test in Japanese
+      run: |
+        python -m pytest test/unit
+      env:
+          LANGUAGE: ja 
+    - name: 'pydocstyle'
+      run: pydocstyle --ignore=D301,D212,D203 src/wily
+    - name: Test build
+      run: |
+          flit build
