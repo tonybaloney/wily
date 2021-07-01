@@ -27,6 +27,7 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
    commands/graph
    commands/index
    commands/report
+   commands/rank
 
 What is wily?
 -------------
