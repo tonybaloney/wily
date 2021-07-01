@@ -9,6 +9,7 @@ import tabulate
 from pathlib import Path
 from shutil import copytree
 from string import Template
+from typing import List
 
 from wily import logger, format_date, format_revision, MAX_MESSAGE_WIDTH
 from wily.helper.custom_enums import ReportFormat
@@ -57,6 +58,7 @@ def report(
     :param console_format: Grid format style for tabulate
     :type  console_format: ``str``
     """
+    metrics = sorted(metrics)
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
 
