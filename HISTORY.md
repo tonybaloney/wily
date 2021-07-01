@@ -1,7 +1,9 @@
 # Release History
 
-## 1.20.0 (master)
+## 1.20.0 (1st July 2021)
 
+* Fixed a bug where the colors for diffs in report were the wrong way around
+* Added Python 3.9 support (@skarzi and @willfrey)
 * Added cache_path to configuration options (@skarzi)
 
 ## 1.19.0 (2nd September 2020)
