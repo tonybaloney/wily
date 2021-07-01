@@ -11,13 +11,12 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
         python-version: [3.7, 3.8, 3.9]
-
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -48,6 +47,3 @@ jobs:
           LANGUAGE: ja 
     - name: 'pydocstyle'
       run: pydocstyle --ignore=D301,D212,D203 src/wily
-    - name: Test build
-      run: |
-          flit build
