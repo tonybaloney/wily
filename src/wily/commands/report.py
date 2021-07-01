@@ -16,6 +16,9 @@ from wily.operators import resolve_metric_as_tuple, MetricType
 from wily.state import State
 from wily.lang import _
 
+ANSI_RED = 31
+ANSI_GREEN = 32
+ANSI_YELLOW = 33
 
 def report(
     config,
@@ -66,19 +69,22 @@ def report(
         operator = operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
-            good_color = 32
-            bad_color = 31
+            increase_color = ANSI_GREEN
+            decrease_color = ANSI_RED
         elif metric.measure == MetricType.AimLow:
-            good_color = 31
-            bad_color = 32
+            increase_color = ANSI_RED
+            decrease_color = ANSI_GREEN
         elif metric.measure == MetricType.Informational:
-            good_color = 33
-            bad_color = 33
+            increase_color = ANSI_YELLOW
+            decrease_color = ANSI_YELLOW
+        else:
+            increase_color = ANSI_YELLOW
+            decrease_color = ANSI_YELLOW
         metric_meta = {
             "key": key,
             "operator": operator,
-            "good_color": good_color,
-            "bad_color": bad_color,
+            "increase_color": increase_color,
+            "decrease_color": decrease_color,
             "title": metric.description,
             "type": metric.type,
         }
@@ -112,9 +118,9 @@ def report(
                     if delta == 0:
                         delta_col = delta
                     elif delta < 0:
-                        delta_col = f"\u001b[{meta['good_color']}m{delta:n}\u001b[0m"
+                        delta_col = f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
                     else:
-                        delta_col = f"\u001b[{meta['bad_color']}m+{delta:n}\u001b[0m"
+                        delta_col = f"\u001b[{meta['increase_color']}m+{delta:n}\u001b[0m"
 
                     if meta["type"] in (int, float):
                         k = f"{val:n} ({delta_col})"
