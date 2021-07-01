@@ -58,7 +58,7 @@ def report(
     :param console_format: Grid format style for tabulate
     :type  console_format: ``str``
     """
-    metrics.sort()
+    metrics = sorted(metrics)
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
 
