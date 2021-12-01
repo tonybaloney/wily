@@ -46,6 +46,9 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     else:
         x_operator, x_key = metric_parts(x_axis)
 
+    y_metric = resolve_metric(metrics[0])
+    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}"
+
     if abs_path.is_dir():
         paths = [
             p.relative_to(config.path) for p in pathlib.Path(abs_path).glob("**/*.py")
@@ -121,8 +124,6 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     else:
         filename = "wily-report.html"
         auto_open = True
-    y_metric = resolve_metric(metrics[0])
-    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}"
     plotly.offline.plot(
         {
             "data": data,
