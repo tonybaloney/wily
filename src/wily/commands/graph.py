@@ -78,7 +78,6 @@ def graph(
         labels = []
         last_y = None
         for rev in state.index[state.default_archiver].revisions:
-            labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
             try:
                 val = rev.get(config, state.default_archiver, operator, str(path), key)
                 if val != last_y or not changes:
@@ -105,6 +104,7 @@ def graph(
                                 x_key,
                             )
                         )
+                labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                 last_y = val
             except KeyError:
                 # missing data
