@@ -104,7 +104,7 @@ def graph(
                                 x_key,
                             )
                         )
-                labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
+                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                 last_y = val
             except KeyError:
                 # missing data
