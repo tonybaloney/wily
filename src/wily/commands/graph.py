@@ -62,7 +62,6 @@ def graph(
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        print(tracked_files)
         paths = {
             tracked_file
             for tracked_file in tracked_files
