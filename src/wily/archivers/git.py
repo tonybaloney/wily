@@ -37,7 +37,7 @@ def get_tracked_files_dirs(repo, commit):
     paths = repo.git.execute(
         ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha]
     ).split("\n")
-    dirs = repo.git.execute(
+    dirs = [""] + repo.git.execute(
         ["git", "ls-tree", "--name-only", "--full-tree", "-r", "-d", commit.hexsha]
     ).split("\n")
     return paths, dirs
