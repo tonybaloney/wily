@@ -54,8 +54,8 @@ def whatchanged(commit_a, commit_b):
         elif diff.deleted_file:
             deleted_files.append(diff.a_path)
         elif diff.renamed_file:
-            added_files.append(diff.b_path)
-            deleted_files.append(diff.a_path)
+            added_files.append(diff.a_path)
+            deleted_files.append(diff.b_path)
         elif diff.change_type == "M":
             modified_files.append(diff.a_path)
     return added_files, modified_files, deleted_files
