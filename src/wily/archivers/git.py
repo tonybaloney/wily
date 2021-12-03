@@ -33,6 +33,34 @@ class DirtyGitRepositoryError(Exception):
         self.message = "Dirty repository, make sure you commit/stash files first"
 
 
+def get_tracked_files_dirs(repo, commit):
+    paths = repo.git.execute(
+        ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha]
+    ).split("\n")
+    dirs = repo.git.execute(
+        ["git", "ls-tree", "--name-only", "--full-tree", "-r", "-d", commit.hexsha]
+    ).split("\n")
+    return paths, dirs
+
+
+def whatchanged(commit_a, commit_b):
+    diffs = commit_a.diff(commit_b)
+    added_files = []
+    modified_files = []
+    deleted_files = []
+    for diff in diffs:
+        if diff.new_file:
+            added_files.append(diff.b_path)
+        elif diff.deleted_file:
+            deleted_files.append(diff.a_path)
+        elif diff.renamed_file:
+            added_files.append(diff.b_path)
+            deleted_files.append(diff.a_path)
+        elif diff.change_type == "M":
+            modified_files.append(diff.a_path)
+    return added_files, modified_files, deleted_files
+
+
 class GitArchiver(BaseArchiver):
     """Gitpython implementation of the base archiver."""
 
@@ -77,13 +105,27 @@ class GitArchiver(BaseArchiver):
         for commit in self.repo.iter_commits(
             self.current_branch, max_count=max_revisions
         ):
+            tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
+            if not commit.parents:
+                added_files = tracked_files
+                modified_files = []
+                deleted_files = []
+            else:
+                added_files, modified_files, deleted_files = whatchanged(
+                    commit, self.repo.commit(commit.hexsha + "~1")
+                )
+
             rev = Revision(
                 key=commit.name_rev.split(" ")[0],
                 author_name=commit.author.name,
                 author_email=commit.author.email,
                 date=commit.committed_date,
                 message=commit.message,
-                files=list(commit.stats.files.keys()),
+                tracked_files=tracked_files,
+                tracked_dirs=tracked_dirs,
+                added_files=added_files,
+                modified_files=modified_files,
+                deleted_files=deleted_files,
             )
             revisions.append(rev)
         return revisions
@@ -121,6 +163,15 @@ class GitArchiver(BaseArchiver):
         :rtype: Instance of :class:`Revision`
         """
         commit = self.repo.commit(search)
+        tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
+        if not commit.parents:
+            added_files = tracked_files
+            modified_files = []
+            deleted_files = []
+        else:
+            added_files, modified_files, deleted_files = whatchanged(
+                commit, self.repo.commit(commit.hexsha + "~1")
+            )
 
         return Revision(
             key=commit.name_rev.split(" ")[0],
@@ -128,5 +179,9 @@ class GitArchiver(BaseArchiver):
             author_email=commit.author.email,
             date=commit.committed_date,
             message=commit.message,
-            files=list(commit.stats.files.keys()),
+            tracked_files=tracked_files,
+            tracked_dirs=tracked_dirs,
+            added_files=added_files,
+            modified_files=modified_files,
+            deleted_files=deleted_files,
         )

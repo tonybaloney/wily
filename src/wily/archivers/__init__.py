@@ -65,7 +65,11 @@ class Revision:
     author_email: str
     date: str
     message: str
-    files: List[str]
+    tracked_files: List[str]
+    tracked_dirs: List[str]
+    added_files: List[str]
+    modified_files: List[str]
+    deleted_files: List[str]
 
 
 from wily.archivers.git import GitArchiver
