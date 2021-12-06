@@ -102,8 +102,8 @@ class GitArchiver(BaseArchiver):
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
         revisions = []
-        for commit in reversed(
-            list(self.repo.iter_commits(self.current_branch, max_count=max_revisions))
+        for commit in self.repo.iter_commits(
+            self.current_branch, max_count=max_revisions, reverse=True
         ):
             tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
             if not commit.parents or not revisions:
@@ -135,7 +135,7 @@ class GitArchiver(BaseArchiver):
                 deleted_files=deleted_files,
             )
             revisions.append(rev)
-        return reversed(revisions)
+        return revisions[::-1]
 
     def checkout(self, revision, options):
         """

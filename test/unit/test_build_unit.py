@@ -21,7 +21,11 @@ class MockArchiverCls(BaseArchiver):
                 author_email="-",  # as above
                 date=12_345_679,
                 message="None",
-                files=[],
+                tracked_files=[],
+                tracked_dirs=[],
+                added_files=[],
+                modified_files=[],
+                deleted_files=[],
             )
         ]
 
