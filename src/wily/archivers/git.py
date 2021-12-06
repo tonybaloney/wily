@@ -106,7 +106,7 @@ class GitArchiver(BaseArchiver):
             self.current_branch, max_count=max_revisions
         ):
             tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
-            if not commit.parents:
+            if not commit.parents or not revisions:
                 added_files = tracked_files
                 modified_files = []
                 deleted_files = []
