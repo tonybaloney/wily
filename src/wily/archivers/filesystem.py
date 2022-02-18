@@ -47,7 +47,11 @@ class FilesystemArchiver(BaseArchiver):
                 author_email="-",  # as above
                 date=int(mtime),
                 message="None",
-                files=[],
+                tracked_files=[],
+                tracked_dirs=[],
+                added_files=[],
+                modified_files=[],
+                deleted_files=[],
             )
         ]
 
