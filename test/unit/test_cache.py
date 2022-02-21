@@ -41,7 +41,7 @@ def test_not_exists():
 
 
 def test_get_default_metrics_empty(tmpdir):
-    """ 
+    """
     Test that get_metrics goes ok with an empty index
     """
     config = DEFAULT_CONFIG
@@ -107,7 +107,11 @@ def test_store_basic(tmpdir):
         author_email="anthony@test.com",
         date="17/01/1990",
         message="my changes",
-        files=[target_path],
+        tracked_files=[target_path],
+        tracked_dirs=[target_path],
+        added_files=[target_path],
+        modified_files=[target_path],
+        deleted_files=[target_path],
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
     with open(fn) as cache_item:
@@ -131,7 +135,11 @@ def test_store_twice(tmpdir):
         author_email="anthony@test.com",
         date="17/01/1990",
         message="my changes",
-        files=[target_path],
+        tracked_files=[target_path],
+        tracked_dirs=[target_path],
+        added_files=[target_path],
+        modified_files=[target_path],
+        deleted_files=[target_path],
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
     with pytest.raises(RuntimeError):
@@ -155,7 +163,11 @@ def test_store_relative_paths(tmpdir):
         author_email="anthony@test.com",
         date="17/01/1990",
         message="my changes",
-        files=[target_path],
+        tracked_files=[target_path],
+        tracked_dirs=[target_path],
+        added_files=[target_path],
+        modified_files=[target_path],
+        deleted_files=[target_path],
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
     with open(fn) as cache_item:

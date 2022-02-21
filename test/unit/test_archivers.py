@@ -45,10 +45,11 @@ class MockRepo(object):
     def is_dirty(self):
         return self._is_dirty
 
-    def iter_commits(self, branch, max_count):
+    def iter_commits(self, branch, max_count, reverse):
         assert branch == self.active_branch
         assert max_count == 99
-        return self.commits
+        assert reverse == True
+        return reversed(self.commits)
 
 
 @pytest.fixture
