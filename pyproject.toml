@@ -3,14 +3,14 @@ requires = [
     "flit>=2.0",
     "gitpython>=3.0.0,<4.0.0",
     "radon>=4.0.0,<4.1.0",
-    "click>=7.0,<8.0",
+    "click>=7.0,<9.0",
     "nbformat>=5.1.3,<6.0.0",
     "colorlog>=4.0.0,<5.0.0",
     "tabulate>=0.8.2,<1.0.0",
     "plotly>=4.0.0,<5.0.0",
     "sphinx",
     "sphinx-click",
-    "progress==1.4",
+    "progress>=1.4,<2.0",
     "dataclasses; python_version == '3.6'",]
 build-backend = "flit.buildapi"
 
