@@ -23,6 +23,12 @@ Wily can be installed via pip from Python 3.6 and above:
  $ pip install wily
 ```
 
+Alternatively, Wily packages are available on conda-forge:
+
+```console
+ $ conda install -c conda-forge wily
+```
+
 ## Usage
 
 See the [Documentation Site](https://wily.readthedocs.io/) for full usage guides.
@@ -45,7 +51,7 @@ Here is a demo of wily analysing a Python project, giving a summary of changes t
 
 Wily can be used in a CI/CD workflow to compare the complexity of the current files against a particular revision.
 
-By default wily will compare against the previous revision (for a git-pre-commit hook) but you can also give a Git ref, for example `HEAD^1` is the commit before the HEAD reference.
+By default, wily will compare against the previous revision (for a git-pre-commit hook) but you can also give a Git ref, for example `HEAD^1` is the commit before the HEAD reference.
 
 ```console
  $ wily build src/
