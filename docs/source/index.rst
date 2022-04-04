@@ -45,6 +45,12 @@ You can install wily from PyPi using pip
 
    $ pip install wily
 
+Or, if you prefer to use conda
+
+.. code-block:: console
+
+  $ conda install -c conda-forge wily
+
 Wily needs an index of the project before any of the commands can be used. :doc:`commands/build` builds an index in a Git repository. Provide the path to your source code as the first argument.
 
 

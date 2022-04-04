@@ -4,7 +4,7 @@ A command-line application for tracking, reporting on complexity of Python tests
 
 [![Wily](https://img.shields.io/badge/%F0%9F%A6%8A%20wily-passing-brightgreen.svg)](https://wily.readthedocs.io/)
 [![Build Status](https://dev.azure.com/AnthonyShaw/wily/_apis/build/status/tonybaloney.wily?branchName=master)](https://dev.azure.com/AnthonyShaw/wily/_build/latest?definitionId=1&branchName=master)
-[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily) [![Documentation Status](https://readthedocs.org/projects/wily/badge/?version=latest)](https://wily.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/wily.svg)](https://badge.fury.io/py/wily) ![black](https://img.shields.io/badge/code%20style-black-000000.svg)
+[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily) [![Documentation Status](https://readthedocs.org/projects/wily/badge/?version=latest)](https://wily.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/wily.svg)](https://badge.fury.io/py/wily) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/wily.svg)](https://anaconda.org/conda-forge/wily) ![black](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 
 ```
@@ -21,6 +21,12 @@ Wily can be installed via pip from Python 3.6 and above:
 
 ```console
  $ pip install wily
+```
+
+Alternatively, Wily packages are available on conda-forge:
+
+```console
+ $ conda install -c conda-forge wily
 ```
 
 ## Usage
@@ -45,7 +51,7 @@ Here is a demo of wily analysing a Python project, giving a summary of changes t
 
 Wily can be used in a CI/CD workflow to compare the complexity of the current files against a particular revision.
 
-By default wily will compare against the previous revision (for a git-pre-commit hook) but you can also give a Git ref, for example `HEAD^1` is the commit before the HEAD reference.
+By default, wily will compare against the previous revision (for a git-pre-commit hook) but you can also give a Git ref, for example `HEAD^1` is the commit before the HEAD reference.
 
 ```console
  $ wily build src/
