@@ -26,6 +26,8 @@ class MockCommit(object):
     author = TEST_AUTHOR
     committed_date = "1/1/1990"
     stats = TEST_STATS
+    hexsha = "123abc"
+    parents = []
 
     def __init__(self, message):
         self.message = message
@@ -52,6 +54,16 @@ class MockRepo(object):
         return reversed(self.commits)
 
 
+class MockGit:
+    def checkout(self, *args):
+        ...
+    
+    def execute(self, command):
+        if command[1] == 'ls-tree':
+            assert command[-1] == '123abc'
+            return "\n"
+        
+
 @pytest.fixture
 def repo(tmpdir):
     repo = MockRepo()
@@ -59,6 +71,7 @@ def repo(tmpdir):
     with open(tmppath / ".gitignore", "w") as test_txt:
         test_txt.write(".wily/")
     repo.path = tmppath
+    repo.git = MockGit()
     return repo
 
 
