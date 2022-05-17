@@ -76,6 +76,26 @@ def test_graph_custom_x(builddir):
     assert result.exit_code == 0, result.stdout
 
 
+def test_graph_aggregate(builddir):
+    """ Test the graph feature """
+    runner = CliRunner()
+    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc", "--aggregate"]
+        )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_graph_individual(builddir):
+    """ Test the graph feature """
+    runner = CliRunner()
+    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
+        result = runner.invoke(
+            main.cli, ["--path", builddir, "graph", _path, "raw.loc", "--individual"]
+        )
+    assert result.exit_code == 0, result.stdout
+
+
 def test_graph_path(builddir):
     """ Test the graph feature """
     runner = CliRunner()

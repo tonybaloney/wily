@@ -19,7 +19,16 @@ def metric_parts(metric):
     return operator.name, met.name
 
 
-def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=False):
+def graph(
+    config,
+    path,
+    metrics,
+    output=None,
+    x_axis=None,
+    changes=True,
+    text=False,
+    aggregate=False,
+):
     """
     Graph information about the cache and runtime.
 
@@ -35,7 +44,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     :param output: Save report to specified path instead of opening browser.
     :type  output: ``str``
     """
-    logger.debug("Running report command")
+    logger.debug("Running graph command")
 
     data = []
     state = State(config)
@@ -46,7 +55,10 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     else:
         x_operator, x_key = metric_parts(x_axis)
 
-    if abs_path.is_dir():
+    y_metric = resolve_metric(metrics[0])
+    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}{' aggregated' if aggregate else ''}"
+
+    if abs_path.is_dir() and not aggregate:
         paths = [
             p.relative_to(config.path) for p in pathlib.Path(abs_path).glob("**/*.py")
         ]
@@ -66,7 +78,6 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
         labels = []
         last_y = None
         for rev in state.index[state.default_archiver].revisions:
-            labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
             try:
                 val = rev.get(config, state.default_archiver, operator, str(path), key)
                 if val != last_y or not changes:
@@ -93,6 +104,7 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
                                 x_key,
                             )
                         )
+                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                 last_y = val
             except KeyError:
                 # missing data
@@ -121,8 +133,6 @@ def graph(config, path, metrics, output=None, x_axis=None, changes=True, text=Fa
     else:
         filename = "wily-report.html"
         auto_open = True
-    y_metric = resolve_metric(metrics[0])
-    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}"
     plotly.offline.plot(
         {
             "data": data,

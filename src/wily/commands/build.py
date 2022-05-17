@@ -102,7 +102,6 @@ def build(config, archiver, operators):
 
     # Index all files the first time, only scan changes afterward
     seed = True
-    prev_roots = None
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             for revision in revisions:
@@ -110,16 +109,13 @@ def build(config, archiver, operators):
                 archiver.checkout(revision, config.checkout_options)
                 stats = {"operator_data": {}}
 
-                if seed:
-                    targets = config.targets
-                else:  # Only target changed files
-                    # TODO : Check that changed files are children of the targets
-                    targets = [
-                        str(pathlib.Path(config.path) / pathlib.Path(file))
-                        for file in revision.files
-                        # if any([True for target in config.targets if
-                        #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
-                    ]
+                # TODO : Check that changed files are children of the targets
+                targets = [
+                    str(pathlib.Path(config.path) / pathlib.Path(file))
+                    for file in revision.added_files + revision.modified_files
+                    # if any([True for target in config.targets if
+                    #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
+                ]
 
                 # Run each operator as a separate process
                 data = pool.starmap(
@@ -142,22 +138,19 @@ def build(config, archiver, operators):
                 # Map the data back into a dictionary
                 for operator_name, result in data:
                     # find all unique directories in the results
-                    roots = {pathlib.Path(entry).parents[0] for entry in result.keys()}
                     indices = set(result.keys())
 
                     # For a seed run, there is no previous change set, so use current
                     if seed:
-                        prev_roots = roots
                         prev_indices = indices
-                    roots = prev_roots | roots
 
                     # Copy the ir from any unchanged files from the prev revision
                     if not seed:
-                        missing_indices = prev_indices - indices
+                        missing_indices = set(revision.tracked_files) - indices
                         # TODO: Check existence of file path.
                         for missing in missing_indices:
                             # Don't copy aggregate keys as their values may have changed
-                            if missing in roots:
+                            if missing in revision.tracked_dirs:
                                 continue
                             # previous index may not have that operator
                             if operator_name not in prev_stats["operator_data"]:
@@ -171,15 +164,17 @@ def build(config, archiver, operators):
                             result[missing] = prev_stats["operator_data"][
                                 operator_name
                             ][missing]
+                        for deleted in revision.deleted_files:
+                            result.pop(deleted, None)
 
                     # Aggregate metrics across all root paths using the aggregate function in the metric
-                    for root in roots:
+                    # Note assumption is that nested dirs are listed after parent..
+                    for root in revision.tracked_dirs:
                         # find all matching entries recursively
                         aggregates = [
-                            path
-                            for path in result.keys()
-                            if root in pathlib.Path(path).parents
+                            path for path in result.keys() if path.startswith(root)
                         ]
+
                         result[str(root)] = {"total": {}}
                         # aggregate values
                         for metric in resolve_operator(operator_name).cls.metrics:
@@ -194,7 +189,6 @@ def build(config, archiver, operators):
                                 result[str(root)]["total"][metric.name] = func(values)
 
                     prev_indices = set(result.keys())
-                    prev_roots = roots
                     stats["operator_data"][operator_name] = result
                     bar.next()
 

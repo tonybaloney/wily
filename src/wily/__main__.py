@@ -16,7 +16,7 @@ from wily.lang import _
 
 version_text = _("Version: ") + __version__ + "\n\n"
 help_header = version_text + _(
-"""\U0001F98A Inspect and search through the complexity of your source code.
+    """\U0001F98A Inspect and search through the complexity of your source code.
 To get started, run setup:
 
   $ wily setup
@@ -33,12 +33,17 @@ You can also graph specific metrics in a browser with:
 
   $ wily graph <file> <metric>
   
-""")
+"""
+)
+
 
 @click.group(help=help_header)
 @click.version_option(
-    __version__, "-V", "--version", message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version")),
-    help=_("Show the version and exit.")
+    __version__,
+    "-V",
+    "--version",
+    message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version")),
+    help=_("Show the version and exit."),
 )
 @click.help_option(help=_("Show this message and exit."))
 @click.option(
@@ -136,7 +141,9 @@ def build(ctx, max_revisions, targets, operators, archiver):
         operators=resolve_operators(config.operators),
     )
     logger.info(
-        _("Completed building wily history, run `wily report <file>` or `wily index` to see more.")
+        _(
+            "Completed building wily history, run `wily report <file>` or `wily index` to see more."
+        )
     )
 
 
@@ -157,7 +164,9 @@ def index(ctx, message):
     index(config=config, include_message=message)
 
 
-@cli.command(help = _("""
+@cli.command(
+    help=_(
+        """
     Rank files, methods and functions in order of any metrics, e.g. complexity.
 
     Some common examples:
@@ -174,13 +183,17 @@ def index(ctx, message):
     and return a non-zero exit code if the total is below the given threshold
 
         $ wily rank --threshold=80
-    """))
+    """
+    )
+)
 @click.argument("path", type=click.Path(resolve_path=False), required=False)
 @click.argument("metric", required=False, default="maintainability.mi")
 @click.option(
     "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
 )
-@click.option("-l", "--limit", help=_("Limit the number of results shown"), type=click.INT)
+@click.option(
+    "-l", "--limit", help=_("Limit the number of results shown"), type=click.INT
+)
 @click.option(
     "--desc/--asc",
     help=_("Order to show results (ascending or descending)"),
@@ -230,10 +243,14 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
 @click.option(
     "--console-format",
     default=DEFAULT_GRID_STYLE,
-    help=_("Style for the console grid, see Tabulate Documentation for a list of styles."),
+    help=_(
+        "Style for the console grid, see Tabulate Documentation for a list of styles."
+    ),
 )
 @click.option(
-    "-o", "--output", help=_("Output report to specified HTML path, e.g. reports/out.html")
+    "-o",
+    "--output",
+    help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
 @click.pass_context
 def report(ctx, file, metrics, number, message, format, console_format, output):
@@ -320,7 +337,9 @@ def diff(ctx, files, metrics, all, detail, revision):
     )
 
 
-@cli.command(help=_("""
+@cli.command(
+    help=_(
+        """
     Graph a specific metric for a given file, if a path is given, all files within path will be graphed.
 
     Some common examples:
@@ -336,18 +355,28 @@ def diff(ctx, files, metrics, all, detail, revision):
     Graph test.py against raw.loc and raw.sloc on the x-axis
 
         $ wily graph src/test.py raw.loc --x-axis raw.sloc
-    """))
+    """
+    )
+)
 @click.argument("path", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-2, required=True)
 @click.option(
-    "-o", "--output", help=_("Output report to specified HTML path, e.g. reports/out.html")
+    "-o",
+    "--output",
+    help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
 @click.option("-x", "--x-axis", help=_("Metric to use on x-axis, defaults to history."))
 @click.option(
     "-a/-c", "--changes/--all", default=True, help=_("All commits or changes only")
 )
+@click.option(
+    "-s/-i",
+    "--aggregate/--individual",
+    default=False,
+    help=_("Aggregate if path is directory"),
+)
 @click.pass_context
-def graph(ctx, path, metrics, output, x_axis, changes):
+def graph(ctx, path, metrics, output, x_axis, changes, aggregate):
     """Output report to specified HTML path, e.g. reports/out.html."""
     config = ctx.obj["CONFIG"]
 
@@ -364,6 +393,7 @@ def graph(ctx, path, metrics, output, x_axis, changes):
         output=output,
         x_axis=x_axis,
         changes=changes,
+        aggregate=aggregate,
     )
 
 
