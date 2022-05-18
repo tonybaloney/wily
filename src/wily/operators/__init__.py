@@ -3,6 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
+from typing import List, Dict, Any, Iterable, Union
 from wily.lang import _
 
 
@@ -54,7 +55,7 @@ class BaseOperator(object):
     """Level at which the operator goes to."""
     level = OperatorLevel.File
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
         Run the operator.
 
@@ -129,7 +130,7 @@ ALL_METRICS = {
 
 
 @lru_cache(maxsize=128)
-def resolve_operator(name):
+def resolve_operator(name: str) -> Operator:
     """
     Get the :namedtuple:`wily.operators.Operator` for a given name.
 
@@ -142,7 +143,7 @@ def resolve_operator(name):
         raise ValueError(f"Operator {name} not recognised.")
 
 
-def resolve_operators(operators):
+def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operator]:
     """
     Resolve a list of operator names to their corresponding types.
 
@@ -155,7 +156,7 @@ def resolve_operators(operators):
 
 
 @lru_cache(maxsize=128)
-def resolve_metric(metric):
+def resolve_metric(metric: str) -> Metric:
     """
     Resolve metric key to a given target.
 

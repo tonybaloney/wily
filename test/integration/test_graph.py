@@ -46,7 +46,7 @@ def test_graph_all(builddir):
     assert result.exit_code == 0, result.stdout
 
 
-def test_graph_all(builddir):
+def test_graph_all_with_shorthand_metric(builddir):
     """ Test the graph feature with shorthand metric"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
@@ -57,7 +57,7 @@ def test_graph_all(builddir):
 
 
 def test_graph_changes(builddir):
-    """ Test the graph feature """
+    """ Test the graph feature comparing changes """
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -67,7 +67,7 @@ def test_graph_changes(builddir):
 
 
 def test_graph_custom_x(builddir):
-    """ Test the graph feature """
+    """ Test the graph feature with a custom x-axis """
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -77,7 +77,7 @@ def test_graph_custom_x(builddir):
 
 
 def test_graph_aggregate(builddir):
-    """ Test the graph feature """
+    """ Test the aggregate graphs """
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -87,7 +87,7 @@ def test_graph_aggregate(builddir):
 
 
 def test_graph_individual(builddir):
-    """ Test the graph feature """
+    """ Test individual graphs """
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
