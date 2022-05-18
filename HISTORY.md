@@ -1,5 +1,9 @@
 # Release History
 
+## 1.21.0 (18th May 2022)
+
+* Fixed click dependencies
+
 ## 1.20.0 (1st July 2021)
 
 * Fixed a bug where the colors for diffs in report were the wrong way around
