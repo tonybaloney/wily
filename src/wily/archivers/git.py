@@ -6,7 +6,8 @@ Implementation of the archiver API for the gitpython module.
 import logging
 from typing import Dict, Tuple, List
 
-from git import Repo, Commit
+from git import Commit
+from git.repo import Repo
 import git.exc
 
 from wily.archivers import BaseArchiver, Revision
@@ -46,7 +47,7 @@ def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[
 
 
 def whatchanged(commit_a: Commit, commit_b: Commit) -> Tuple[List[str], List[str], List[str]]:
-    """What files were added, modified and deleted between commits."""
+    """Get files added, modified and deleted between commits."""
     diffs = commit_b.diff(commit_a)
     added_files = []
     modified_files = []
