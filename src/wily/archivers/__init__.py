@@ -9,10 +9,26 @@ from dataclasses import dataclass
 from typing import List
 
 
+@dataclass
+class Revision:
+    """Represents a revision in the archiver."""
+
+    key: str
+    author_name: str
+    author_email: str
+    date: str
+    message: str
+    tracked_files: List[str]
+    tracked_dirs: List[str]
+    added_files: List[str]
+    modified_files: List[str]
+    deleted_files: List[str]
+
+
 class BaseArchiver(object):
     """Abstract Archiver Class."""
 
-    def revisions(self, path, max_revisions):
+    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
         """
         Get the list of revisions.
 
@@ -27,7 +43,7 @@ class BaseArchiver(object):
         """
         raise NotImplementedError
 
-    def checkout(self, revision, **options):
+    def checkout(self, revision: Revision, **options):
         """
         Checkout a specific revision.
 
@@ -43,7 +59,7 @@ class BaseArchiver(object):
         """Clean up any state if processing completed/failed."""
         pass
 
-    def find(self, search):
+    def find(self, search: str) -> Revision:
         """
         Search a string and return a single revision.
 
@@ -54,22 +70,6 @@ class BaseArchiver(object):
         :rtype: Instance of :class:`Revision`
         """
         raise NotImplementedError
-
-
-@dataclass
-class Revision:
-    """Represents a revision in the archiver."""
-
-    key: str
-    author_name: str
-    author_email: str
-    date: str
-    message: str
-    tracked_files: List[str]
-    tracked_dirs: List[str]
-    added_files: List[str]
-    modified_files: List[str]
-    deleted_files: List[str]
 
 
 from wily.archivers.git import GitArchiver
@@ -92,7 +92,7 @@ ARCHIVER_FILESYSTEM = Archiver(
 ALL_ARCHIVERS = {a.name: a for a in [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]}
 
 
-def resolve_archiver(name):
+def resolve_archiver(name: str) -> Archiver:
     """
     Get the :class:`wily.archivers.Archiver` for a given name.
 

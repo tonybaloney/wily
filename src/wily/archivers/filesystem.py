@@ -4,6 +4,8 @@ Filesystem Archiver.
 Implementation of the archiver API for a standard directory (no revisions)
 """
 import logging
+from typing import List
+
 import os.path
 import hashlib
 from wily.archivers import BaseArchiver, Revision
@@ -25,7 +27,7 @@ class FilesystemArchiver(BaseArchiver):
         """
         self.config = config
 
-    def revisions(self, path, max_revisions):
+    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
         """
         Get the list of revisions.
 
@@ -55,7 +57,7 @@ class FilesystemArchiver(BaseArchiver):
             )
         ]
 
-    def checkout(self, revision, options):
+    def checkout(self, revision: Revision, options):
         """
         Checkout a specific revision.
 
