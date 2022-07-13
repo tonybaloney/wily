@@ -107,7 +107,7 @@
 
 ## 1.8.1 (19th Decemember 2018)
 
-* [BUGFIX] Fixed an issue that occured if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
+* [BUGFIX] Fixed an issue that occurred if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
 
 ## 1.8.0 (14th December 2018)
 
