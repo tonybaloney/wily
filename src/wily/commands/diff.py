@@ -134,11 +134,15 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
             if metric.type in (int, float) and new != "-" and current != "-":
                 if current > new:
                     metrics_data.append(
-                        f"{current:n} -> [{BAD_COLORS[metric.measure]}m{new:n}[0m"
+                        "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
+                            current, new, BAD_COLORS[metric.measure]
+                        )
                     )
                 elif current < new:
                     metrics_data.append(
-                        f"{current:n} -> [{GOOD_COLORS[metric.measure]}m{new:n}[0m"
+                        "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
+                            current, new, GOOD_COLORS[metric.measure]
+                        )
                     )
                 else:
                     metrics_data.append(f"{current:n} -> {new:n}")

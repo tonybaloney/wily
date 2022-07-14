@@ -41,7 +41,7 @@ You can also graph specific metrics in a browser with:
     __version__,
     "-V",
     "--version",
-    message=f"🦊 %(prog)s, {_('version')} %(version)s",
+    message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version")),
     help=_("Show the version and exit."),
 )
 @click.help_option(help=_("Show this message and exit."))
