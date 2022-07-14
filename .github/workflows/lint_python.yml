@@ -21,9 +21,9 @@ jobs:
       - run: flake8 . --ignore C408,C416,E302,E402,E712,E741,F401,F541,F821,F841,R503,R504,W292,W293,W503
                       --count --max-complexity=24 --max-line-length=218 --show-source --statistics
       - run: isort --check-only --profile black . || true
-      - run: flit install
+      - run: flit install && pip install mock
       - run: mkdir --parents --verbose .mypy_cache
       - run: mypy --ignore-missing-imports --install-types --non-interactive . || true
       - run: pytest --doctest-modules . || pytest . || true
       - run: shopt -s globstar && pyupgrade --py37-plus **/*.py || true
-      - run: pip install safety && safety check
+      - run: pip install safety && safety check  # Must pip install to replace old version of `click`
