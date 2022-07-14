@@ -24,6 +24,6 @@ jobs:
       - run: flit install && pip install mock
       - run: mkdir --parents --verbose .mypy_cache
       - run: mypy --ignore-missing-imports --install-types --non-interactive . || true
-      - run: pytest --doctest-modules . || pytest . || true
+      - run: pytest .
       - run: shopt -s globstar && pyupgrade --py37-plus **/*.py || true
       - run: pip install safety && safety check  # Must pip install to replace old version of `click`
