@@ -1,5 +1,9 @@
 name: lint_python
-on: [pull_request, push]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 jobs:
   lint_python:
     runs-on: ubuntu-latest
@@ -13,7 +17,7 @@ jobs:
                          flake8-comprehensions flit isort mypy pytest pyupgrade safety
       - run: bandit --recursive --skip B101,B324 .
       - run: black --check --line-length 100 . || true
-      - run: codespell --ignore-words-list="fo,wil" --skip="*.svg"
+      - run: codespell --ignore-words-list="fo,wil" --skip="*.po,*.svg"
       - run: flake8 . --ignore C408,C416,E302,E402,E712,E741,F401,F541,F821,F841,R503,R504,W292,293
                       --count --max-complexity=10 --max-line-length=100 --show-source --statistics
       - run: isort --check-only --profile black . || true
