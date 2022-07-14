@@ -14,7 +14,7 @@ from wily.operators import get_metric
 
 
 @dataclass
-class IndexedRevision(object):
+class IndexedRevision:
     """Union of revision and the operators executed."""
 
     revision: Revision
@@ -108,7 +108,7 @@ class IndexedRevision(object):
         return cache.store(config, archiver, self.revision, stats)
 
 
-class Index(object):
+class Index:
     """The index of the wily cache."""
 
     operators = None
@@ -206,7 +206,7 @@ class Index(object):
         cache.store_archiver_index(self.config, self.archiver, data)
 
 
-class State(object):
+class State:
     """
     The wily process state.
 

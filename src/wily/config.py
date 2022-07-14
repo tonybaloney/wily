@@ -39,7 +39,7 @@ def generate_cache_path(path):
 
 
 @dataclass
-class WilyConfig(object):
+class WilyConfig:
     """
     Wily configuration.
 

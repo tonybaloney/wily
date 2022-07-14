@@ -25,7 +25,7 @@ class Revision:
     deleted_files: List[str]
 
 
-class BaseArchiver(object):
+class BaseArchiver:
     """Abstract Archiver Class."""
 
     def revisions(self, path: str, max_revisions: int) -> List[Revision]:

@@ -35,7 +35,7 @@ def exists(config):
         return False
     index_path = pathlib.Path(config.cache_path) / "index.json"
     if index_path.exists():
-        with open(index_path, "r") as out:
+        with open(index_path) as out:
             index = json.load(out)
         if index["version"] != __version__:
             # TODO: Inspect the versions properly.
@@ -216,7 +216,7 @@ def get_default_metrics(config):
             o = resolve_operator(operator)
             if o.cls.default_metric_index is not None:
                 metric = o.cls.metrics[o.cls.default_metric_index]
-                default_metrics.append("{0}.{1}".format(o.cls.name, metric.name))
+                default_metrics.append(f"{o.cls.name}.{metric.name}")
     return default_metrics
 
 
