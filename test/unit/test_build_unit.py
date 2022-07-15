@@ -1,5 +1,5 @@
 import pytest
-from mock import patch
+from unittest.mock import patch
 
 import wily.commands.build as build
 from wily.config import DEFAULT_CONFIG

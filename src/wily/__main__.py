@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """Main command line."""
 
 import click

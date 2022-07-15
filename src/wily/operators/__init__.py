@@ -37,7 +37,7 @@ class OperatorLevel(Enum):
     Object = 2
 
 
-class BaseOperator(object):
+class BaseOperator:
     """Abstract Operator Class."""
 
     """Name of the operator."""

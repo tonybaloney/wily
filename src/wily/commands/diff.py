@@ -145,12 +145,12 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
                         )
                     )
                 else:
-                    metrics_data.append("{0:n} -> {1:n}".format(current, new))
+                    metrics_data.append(f"{current:n} -> {new:n}")
             else:
                 if current == "-" and new == "-":
                     metrics_data.append("-")
                 else:
-                    metrics_data.append("{0} -> {1}".format(current, new))
+                    metrics_data.append(f"{current} -> {new}")
         if has_changes or not changes_only:
             results.append((file, *metrics_data))
         else:

@@ -11,7 +11,7 @@ import pathlib
 import pytest
 from click.testing import CliRunner
 from git import Repo, Actor
-from mock import patch
+from unittest.mock import patch
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS

@@ -1,19 +1,19 @@
 import pathlib
 
 import pytest
-from mock import patch
+from unittest.mock import patch
 
 import wily.archivers
 import wily.archivers.git as git
 import wily.config
 
 
-class MockAuthor(object):
+class MockAuthor:
     name = "Mr Test"
     email = "test@test.com"
 
 
-class MockStats(object):
+class MockStats:
     files = {}
 
 
@@ -21,7 +21,7 @@ TEST_AUTHOR = MockAuthor()
 TEST_STATS = MockStats()
 
 
-class MockCommit(object):
+class MockCommit:
     name_rev = "1234 bbb"
     author = TEST_AUTHOR
     committed_date = "1/1/1990"
@@ -33,11 +33,11 @@ class MockCommit(object):
         self.message = message
 
 
-class MockHead(object):
+class MockHead:
     is_detached = False
 
 
-class MockRepo(object):
+class MockRepo:
     active_branch = "master"
     bare = False
     _is_dirty = False

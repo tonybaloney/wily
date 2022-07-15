@@ -1,7 +1,7 @@
 import pytest
 
 from click.testing import CliRunner
-from mock import patch
+from unittest.mock import patch
 from pathlib import Path
 
 import wily.__main__ as main
