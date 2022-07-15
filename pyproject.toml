@@ -52,10 +52,8 @@ dev = [
     "pyupgrade~=2.37.1",
     "safety~=2.1.0",
 ]
-doc = [
-    "sphinx~=5.0.2",
-    "sphinx-click~=4.3.0",
-]
+# TODO: move here proper deps from `docs/requirements_docs.txt`
+doc = []
 
 [tool.flit.metadata.urls]
 Documentation = "https://wily.readthedocs.io/en/latest/"
