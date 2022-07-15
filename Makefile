@@ -20,8 +20,8 @@ lint_python:
 	@# TODO(skarzi): fix type hitings and require `mypy` to pass
 	mypy . || true
 	bandit --configfile pyproject.toml --recursive .
-	pydocstyle wily
-	shopt -s globstar && pyupgrade --py37-plus **/*.py
+	pydocstyle src/wily
+	find . -type f -name '*.py' | xargs pyupgrade --py37-plus
 
 .PHONY: lint_formatting
 lint_formatting:
