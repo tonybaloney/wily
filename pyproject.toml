@@ -33,6 +33,30 @@ requires = [
 requires-python = ">=3.6"
 description-file = "README.md"
 
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest~=7.1.2",
+    "pytest-cov~=3.0.0",
+]
+dev = [
+    "bandit~=1.7.4",
+    "black~=22.6.0",
+    "codespell~=2.1.0",
+    "flake8~=4.0.1",
+    "flake8-bugbear~=22.7.1",
+    "flake8-comprehensions~=3.10.0",
+    "flake8-2020~=1.6.1",
+    "isort~=5.10.1",
+    "mypy~=0.961",
+    "pydocstyle~=6.1.1",
+    "pyupgrade~=2.37.1",
+    "safety~=2.1.0",
+]
+doc = [
+    "sphinx~=5.0.2",
+    "sphinx-click~=4.3.0",
+]
+
 [tool.flit.metadata.urls]
 Documentation = "https://wily.readthedocs.io/en/latest/"
 
