@@ -67,28 +67,6 @@ exclude = ["doc/*.html"]
 [tool.flit.scripts]
 wily = "wily.__main__:cli"
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = true
-envlist = py36, py37, py38, py39, py310
-[testenv]
-passenv = CI TRAVIS TRAVIS_* HOME
-setenv =
-    PYTHONPATH = {toxinidir}
-deps =
-    pip>=19.1
-    pytest
-    pytest-cov
-    codecov
-    mock
-    pydocstyle
-commands =
-    pytest --cov=wily
-    codecov
-    pydocstyle --ignore=D301,D212,D203 wily
-"""
-
 [tool.black]
 line-length = 88
 target-version = ["py37", "py38", "py39", "py310", "py311"]
