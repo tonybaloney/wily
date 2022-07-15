@@ -1,5 +1,9 @@
 # Release History
 
+## 1.22.0 (15th July 2022)
+
+* Add support for Python 3.11
+
 ## 1.21.0 (18th May 2022)
 
 * Fixed click dependencies
