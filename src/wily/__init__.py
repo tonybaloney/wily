@@ -41,7 +41,7 @@ import colorlog
 import logging
 import datetime
 
-__version__ = "1.21.0"
+__version__ = "1.22.0"
 
 _, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 
