@@ -4,8 +4,10 @@ Git Archiver.
 Implementation of the archiver API for the gitpython module.
 """
 import logging
+from typing import Dict, Tuple, List
 
-from git import Repo
+from git import Commit
+from git.repo import Repo
 import git.exc
 
 from wily.archivers import BaseArchiver, Revision
@@ -33,7 +35,8 @@ class DirtyGitRepositoryError(Exception):
         self.message = "Dirty repository, make sure you commit/stash files first"
 
 
-def get_tracked_files_dirs(repo, commit):
+def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[str]]:
+    """Get tracked files in a repo for a commit hash using ls-tree."""
     paths = repo.git.execute(
         ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha]
     ).split("\n")
@@ -43,7 +46,8 @@ def get_tracked_files_dirs(repo, commit):
     return paths, dirs
 
 
-def whatchanged(commit_a, commit_b):
+def whatchanged(commit_a: Commit, commit_b: Commit) -> Tuple[List[str], List[str], List[str]]:
+    """Get files added, modified and deleted between commits."""
     diffs = commit_b.diff(commit_a)
     added_files = []
     modified_files = []
@@ -85,7 +89,7 @@ class GitArchiver(BaseArchiver):
             self.current_branch = self.repo.active_branch
         assert not self.repo.bare, "Not a Git repository"
 
-    def revisions(self, path, max_revisions):
+    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
         """
         Get the list of revisions.
 
@@ -137,7 +141,7 @@ class GitArchiver(BaseArchiver):
             revisions.append(rev)
         return revisions[::-1]
 
-    def checkout(self, revision, options):
+    def checkout(self, revision: Revision, options: Dict):
         """
         Checkout a specific revision.
 
@@ -159,7 +163,7 @@ class GitArchiver(BaseArchiver):
         self.repo.git.checkout(self.current_branch)
         self.repo.close()
 
-    def find(self, search):
+    def find(self, search: str) -> Revision:
         """
         Search a string and return a single revision.
 

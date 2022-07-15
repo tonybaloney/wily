@@ -18,7 +18,7 @@ def mode(data):
     """
     Return the modal value of a iterable with discrete values.
     
-    If there is more than 1 modal value, arbritrarily return the first top n.
+    If there is more than 1 modal value, arbitrarily return the first top n.
     """
     c = Counter(data)
     mode, freq = c.most_common(1)[0]

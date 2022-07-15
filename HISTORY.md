@@ -1,5 +1,9 @@
 # Release History
 
+## 1.21.0 (18th May 2022)
+
+* Fixed click dependencies
+
 ## 1.20.0 (1st July 2021)
 
 * Fixed a bug where the colors for diffs in report were the wrong way around
@@ -103,7 +107,7 @@
 
 ## 1.8.1 (19th Decemember 2018)
 
-* [BUGFIX] Fixed an issue that occured if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
+* [BUGFIX] Fixed an issue that occurred if a target project contained a revision with invalid Python syntax, this is quite common, especially on long projects. The cyclomatic op would crash, also the aggregation logic would expect all metrics to be inside the output. This change avoids that and raises a warning instead.
 
 ## 1.8.0 (14th December 2018)
 
