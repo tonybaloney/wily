@@ -44,4 +44,5 @@ jobs:
         with:
           # TODO(tonybaloney): move token to `secrets.CODECOV_TOKEN`
           token: 48f9ff3a-6358-4607-aa5d-9cb7cada539c
+          files: .tests-reports/coverage.xml
           fail_ci_if_error: true
