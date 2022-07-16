@@ -19,19 +19,19 @@ help_header = version_text + _(
 To get started, run setup:
 
   $ wily setup
-  
+
 To reindex any changes in your source code:
 
   $ wily build <src>
-  
+
 Then explore basic metrics with:
 
   $ wily report <file>
-  
+
 You can also graph specific metrics in a browser with:
 
   $ wily graph <file> <metric>
-  
+
 """
 )
 
@@ -358,7 +358,7 @@ def diff(ctx, files, metrics, all, detail, revision):
     )
 )
 @click.argument("path", type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=-2, required=True)
+@click.argument("metrics", nargs=-1, required=True)
 @click.option(
     "-o",
     "--output",
