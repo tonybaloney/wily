@@ -68,7 +68,6 @@ deps =
     pytest
     pytest-cov
     codecov
-    mock
     pydocstyle
 commands =
     pytest --cov=wily
