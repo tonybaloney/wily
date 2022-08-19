@@ -58,7 +58,7 @@ def graph(
     y_metric = resolve_metric(metrics[0])
     title = f"{x_axis.capitalize()} of {y_metric.description} for {path}{' aggregated' if aggregate else ''}"
 
-    if not aggregate:
+    if abs_path.is_dir() and not aggregate:
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
