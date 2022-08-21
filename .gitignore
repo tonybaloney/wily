@@ -110,3 +110,6 @@ docs/build/
 
 # OSX
 .DS_Store
+
+# tests
+.tests-reports/

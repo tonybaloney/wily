@@ -1,18 +1,6 @@
 [build-system]
-requires = [
-    "flit>=2.0",
-    "gitpython>=3.0.0,<4.0.0",
-    "radon>=4.0.0,<4.1.0",
-    "click>=7.0,<9.0",
-    "nbformat>=5.1.3,<6.0.0",
-    "colorlog>=4.0.0,<5.0.0",
-    "tabulate>=0.8.2,<1.0.0",
-    "plotly>=4.0.0,<5.0.0",
-    "sphinx",
-    "sphinx-click",
-    "progress>=1.4,<2.0",
-    "dataclasses; python_version == '3.6'",]
-build-backend = "flit.buildapi"
+requires = ["flit_core>=2,<4"]
+build-backend = "flit_core.buildapi"
 
 [tool.flit.metadata]
 module = "wily"
@@ -30,19 +18,42 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
-    ]
+]
 requires = [
     "gitpython>=3.0.0,<4.0.0",
     "radon>=4.0.0,<4.1.0",
-    "click>=7.0,<8.0",
+    "click>=7.0,<9.0",
     "nbformat>=5.1.3,<6.0.0",
     "colorlog>=4.0.0,<5.0.0",
     "tabulate>=0.8.2,<1.0.0",
     "plotly>=4.0.0,<5.0.0",
-    "progress==1.4",
-    "dataclasses; python_version == '3.6'",]
+    "progress>=1.4,<2.0",
+    "dataclasses; python_version == '3.6'",
+]
 requires-python = ">=3.6"
 description-file = "README.md"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest~=7.1.2",
+    "pytest-cov~=3.0.0",
+]
+dev = [
+    "bandit~=1.7.4",
+    "black~=22.6.0",
+    "codespell~=2.1.0",
+    "flake8~=4.0.1",
+    "flake8-bugbear~=22.7.1",
+    "flake8-comprehensions~=3.10.0",
+    "flake8-2020~=1.6.1",
+    "isort~=5.10.1",
+    "mypy~=0.961",
+    "pydocstyle~=6.1.1",
+    "pyupgrade~=2.37.1",
+    "safety~=2.1.0",
+]
+# TODO: move here proper deps from `docs/requirements_docs.txt`
+doc = []
 
 [tool.flit.metadata.urls]
 Documentation = "https://wily.readthedocs.io/en/latest/"
@@ -54,37 +65,32 @@ exclude = ["doc/*.html"]
 [tool.flit.scripts]
 wily = "wily.__main__:cli"
 
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = true
-envlist = py36, py37, py38, py39, py310
-[testenv]
-passenv = CI TRAVIS TRAVIS_* HOME
-setenv =
-    PYTHONPATH = {toxinidir}
-deps =
-    pip>=19.1
-    pytest
-    pytest-cov
-    codecov
-    pydocstyle
-commands =
-    pytest --cov=wily
-    codecov
-    pydocstyle --ignore=D301,D212,D203 wily
-"""
-
 [tool.black]
 line-length = 88
-py36 = true
+target-version = ["py37", "py38", "py39", "py310", "py311"]
 include = '\.pyi?$'
-exclude = '''
+extent-exclude = '''
 /(
     \.git
   | \.tox
   | \.venv
+  | \.mypy_cache
   | build
   | dist
 )/
 '''
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+show_error_codes = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[tool.bandit]
+skips = ["B101", "B303", "B324"]
+
+[tool.pydocstyle]
+ignore = ["D203", "D212", "D301"]
