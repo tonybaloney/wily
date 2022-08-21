@@ -48,7 +48,6 @@ def graph(
 
     data = []
     state = State(config)
-    abs_path = config.path / pathlib.Path(path)
 
     if x_axis is None:
         x_axis = "history"
@@ -58,12 +57,17 @@ def graph(
     y_metric = resolve_metric(metrics[0])
     title = f"{x_axis.capitalize()} of {y_metric.description} for {path}{' aggregated' if aggregate else ''}"
 
-    if abs_path.is_dir() and not aggregate:
-        paths = [
-            p.relative_to(config.path) for p in pathlib.Path(abs_path).glob("**/*.py")
-        ]
+    if not aggregate:
+        tracked_files = set()
+        for rev in state.index[state.default_archiver].revisions:
+            tracked_files.update(rev.revision.tracked_files)
+        paths = {
+            tracked_file
+            for tracked_file in tracked_files
+            if tracked_file.startswith(path)
+        } or {path}
     else:
-        paths = [path]
+        paths = {path}
 
     operator, key = metric_parts(metrics[0])
     if len(metrics) == 1:  # only y-axis
@@ -104,7 +108,9 @@ def graph(
                                 x_key,
                             )
                         )
-                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
+                    labels.append(
+                        f"{rev.revision.author_name} <br>{rev.revision.message}"
+                    )
                 last_y = val
             except KeyError:
                 # missing data
