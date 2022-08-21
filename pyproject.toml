@@ -69,13 +69,13 @@ wily = "wily.__main__:cli"
 line-length = 88
 target-version = ["py37", "py38", "py39", "py310", "py311"]
 include = '\.pyi?$'
-extent-exclude = '''
+extend-exclude = '''
 /(
     \.git
   | \.tox
   | \.venv
   | \.mypy_cache
-  | build
+  | build/
   | dist
 )/
 '''
