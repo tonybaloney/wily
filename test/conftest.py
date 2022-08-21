@@ -13,7 +13,7 @@ import wily.__main__ as main
 
 @pytest.fixture
 def gitdir(tmpdir):
-    """ Create a project and add code to it """
+    """Create a project and add code to it"""
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir)
     testpath = tmppath / "src" / "test.py"

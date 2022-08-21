@@ -24,7 +24,7 @@ def test_diff_no_path(tmpdir):
 
 
 def test_diff_output(builddir):
-    """ Test the diff feature with no changes """
+    """Test the diff feature with no changes"""
     runner = CliRunner()
     result = runner.invoke(
         main.cli, ["--debug", "--path", builddir, "diff", _path], catch_exceptions=False
@@ -34,7 +34,7 @@ def test_diff_output(builddir):
 
 
 def test_diff_output_all(builddir):
-    """ Test the diff feature with no changes and the --all flag """
+    """Test the diff feature with no changes and the --all flag"""
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
@@ -46,7 +46,7 @@ def test_diff_output_all(builddir):
 
 
 def test_diff_output_bad_path(builddir):
-    """ Test the diff feature with no changes """
+    """Test the diff feature with no changes"""
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
@@ -58,7 +58,7 @@ def test_diff_output_bad_path(builddir):
 
 
 def test_diff_output_remove_all(builddir):
-    """ Test the diff feature by removing all functions and classes """
+    """Test the diff feature by removing all functions and classes"""
 
     with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
         test_py.write("print(1)")
@@ -73,7 +73,7 @@ def test_diff_output_remove_all(builddir):
 
 
 def test_diff_output_more_complex(builddir):
-    """ Test the diff feature by making the test file more complicated """
+    """Test the diff feature by making the test file more complicated"""
 
     complex_test = """
             import abc
@@ -108,7 +108,7 @@ def test_diff_output_more_complex(builddir):
 
 
 def test_diff_output_less_complex(builddir):
-    """ Test the diff feature by making the test file more complicated """
+    """Test the diff feature by making the test file more complicated"""
 
     simple_test = """
             import abc
@@ -137,7 +137,7 @@ def test_diff_output_less_complex(builddir):
 
 
 def test_diff_output_loc(builddir):
-    """ Test the diff feature by making the test file more complicated """
+    """Test the diff feature by making the test file more complicated"""
 
     simple_test = """print("test")"""
 
@@ -156,7 +156,7 @@ def test_diff_output_loc(builddir):
 
 
 def test_diff_output_loc_and_revision(builddir):
-    """ Test the diff feature by making the test file more complicated, particular revision """
+    """Test the diff feature by making the test file more complicated, particular revision"""
 
     simple_test = """print("test")"""
 
@@ -185,7 +185,7 @@ def test_diff_output_loc_and_revision(builddir):
 
 
 def test_diff_output_rank(builddir):
-    """ Test the diff feature by making the test file more complicated """
+    """Test the diff feature by making the test file more complicated"""
 
     simple_test = """print("test")"""
 

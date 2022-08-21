@@ -27,7 +27,7 @@ def test_graph_no_cache(tmpdir, cache_path):
 
 
 def test_graph(builddir):
-    """ Test the graph feature """
+    """Test the graph feature"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -37,7 +37,7 @@ def test_graph(builddir):
 
 
 def test_graph_all(builddir):
-    """ Test the graph feature """
+    """Test the graph feature"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -47,7 +47,7 @@ def test_graph_all(builddir):
 
 
 def test_graph_all_with_shorthand_metric(builddir):
-    """ Test the graph feature with shorthand metric"""
+    """Test the graph feature with shorthand metric"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -57,7 +57,7 @@ def test_graph_all_with_shorthand_metric(builddir):
 
 
 def test_graph_changes(builddir):
-    """ Test the graph feature comparing changes """
+    """Test the graph feature comparing changes"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -67,7 +67,7 @@ def test_graph_changes(builddir):
 
 
 def test_graph_custom_x(builddir):
-    """ Test the graph feature with a custom x-axis """
+    """Test the graph feature with a custom x-axis"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -77,7 +77,7 @@ def test_graph_custom_x(builddir):
 
 
 def test_graph_aggregate(builddir):
-    """ Test the aggregate graphs """
+    """Test the aggregate graphs"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -87,7 +87,7 @@ def test_graph_aggregate(builddir):
 
 
 def test_graph_individual(builddir):
-    """ Test individual graphs """
+    """Test individual graphs"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -97,7 +97,7 @@ def test_graph_individual(builddir):
 
 
 def test_graph_path(builddir):
-    """ Test the graph feature """
+    """Test the graph feature"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -107,7 +107,7 @@ def test_graph_path(builddir):
 
 
 def test_graph_multiple(builddir):
-    """ Test the graph feature with multiple metrics """
+    """Test the graph feature with multiple metrics"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -117,7 +117,7 @@ def test_graph_multiple(builddir):
 
 
 def test_graph_multiple_custom_x(builddir):
-    """ Test the graph feature with multiple metrics """
+    """Test the graph feature with multiple metrics"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -137,7 +137,7 @@ def test_graph_multiple_custom_x(builddir):
 
 
 def test_graph_multiple_path(builddir):
-    """ Test the graph feature with multiple metrics """
+    """Test the graph feature with multiple metrics"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -147,7 +147,7 @@ def test_graph_multiple_path(builddir):
 
 
 def test_graph_output(builddir):
-    """ Test the graph feature with target output file """
+    """Test the graph feature with target output file"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -168,7 +168,7 @@ def test_graph_output(builddir):
 
 
 def test_graph_output_granular(builddir):
-    """ Test the graph feature with target output file """
+    """Test the graph feature with target output file"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(

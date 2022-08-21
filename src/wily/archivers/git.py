@@ -46,7 +46,9 @@ def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[
     return paths, dirs
 
 
-def whatchanged(commit_a: Commit, commit_b: Commit) -> Tuple[List[str], List[str], List[str]]:
+def whatchanged(
+    commit_a: Commit, commit_b: Commit
+) -> Tuple[List[str], List[str], List[str]]:
     """Get files added, modified and deleted between commits."""
     diffs = commit_b.diff(commit_a)
     added_files = []
