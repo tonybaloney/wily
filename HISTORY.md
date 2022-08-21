@@ -1,5 +1,10 @@
 # Release History
 
+## 1.23.0 (21st August 2022)
+
+* Fixed dependency conflict for packages using newer versions of click (@skarzi)
+* Graph will include deleted files (@ThomasTNO)
+
 ## 1.22.0 (15th July 2022)
 
 * Add support for Python 3.11
