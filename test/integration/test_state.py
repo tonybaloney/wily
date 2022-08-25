@@ -15,7 +15,7 @@ def config(builddir):
 
 
 def test_state_defaults(config):
-    """ Test the state defaults """
+    """Test the state defaults"""
     state = wily.state.State(config)
     assert state.index
     assert "git" in state.index
@@ -24,7 +24,7 @@ def test_state_defaults(config):
 
 
 def test_index(config):
-    """ Test the state index """
+    """Test the state index"""
     state = wily.state.State(config)
     assert state.index
     assert state.index["git"] is not None

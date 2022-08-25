@@ -101,13 +101,13 @@ def store(config, archiver, revision, stats):
 
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
-    
+
     :param revision: The revision ID
     :type  revision: ``str``
-    
+
     :param stats: The collected data
     :type  stats: ``dict``
-    
+
     :return: The absolute path to the created file
     :rtype: ``str``
 
@@ -152,7 +152,7 @@ def store_archiver_index(config, archiver, index):
 
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
-    
+
     :param index: The archiver index record
     :type  index: ``dict``
 
@@ -246,7 +246,7 @@ def get_archiver_index(config, archiver):
 
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
-    
+
     :return: The index data
     :rtype: ``dict``
     """
@@ -265,10 +265,10 @@ def get(config, archiver, revision):
 
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
-    
+
     :param revision: The revision ID
     :type  revision: ``str``
-    
+
     :return: The data record for that revision
     :rtype: ``dict``
     """

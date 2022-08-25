@@ -17,7 +17,7 @@ from wily.lang import _
 def mode(data):
     """
     Return the modal value of a iterable with discrete values.
-    
+
     If there is more than 1 modal value, arbitrarily return the first top n.
     """
     c = Counter(data)
@@ -42,7 +42,9 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational, mode),
+        Metric(
+            "rank", _("Maintainability Ranking"), str, MetricType.Informational, mode
+        ),
         Metric(
             "mi", _("Maintainability Index"), float, MetricType.AimHigh, statistics.mean
         ),

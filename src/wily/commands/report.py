@@ -21,6 +21,7 @@ ANSI_RED = 31
 ANSI_GREEN = 32
 ANSI_YELLOW = 33
 
+
 def report(
     config,
     path,
@@ -120,9 +121,13 @@ def report(
                     if delta == 0:
                         delta_col = delta
                     elif delta < 0:
-                        delta_col = f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
+                        delta_col = (
+                            f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
+                        )
                     else:
-                        delta_col = f"\u001b[{meta['increase_color']}m+{delta:n}\u001b[0m"
+                        delta_col = (
+                            f"\u001b[{meta['increase_color']}m+{delta:n}\u001b[0m"
+                        )
 
                     if meta["type"] in (int, float):
                         k = f"{val:n} ({delta_col})"

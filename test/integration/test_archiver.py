@@ -65,7 +65,7 @@ def test_git_end_to_end(tmpdir):
 
 
 def test_dirty_git(tmpdir):
-    """ Check that repository fails to initialise if unchecked files are in the repo """
+    """Check that repository fails to initialise if unchecked files are in the repo"""
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir)
 
@@ -95,7 +95,7 @@ def test_dirty_git(tmpdir):
 
 
 def test_detached_head(tmpdir):
-    """ Check that repo can initialize in detached head state"""
+    """Check that repo can initialize in detached head state"""
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir)
 

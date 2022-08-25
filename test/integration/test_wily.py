@@ -15,7 +15,7 @@ def test_list_metrics(builddir):
 
 
 def test_clean(builddir):
-    """ Test the clean feature """
+    """Test the clean feature"""
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "clean", "--yes"])
     assert result.exit_code == 0, result.stdout

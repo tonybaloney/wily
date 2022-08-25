@@ -57,12 +57,12 @@ class MockRepo:
 class MockGit:
     def checkout(self, *args):
         ...
-    
+
     def execute(self, command):
-        if command[1] == 'ls-tree':
-            assert command[-1] == '123abc'
+        if command[1] == "ls-tree":
+            assert command[-1] == "123abc"
             return "\n"
-        
+
 
 @pytest.fixture
 def repo(tmpdir):
