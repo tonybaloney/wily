@@ -4,7 +4,7 @@ For managing the state of the wily process.
 Contains a lazy revision, index and process state model.
 """
 from collections import OrderedDict
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import List
 
 import wily.cache as cache

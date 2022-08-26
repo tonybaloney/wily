@@ -5,24 +5,24 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
-import tabulate
-
 from pathlib import Path
-from wily import logger, format_revision, format_date
-from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
-from wily.operators import (
-    resolve_metric,
-    resolve_operator,
-    get_metric,
-    GOOD_COLORS,
-    BAD_COLORS,
-    OperatorLevel,
-)
-from wily.commands.build import run_operator
-from wily.state import State
 
 import radon.cli.harvest
+import tabulate
+
+from wily import format_date, format_revision, logger
+from wily.archivers import resolve_archiver
+from wily.commands.build import run_operator
+from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.operators import (
+    BAD_COLORS,
+    GOOD_COLORS,
+    OperatorLevel,
+    get_metric,
+    resolve_metric,
+    resolve_operator,
+)
+from wily.state import State
 
 
 def diff(config, files, metrics, changes_only=True, detail=True, revision=None):

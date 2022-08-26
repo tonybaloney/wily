@@ -1,11 +1,10 @@
-import pytest
-
-from click.testing import CliRunner
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+from click.testing import CliRunner
 
 import wily.__main__ as main
-
 from wily.helper.custom_enums import ReportFormat
 
 

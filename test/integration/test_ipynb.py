@@ -1,4 +1,5 @@
 import sys
+
 from click.testing import CliRunner
 
 import wily.__main__ as main

@@ -3,7 +3,8 @@
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
-from typing import List, Dict, Any, Iterable, Union
+from typing import Any, Dict, Iterable, List, Union
+
 from wily.lang import _
 
 
@@ -72,10 +73,9 @@ class BaseOperator:
 
 
 from wily.operators.cyclomatic import CyclomaticComplexityOperator
+from wily.operators.halstead import HalsteadOperator
 from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
-from wily.operators.halstead import HalsteadOperator
-
 
 """Type for an operator."""
 Operator = namedtuple("Operator", "name cls description level")

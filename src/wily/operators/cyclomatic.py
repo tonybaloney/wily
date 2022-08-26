@@ -8,11 +8,11 @@ import statistics
 import radon
 import radon.cli.harvest as harvesters
 from radon.cli import Config
-from radon.visitors import Function, Class
+from radon.visitors import Class, Function
 
 from wily import logger
-from wily.operators import BaseOperator, Metric, MetricType
 from wily.lang import _
+from wily.operators import BaseOperator, Metric, MetricType
 
 
 class CyclomaticComplexityOperator(BaseOperator):

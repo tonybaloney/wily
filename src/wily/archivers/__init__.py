@@ -72,9 +72,8 @@ class BaseArchiver:
         raise NotImplementedError
 
 
-from wily.archivers.git import GitArchiver
 from wily.archivers.filesystem import FilesystemArchiver
-
+from wily.archivers.git import GitArchiver
 
 """Type for an operator"""
 Archiver = namedtuple("Archiver", "name cls description")

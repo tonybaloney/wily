@@ -4,18 +4,17 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+import multiprocessing
 import os
 import pathlib
-import multiprocessing
+
 from progress.bar import Bar
 
 from wily import logger
-from wily.state import State
-
-from wily.archivers.git import InvalidGitRepositoryError
 from wily.archivers import FilesystemArchiver
-
+from wily.archivers.git import InvalidGitRepositoryError
 from wily.operators import resolve_operator
+from wily.state import State
 
 
 def run_operator(operator, revision, config, targets):

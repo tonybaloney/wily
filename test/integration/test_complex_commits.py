@@ -2,12 +2,13 @@
 Integration tests that will create a repository with multiple files
 and test the skipping of unchanged files does not impact the index.
 """
-import sys
-import pathlib
 import json
-from click.testing import CliRunner
-from git import Repo, Actor
+import pathlib
+import sys
+
 import pytest
+from click.testing import CliRunner
+from git import Actor, Repo
 
 import wily.__main__ as main
 

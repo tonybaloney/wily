@@ -36,10 +36,11 @@ A Python application for tracking, reporting on timing and complexity in tests a
       %%$%$&&S#&$$@@@@@@@@@$$@&&&@$@@@@@@@@@@@@@@@@$$%%$$
                .%%$$$$%%%$%%%%***%%%%%$%%$$$$$%%$%*&
 """
-import tempfile
-import colorlog
-import logging
 import datetime
+import logging
+import tempfile
+
+import colorlog
 
 __version__ = "1.23.0"
 
