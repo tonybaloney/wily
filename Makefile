@@ -26,8 +26,7 @@ lint_python:
 .PHONY: lint_formatting
 lint_formatting:
 	black --check .
-	@# TODO(skarzi): apply `isort` on codebase and require it to pass
-	isort --check-only . || true
+	isort --check-only .
 
 .PHONY: lint_spelling
 lint_spelling:
