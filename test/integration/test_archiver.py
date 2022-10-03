@@ -1,9 +1,9 @@
 import pathlib
 
 import pytest
-from git import Repo, Actor
+from git import Actor, Repo
 
-from wily.archivers.git import GitArchiver, DirtyGitRepositoryError
+from wily.archivers.git import DirtyGitRepositoryError, GitArchiver
 from wily.config import DEFAULT_CONFIG
 
 

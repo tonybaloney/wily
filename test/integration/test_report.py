@@ -1,7 +1,7 @@
 import sys
+from pathlib import Path
 
 from click.testing import CliRunner
-from pathlib import Path
 
 import wily.__main__ as main
 

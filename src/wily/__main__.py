@@ -1,17 +1,18 @@
 """Main command line."""
 
-import click
 import traceback
 from pathlib import Path
 
-from wily import logger, __version__, WILY_LOG_NAME
+import click
+
+from wily import WILY_LOG_NAME, __version__, logger
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
 from wily.helper.custom_enums import ReportFormat
-from wily.operators import resolve_operators
 from wily.lang import _
+from wily.operators import resolve_operators
 
 version_text = _("Version: ") + __version__ + "\n\n"
 help_header = version_text + _(

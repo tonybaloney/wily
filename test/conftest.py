@@ -1,12 +1,12 @@
 import pathlib
-from textwrap import dedent
 import shutil
 import tempfile
+from textwrap import dedent
 from time import time
 
 import pytest
 from click.testing import CliRunner
-from git import Repo, Actor
+from git import Actor, Repo
 
 import wily.__main__ as main
 

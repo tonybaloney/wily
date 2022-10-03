@@ -1,7 +1,7 @@
 from click.testing import CliRunner
+from git import Actor, Repo
 
 import wily.__main__ as main
-from git import Actor, Repo
 
 
 def test_rank_no_cache(tmpdir):

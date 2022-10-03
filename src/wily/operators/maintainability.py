@@ -10,8 +10,8 @@ import radon.cli.harvest as harvesters
 from radon.cli import Config
 
 from wily import logger
-from wily.operators import BaseOperator, MetricType, Metric
 from wily.lang import _
+from wily.operators import BaseOperator, Metric, MetricType
 
 
 def mode(data):

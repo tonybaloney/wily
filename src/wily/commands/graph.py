@@ -8,7 +8,7 @@ import pathlib
 import plotly.graph_objs as go
 import plotly.offline
 
-from wily import logger, format_datetime
+from wily import format_datetime, logger
 from wily.operators import resolve_metric, resolve_metric_as_tuple
 from wily.state import State
 

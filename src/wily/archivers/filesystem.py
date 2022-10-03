@@ -3,11 +3,11 @@ Filesystem Archiver.
 
 Implementation of the archiver API for a standard directory (no revisions)
 """
+import hashlib
 import logging
+import os.path
 from typing import List
 
-import os.path
-import hashlib
 from wily.archivers import BaseArchiver, Revision
 
 logger = logging.getLogger(__name__)

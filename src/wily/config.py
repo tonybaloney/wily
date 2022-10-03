@@ -5,12 +5,12 @@ TODO : Handle operator settings. Maybe a section for each operator and then pass
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
 """
-from functools import lru_cache
 import configparser
+import hashlib
 import logging
 import pathlib
-import hashlib
-from dataclasses import dataclass, field, InitVar
+from dataclasses import InitVar, dataclass, field
+from functools import lru_cache
 from typing import Any, List
 
 import wily.operators as operators

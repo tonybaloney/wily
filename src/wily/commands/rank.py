@@ -7,19 +7,18 @@ Will compare the values between files and return a sorted table.
 
 TODO: Layer on Click invocation in operators section, __main__.py file
 """
-import os
-
-import tabulate
 import operator as op
+import os
 from pathlib import Path
 
-from wily import logger, format_revision, format_date
+import radon.cli.harvest
+import tabulate
+
+from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.operators import MetricType, resolve_metric_as_tuple
 from wily.state import State
-from wily.operators import resolve_metric_as_tuple, MetricType
-
-import radon.cli.harvest
 
 
 def rank(config, path, metric, revision_index, limit, threshold, descending):

@@ -1,6 +1,7 @@
 import sys
-from unittest.mock import patch
 import tempfile
+from unittest.mock import patch
+
 from click.testing import CliRunner
 
 import wily.__main__ as main

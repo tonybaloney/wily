@@ -11,10 +11,10 @@ import os.path
 import pathlib
 import shutil
 
-from wily import logger, __version__
+from wily import __version__, logger
 from wily.archivers import ALL_ARCHIVERS
-from wily.operators import resolve_operator
 from wily.lang import _
+from wily.operators import resolve_operator
 
 
 def exists(config):

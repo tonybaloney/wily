@@ -6,12 +6,13 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
-import sys
 import pathlib
+import sys
+from unittest.mock import patch
+
 import pytest
 from click.testing import CliRunner
-from git import Repo, Actor
-from unittest.mock import patch
+from git import Actor, Repo
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
