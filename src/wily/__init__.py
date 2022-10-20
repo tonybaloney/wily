@@ -42,7 +42,7 @@ import tempfile
 
 import colorlog
 
-__version__ = "1.23.0"
+__version__ = "1.24.0"
 
 _, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 

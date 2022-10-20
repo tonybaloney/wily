@@ -1,5 +1,12 @@
 # Release History
 
+## 1.24.0 (20th October 2022)
+
+* refactor: apply black on wily codebase by @skarzi in https://github.com/tonybaloney/wily/pull/162
+* refactor: apply isort on wily codebase by @skarzi in https://github.com/tonybaloney/wily/pull/163
+* Adds Code of Conduct by @kjaymiller in https://github.com/tonybaloney/wily/pull/166
+* Upgrade plotly from 4.x to 5.x by @anderso in https://github.com/tonybaloney/wily/pull/167
+
 ## 1.23.0 (21st August 2022)
 
 * Fixed dependency conflict for packages using newer versions of click (@skarzi)
