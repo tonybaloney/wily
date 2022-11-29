@@ -6,6 +6,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 """
 import multiprocessing
 import os
+import sys
 import pathlib
 
 from progress.bar import Bar
@@ -70,7 +71,7 @@ def build(config, archiver, operators):
         revisions = archiver.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
         # TODO: This logic shouldn't really be here (SoC)
-        logger.info(f"Defaulting back to the filesystem archiver, not a valid git repo")
+        logger.info("Defaulting back to the filesystem archiver, not a valid git repo")
         archiver = FilesystemArchiver(config)
         revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
@@ -78,7 +79,7 @@ def build(config, archiver, operators):
             logger.error(f"Failed to setup archiver: '{e.message}'")
         else:
             logger.error(f"Failed to setup archiver: '{type(e)} - {e}'")
-        exit(1)
+        sys.exit(1)
 
     state = State(config, archiver=archiver)
     # Check for existence of cache, else provision

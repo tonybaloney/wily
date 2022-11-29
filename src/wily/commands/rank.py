@@ -9,6 +9,7 @@ TODO: Layer on Click invocation in operators section, __main__.py file
 """
 import operator as op
 import os
+import sys
 from pathlib import Path
 
 import radon.cli.harvest
@@ -17,7 +18,7 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
-from wily.operators import MetricType, resolve_metric_as_tuple
+from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
 
@@ -65,7 +66,7 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
             logger.error(
                 f"Revision {revision_index} is not in the cache, make sure you have run wily build."
             )
-            exit(1)
+            sys.exit(1)
 
     logger.info(
         f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
@@ -123,4 +124,4 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
         logger.error(
             f"Total value below the specified threshold: {total} < {threshold}"
         )
-        exit(1)
+        sys.exit(1)

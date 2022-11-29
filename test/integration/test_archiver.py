@@ -19,13 +19,13 @@ def test_git_end_to_end(tmpdir):
     committer = Actor("A committer", "committer@example.com")
 
     # First commit
-    with open(tmppath / ".gitignore", "w") as ignore:
+    with open(tmppath / ".gitignore", "w", encoding="utf8") as ignore:
         ignore.write(".wily/")
     index.add([".gitignore"])
     commit1 = index.commit("commit1", author=author, committer=committer)
 
     # Second commit
-    with open(tmppath / "test.py", "w") as file1:
+    with open(tmppath / "test.py", "w", encoding="utf8") as file1:
         file1.write("print(1)")
     index.add(["test.py"])
     commit2 = index.commit("commit2", author=author, committer=committer)
@@ -74,14 +74,14 @@ def test_dirty_git(tmpdir):
     committer = Actor("A committer", "committer@example.com")
 
     # First commit
-    with open(tmppath / ".gitignore", "w") as ignore:
+    with open(tmppath / ".gitignore", "w", encoding="utf8") as ignore:
         ignore.write(".wily/")
 
     index.add([".gitignore"])
     commit1 = index.commit("commit1", author=author, committer=committer)
 
     # Write a test file to the repo
-    with open(tmppath / "blah.py", "w") as ignore:
+    with open(tmppath / "blah.py", "w", encoding="utf8") as ignore:
         ignore.write("*.py[co]\n")
     index.add(["blah.py"])
     repo.close()
@@ -104,14 +104,14 @@ def test_detached_head(tmpdir):
     committer = Actor("A committer", "committer@example.com")
 
     # First commit
-    with open(tmppath / "test.py", "w") as ignore:
+    with open(tmppath / "test.py", "w", encoding="utf8") as ignore:
         ignore.write("print('hello world')")
 
     index.add(["test.py"])
     commit1 = index.commit("commit1", author=author, committer=committer)
 
     # Second commit
-    with open(tmppath / "test.py", "w") as ignore:
+    with open(tmppath / "test.py", "w", encoding="utf8") as ignore:
         ignore.write("print('hello world')\nprint(1)")
 
     index.add(["test.py"])

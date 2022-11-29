@@ -1,5 +1,6 @@
 """Main command line."""
 
+import sys
 import traceback
 from pathlib import Path
 
@@ -406,12 +407,12 @@ def clean(ctx, yes):
 
     if not exists(config):
         logger.info(_("Wily cache does not exist, nothing to remove."))
-        exit(0)
+        sys.exit(0)
 
     if not yes:
         p = input(_("Are you sure you want to delete wily cache? [y/N]"))
         if p.lower() != "y":
-            exit(0)
+            sys.exit(0)
 
     from wily.cache import clean
 
@@ -446,7 +447,7 @@ def handle_no_cache(context):
     )
     p = input(_("Do you want to run setup and index your project now? [y/N]"))
     if p.lower() != "y":
-        exit(1)
+        sys.exit(1)
     else:
         revisions = input(_("How many previous git revisions do you want to index? : "))
         revisions = int(revisions)
@@ -461,6 +462,6 @@ if __name__ == "__main__":  # pragma: no cover
     except Exception as runtime:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
         logger.info(
-            f"If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."
+            "If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."
         )
         logger.debug(traceback.format_exc())

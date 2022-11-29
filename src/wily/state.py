@@ -7,7 +7,7 @@ from collections import OrderedDict
 from dataclasses import asdict, dataclass
 from typing import List
 
-import wily.cache as cache
+from wily import cache
 from wily import logger
 from wily.archivers import Revision, resolve_archiver
 from wily.operators import get_metric
@@ -88,7 +88,7 @@ class IndexedRevision:
             self._data = cache.get(
                 config=config, archiver=archiver, revision=self.revision.key
             )["operator_data"]
-        logger.debug(f"Fetching keys")
+        logger.debug("Fetching keys")
         return list(self._data[operator].keys())
 
     def store(self, config, archiver, stats):

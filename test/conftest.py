@@ -2,7 +2,6 @@ import pathlib
 import shutil
 import tempfile
 from textwrap import dedent
-from time import time
 
 import pytest
 from click.testing import CliRunner
@@ -19,7 +18,7 @@ def gitdir(tmpdir):
     testpath = tmppath / "src" / "test.py"
     (tmppath / "src").mkdir()
     # Write a test file to the repo
-    with open(testpath, "w") as test_txt:
+    with open(testpath, "w", encoding="utf8") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
@@ -46,7 +45,7 @@ def gitdir(tmpdir):
         def method(self):
             b = 1 + 5
     """
-    with open(testpath, "w") as test_txt:
+    with open(testpath, "w", encoding="utf8") as test_txt:
         test_txt.write(dedent(first_test))
 
     index.add([str(testpath)])
@@ -70,7 +69,7 @@ def gitdir(tmpdir):
                 return 'banana'
     """
 
-    with open(testpath, "w") as test_txt:
+    with open(testpath, "w", encoding="utf8") as test_txt:
         test_txt.write(dedent(second_test))
 
     index.add([str(testpath)])
@@ -141,7 +140,7 @@ def ipynbgitdir(tmpdir):
     testpath = tmppath / "src" / "test.ipynb"
     (tmppath / "src").mkdir()
     # Write a test file to the repo
-    with open(testpath, "w") as test_txt:
+    with open(testpath, "w", encoding="utf8") as test_txt:
         test_txt.write('{"cells": [],' + _NB_FOOTER + "}")
 
     index = repo.index
@@ -178,7 +177,7 @@ def ipynbgitdir(tmpdir):
         + _NB_FOOTER
         + "}"
     )
-    with open(testpath, "w") as test_txt:
+    with open(testpath, "w", encoding="utf8") as test_txt:
         test_txt.write(dedent(first_test))
 
     index.add([str(testpath)])
@@ -228,7 +227,7 @@ def ipynbgitdir(tmpdir):
         + "}"
     )
 
-    with open(testpath, "w") as test_txt:
+    with open(testpath, "w", encoding="utf8") as test_txt:
         test_txt.write(dedent(second_test))
 
     index.add([str(testpath)])
@@ -251,7 +250,7 @@ def ipynbbuilddir(ipynbgitdir):
     ipynb_cells = true
     """
     config_path = tmppath / "wily.cfg"
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     runner = CliRunner()

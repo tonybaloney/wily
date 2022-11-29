@@ -3,7 +3,6 @@ Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
 """
-import pathlib
 
 import plotly.graph_objs as go
 import plotly.offline

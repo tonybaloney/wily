@@ -69,7 +69,7 @@ def test_build_crash(tmpdir):
     tmppath = pathlib.Path(tmpdir)
 
     # Write a test file to the repo
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(tmppath / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
@@ -100,7 +100,7 @@ def test_build(tmpdir, cache_path):
     tmppath = pathlib.Path(tmpdir)
 
     # Write a test file to the repo
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(tmppath / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
@@ -141,11 +141,11 @@ def test_build_with_config(tmpdir, cache_path):
     operators = raw, maintainability
     """
     config_path = tmppath / "wily.cfg"
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     # Write a test file to the repo
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(tmppath / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
@@ -189,7 +189,7 @@ def test_build_twice(tmpdir, cache_path):
     tmppath = pathlib.Path(tmpdir)
 
     # Write a test file to the repo
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(tmppath / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index
@@ -215,7 +215,7 @@ def test_build_twice(tmpdir, cache_path):
     assert rev_path.exists()
 
     # Write a test file to the repo
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(tmppath / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc\nfoo = 1")
 
     index.add(["test.py"])
@@ -254,7 +254,7 @@ def test_build_dirty_repo(builddir):
     Test that build fails cleanly with a dirty repo
     """
     tmppath = pathlib.Path(builddir)
-    with open(tmppath / "test.py", "w") as test_txt:
+    with open(tmppath / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc\nfoo = 1")
 
     runner = CliRunner()

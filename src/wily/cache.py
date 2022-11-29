@@ -35,7 +35,7 @@ def exists(config):
         return False
     index_path = pathlib.Path(config.cache_path) / "index.json"
     if index_path.exists():
-        with open(index_path) as out:
+        with open(index_path, encoding="utf8") as out:
             index = json.load(out)
         if index["version"] != __version__:
             # TODO: Inspect the versions properly.
@@ -54,7 +54,7 @@ def create_index(config):
     """Create the root index."""
     filename = pathlib.Path(config.cache_path) / "index.json"
     index = {"version": __version__}
-    with open(filename, "w") as out:
+    with open(filename, "w", encoding="utf8") as out:
         out.write(json.dumps(index, indent=2))
 
 
@@ -138,7 +138,7 @@ def store(config, archiver, revision, stats):
     filename = root / (revision.key + ".json")
     if filename.exists():
         raise RuntimeError(f"File {filename} already exists, index may be corrupt.")
-    with open(filename, "w") as out:
+    with open(filename, "w", encoding="utf8") as out:
         out.write(json.dumps(stats, indent=2))
     return filename
 
@@ -167,9 +167,9 @@ def store_archiver_index(config, archiver, index):
     index = sorted(index, key=lambda k: k["date"], reverse=True)
 
     filename = root / "index.json"
-    with open(filename, "w") as out:
+    with open(filename, "w", encoding="utf8") as out:
         out.write(json.dumps(index, indent=2))
-    logger.debug(f"Created index output")
+    logger.debug("Created index output")
     return filename
 
 

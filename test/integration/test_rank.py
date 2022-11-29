@@ -49,7 +49,7 @@ def test_rank_directory_default_invalid_revision(builddir):
 def test_rank_directory_default_unindexed_revision(builddir):
     """Test the rank feature with an unindexed revision."""
     repo = Repo(builddir)
-    with open(builddir / "test.py", "w") as test_txt:
+    with open(builddir / "test.py", "w", encoding="utf8") as test_txt:
         test_txt.write("import abc")
 
     index = repo.index

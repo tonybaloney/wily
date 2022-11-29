@@ -5,6 +5,7 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
+import sys
 from pathlib import Path
 
 import radon.cli.harvest
@@ -75,7 +76,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
             logger.error(
                 f"Revision {revision} is not in the cache, make sure you have run wily build."
             )
-            exit(1)
+            sys.exit(1)
 
     logger.info(
         f"Comparing current with {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}."
