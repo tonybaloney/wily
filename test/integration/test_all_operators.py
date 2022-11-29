@@ -66,7 +66,9 @@ def test_operator(operator, gitdir):
                               print(1)
             """
 
-    with open(pathlib.Path(gitdir) / "src" / "test.py", "w", encoding="utf8") as test_py:
+    with open(
+        pathlib.Path(gitdir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(complex_test))
 
     result = runner.invoke(
