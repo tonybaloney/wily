@@ -6,8 +6,8 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 """
 import multiprocessing
 import os
-import sys
 import pathlib
+import sys
 
 from progress.bar import Bar
 

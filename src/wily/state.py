@@ -7,8 +7,7 @@ from collections import OrderedDict
 from dataclasses import asdict, dataclass
 from typing import List
 
-from wily import cache
-from wily import logger
+from wily import cache, logger
 from wily.archivers import Revision, resolve_archiver
 from wily.operators import get_metric
 
