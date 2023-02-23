@@ -2,11 +2,12 @@
 requires = ["flit_core>=2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "wily"
-author = "Anthony Shaw"
-author-email = "anthonyshaw@apache.org"
-home-page = "https://github.com/tonybaloney/wily"
+[project]
+name = "wily"
+authors = [
+ { name = "Anthony Shaw", email = "anthonyshaw@apache.org"},
+]
+readme = "README.md"
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Development Status :: 5 - Production/Stable",
@@ -19,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
 ]
-requires = [
+dependencies = [
     "gitpython>=3.0.0,<4.0.0",
     "radon>=5.1,<5.2",
     "click>=7.0,<9.0",
@@ -31,9 +32,9 @@ requires = [
     "dataclasses; python_version == '3.6'",
 ]
 requires-python = ">=3.6"
-description-file = "README.md"
+dynamic=["version", "description"]
 
-[tool.flit.metadata.requires-extra]
+[project.optional-dependencies]
 test = [
     "pytest~=7.2",
     "pytest-cov~=3.0.0",
@@ -55,15 +56,16 @@ dev = [
 # TODO: move here proper deps from `docs/requirements_docs.txt`
 doc = []
 
-[tool.flit.metadata.urls]
+[project.urls]
+Homepage = "https://github.com/tonybaloney/wily"
 Documentation = "https://wily.readthedocs.io/en/latest/"
+
+[project.scripts]
+wily = "wily.__main__:cli"
 
 [tool.flit.sdist]
 include = ["doc/"]
 exclude = ["doc/*.html"]
-
-[tool.flit.scripts]
-wily = "wily.__main__:cli"
 
 [tool.black]
 line-length = 88
