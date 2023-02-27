@@ -41,7 +41,7 @@ jobs:
       - name: lint and test
         run: make ci
       - name: Inclusiveness Analyzer
-        uses: tonybaloney/InclusivenessAnalyzer@patch-1
+        uses: tonybaloney/InclusivenessAnalyzer@skip_svg
       - name: upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
