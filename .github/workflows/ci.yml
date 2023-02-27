@@ -41,7 +41,7 @@ jobs:
       - name: lint and test
         run: make ci
       - name: Inclusiveness Analyzer
-        uses: microsoft/InclusivenessAnalyzer@v1.0.1
+        uses: tonybaloney/InclusivenessAnalyzer@patch-1
       - name: upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
