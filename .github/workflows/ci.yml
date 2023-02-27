@@ -44,6 +44,7 @@ jobs:
         uses: tonybaloney/InclusivenessAnalyzer@skip_svg
         with:
           excludeTerms: master
+          failOnNonInclusiveTerm: true
       - name: upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
