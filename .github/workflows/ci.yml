@@ -40,6 +40,10 @@ jobs:
           flit install --extras=all
       - name: lint and test
         run: make ci
+      - name: Inclusiveness Analyzer
+        uses: microsoft/InclusivenessAnalyzer@main
+        with:
+          excludeTerms: master
       - name: upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
