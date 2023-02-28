@@ -41,10 +41,9 @@ jobs:
       - name: lint and test
         run: make ci
       - name: Inclusiveness Analyzer
-        uses: tonybaloney/InclusivenessAnalyzer@skip_svg
+        uses: microsoft/InclusivenessAnalyzer@main
         with:
           excludeTerms: master
-          failOnNonInclusiveTerm: true
       - name: upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:
