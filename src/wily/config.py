@@ -13,7 +13,7 @@ from dataclasses import InitVar, dataclass, field
 from functools import lru_cache
 from typing import Any, List
 
-import wily.operators as operators
+from wily import operators
 from wily.archivers import ARCHIVER_GIT
 
 logger = logging.getLogger(__name__)

@@ -2,6 +2,7 @@
 
 import traceback
 from pathlib import Path
+from sys import exit
 
 import click
 

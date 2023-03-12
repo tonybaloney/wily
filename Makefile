@@ -16,21 +16,17 @@ compile_messages:
 
 .PHONY: lint_python
 lint_python:
-	flake8 .
-	@# TODO(skarzi): fix type hitings and require `mypy` to pass
+	ruff .
+	@# TODO(skarzi): fix type hints and require `mypy` to pass
 	mypy . || true
-	bandit --configfile pyproject.toml --recursive .
-	pydocstyle src/wily
-	find . -type f -name '*.py' | xargs pyupgrade --py37-plus
 
 .PHONY: lint_formatting
 lint_formatting:
 	black --check .
-	isort --check-only .
 
 .PHONY: lint_spelling
 lint_spelling:
-	codespell || true
+	codespell
 
 .PHONY: lint_deps
 lint_deps:
