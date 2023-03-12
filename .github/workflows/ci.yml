@@ -35,7 +35,7 @@ jobs:
           python-version: "${{ matrix.python-version }}"
       - name: install dependencies
         run: |
-          python -m pip install --update pip setuptools wheel
+          python -m pip install --upgrade pip setuptools wheel
           pip install flit
           flit install --extras=all
       - name: lint and test
