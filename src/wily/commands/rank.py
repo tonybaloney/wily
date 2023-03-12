@@ -17,7 +17,7 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
-from wily.operators import MetricType, resolve_metric_as_tuple
+from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
 

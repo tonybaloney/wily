@@ -50,7 +50,7 @@ class MockRepo:
     def iter_commits(self, branch, max_count, reverse):
         assert branch == self.active_branch
         assert max_count == 99
-        assert reverse == True
+        assert reverse is True
         return reversed(self.commits)
 
 

@@ -2,7 +2,6 @@ import pathlib
 import shutil
 import tempfile
 from textwrap import dedent
-from time import time
 
 import pytest
 from click.testing import CliRunner
