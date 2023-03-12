@@ -88,7 +88,7 @@ class IndexedRevision:
             self._data = cache.get(
                 config=config, archiver=archiver, revision=self.revision.key
             )["operator_data"]
-        logger.debug(f"Fetching keys")
+        logger.debug("Fetching keys")
         return list(self._data[operator].keys())
 
     def store(self, config, archiver, stats):

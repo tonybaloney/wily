@@ -70,7 +70,7 @@ def build(config, archiver, operators):
         revisions = archiver.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
         # TODO: This logic shouldn't really be here (SoC)
-        logger.info(f"Defaulting back to the filesystem archiver, not a valid git repo")
+        logger.info("Defaulting back to the filesystem archiver, not a valid git repo")
         archiver = FilesystemArchiver(config)
         revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:

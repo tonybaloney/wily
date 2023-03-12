@@ -169,7 +169,7 @@ def store_archiver_index(config, archiver, index):
     filename = root / "index.json"
     with open(filename, "w") as out:
         out.write(json.dumps(index, indent=2))
-    logger.debug(f"Created index output")
+    logger.debug("Created index output")
     return filename
 
 
