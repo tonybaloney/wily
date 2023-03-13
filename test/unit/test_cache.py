@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-import wily.cache as cache
+from wily import cache
 from wily.archivers import Revision
 from wily.config import ARCHIVER_GIT, DEFAULT_CONFIG
 

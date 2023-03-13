@@ -11,6 +11,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+"""Docstring to fix pydocstyle D100 Missing docstring in public module."""
 
 import os.path
 import sys

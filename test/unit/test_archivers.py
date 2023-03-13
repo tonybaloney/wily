@@ -4,8 +4,8 @@ from unittest.mock import patch
 import pytest
 
 import wily.archivers
-import wily.archivers.git as git
 import wily.config
+from wily.archivers import git
 
 
 class MockAuthor:
