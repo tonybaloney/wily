@@ -23,7 +23,7 @@ jobs:
           - '3.8'
           - '3.9'
           - '3.10'
-          - '3.11-dev'
+          - '3.11'
         continue-on-error:
           - false
     runs-on: "${{ matrix.os }}"
@@ -35,7 +35,7 @@ jobs:
           python-version: "${{ matrix.python-version }}"
       - name: install dependencies
         run: |
-          python -m pip install -U pip setuptools wheel
+          python -m pip install --upgrade pip setuptools wheel
           pip install flit
           flit install --extras=all
       - name: lint and test
