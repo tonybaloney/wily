@@ -121,8 +121,8 @@ def test_report_changes_only(builddir):
         main.cli, ["--path", builddir, "report", _path, "raw.multi", "-c"]
     )
     assert result.exit_code == 0, result.stdout
-    assert "basic test" in result.stdout
-    assert "remove line" in result.stdout
+    assert "basic test" not in result.stdout
+    assert "remove line" not in result.stdout
     assert "Not found" not in result.stdout
 
 
