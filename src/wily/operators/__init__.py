@@ -112,12 +112,12 @@ OPERATOR_HALSTEAD = Operator(
 """Dictionary of all operators"""
 ALL_OPERATORS = {
     operator.name: operator
-    for operator in {
+    for operator in (
         OPERATOR_CYCLOMATIC,
         OPERATOR_MAINTAINABILITY,
         OPERATOR_RAW,
         OPERATOR_HALSTEAD,
-    }
+    )
 }
 
 
