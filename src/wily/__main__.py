@@ -253,10 +253,15 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
 @click.option(
-    "-c", "--changes/--all", default=False, help=_("Only show revisions that have changes")
+    "-c",
+    "--changes/--all",
+    default=False,
+    help=_("Only show revisions that have changes"),
 )
 @click.pass_context
-def report(ctx, file, metrics, number, message, format, console_format, output, changes):
+def report(
+    ctx, file, metrics, number, message, format, console_format, output, changes
+):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
