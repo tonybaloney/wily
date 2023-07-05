@@ -30,6 +30,7 @@ def report(
     include_message=False,
     format=ReportFormat.CONSOLE,
     console_format=None,
+    changes_only=False,
 ):
     """
     Show information about the cache and runtime.
@@ -57,6 +58,9 @@ def report(
 
     :param console_format: Grid format style for tabulate
     :type  console_format: ``str``
+
+    :param changes_only: Only report revisions where delta != 0
+    :type  changes_only: ``bool``
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")
@@ -97,6 +101,7 @@ def report(
         history = state.index[archiver].revisions[:n][::-1]
         last = {}
         for rev in history:
+            deltas = []
             vals = []
             for meta in metric_metas:
                 try:
@@ -134,26 +139,29 @@ def report(
                         k = f"{val}"
                 except KeyError as e:
                     k = f"Not found {e}"
+                    delta = 0
+                deltas.append(delta)
                 vals.append(k)
-            if include_message:
-                data.append(
-                    (
-                        format_revision(rev.revision.key),
-                        rev.revision.message[:MAX_MESSAGE_WIDTH],
-                        rev.revision.author_name,
-                        format_date(rev.revision.date),
-                        *vals,
+            if not changes_only or any(deltas):
+                if include_message:
+                    data.append(
+                        (
+                            format_revision(rev.revision.key),
+                            rev.revision.message[:MAX_MESSAGE_WIDTH],
+                            rev.revision.author_name,
+                            format_date(rev.revision.date),
+                            *vals,
+                        )
                     )
-                )
-            else:
-                data.append(
-                    (
-                        format_revision(rev.revision.key),
-                        rev.revision.author_name,
-                        format_date(rev.revision.date),
-                        *vals,
+                else:
+                    data.append(
+                        (
+                            format_revision(rev.revision.key),
+                            rev.revision.author_name,
+                            format_date(rev.revision.date),
+                            *vals,
+                        )
                     )
-                )
     descriptions = [meta["title"] for meta in metric_metas]
     if include_message:
         headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
