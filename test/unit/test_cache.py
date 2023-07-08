@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-import wily.cache as cache
+from wily import cache
 from wily.archivers import Revision
 from wily.config import ARCHIVER_GIT, DEFAULT_CONFIG
 
@@ -27,7 +27,7 @@ def test_exists_older(tmpdir):
     tmp_path = pathlib.Path(tmpdir)
     config.cache_path = tmp_path / ".wily"
     (tmp_path / ".wily").mkdir()
-    with open((tmp_path / ".wily" / "index.json"), "w+") as index:
+    with open((tmp_path / ".wily" / "index.json"), "w+", encoding="utf8") as index:
         index.write('{"version": "0.1.0"}')
     assert cache.exists(config)
 
@@ -50,11 +50,11 @@ def test_get_default_metrics_empty(tmpdir):
     config.cache_path = str(tmppath)
     tmppath.mkdir()
     (tmppath / "git").mkdir()
-    with open(tmppath / "git" / "index.json", "w+") as f:
+    with open(tmppath / "git" / "index.json", "w+", encoding="utf8") as f:
         f.write("[]")
 
     metrics = cache.get_default_metrics(config)
-    assert metrics == []
+    assert not metrics
 
 
 def test_create_and_delete(tmpdir):
@@ -115,7 +115,7 @@ def test_store_basic(tmpdir):
         deleted_files=[target_path],
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
-    with open(fn) as cache_item:
+    with open(fn, encoding="utf8") as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, dict)
         assert result == _TEST_STATS
@@ -171,7 +171,7 @@ def test_store_relative_paths(tmpdir):
         deleted_files=[target_path],
     )
     fn = cache.store(config, ARCHIVER_GIT, _TEST_REVISION, _TEST_STATS)
-    with open(fn) as cache_item:
+    with open(fn, encoding="utf8") as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, dict)
         if sys.platform == "win32":
@@ -191,7 +191,7 @@ def test_store_index(tmpdir):
     config.path = tmpdir
     _TEST_INDEX = [{"message": "a", "date": 1234}, {"message": "b", "date": 1345}]
     fn = cache.store_archiver_index(config, ARCHIVER_GIT, _TEST_INDEX)
-    with open(fn) as cache_item:
+    with open(fn, encoding="utf8") as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, list)
         assert result[0] == _TEST_INDEX[1]

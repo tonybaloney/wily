@@ -60,7 +60,9 @@ def test_diff_output_bad_path(builddir):
 def test_diff_output_remove_all(builddir):
     """Test the diff feature by removing all functions and classes"""
 
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(builddir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write("print(1)")
 
     runner = CliRunner()
@@ -91,7 +93,9 @@ def test_diff_output_more_complex(builddir):
                               print(1)
             """
 
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(builddir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(complex_test))
 
     runner = CliRunner()
@@ -120,7 +124,9 @@ def test_diff_output_less_complex(builddir):
                     pass
             """
 
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(builddir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(simple_test))
 
     runner = CliRunner()
@@ -141,7 +147,9 @@ def test_diff_output_loc(builddir):
 
     simple_test = """print("test")"""
 
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(builddir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(simple_test))
 
     runner = CliRunner()
@@ -160,7 +168,9 @@ def test_diff_output_loc_and_revision(builddir):
 
     simple_test = """print("test")"""
 
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(builddir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(simple_test))
 
     runner = CliRunner()
@@ -189,7 +199,9 @@ def test_diff_output_rank(builddir):
 
     simple_test = """print("test")"""
 
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(builddir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(simple_test))
 
     runner = CliRunner()

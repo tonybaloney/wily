@@ -4,8 +4,8 @@ from unittest.mock import patch
 import pytest
 
 import wily.archivers
-import wily.archivers.git as git
 import wily.config
+from wily.archivers import git
 
 
 class MockAuthor:
@@ -68,7 +68,7 @@ class MockGit:
 def repo(tmpdir):
     repo = MockRepo()
     tmppath = pathlib.Path(tmpdir)
-    with open(tmppath / ".gitignore", "w") as test_txt:
+    with open(tmppath / ".gitignore", "w", encoding="utf8") as test_txt:
         test_txt.write(".wily/")
     repo.path = tmppath
     repo.git = MockGit()

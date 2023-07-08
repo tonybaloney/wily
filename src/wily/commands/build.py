@@ -7,6 +7,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import multiprocessing
 import os
 import pathlib
+import sys
 
 from progress.bar import Bar
 
@@ -78,7 +79,7 @@ def build(config, archiver, operators):
             logger.error(f"Failed to setup archiver: '{e.message}'")
         else:
             logger.error(f"Failed to setup archiver: '{type(e)} - {e}'")
-        exit(1)
+        sys.exit(1)
 
     state = State(config, archiver=archiver)
     # Check for existence of cache, else provision

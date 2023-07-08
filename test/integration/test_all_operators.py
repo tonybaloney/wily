@@ -66,7 +66,9 @@ def test_operator(operator, gitdir):
                               print(1)
             """
 
-    with open(pathlib.Path(gitdir) / "src" / "test.py", "w") as test_py:
+    with open(
+        pathlib.Path(gitdir) / "src" / "test.py", "w", encoding="utf8"
+    ) as test_py:
         test_py.write(dedent(complex_test))
 
     result = runner.invoke(
@@ -115,7 +117,7 @@ def test_operator_on_code_with_metric_named_objects(operator, tmpdir):
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
 
-    with open(testpath, "w") as test_py:
+    with open(testpath, "w", encoding="utf8") as test_py:
         test_py.write(dedent(code_with_metric_named_objects))
 
     with Repo.init(path=tmpdir) as repo:

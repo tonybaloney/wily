@@ -26,10 +26,10 @@ def test_skip_files(tmpdir, cache_path):
     tmppath.mkdir()
 
     # Write two test files to the repo
-    with open(tmppath / "test1.py", "w") as test1_txt:
+    with open(tmppath / "test1.py", "w", encoding="utf8") as test1_txt:
         test1_txt.write("import abc")
 
-    with open(tmppath / "test2.py", "w") as test2_txt:
+    with open(tmppath / "test2.py", "w", encoding="utf8") as test2_txt:
         test2_txt.write("import cde")
 
     index = repo.index
@@ -41,7 +41,7 @@ def test_skip_files(tmpdir, cache_path):
     commit = index.commit("commit two files", author=author, committer=committer)
 
     # Change the second file and commit that
-    with open(tmppath / "test2.py", "w") as test2_txt:
+    with open(tmppath / "test2.py", "w", encoding="utf8") as test2_txt:
         test2_txt.write("import zzz\nprint(1)")
 
     repo.index.add([str(tmppath / "test2.py")])
@@ -50,7 +50,7 @@ def test_skip_files(tmpdir, cache_path):
     )
 
     # Change the first file and commit that
-    with open(tmppath / "test1.py", "w") as test2_txt:
+    with open(tmppath / "test1.py", "w", encoding="utf8") as test2_txt:
         test2_txt.write("import zzz\nprint(1)")
 
     repo.index.add([str(tmppath / "test1.py")])
@@ -77,13 +77,13 @@ def test_skip_files(tmpdir, cache_path):
     assert rev_path.exists()
 
     # Inspect the contents of the index for the existence of both files
-    with open(index_path) as index_file:
+    with open(index_path, encoding="utf8") as index_file:
         index = json.load(index_file)
 
     assert len(index) == 3
 
     # Look at the first commit
-    with open(rev_path) as rev_file:
+    with open(rev_path, encoding="utf8") as rev_file:
         data = json.load(rev_file)
 
     assert "raw" in data["operator_data"]
@@ -94,7 +94,7 @@ def test_skip_files(tmpdir, cache_path):
     rev2_path = cache_path / "git" / (commit2.name_rev.split(" ")[0] + ".json")
     assert rev2_path.exists()
 
-    with open(rev2_path) as rev2_file:
+    with open(rev2_path, encoding="utf8") as rev2_file:
         data2 = json.load(rev2_file)
 
     assert "raw" in data2["operator_data"]
@@ -105,7 +105,7 @@ def test_skip_files(tmpdir, cache_path):
     rev3_path = cache_path / "git" / (commit3.name_rev.split(" ")[0] + ".json")
     assert rev3_path.exists()
 
-    with open(rev3_path) as rev3_file:
+    with open(rev3_path, encoding="utf8") as rev3_file:
         data3 = json.load(rev3_file)
 
     assert "raw" in data3["operator_data"]

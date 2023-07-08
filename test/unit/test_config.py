@@ -12,7 +12,7 @@ def test_config_empty_defaults(tmpdir):
     config = """
     """
     config_path = os.path.join(tmpdir, "wily.cfg")
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     cfg = wily.config.load(config_path)
@@ -31,7 +31,7 @@ def test_config_archiver(tmpdir):
     archiver = foo
     """
     config_path = os.path.join(tmpdir, "wily.cfg")
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     cfg = wily.config.load(config_path)
@@ -59,7 +59,7 @@ def test_config_operators(tmpdir, raw_operators, expected_operators):
     operators = {raw_operators}
     """
     config_path = os.path.join(tmpdir, "wily.cfg")
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     cfg = wily.config.load(config_path)
@@ -78,7 +78,7 @@ def test_config_max_revisions(tmpdir):
     max_revisions = 14
     """
     config_path = os.path.join(tmpdir, "wily.cfg")
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     cfg = wily.config.load(config_path)
@@ -97,7 +97,7 @@ def test_config_cache_path(tmpdir):
     cache_path = .wily/
     """
     config_path = os.path.join(tmpdir, "wily.cfg")
-    with open(config_path, "w") as config_f:
+    with open(config_path, "w", encoding="utf8") as config_f:
         config_f.write(config)
 
     cfg = wily.config.load(config_path)
