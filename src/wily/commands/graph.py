@@ -27,6 +27,7 @@ def graph(
     changes=True,
     text=False,
     aggregate=False,
+    plotlyjs=False,
 ):
     """
     Graph information about the cache and runtime.
@@ -149,4 +150,5 @@ def graph(
         },
         auto_open=auto_open,
         filename=filename,
+        include_plotlyjs=plotlyjs,
     )
