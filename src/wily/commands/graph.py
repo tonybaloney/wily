@@ -4,6 +4,8 @@ Draw graph in HTML for a specific metric.
 TODO: Add multiple lines for multiple files
 """
 
+from pathlib import Path
+
 import plotly.graph_objs as go
 import plotly.offline
 
@@ -75,6 +77,7 @@ def graph(
         z_axis = resolve_metric(metrics[1])
         z_operator, z_key = metric_parts(metrics[1])
     for path in paths:
+        path = Path(path)
         x = []
         y = []
         z = []
