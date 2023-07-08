@@ -27,6 +27,7 @@ def graph(
     changes=True,
     text=False,
     aggregate=False,
+    format="html",
 ):
     """
     Graph information about the cache and runtime.
@@ -136,17 +137,23 @@ def graph(
         filename = output
         auto_open = False
     else:
-        filename = "wily-report.html"
+        filename = f"wily-report.{format}"
         auto_open = True
-    plotly.offline.plot(
-        {
-            "data": data,
-            "layout": go.Layout(
-                title=title,
-                xaxis={"title": x_axis},
-                yaxis={"title": y_metric.description},
-            ),
-        },
-        auto_open=auto_open,
-        filename=filename,
-    )
+    if format == "html":
+        plotly.offline.plot(
+            {
+                "data": data,
+                "layout": go.Layout(
+                    title=title,
+                    xaxis={"title": x_axis},
+                    yaxis={"title": y_metric.description},
+                ),
+            },
+            auto_open=auto_open,
+            filename=filename,
+        )
+    else:
+        fig = go.Figure()
+        for trace in data:
+            fig.add_trace(trace)
+        fig.write_image(filename)

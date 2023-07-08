@@ -375,8 +375,11 @@ def diff(ctx, files, metrics, all, detail, revision):
     default=False,
     help=_("Aggregate if path is directory"),
 )
+@click.option(
+    "-f", "--format", default="html", help=_("Format to output, can be html or png")
+)  # Supported formats: html, png, jpg, webp, svg or pdf
 @click.pass_context
-def graph(ctx, path, metrics, output, x_axis, changes, aggregate):
+def graph(ctx, path, metrics, output, x_axis, changes, aggregate, format):
     """Output report to specified HTML path, e.g. reports/out.html."""
     config = ctx.obj["CONFIG"]
 
@@ -394,6 +397,7 @@ def graph(ctx, path, metrics, output, x_axis, changes, aggregate):
         x_axis=x_axis,
         changes=changes,
         aggregate=aggregate,
+        format=format,
     )
 
 
