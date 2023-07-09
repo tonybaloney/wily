@@ -93,4 +93,3 @@ def test_print_result_data_table_path():
 │ data2_1   │ data2_2   │ data2_3   │
 ╘═══════════╧═══════════╧═══════════╛
 """[1:]
-
