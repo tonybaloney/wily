@@ -3,6 +3,7 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
+import json
 import multiprocessing
 import os
 from pathlib import Path
@@ -25,7 +26,9 @@ from wily.operators import (
 from wily.state import State
 
 
-def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
+def diff(
+    config, files, metrics, changes_only=True, detail=True, revision=None, as_json=False
+):
     """
     Show the differences in metrics for each of the files.
 
@@ -159,9 +162,15 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
-        print(
-            # But it still makes more sense to show the newest at the top, so reverse again
-            tabulate.tabulate(
-                headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
+        if as_json:
+            json_data = [
+                {headers[x]: d[x] for x in range(len(headers))} for d in results
+            ]
+            print(json.dumps(json_data, indent=2))
+        else:
+            print(
+                # But it still makes more sense to show the newest at the top, so reverse again
+                tabulate.tabulate(
+                    headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
+                )
             )
-        )

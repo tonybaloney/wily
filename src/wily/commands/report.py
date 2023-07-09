@@ -4,6 +4,7 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+import json
 from pathlib import Path
 from shutil import copytree
 from string import Template
@@ -30,6 +31,7 @@ def report(
     include_message=False,
     format=ReportFormat.CONSOLE,
     console_format=None,
+    as_json=False,
 ):
     """
     Show information about the cache and runtime.
@@ -199,8 +201,13 @@ def report(
 
         logger.info(f"wily report was saved to {report_path}")
     else:
-        print(
-            tabulate.tabulate(
-                headers=headers, tabular_data=data[::-1], tablefmt=console_format
+        data = data[::-1]
+        if as_json:
+            json_data = [{headers[x]: d[x] for x in range(len(headers))} for d in data]
+            print(json.dumps(json_data, indent=2))
+        else:
+            print(
+                tabulate.tabulate(
+                    headers=headers, tabular_data=data, tablefmt=console_format
+                )
             )
-        )

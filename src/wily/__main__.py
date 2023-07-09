@@ -152,7 +152,12 @@ def build(ctx, max_revisions, targets, operators, archiver):
 @click.option(
     "-m", "--message/--no-message", default=False, help=_("Include revision message")
 )
-def index(ctx, message):
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
+def index(ctx, message, json):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
@@ -161,7 +166,7 @@ def index(ctx, message):
 
     from wily.commands.index import index
 
-    index(config=config, include_message=message)
+    index(config=config, include_message=message, as_json=json)
 
 
 @cli.command(
@@ -204,8 +209,13 @@ def index(ctx, message):
     help=_("Return a non-zero exit code under the specified threshold"),
     type=click.INT,
 )
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold):
+def rank(ctx, path, metric, revision, limit, desc, threshold, json):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
@@ -223,6 +233,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
         limit=limit,
         threshold=threshold,
         descending=desc,
+        as_json=json,
     )
 
 
@@ -252,8 +263,13 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
     "--output",
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
 @click.pass_context
-def report(ctx, file, metrics, number, message, format, console_format, output):
+def report(ctx, file, metrics, number, message, format, console_format, output, json):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -284,6 +300,7 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
         include_message=message,
         format=ReportFormat[format],
         console_format=console_format,
+        as_json=json,
     )
 
 
@@ -309,8 +326,13 @@ def report(ctx, file, metrics, number, message, format, console_format, output):
 @click.option(
     "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
 )
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision):
+def diff(ctx, files, metrics, all, detail, revision, json):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -334,6 +356,7 @@ def diff(ctx, files, metrics, all, detail, revision):
         changes_only=not all,
         detail=detail,
         revision=revision,
+        as_json=json,
     )
 
 

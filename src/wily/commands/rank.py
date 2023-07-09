@@ -7,6 +7,7 @@ Will compare the values between files and return a sorted table.
 
 TODO: Layer on Click invocation in operators section, __main__.py file
 """
+import json
 import operator as op
 import os
 from pathlib import Path
@@ -21,7 +22,7 @@ from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
 
-def rank(config, path, metric, revision_index, limit, threshold, descending):
+def rank(config, path, metric, revision_index, limit, threshold, descending, as_json):
     """
     Rank command ordering files, methods or functions using metrics.
 
@@ -113,11 +114,15 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
     data.append(["Total", total])
 
     headers = ("File", metric.description)
-    print(
-        tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
+    if as_json:
+        json_data = [{headers[x]: d[x] for x in range(len(headers))} for d in data]
+        print(json.dumps(json_data, indent=2))
+    else:
+        print(
+            tabulate.tabulate(
+                headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
+            )
         )
-    )
 
     if threshold and total < threshold:
         logger.error(
