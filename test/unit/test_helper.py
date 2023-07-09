@@ -29,7 +29,9 @@ def test_print_result_data_json():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_result(True, DATA, HEADERS, DEFAULT_GRID_STYLE)
-    assert stdout.getvalue() == """[
+    assert (
+        stdout.getvalue()
+        == """[
   {
     "header1": "data1_1",
     "header2": "data1_2",
@@ -42,13 +44,16 @@ def test_print_result_data_json():
   }
 ]
 """
+    )
 
 
 def test_print_result_data_table():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_result(False, DATA, HEADERS, DEFAULT_GRID_STYLE)
-    assert stdout.getvalue() == """
+    assert (
+        stdout.getvalue()
+        == """
 ╒═══════════╤═══════════╤═══════════╕
 │ header1   │ header2   │ header3   │
 ╞═══════════╪═══════════╪═══════════╡
@@ -56,14 +61,19 @@ def test_print_result_data_table():
 ├───────────┼───────────┼───────────┤
 │ data2_1   │ data2_2   │ data2_3   │
 ╘═══════════╧═══════════╧═══════════╛
-"""[1:]
+"""[
+            1:
+        ]
+    )
 
 
 def test_print_result_data_json_path():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_result(True, DATA, HEADERS, DEFAULT_GRID_STYLE, "some_path")
-    assert stdout.getvalue() == """[
+    assert (
+        stdout.getvalue()
+        == """[
   {
     "header1": "data1_1",
     "header2": "data1_2",
@@ -78,13 +88,16 @@ def test_print_result_data_json_path():
   }
 ]
 """
+    )
 
 
 def test_print_result_data_table_path():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_result(False, DATA, HEADERS, DEFAULT_GRID_STYLE, "some_path")
-    assert stdout.getvalue() == """
+    assert (
+        stdout.getvalue()
+        == """
 ╒═══════════╤═══════════╤═══════════╕
 │ header1   │ header2   │ header3   │
 ╞═══════════╪═══════════╪═══════════╡
@@ -92,4 +105,7 @@ def test_print_result_data_table_path():
 ├───────────┼───────────┼───────────┤
 │ data2_1   │ data2_2   │ data2_3   │
 ╘═══════════╧═══════════╧═══════════╛
-"""[1:]
+"""[
+            1:
+        ]
+    )

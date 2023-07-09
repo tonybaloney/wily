@@ -37,7 +37,9 @@ def test_diff_output_json(builddir):
     """Test the diff feature with JSON output"""
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", _path, "--json"], catch_exceptions=False
+        main.cli,
+        ["--debug", "--path", builddir, "diff", _path, "--json"],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
@@ -47,7 +49,9 @@ def test_diff_output_table(builddir):
     """Test the diff feature with table output"""
     runner = CliRunner()
     result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", _path, "--table"], catch_exceptions=False
+        main.cli,
+        ["--debug", "--path", builddir, "diff", _path, "--table"],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout

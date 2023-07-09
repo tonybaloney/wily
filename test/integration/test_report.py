@@ -227,9 +227,7 @@ def test_report_json(builddir):
     Test that report works with JSON output
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--json"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "--json"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -239,8 +237,6 @@ def test_report_table(builddir):
     Test that report works with table output
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--table"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "--table"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
