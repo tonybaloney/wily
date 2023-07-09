@@ -143,3 +143,17 @@ def test_rank_total_below_threshold(builddir):
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "rank", "--threshold=100"])
     assert result.exit_code == 1, result.stdout
+
+
+def test_rank_json(builddir):
+    """Test the rank feature json"""
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "--json"])
+    assert result.exit_code == 0, result.stdout
+
+
+def test_rank_table(builddir):
+    """Test the rank feature json"""
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "--table"])
+    assert result.exit_code == 0, result.stdout

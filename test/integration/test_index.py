@@ -34,3 +34,23 @@ def test_index_with_messages(builddir):
     assert "add line" in result.stdout
     assert "remove line" in result.stdout
     assert result.exit_code == 0, result.stdout
+
+
+def test_index_json(builddir):
+    """
+    Test that index works with JSON output
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "index", "--json"])
+    assert result.stdout.count("An author") >= 3
+    assert result.exit_code == 0, result.stdout
+
+
+def test_index_table(builddir):
+    """
+    Test that index works with table output
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "index", "--table"])
+    assert result.stdout.count("An author") >= 3
+    assert result.exit_code == 0, result.stdout
