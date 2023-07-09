@@ -204,6 +204,8 @@ def report(
         data = data[::-1]
         if as_json:
             json_data = [{headers[x]: d[x] for x in range(len(headers))} for d in data]
+            for entry in json_data:
+                entry["Filename"] = path
             print(json.dumps(json_data, indent=2))
         else:
             print(
