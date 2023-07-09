@@ -3,12 +3,10 @@ Print command.
 
 Print information about the wily cache and what is in the index.
 """
-import json
-
-import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.config import DEFAULT_GRID_STYLE
+from wily.helper.output import print_result
 from wily.state import State
 
 
@@ -56,12 +54,5 @@ def index(config, include_message=False, as_json=False):
         headers = ("Revision", "Author", "Message", "Date")
     else:
         headers = ("Revision", "Author", "Date")
-    if as_json:
-        json_data = [{headers[x]: d[x] for x in range(len(headers))} for d in data]
-        print(json.dumps(json_data, indent=2))
-    else:
-        print(
-            tabulate.tabulate(
-                headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
-            )
-        )
+
+    print_result(as_json, data, headers, DEFAULT_GRID_STYLE)

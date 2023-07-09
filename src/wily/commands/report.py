@@ -4,15 +4,13 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
-import json
 from pathlib import Path
 from shutil import copytree
 from string import Template
 
-import tabulate
-
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.helper.custom_enums import ReportFormat
+from wily.helper.output import print_result
 from wily.lang import _
 from wily.operators import MetricType, resolve_metric_as_tuple
 from wily.state import State
@@ -202,14 +200,5 @@ def report(
         logger.info(f"wily report was saved to {report_path}")
     else:
         data = data[::-1]
-        if as_json:
-            json_data = [{headers[x]: d[x] for x in range(len(headers))} for d in data]
-            for entry in json_data:
-                entry["Filename"] = path
-            print(json.dumps(json_data, indent=2))
-        else:
-            print(
-                tabulate.tabulate(
-                    headers=headers, tabular_data=data, tablefmt=console_format
-                )
-            )
+
+        print_result(as_json, data, headers, console_format, path)

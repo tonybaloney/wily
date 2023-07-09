@@ -3,18 +3,17 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
-import json
 import multiprocessing
 import os
 from pathlib import Path
 
 import radon.cli.harvest
-import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.helper.output import print_result
 from wily.operators import (
     BAD_COLORS,
     GOOD_COLORS,
@@ -162,15 +161,4 @@ def diff(
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
-        if as_json:
-            json_data = [
-                {headers[x]: d[x] for x in range(len(headers))} for d in results
-            ]
-            print(json.dumps(json_data, indent=2))
-        else:
-            print(
-                # But it still makes more sense to show the newest at the top, so reverse again
-                tabulate.tabulate(
-                    headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
-                )
-            )
+        print_result(as_json, results, headers, DEFAULT_GRID_STYLE)
