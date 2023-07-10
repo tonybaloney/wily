@@ -122,8 +122,8 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
             )
         )
 
-    if threshold and total < threshold:
-        logger.error(
-            f"Total value below the specified threshold: {total} < {threshold}"
-        )
-        exit(1)
+        if threshold and total < threshold:
+            logger.error(
+                f"Total value below the specified threshold: {total} < {threshold}"
+            )
+            exit(1)
