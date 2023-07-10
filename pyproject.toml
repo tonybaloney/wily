@@ -152,6 +152,6 @@ max-complexity = 24
 "test/*" = ["D"]
 
 [tool.ruff.pylint]
-max-args = 8
-max-branches = 31
-max-statements = 91
+max-args = 10
+max-branches = 35
+max-statements = 95
