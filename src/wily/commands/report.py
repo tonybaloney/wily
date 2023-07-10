@@ -189,7 +189,7 @@ def report(
             headers=table_headers, content=table_content
         )
 
-        with report_output.open("w") as output:
+        with report_output.open("w", errors="xmlcharrefreplace") as output:
             output.write(report_template)
 
         try:
