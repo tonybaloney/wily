@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-import wily.commands.build as build
 from wily.archivers import Archiver, BaseArchiver, Revision
+from wily.commands import build
 from wily.config import DEFAULT_CONFIG
 from wily.operators import BaseOperator, Operator, OperatorLevel
 

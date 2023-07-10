@@ -123,11 +123,11 @@ def graph(
             name=f"{path}",
             ids=state.index[state.default_archiver].revision_keys,
             text=labels,
-            marker=dict(
-                size=0 if z_axis is None else z,
-                color=list(range(len(y))),
-                # colorscale='Viridis',
-            ),
+            marker={
+                "size": 0 if z_axis is None else z,
+                "color": list(range(len(y))),
+                # "colorscale": "Viridis",
+            },
             xcalendar="gregorian",
             hoveron="points+fills",
         )

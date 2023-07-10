@@ -40,7 +40,7 @@ def gitdir(tmpdir):
     foo = 1
     def function1():
         a = 1 + 1
-    
+
     class Class1(object):
         def method(self):
             b = 1 + 5
