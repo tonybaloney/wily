@@ -40,17 +40,10 @@ test = [
     "pytest-cov~=3.0.0",
 ]
 dev = [
-    "bandit~=1.7.4",
     "black~=22.6.0",
-    "codespell~=2.1.0",
-    "flake8~=4.0.1",
-    "flake8-bugbear~=22.7.1",
-    "flake8-comprehensions~=3.10.0",
-    "flake8-2020~=1.6.1",
-    "isort~=5.10.1",
+    "codespell[toml]",
     "mypy~=0.961",
-    "pydocstyle~=6.1.1",
-    "pyupgrade~=2.37.1",
+    "ruff~=0.0.277",
     "safety~=2.3.4",
 ]
 # TODO: move here proper deps from `docs/requirements_docs.txt`
@@ -68,9 +61,6 @@ include = ["doc/"]
 exclude = ["doc/*.html"]
 
 [tool.black]
-line-length = 88
-target-version = ["py37", "py38", "py39", "py310", "py311"]
-include = '\.pyi?$'
 extend-exclude = '''
 /(
     \.git
@@ -81,9 +71,14 @@ extend-exclude = '''
   | dist
 )/
 '''
+include = '\.pyi?$'
+line-length = 88
+target-version = ["py37", "py38", "py39", "py310", "py311"]
 
-[tool.isort]
-profile = "black"
+[tool.codespell]
+check-filenames = "True"
+ignore-words-list = "fo,wil"
+skip = "./.*,*.json,*.po,*.svg"
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -91,8 +86,72 @@ show_error_codes = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[tool.bandit]
-skips = ["B101", "B303", "B324"]
+[tool.pytest.ini_options]
+python_files = ["tests.py", "tests_*.py", "test_*.py"]
+junit_family = "xunit2"
+testpaths = ["test"]
+norecursedirs = [
+    "*.egg",
+    ".eggs",
+    "dist",
+    "build",
+    "docs",
+    ".tox",
+    ".git",
+    "__pycache__",
+]
+addopts = """
+--strict-markers
+--strict-config
+--cov
+--cov-config=setup.cfg
+--cov-report=term
+--cov-report=xml"""
 
-[tool.pydocstyle]
-ignore = ["D203", "D212", "D301"]
+[tool.ruff]
+select = [
+    "B",
+    "C4",
+    "C9",
+    "D",
+    "E",
+    "F",
+    "I",
+    "PL",
+    "S",
+    "U",
+    "W",
+    "YTT",
+]
+extend-ignore = [
+    "D203",
+    "D212",
+    "D301",
+    "E402",
+    "E741",
+    "F821",
+    "F841",
+    "PLR2004",
+    "PLR5501",
+    "PLW2901",
+    "S101",
+    "S324",
+    "UP030",
+]
+line-length = 217
+show-source = true
+target-version = "py37"
+
+[tool.ruff.isort]
+known-local-folder = ["wily"]
+
+[tool.ruff.mccabe]
+max-complexity = 24
+
+[tool.ruff.per-file-ignores]
+"test/*" = ["D"]
+
+[tool.ruff.pylint]
+max-args = 8
+max-branches = 31
+max-statements = 91
