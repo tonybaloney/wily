@@ -10,6 +10,7 @@ TODO: Layer on Click invocation in operators section, __main__.py file
 import operator as op
 import os
 from pathlib import Path
+from sys import exit
 
 import radon.cli.harvest
 

@@ -272,7 +272,7 @@ def test_build_no_git_history(tmpdir):
         assert result.exit_code == 1, result.stdout
 
 
-archivers = {name for name in ALL_ARCHIVERS.keys()}
+archivers = set(ALL_ARCHIVERS)
 
 
 @pytest.mark.parametrize("archiver", archivers)

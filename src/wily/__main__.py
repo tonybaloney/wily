@@ -2,6 +2,7 @@
 
 import traceback
 from pathlib import Path
+from sys import exit
 
 import click
 
@@ -264,12 +265,20 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, json):
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
 @click.option(
+    "-c",
+    "--changes/--all",
+    default=False,
+    help=_("Only show revisions that have changes"),
+)
+@click.option(
     "--json/--table",
     help=_("Display results as JSON"),
     default=False,
 )
 @click.pass_context
-def report(ctx, file, metrics, number, message, format, console_format, output, json):
+def report(
+    ctx, file, metrics, number, message, format, console_format, output, changes, json
+):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -300,6 +309,7 @@ def report(ctx, file, metrics, number, message, format, console_format, output, 
         include_message=message,
         format=ReportFormat[format],
         console_format=console_format,
+        changes_only=changes,
         as_json=json,
     )
 
