@@ -99,7 +99,7 @@ def store(config, archiver, revision, stats):
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
 
-    :param archiver: The name of the archiver type (e.g. 'git')
+    :param archiver: The archiver to get name from (e.g. 'git')
     :type  archiver: :class:`Archiver`
 
     :param revision: The revision
