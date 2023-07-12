@@ -109,6 +109,9 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, as_
     if limit:
         data = data[:limit]
 
+    if not data:
+        return
+
     # Tack on the total row at the end
     total = metric.aggregate(rev[1] for rev in data)
     data.append(["Total", total])
