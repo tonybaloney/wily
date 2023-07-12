@@ -368,8 +368,8 @@ def diff(ctx, files, metrics, all, detail, revision):
     """
     )
 )
-@click.argument("path", type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=-1, required=True)
+@click.argument("path", nargs=-1, type=click.Path(resolve_path=False))
+@click.argument("metrics", nargs=1, required=True)
 @click.option(
     "-o",
     "--output",

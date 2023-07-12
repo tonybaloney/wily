@@ -3,6 +3,7 @@ Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
 """
+import pathlib
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -35,10 +36,10 @@ def graph(
     :type  config: :class:`wily.config.WilyConfig`
 
     :param path: The path to the files.
-    :type  path: ``list``
+    :type  path: ``tuple``
 
     :param metrics: The Y and Z-axis metrics to report on.
-    :type  metrics: ``tuple``
+    :type  metrics: ``str``
 
     :param output: Save report to specified path instead of opening browser.
     :type  output: ``str``
@@ -53,21 +54,22 @@ def graph(
     else:
         x_operator, x_key = metric_parts(x_axis)
 
+    metrics = metrics.split(",")
+
     y_metric = resolve_metric(metrics[0])
-    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}{' aggregated' if aggregate else ''}"
+    title = f"{x_axis.capitalize()} of {y_metric.description} for {', '.join(path)}{' aggregated' if aggregate else ''}"
 
     if not aggregate:
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        paths = {
+        paths = tuple(
             tracked_file
             for tracked_file in tracked_files
-            if tracked_file.startswith(path)
-        } or {path}
+            if any(tracked_file.startswith(p) for p in path)
+        ) or path
     else:
-        paths = {path}
-
+        paths = path
     operator, key = metric_parts(metrics[0])
     if len(metrics) == 1:  # only y-axis
         z_axis = None
@@ -75,6 +77,7 @@ def graph(
         z_axis = resolve_metric(metrics[1])
         z_operator, z_key = metric_parts(metrics[1])
     for path in paths:
+        path = pathlib.Path(path)
         x = []
         y = []
         z = []
