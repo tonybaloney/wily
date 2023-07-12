@@ -280,8 +280,8 @@ msgid "Show the differences in metrics for each file."
 msgstr ""
 
 #: src/wily/__main__.py:279
-msgid "comma-seperated list of metrics, see list-metrics for choices"
-msgstr "comma-seperated list of metrics, see list-metrics for choices"
+msgid "comma-separated list of metrics, see list-metrics for choices"
+msgstr "comma-separated list of metrics, see list-metrics for choices"
 
 #: src/wily/__main__.py:285
 msgid "Show all files, instead of changes only"

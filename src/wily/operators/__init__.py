@@ -176,7 +176,7 @@ def resolve_metric_as_tuple(metric):
     :param metric: the metric name.
     :type  metric: ``str``
 
-    :rtype: :class:`Metric`
+    :rtype: tuple(:class:`Operator`, :class:`Metric`)
     """
     if "." in metric:
         _, metric = metric.split(".")
