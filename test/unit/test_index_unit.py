@@ -4,48 +4,6 @@ from unittest import mock
 
 from wily.commands.index import index
 
-EXPECTED = """
-╒════════════╤══════════╤════════════╕
-│ Revision   │ Author   │ Date       │
-╞════════════╪══════════╪════════════╡
-│ abcdef0    │ Author 0 │ 1969-12-31 │
-├────────────┼──────────┼────────────┤
-│ abcdef1    │ Author 1 │ 1969-12-31 │
-├────────────┼──────────┼────────────┤
-│ abcdef2    │ Author 2 │ 1969-12-31 │
-╘════════════╧══════════╧════════════╛
-"""
-EXPECTED = EXPECTED[1:]
-
-EXPECTED_WITH_MESSAGE = """
-╒════════════╤══════════╤═══════════╤════════════╕
-│ Revision   │ Author   │ Message   │ Date       │
-╞════════════╪══════════╪═══════════╪════════════╡
-│ abcdef0    │ Author 0 │ Message 0 │ 1969-12-31 │
-├────────────┼──────────┼───────────┼────────────┤
-│ abcdef1    │ Author 1 │ Message 1 │ 1969-12-31 │
-├────────────┼──────────┼───────────┼────────────┤
-│ abcdef2    │ Author 2 │ Message 2 │ 1969-12-31 │
-╘════════════╧══════════╧═══════════╧════════════╛
-"""
-EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
-
-EXPECTED_EMPTY = """
-╒════════════╤══════════╤════════╕
-│ Revision   │ Author   │ Date   │
-╞════════════╪══════════╪════════╡
-╘════════════╧══════════╧════════╛
-"""
-EXPECTED_EMPTY = EXPECTED_EMPTY[1:]
-
-EXPECTED_EMPTY_WITH_MESSAGE = """
-╒════════════╤══════════╤═══════════╤════════╕
-│ Revision   │ Author   │ Message   │ Date   │
-╞════════════╪══════════╪═══════════╪════════╡
-╘════════════╧══════════╧═══════════╧════════╛
-"""
-EXPECTED_EMPTY_WITH_MESSAGE = EXPECTED_EMPTY_WITH_MESSAGE[1:]
-
 
 def get_mock_State_and_config(revs):
     revisions = []
@@ -66,6 +24,20 @@ def get_mock_State_and_config(revs):
     return mock_State, mock_config
 
 
+EXPECTED = """
+╒════════════╤══════════╤════════════╕
+│ Revision   │ Author   │ Date       │
+╞════════════╪══════════╪════════════╡
+│ abcdef0    │ Author 0 │ 1969-12-31 │
+├────────────┼──────────┼────────────┤
+│ abcdef1    │ Author 1 │ 1969-12-31 │
+├────────────┼──────────┼────────────┤
+│ abcdef2    │ Author 2 │ 1969-12-31 │
+╘════════════╧══════════╧════════════╛
+"""
+EXPECTED = EXPECTED[1:]
+
+
 def test_index_without_message():
     mock_State, mock_config = get_mock_State_and_config(3)
     stdout = StringIO()
@@ -77,6 +49,20 @@ def test_index_without_message():
 
     assert stdout.getvalue() == EXPECTED
     mock_State.assert_called_once_with(config=mock_config)
+
+
+EXPECTED_WITH_MESSAGE = """
+╒════════════╤══════════╤═══════════╤════════════╕
+│ Revision   │ Author   │ Message   │ Date       │
+╞════════════╪══════════╪═══════════╪════════════╡
+│ abcdef0    │ Author 0 │ Message 0 │ 1969-12-31 │
+├────────────┼──────────┼───────────┼────────────┤
+│ abcdef1    │ Author 1 │ Message 1 │ 1969-12-31 │
+├────────────┼──────────┼───────────┼────────────┤
+│ abcdef2    │ Author 2 │ Message 2 │ 1969-12-31 │
+╘════════════╧══════════╧═══════════╧════════════╛
+"""
+EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
 
 
 def test_index_with_message():
@@ -92,6 +78,15 @@ def test_index_with_message():
     mock_State.assert_called_once_with(config=mock_config)
 
 
+EXPECTED_EMPTY = """
+╒════════════╤══════════╤════════╕
+│ Revision   │ Author   │ Date   │
+╞════════════╪══════════╪════════╡
+╘════════════╧══════════╧════════╛
+"""
+EXPECTED_EMPTY = EXPECTED_EMPTY[1:]
+
+
 def test_empty_index_without_message():
     mock_State, mock_config = get_mock_State_and_config(0)
     stdout = StringIO()
@@ -103,6 +98,15 @@ def test_empty_index_without_message():
 
     assert stdout.getvalue() == EXPECTED_EMPTY
     mock_State.assert_called_once_with(config=mock_config)
+
+
+EXPECTED_EMPTY_WITH_MESSAGE = """
+╒════════════╤══════════╤═══════════╤════════╕
+│ Revision   │ Author   │ Message   │ Date   │
+╞════════════╪══════════╪═══════════╪════════╡
+╘════════════╧══════════╧═══════════╧════════╛
+"""
+EXPECTED_EMPTY_WITH_MESSAGE = EXPECTED_EMPTY_WITH_MESSAGE[1:]
 
 
 def test_empty_index_with_message():
