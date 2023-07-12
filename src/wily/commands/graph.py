@@ -3,7 +3,8 @@ Draw graph in HTML for a specific metric.
 
 TODO: Add multiple lines for multiple files
 """
-import pathlib
+
+from pathlib import Path
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -76,8 +77,8 @@ def graph(
     else:
         z_axis = resolve_metric(metrics[1])
         z_operator, z_key = metric_parts(metrics[1])
-    for path in paths:
-        path = pathlib.Path(path)
+    for path_ in paths:
+        current_path = str(Path(path_))
         x = []
         y = []
         z = []
@@ -85,7 +86,9 @@ def graph(
         last_y = None
         for rev in state.index[state.default_archiver].revisions:
             try:
-                val = rev.get(config, state.default_archiver, operator, str(path), key)
+                val = rev.get(
+                    config, state.default_archiver, operator, current_path, key
+                )
                 if val != last_y or not changes:
                     y.append(val)
                     if z_axis:
@@ -94,7 +97,7 @@ def graph(
                                 config,
                                 state.default_archiver,
                                 z_operator,
-                                str(path),
+                                current_path,
                                 z_key,
                             )
                         )
@@ -106,7 +109,7 @@ def graph(
                                 config,
                                 state.default_archiver,
                                 x_operator,
-                                str(path),
+                                current_path,
                                 x_key,
                             )
                         )
