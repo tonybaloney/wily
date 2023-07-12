@@ -109,21 +109,22 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
     if limit:
         data = data[:limit]
 
-    if data:
-        # Tack on the total row at the end
-        total = metric.aggregate(rev[1] for rev in data)
+    if not data:
+        return
 
-        data.append(["Total", total])
+    # Tack on the total row at the end
+    total = metric.aggregate(rev[1] for rev in data)
+    data.append(["Total", total])
 
-        headers = ("File", metric.description)
-        print(
-            tabulate.tabulate(
-                headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
-            )
+    headers = ("File", metric.description)
+    print(
+        tabulate.tabulate(
+            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
         )
+    )
 
-        if threshold and total < threshold:
-            logger.error(
-                f"Total value below the specified threshold: {total} < {threshold}"
-            )
-            exit(1)
+    if threshold and total < threshold:
+        logger.error(
+            f"Total value below the specified threshold: {total} < {threshold}"
+        )
+        exit(1)
