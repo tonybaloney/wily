@@ -2,22 +2,29 @@
 from unittest import mock
 
 
-def get_mock_State_and_config(revs, empty=False, with_keyerror=False):
+def get_mock_State_and_config(revs, empty=False, with_keyerror=False, ascending=False):
     """Build a mock State and a mock config for command tests."""
     revisions = []
     if not empty:
         for rev in range(revs):
-            add_revision(rev, revisions)
+            add_revision(rev, revisions, ascending=ascending)
         rev_dict = {
             "key": "abcdeff",
             "author": "Author Someone",
             "message": "Message here.",
             "date": 10,
         }
-        add_revision(revs, revisions, val=revs, **rev_dict)
-        add_revision(revs, revisions, val=revs + 1, **rev_dict)
-        add_revision(revs, revisions, val=revs, **rev_dict)
-        add_revision(revs, revisions, val=revs, **rev_dict, with_keyerror=with_keyerror)
+        add_revision(revs, revisions, val=revs, ascending=ascending, **rev_dict)
+        add_revision(revs, revisions, val=revs + 1, ascending=ascending, **rev_dict)
+        add_revision(revs, revisions, val=revs, ascending=ascending, **rev_dict)
+        add_revision(
+            revs,
+            revisions,
+            val=revs,
+            ascending=ascending,
+            **rev_dict,
+            with_keyerror=with_keyerror,
+        )
     if revisions:
         mock__get_item__ = mock.Mock(return_value=revisions[-1])
     else:
@@ -42,6 +49,7 @@ def add_revision(
     date=None,
     val=None,
     with_keyerror=False,
+    ascending=False,
 ):
     """Add a mock revision to the revisions list."""
     rev_dict = {
@@ -52,6 +60,8 @@ def add_revision(
     }
     if with_keyerror:
         mock_get = mock.Mock(side_effect=KeyError("some_path.py"))
+    elif ascending:
+        mock_get = mock.Mock(side_effect=[0, 1, 2, 3, 4, 5])
     else:
         mock_get = mock.Mock(return_value=val or rev)
     mock_revision = mock.Mock(get=mock_get, **rev_dict)
