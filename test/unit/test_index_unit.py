@@ -42,9 +42,7 @@ EXPECTED = EXPECTED[1:]
 def test_index_without_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(3)
 
-    with mock.patch(
-        "wily.commands.index.State", mock_State
-    ):
+    with mock.patch("wily.commands.index.State", mock_State):
         index(mock_config, include_message=False)
 
     captured = capsys.readouterr()
@@ -69,9 +67,7 @@ EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
 def test_index_with_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(3)
 
-    with mock.patch(
-        "wily.commands.index.State", mock_State
-    ):
+    with mock.patch("wily.commands.index.State", mock_State):
         index(mock_config, include_message=True)
 
     captured = capsys.readouterr()
@@ -91,9 +87,7 @@ EXPECTED_EMPTY = EXPECTED_EMPTY[1:]
 def test_empty_index_without_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(0)
 
-    with mock.patch(
-        "wily.commands.index.State", mock_State
-    ):
+    with mock.patch("wily.commands.index.State", mock_State):
         index(mock_config, include_message=False)
 
     captured = capsys.readouterr()
@@ -113,9 +107,7 @@ EXPECTED_EMPTY_WITH_MESSAGE = EXPECTED_EMPTY_WITH_MESSAGE[1:]
 def test_empty_index_with_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(0)
 
-    with mock.patch(
-        "wily.commands.index.State", mock_State
-    ):
+    with mock.patch("wily.commands.index.State", mock_State):
         index(mock_config, include_message=True)
 
     captured = capsys.readouterr()

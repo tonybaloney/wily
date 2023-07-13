@@ -28,9 +28,9 @@ def test_rank(capsys):
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
 
-    with  mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
         rank(
             config=mock_config,
             path=None,
@@ -69,9 +69,9 @@ def test_rank_descending(capsys):
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
 
-    with  mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
         rank(
             config=mock_config,
             path=None,
@@ -108,9 +108,9 @@ def test_rank_limit(capsys):
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
 
-    with  mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
         rank(
             config=mock_config,
             path=None,
@@ -135,9 +135,9 @@ def test_rank_path(capsys):
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
 
-    with  mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
         rank(
             config=mock_config,
             path="directory1s",
@@ -163,11 +163,9 @@ def test_rank_path_output(capsys):
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
     mock_iterfilenames = mock.Mock(return_value=("file1", "file2"))
 
-    with  mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve), mock.patch(
-        "radon.cli.harvest.iter_filenames", mock_iterfilenames
-    ):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ), mock.patch("radon.cli.harvest.iter_filenames", mock_iterfilenames):
         rank(
             config=mock_config,
             path="directory1s",
@@ -192,9 +190,9 @@ def test_keyerror(capsys):
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
 
-    with mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
         raised = False
         try:
             rank(
@@ -223,9 +221,9 @@ def test_threshold(capsys):
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
 
-    with  mock.patch(
-        "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
         raised = False
         try:
             rank(
