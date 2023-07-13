@@ -30,7 +30,9 @@ def get_mock_State_and_config(revs, empty=False, with_keyerror=False, ascending=
     else:
         mock__get_item__ = mock.Mock(side_effect=KeyError)
 
-    mock_revisions = mock.MagicMock(revisions=revisions, __getitem__=mock__get_item__)
+    mock_revisions = mock.MagicMock(
+        revisions=revisions, __getitem__=mock__get_item__, revision_keys=("abcdeff",)
+    )
     mock_state = mock.Mock(
         index={"git": mock_revisions}, archivers=("git",), default_archiver="git"
     )
@@ -57,6 +59,7 @@ def add_revision(
         "revision.author_name": author or f"Author {rev}",
         "revision.message": message or f"Message {rev}",
         "revision.date": date or rev,
+        "revision.tracked_files": ("file0", "file1"),
     }
     if with_keyerror:
         mock_get = mock.Mock(side_effect=KeyError("some_path.py"))
