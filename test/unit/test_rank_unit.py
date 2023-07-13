@@ -11,9 +11,9 @@ def get_mock_State_and_config(revs, empty=False, with_keyerror=False):
         for rev in range(revs):
             add_revision(rev, revisions)
         rev_dict = {
-            "key": f"abcdeff",
-            "author": f"Author Someone",
-            "message": f"Message here.",
+            "key": "abcdeff",
+            "author": "Author Someone",
+            "message": "Message here.",
             "date": 10,
         }
         add_revision(revs, revisions, val=revs, **rev_dict)
