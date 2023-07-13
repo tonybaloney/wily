@@ -167,8 +167,9 @@ def test_rank_path_output():
 
     with mock.patch("sys.stdout", stdout), mock.patch(
         "wily.commands.rank.State", mock_State
-    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve
-    ), mock.patch("radon.cli.harvest.iter_filenames", mock_iterfilenames):
+    ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve), mock.patch(
+        "radon.cli.harvest.iter_filenames", mock_iterfilenames
+    ):
         rank(
             config=mock_config,
             path="directory1s",
