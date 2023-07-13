@@ -5,7 +5,7 @@ from unittest import mock
 
 from util import get_mock_State_and_config
 
-from wily.commands.graph import graph
+from wily.commands.graph import graph, metric_parts
 
 SCATTER_EXPECTED = dict(
     x=["1969-12-31T21:00:00"],
@@ -263,3 +263,33 @@ def test_graph_all():
     mock_Layout.assert_called_once_with(**LAYOUT_EXPECTED_ALL)
     mock_go.Scatter.assert_called_once_with(**SCATTER_EXPECTED_ALL)
     mock_State.assert_called_once_with(mock_config)
+
+
+def test_metric_parts():
+    result = metric_parts("raw.loc")
+    assert result[0] == "raw"
+    assert result[1] == "loc"
+
+
+def test_metric_parts_no_operator():
+    result = metric_parts("loc")
+    assert result[0] == "raw"
+    assert result[1] == "loc"
+
+
+def test_metric_parts_no_metric():
+    raised = False
+    try:
+        metric_parts("raw")
+    except ValueError:
+        raised = True
+    assert raised, "metric_parts didn't raise ValueError for missing metric."
+
+
+def test_metric_parts_invalid_metric():
+    raised = False
+    try:
+        metric_parts("raw.blah")
+    except ValueError:
+        raised = True
+    assert raised, "metric_parts didn't raise ValueError for invalid metric."
