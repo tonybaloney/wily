@@ -26,11 +26,8 @@ def test_rank():
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
-    mock_find = mock.Mock()
-    mock_find.find = mock.Mock(return_value=mock_revision)
-    mock_cls = mock.Mock()
-    mock_cls.cls = mock.Mock(return_value=mock_find)
-    mock_resolve = mock.MagicMock(return_value=mock_cls)
+    mock_resolve = mock.MagicMock()
+    mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
     stdout = StringIO()
 
     with mock.patch("sys.stdout", stdout), mock.patch(
@@ -49,8 +46,6 @@ def test_rank():
     assert stdout.getvalue() == EXPECTED
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
-    mock_cls.cls.assert_called_once()
-    mock_find.find.assert_called_once()
 
 
 def test_keyerror():
@@ -58,11 +53,8 @@ def test_keyerror():
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, empty=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
-    mock_find = mock.Mock()
-    mock_find.find = mock.Mock(return_value=mock_revision)
-    mock_cls = mock.Mock()
-    mock_cls.cls = mock.Mock(return_value=mock_find)
-    mock_resolve = mock.MagicMock(return_value=mock_cls)
+    mock_resolve = mock.MagicMock()
+    mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
     stdout = StringIO()
 
     with mock.patch("sys.stdout", stdout), mock.patch(
@@ -85,8 +77,6 @@ def test_keyerror():
     assert stdout.getvalue() == ""
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
-    mock_cls.cls.assert_called_once()
-    mock_find.find.assert_called_once()
 
 
 def test_threshold():
@@ -94,11 +84,8 @@ def test_threshold():
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
-    mock_find = mock.Mock()
-    mock_find.find = mock.Mock(return_value=mock_revision)
-    mock_cls = mock.Mock()
-    mock_cls.cls = mock.Mock(return_value=mock_find)
-    mock_resolve = mock.MagicMock(return_value=mock_cls)
+    mock_resolve = mock.MagicMock()
+    mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
     stdout = StringIO()
 
     with mock.patch("sys.stdout", stdout), mock.patch(
@@ -121,5 +108,3 @@ def test_threshold():
     assert stdout.getvalue() == EXPECTED
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
-    mock_cls.cls.assert_called_once()
-    mock_find.find.assert_called_once()
