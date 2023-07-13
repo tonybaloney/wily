@@ -1,4 +1,4 @@
-"""Unit tests for the index command."""
+"""Unit tests for the graph command."""
 
 from unittest import mock
 

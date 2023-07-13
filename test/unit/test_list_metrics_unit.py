@@ -1,4 +1,4 @@
-"""Unit tests for the index command."""
+"""Unit tests for the list_metrics command."""
 
 from io import StringIO
 from statistics import mean

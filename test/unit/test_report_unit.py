@@ -1,4 +1,4 @@
-"""Unit tests for the index command."""
+"""Unit tests for the report command."""
 
 from io import StringIO
 from unittest import mock
