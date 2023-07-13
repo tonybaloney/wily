@@ -31,14 +31,13 @@ EXPECTED = """
 EXPECTED = EXPECTED[1:]
 
 
-def test_report_no_message():
+def test_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -52,7 +51,8 @@ def test_report_no_message():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
-    assert stdout.getvalue() == EXPECTED
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -74,14 +74,13 @@ EXPECTED_CHANGES_ONLY = """
 EXPECTED_CHANGES_ONLY = EXPECTED_CHANGES_ONLY[1:]
 
 
-def test_report_no_message_changes_only():
+def test_report_no_message_changes_only(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -95,7 +94,8 @@ def test_report_no_message_changes_only():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=True,
         )
-    assert stdout.getvalue() == EXPECTED_CHANGES_ONLY
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_CHANGES_ONLY
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -121,14 +121,13 @@ EXPECTED_WITH_MESSAGE = """
 EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
 
 
-def test_report_with_message():
+def test_report_with_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -142,7 +141,8 @@ def test_report_with_message():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
-    assert stdout.getvalue() == EXPECTED_WITH_MESSAGE
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_WITH_MESSAGE
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -155,14 +155,13 @@ EXPECTED_EMPTY = """
 EXPECTED_EMPTY = EXPECTED_EMPTY[1:]
 
 
-def test_empty_report_no_message():
+def test_empty_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, empty=True)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -176,7 +175,8 @@ def test_empty_report_no_message():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
-    assert stdout.getvalue() == EXPECTED_EMPTY
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_EMPTY
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -189,15 +189,13 @@ EXPECTED_EMPTY_WITH_MESSAGE = """
 EXPECTED_EMPTY_WITH_MESSAGE = EXPECTED_EMPTY_WITH_MESSAGE[1:]
 
 
-def test_empty_report_with_message():
+def test_empty_report_with_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
-    output = StringIO()
     mock_State, mock_config = get_mock_State_and_config(3, empty=True)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -211,7 +209,8 @@ def test_empty_report_with_message():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
-    assert stdout.getvalue() == EXPECTED_EMPTY_WITH_MESSAGE
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_EMPTY_WITH_MESSAGE
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -237,14 +236,13 @@ EXPECTED_WITH_KEYERROR = """
 EXPECTED_WITH_KEYERROR = EXPECTED_WITH_KEYERROR[1:]
 
 
-def test_report_with_keyerror():
+def test_report_with_keyerror(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -258,7 +256,8 @@ def test_report_with_keyerror():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
-    assert stdout.getvalue() == EXPECTED_WITH_KEYERROR
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_WITH_KEYERROR
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -280,14 +279,13 @@ EXPECTED_WITH_KEYERROR_CHANGES_ONLY = """
 EXPECTED_WITH_KEYERROR_CHANGES_ONLY = EXPECTED_WITH_KEYERROR_CHANGES_ONLY[1:]
 
 
-def test_report_with_keyerror_changes_only():
+def test_report_with_keyerror_changes_only(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ):
         report(
@@ -301,7 +299,8 @@ def test_report_with_keyerror_changes_only():
             console_format=DEFAULT_GRID_STYLE,
             changes_only=True,
         )
-    assert stdout.getvalue() == EXPECTED_WITH_KEYERROR_CHANGES_ONLY
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_WITH_KEYERROR_CHANGES_ONLY
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -349,9 +348,8 @@ def test_report_html():
     mock_output, output = get_outputs()
 
     mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.report.State", mock_State
     ), mock.patch("wily.commands.report.copytree"):
         report(

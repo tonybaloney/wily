@@ -1,6 +1,5 @@
 """Unit tests for the index command."""
 
-from io import StringIO
 from unittest import mock
 
 from wily.commands.index import index
@@ -40,16 +39,16 @@ EXPECTED = """
 EXPECTED = EXPECTED[1:]
 
 
-def test_index_without_message():
+def test_index_without_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(3)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.index.State", mock_State
     ):
         index(mock_config, include_message=False)
 
-    assert stdout.getvalue() == EXPECTED
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -67,16 +66,16 @@ EXPECTED_WITH_MESSAGE = """
 EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
 
 
-def test_index_with_message():
+def test_index_with_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(3)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.index.State", mock_State
     ):
         index(mock_config, include_message=True)
 
-    assert stdout.getvalue() == EXPECTED_WITH_MESSAGE
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_WITH_MESSAGE
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -89,16 +88,16 @@ EXPECTED_EMPTY = """
 EXPECTED_EMPTY = EXPECTED_EMPTY[1:]
 
 
-def test_empty_index_without_message():
+def test_empty_index_without_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(0)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.index.State", mock_State
     ):
         index(mock_config, include_message=False)
 
-    assert stdout.getvalue() == EXPECTED_EMPTY
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_EMPTY
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -111,14 +110,14 @@ EXPECTED_EMPTY_WITH_MESSAGE = """
 EXPECTED_EMPTY_WITH_MESSAGE = EXPECTED_EMPTY_WITH_MESSAGE[1:]
 
 
-def test_empty_index_with_message():
+def test_empty_index_with_message(capsys):
     mock_State, mock_config = get_mock_State_and_config(0)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.index.State", mock_State
     ):
         index(mock_config, include_message=True)
 
-    assert stdout.getvalue() == EXPECTED_EMPTY_WITH_MESSAGE
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_EMPTY_WITH_MESSAGE
     mock_State.assert_called_once_with(config=mock_config)

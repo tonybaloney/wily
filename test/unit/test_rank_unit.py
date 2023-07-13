@@ -1,6 +1,5 @@
 """Unit tests for the rank command."""
 
-from io import StringIO
 from unittest import mock
 
 from util import get_mock_State_and_config
@@ -21,16 +20,15 @@ EXPECTED = """
 EXPECTED = EXPECTED[1:]
 
 
-def test_rank():
+def test_rank(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with  mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
         rank(
@@ -43,7 +41,8 @@ def test_rank():
             descending=False,
         )
 
-    assert stdout.getvalue() == EXPECTED
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -62,16 +61,15 @@ EXPECTED_DESCENDING = """
 EXPECTED_DESCENDING = EXPECTED_DESCENDING[1:]
 
 
-def test_rank_descending():
+def test_rank_descending(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with  mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
         rank(
@@ -84,7 +82,8 @@ def test_rank_descending():
             descending=True,
         )
 
-    assert stdout.getvalue() == EXPECTED_DESCENDING
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_DESCENDING
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -101,16 +100,15 @@ EXPECTED_LIMIT = """
 EXPECTED_LIMIT = EXPECTED_LIMIT[1:]
 
 
-def test_rank_limit():
+def test_rank_limit(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with  mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
         rank(
@@ -123,21 +121,21 @@ def test_rank_limit():
             descending=False,
         )
 
-    assert stdout.getvalue() == EXPECTED_LIMIT
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_LIMIT
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
 
-def test_rank_path():
+def test_rank_path(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with  mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
         rank(
@@ -150,12 +148,13 @@ def test_rank_path():
             descending=False,
         )
 
-    assert stdout.getvalue() == ""
+    captured = capsys.readouterr()
+    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
 
-def test_rank_path_output():
+def test_rank_path_output(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
@@ -163,9 +162,8 @@ def test_rank_path_output():
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
     mock_iterfilenames = mock.Mock(return_value=("file1", "file2"))
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with  mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve), mock.patch(
         "radon.cli.harvest.iter_filenames", mock_iterfilenames
@@ -180,21 +178,21 @@ def test_rank_path_output():
             descending=False,
         )
 
-    assert stdout.getvalue() == EXPECTED
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
 
-def test_keyerror():
+def test_keyerror(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, empty=True, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
         raised = False
@@ -211,21 +209,21 @@ def test_keyerror():
         except SystemExit:
             raised = True
     assert raised, "rank didn't raise SystemExit."
-    assert stdout.getvalue() == ""
+    captured = capsys.readouterr()
+    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
 
-def test_threshold():
+def test_threshold(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
-    stdout = StringIO()
 
-    with mock.patch("sys.stdout", stdout), mock.patch(
+    with  mock.patch(
         "wily.commands.rank.State", mock_State
     ), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve):
         raised = False
@@ -242,6 +240,7 @@ def test_threshold():
         except SystemExit:
             raised = True
     assert raised, "rank didn't raise SystemExit."
-    assert stdout.getvalue() == EXPECTED
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
