@@ -5,27 +5,28 @@ from unittest import mock
 
 from util import get_mock_State_and_config
 
+from wily import format_date as fd
 from wily.commands.report import report
 from wily.config import DEFAULT_GRID_STYLE
 from wily.helper.custom_enums import ReportFormat
 
-EXPECTED = """
+EXPECTED = f"""
 ╒════════════╤════════════════╤════════════╤═════════════════╕
 │ Revision   │ Author         │ Date       │ Lines of Code   │
 ╞════════════╪════════════════╪════════════╪═════════════════╡
-│ abcdef0    │ Author 0       │ 1969-12-31 │ 0 (\u001b[33m-1\u001b[0m)          │
+│ abcdef0    │ Author 0       │ {fd(0)} │ 0 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef1    │ Author 1       │ 1969-12-31 │ 1 (\u001b[33m-1\u001b[0m)          │
+│ abcdef1    │ Author 1       │ {fd(1)} │ 1 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef2    │ Author 2       │ 1969-12-31 │ 2 (\u001b[33m-1\u001b[0m)          │
+│ abcdef2    │ Author 2       │ {fd(2)} │ 2 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (\u001b[33m-1\u001b[0m)          │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 3 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 4 (\u001b[33m+1\u001b[0m)          │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 4 (\u001b[33m+1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (0)           │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 3 (0)           │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (0)           │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 3 (0)           │
 ╘════════════╧════════════════╧════════════╧═════════════════╛
 """
 EXPECTED = EXPECTED[1:]
@@ -54,19 +55,19 @@ def test_report_no_message(capsys):
     mock_State.assert_called_once_with(mock_config)
 
 
-EXPECTED_CHANGES_ONLY = """
+EXPECTED_CHANGES_ONLY = f"""
 ╒════════════╤════════════════╤════════════╤═════════════════╕
 │ Revision   │ Author         │ Date       │ Lines of Code   │
 ╞════════════╪════════════════╪════════════╪═════════════════╡
-│ abcdef0    │ Author 0       │ 1969-12-31 │ 0 (\u001b[33m-1\u001b[0m)          │
+│ abcdef0    │ Author 0       │ {fd(0)} │ 0 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef1    │ Author 1       │ 1969-12-31 │ 1 (\u001b[33m-1\u001b[0m)          │
+│ abcdef1    │ Author 1       │ {fd(1)} │ 1 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef2    │ Author 2       │ 1969-12-31 │ 2 (\u001b[33m-1\u001b[0m)          │
+│ abcdef2    │ Author 2       │ {fd(2)} │ 2 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (\u001b[33m-1\u001b[0m)          │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 3 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 4 (\u001b[33m+1\u001b[0m)          │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 4 (\u001b[33m+1\u001b[0m)          │
 ╘════════════╧════════════════╧════════════╧═════════════════╛
 """
 EXPECTED_CHANGES_ONLY = EXPECTED_CHANGES_ONLY[1:]
@@ -95,23 +96,23 @@ def test_report_no_message_changes_only(capsys):
     mock_State.assert_called_once_with(mock_config)
 
 
-EXPECTED_WITH_MESSAGE = """
+EXPECTED_WITH_MESSAGE = f"""
 ╒════════════╤═══════════════╤════════════════╤════════════╤═════════════════╕
 │ Revision   │ Message       │ Author         │ Date       │ Lines of Code   │
 ╞════════════╪═══════════════╪════════════════╪════════════╪═════════════════╡
-│ abcdef0    │ Message 0     │ Author 0       │ 1969-12-31 │ 0 (\u001b[33m-1\u001b[0m)          │
+│ abcdef0    │ Message 0     │ Author 0       │ {fd(0)} │ 0 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼───────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef1    │ Message 1     │ Author 1       │ 1969-12-31 │ 1 (\u001b[33m-1\u001b[0m)          │
+│ abcdef1    │ Message 1     │ Author 1       │ {fd(1)} │ 1 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼───────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef2    │ Message 2     │ Author 2       │ 1969-12-31 │ 2 (\u001b[33m-1\u001b[0m)          │
+│ abcdef2    │ Message 2     │ Author 2       │ {fd(2)} │ 2 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼───────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Message here. │ Author Someone │ 1969-12-31 │ 3 (\u001b[33m-1\u001b[0m)          │
+│ abcdeff    │ Message here. │ Author Someone │ {fd(3)} │ 3 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼───────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Message here. │ Author Someone │ 1969-12-31 │ 4 (\u001b[33m+1\u001b[0m)          │
+│ abcdeff    │ Message here. │ Author Someone │ {fd(10)} │ 4 (\u001b[33m+1\u001b[0m)          │
 ├────────────┼───────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Message here. │ Author Someone │ 1969-12-31 │ 3 (0)           │
+│ abcdeff    │ Message here. │ Author Someone │ {fd(10)} │ 3 (0)           │
 ├────────────┼───────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Message here. │ Author Someone │ 1969-12-31 │ 3 (0)           │
+│ abcdeff    │ Message here. │ Author Someone │ {fd(10)} │ 3 (0)           │
 ╘════════════╧═══════════════╧════════════════╧════════════╧═════════════════╛
 """
 EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
@@ -204,23 +205,23 @@ def test_empty_report_with_message(capsys):
     mock_State.assert_called_once_with(mock_config)
 
 
-EXPECTED_WITH_KEYERROR = """
+EXPECTED_WITH_KEYERROR = f"""
 ╒════════════╤════════════════╤════════════╤══════════════════════════╕
 │ Revision   │ Author         │ Date       │ Lines of Code            │
 ╞════════════╪════════════════╪════════════╪══════════════════════════╡
-│ abcdef0    │ Author 0       │ 1969-12-31 │ 0 (\u001b[33m-1\u001b[0m)                   │
+│ abcdef0    │ Author 0       │ {fd(0)} │ 0 (\u001b[33m-1\u001b[0m)                   │
 ├────────────┼────────────────┼────────────┼──────────────────────────┤
-│ abcdef1    │ Author 1       │ 1969-12-31 │ 1 (\u001b[33m-1\u001b[0m)                   │
+│ abcdef1    │ Author 1       │ {fd(1)} │ 1 (\u001b[33m-1\u001b[0m)                   │
 ├────────────┼────────────────┼────────────┼──────────────────────────┤
-│ abcdef2    │ Author 2       │ 1969-12-31 │ 2 (\u001b[33m-1\u001b[0m)                   │
+│ abcdef2    │ Author 2       │ {fd(2)} │ 2 (\u001b[33m-1\u001b[0m)                   │
 ├────────────┼────────────────┼────────────┼──────────────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (\u001b[33m-1\u001b[0m)                   │
+│ abcdeff    │ Author Someone │ {fd(3)} │ 3 (\u001b[33m-1\u001b[0m)                   │
 ├────────────┼────────────────┼────────────┼──────────────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 4 (\u001b[33m+1\u001b[0m)                   │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 4 (\u001b[33m+1\u001b[0m)                   │
 ├────────────┼────────────────┼────────────┼──────────────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (0)                    │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 3 (0)                    │
 ├────────────┼────────────────┼────────────┼──────────────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ Not found 'some_path.py' │
+│ abcdeff    │ Author Someone │ {fd(10)} │ Not found 'some_path.py' │
 ╘════════════╧════════════════╧════════════╧══════════════════════════╛
 """
 EXPECTED_WITH_KEYERROR = EXPECTED_WITH_KEYERROR[1:]
@@ -249,19 +250,19 @@ def test_report_with_keyerror(capsys):
     mock_State.assert_called_once_with(mock_config)
 
 
-EXPECTED_WITH_KEYERROR_CHANGES_ONLY = """
+EXPECTED_WITH_KEYERROR_CHANGES_ONLY = f"""
 ╒════════════╤════════════════╤════════════╤═════════════════╕
 │ Revision   │ Author         │ Date       │ Lines of Code   │
 ╞════════════╪════════════════╪════════════╪═════════════════╡
-│ abcdef0    │ Author 0       │ 1969-12-31 │ 0 (\u001b[33m-1\u001b[0m)          │
+│ abcdef0    │ Author 0       │ {fd(0)} │ 0 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef1    │ Author 1       │ 1969-12-31 │ 1 (\u001b[33m-1\u001b[0m)          │
+│ abcdef1    │ Author 1       │ {fd(1)} │ 1 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdef2    │ Author 2       │ 1969-12-31 │ 2 (\u001b[33m-1\u001b[0m)          │
+│ abcdef2    │ Author 2       │ {fd(2)} │ 2 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 3 (\u001b[33m-1\u001b[0m)          │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 3 (\u001b[33m-1\u001b[0m)          │
 ├────────────┼────────────────┼────────────┼─────────────────┤
-│ abcdeff    │ Author Someone │ 1969-12-31 │ 4 (\u001b[33m+1\u001b[0m)          │
+│ abcdeff    │ Author Someone │ {fd(10)} │ 4 (\u001b[33m+1\u001b[0m)          │
 ╘════════════╧════════════════╧════════════╧═════════════════╛
 """
 EXPECTED_WITH_KEYERROR_CHANGES_ONLY = EXPECTED_WITH_KEYERROR_CHANGES_ONLY[1:]
@@ -308,13 +309,13 @@ EXPECTED_HTML = """<!DOCTYPE html>
                     <tbody>
 """
 EXPECTED_HTML += (
-    "                        <tr><td>abcdef0</td><td>Author 0</td><td>1969-12-31</td><td>0 (<span class='orange-color'>-1</span>)</td></tr>"
-    "<tr><td>abcdef1</td><td>Author 1</td><td>1969-12-31</td><td>1 (<span class='orange-color'>-1</span>)</td></tr>"
-    "<tr><td>abcdef2</td><td>Author 2</td><td>1969-12-31</td><td>2 (<span class='orange-color'>-1</span>)</td></tr>"
-    "<tr><td>abcdeff</td><td>Author Someone</td><td>1969-12-31</td><td>3 (<span class='orange-color'>-1</span>)</td></tr>"
-    "<tr><td>abcdeff</td><td>Author Someone</td><td>1969-12-31</td><td>4 (<span class='orange-color'>+1</span>)</td></tr>"
-    "<tr><td>abcdeff</td><td>Author Someone</td><td>1969-12-31</td><td>3 (0)</td></tr>"
-    "<tr><td>abcdeff</td><td>Author Someone</td><td>1969-12-31</td><td>Not found 'some_path.py'</td></tr>"
+    f"                        <tr><td>abcdef0</td><td>Author 0</td><td>{fd(0)}</td><td>0 (<span class='orange-color'>-1</span>)</td></tr>"
+    f"<tr><td>abcdef1</td><td>Author 1</td><td>{fd(1)}</td><td>1 (<span class='orange-color'>-1</span>)</td></tr>"
+    f"<tr><td>abcdef2</td><td>Author 2</td><td>{fd(2)}</td><td>2 (<span class='orange-color'>-1</span>)</td></tr>"
+    f"<tr><td>abcdeff</td><td>Author Someone</td><td>{fd(10)}</td><td>3 (<span class='orange-color'>-1</span>)</td></tr>"
+    f"<tr><td>abcdeff</td><td>Author Someone</td><td>{fd(10)}</td><td>4 (<span class='orange-color'>+1</span>)</td></tr>"
+    f"<tr><td>abcdeff</td><td>Author Someone</td><td>{fd(10)}</td><td>3 (0)</td></tr>"
+    f"<tr><td>abcdeff</td><td>Author Someone</td><td>{fd(10)}</td><td>Not found 'some_path.py'</td></tr>"
 )
 EXPECTED_HTML += """
                     </tbody>

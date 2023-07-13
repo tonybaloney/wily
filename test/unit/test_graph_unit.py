@@ -4,10 +4,11 @@ from unittest import mock
 
 from util import get_mock_State_and_config
 
+from wily import format_datetime
 from wily.commands.graph import graph, metric_parts
 
 SCATTER_EXPECTED = {
-    "x": ["1969-12-31T21:00:00"],
+    "x": [format_datetime(0)],
     "y": [0],
     "mode": "lines+markers",
     "name": "test.py",
@@ -64,7 +65,7 @@ def test_graph():
 
 
 SCATTER_EXPECTED_WITH_KEYERROR = {
-    "x": ["1969-12-31T21:00:00"],
+    "x": [format_datetime(0)],
     "y": [0],
     "mode": "lines+markers",
     "name": "test.py",
@@ -124,12 +125,12 @@ def test_graph_with_keyerror():
 
 SCATTER_EXPECTED_WITH_CHANGES = {
     "x": [
-        "1969-12-31T21:00:00",
-        "1969-12-31T21:00:01",
-        "1969-12-31T21:00:02",
-        "1969-12-31T21:00:10",
-        "1969-12-31T21:00:10",
-        "1969-12-31T21:00:10",
+        format_datetime(0),
+        format_datetime(1),
+        format_datetime(2),
+        format_datetime(10),
+        format_datetime(10),
+        format_datetime(10),
     ],
     "y": [0, 1, 2, 3, 4, 3],
     "mode": "lines+markers",
@@ -195,13 +196,13 @@ def test_graph_with_changes():
 
 SCATTER_EXPECTED_ALL = {
     "x": [
-        "1969-12-31T21:00:00",
-        "1969-12-31T21:00:01",
-        "1969-12-31T21:00:02",
-        "1969-12-31T21:00:10",
-        "1969-12-31T21:00:10",
-        "1969-12-31T21:00:10",
-        "1969-12-31T21:00:10",
+        format_datetime(0),
+        format_datetime(1),
+        format_datetime(2),
+        format_datetime(10),
+        format_datetime(10),
+        format_datetime(10),
+        format_datetime(10),
     ],
     "y": [0, 1, 2, 3, 4, 3, 3],
     "mode": "lines+markers",

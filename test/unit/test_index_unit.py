@@ -2,6 +2,7 @@
 
 from unittest import mock
 
+from wily import format_date as fd
 from wily.commands.index import index
 
 
@@ -25,15 +26,15 @@ def get_mock_State_and_config(revs):
     return mock_State, mock_config
 
 
-EXPECTED = """
+EXPECTED = f"""
 ╒════════════╤══════════╤════════════╕
 │ Revision   │ Author   │ Date       │
 ╞════════════╪══════════╪════════════╡
-│ abcdef0    │ Author 0 │ 1969-12-31 │
+│ abcdef0    │ Author 0 │ {fd(0)} │
 ├────────────┼──────────┼────────────┤
-│ abcdef1    │ Author 1 │ 1969-12-31 │
+│ abcdef1    │ Author 1 │ {fd(1)} │
 ├────────────┼──────────┼────────────┤
-│ abcdef2    │ Author 2 │ 1969-12-31 │
+│ abcdef2    │ Author 2 │ {fd(2)} │
 ╘════════════╧══════════╧════════════╛
 """
 EXPECTED = EXPECTED[1:]
@@ -50,15 +51,15 @@ def test_index_without_message(capsys):
     mock_State.assert_called_once_with(config=mock_config)
 
 
-EXPECTED_WITH_MESSAGE = """
+EXPECTED_WITH_MESSAGE = f"""
 ╒════════════╤══════════╤═══════════╤════════════╕
 │ Revision   │ Author   │ Message   │ Date       │
 ╞════════════╪══════════╪═══════════╪════════════╡
-│ abcdef0    │ Author 0 │ Message 0 │ 1969-12-31 │
+│ abcdef0    │ Author 0 │ Message 0 │ {fd(0)} │
 ├────────────┼──────────┼───────────┼────────────┤
-│ abcdef1    │ Author 1 │ Message 1 │ 1969-12-31 │
+│ abcdef1    │ Author 1 │ Message 1 │ {fd(1)} │
 ├────────────┼──────────┼───────────┼────────────┤
-│ abcdef2    │ Author 2 │ Message 2 │ 1969-12-31 │
+│ abcdef2    │ Author 2 │ Message 2 │ {fd(2)} │
 ╘════════════╧══════════╧═══════════╧════════════╛
 """
 EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
