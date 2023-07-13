@@ -3,7 +3,7 @@ from unittest import mock
 
 
 def get_mock_State_and_config(revs, empty=False, with_keyerror=False):
-    """Build a mock Stage and a mock config for command tests."""
+    """Build a mock State and a mock config for command tests."""
     revisions = []
     if not empty:
         for rev in range(revs):

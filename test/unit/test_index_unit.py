@@ -7,7 +7,7 @@ from wily.commands.index import index
 
 
 def get_mock_State_and_config(revs):
-    """Build a mock Stage and a mock config for command tests."""
+    """Build a mock State and a mock config for command tests."""
     revisions = []
     for rev in range(revs):
         rev_dict = {
