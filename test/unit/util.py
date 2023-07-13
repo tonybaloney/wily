@@ -3,6 +3,7 @@ from unittest import mock
 
 
 def get_mock_State_and_config(revs, empty=False, with_keyerror=False):
+    """Build a mock Stage and a mock config for command tests."""
     revisions = []
     if not empty:
         for rev in range(revs):
@@ -42,6 +43,7 @@ def add_revision(
     val=None,
     with_keyerror=False,
 ):
+    """Add a mock revision to the revisions list."""
     rev_dict = {
         "revision.key": key or f"abcdef{rev}",
         "revision.author_name": author or f"Author {rev}",
