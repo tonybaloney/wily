@@ -1,58 +1,13 @@
 """Unit tests for the index command."""
+
 from io import StringIO
 from unittest import mock
+
+from util import get_mock_State_and_config
 
 from wily.commands.report import report
 from wily.config import DEFAULT_GRID_STYLE
 from wily.helper.custom_enums import ReportFormat
-
-
-def get_mock_State_and_config(revs, empty=False, with_keyerror=False):
-    revisions = []
-    if not empty:
-        for rev in range(revs):
-            add_revision(rev, revisions)
-        rev_dict = {
-            "key": "abcdeff",
-            "author": "Author Someone",
-            "message": "Message here.",
-            "date": 10,
-        }
-        add_revision(revs, revisions, val=revs, **rev_dict)
-        add_revision(revs, revisions, val=revs + 1, **rev_dict)
-        add_revision(revs, revisions, val=revs, **rev_dict)
-        add_revision(revs, revisions, val=revs, **rev_dict, with_keyerror=with_keyerror)
-    mock_revisions = mock.Mock(revisions=revisions)
-    mock_state = mock.Mock(index={"git": mock_revisions}, archivers=("git",))
-    mock.seal(mock_state)
-    mock_State = mock.Mock(return_value=mock_state)
-    mock_config = mock.Mock(path="", archiver="", operator="")
-    return mock_State, mock_config
-
-
-def add_revision(
-    rev,
-    revisions,
-    key=None,
-    author=None,
-    message=None,
-    date=None,
-    val=None,
-    with_keyerror=False,
-):
-    rev_dict = {
-        "revision.key": key or f"abcdef{rev}",
-        "revision.author_name": author or f"Author {rev}",
-        "revision.message": message or f"Message {rev}",
-        "revision.date": date or rev,
-    }
-    if with_keyerror:
-        mock_get = mock.Mock(side_effect=KeyError("some_path.py"))
-    else:
-        mock_get = mock.Mock(return_value=val or rev)
-    mock_revision = mock.Mock(get=mock_get, **rev_dict)
-    revisions.append(mock_revision)
-
 
 EXPECTED = """
 ╒════════════╤════════════════╤════════════╤═════════════════╕
