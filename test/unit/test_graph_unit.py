@@ -1,29 +1,28 @@
 """Unit tests for the index command."""
 
-from io import StringIO
 from unittest import mock
 
 from util import get_mock_State_and_config
 
 from wily.commands.graph import graph, metric_parts
 
-SCATTER_EXPECTED = dict(
-    x=["1969-12-31T21:00:00"],
-    y=[0],
-    mode="lines+markers",
-    name="test.py",
-    ids=("abcdeff",),
-    text=["Author 0 <br>Message 0"],
-    marker={"size": 0, "color": [0]},
-    xcalendar="gregorian",
-    hoveron="points+fills",
-)
+SCATTER_EXPECTED = {
+    "x": ["1969-12-31T21:00:00"],
+    "y": [0],
+    "mode": "lines+markers",
+    "name": "test.py",
+    "ids": ("abcdeff",),
+    "text": ["Author 0 <br>Message 0"],
+    "marker": {"size": 0, "color": [0]},
+    "xcalendar": "gregorian",
+    "hoveron": "points+fills",
+}
 
-LAYOUT_EXPECTED = dict(
-    title="History of Lines of Code for test.py",
-    xaxis={"title": "history"},
-    yaxis={"title": "Lines of Code"},
-)
+LAYOUT_EXPECTED = {
+    "title": "History of Lines of Code for test.py",
+    "xaxis": {"title": "history"},
+    "yaxis": {"title": "Lines of Code"},
+}
 
 
 def test_graph():
@@ -64,30 +63,32 @@ def test_graph():
     mock_State.assert_called_once_with(mock_config)
 
 
-SCATTER_EXPECTED_WITH_KEYERROR = dict(
-    x=["1969-12-31T21:00:00"],
-    y=[0],
-    mode="lines+markers",
-    name="test.py",
-    ids=("abcdeff",),
-    text=["Author 0 <br>Message 0"],
-    marker={"size": 0, "color": [0]},
-    xcalendar="gregorian",
-    hoveron="points+fills",
-)
+SCATTER_EXPECTED_WITH_KEYERROR = {
+    "x": ["1969-12-31T21:00:00"],
+    "y": [0],
+    "mode": "lines+markers",
+    "name": "test.py",
+    "ids": ("abcdeff",),
+    "text": ["Author 0 <br>Message 0"],
+    "marker": {"size": 0, "color": [0]},
+    "xcalendar": "gregorian",
+    "hoveron": "points+fills",
+}
 
-LAYOUT_EXPECTED_WITH_KEYERROR = dict(
-    title="History of Lines of Code for test.py",
-    xaxis={"title": "history"},
-    yaxis={"title": "Lines of Code"},
-)
+LAYOUT_EXPECTED_WITH_KEYERROR = {
+    "title": "History of Lines of Code for test.py",
+    "xaxis": {"title": "history"},
+    "yaxis": {"title": "Lines of Code"},
+}
 
 
 def test_graph_with_keyerror():
     metrics = ("raw.loc",)
     path = "test.py"
     output = ""
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True, with_keyerror=True)
+    mock_State, mock_config = get_mock_State_and_config(
+        3, ascending=True, with_keyerror=True
+    )
     mock_offline = mock.MagicMock()
     mock_layout = mock.MagicMock()
     mock_Layout = mock.MagicMock(return_value=mock_layout)
@@ -121,8 +122,8 @@ def test_graph_with_keyerror():
     mock_State.assert_called_once_with(mock_config)
 
 
-SCATTER_EXPECTED_WITH_CHANGES = dict(
-    x=[
+SCATTER_EXPECTED_WITH_CHANGES = {
+    "x": [
         "1969-12-31T21:00:00",
         "1969-12-31T21:00:01",
         "1969-12-31T21:00:02",
@@ -130,11 +131,11 @@ SCATTER_EXPECTED_WITH_CHANGES = dict(
         "1969-12-31T21:00:10",
         "1969-12-31T21:00:10",
     ],
-    y=[0, 1, 2, 3, 4, 3],
-    mode="lines+markers",
-    name="test.py",
-    ids=("abcdeff",),
-    text=[
+    "y": [0, 1, 2, 3, 4, 3],
+    "mode": "lines+markers",
+    "name": "test.py",
+    "ids": ("abcdeff",),
+    "text": [
         "Author 0 <br>Message 0",
         "Author 1 <br>Message 1",
         "Author 2 <br>Message 2",
@@ -142,16 +143,16 @@ SCATTER_EXPECTED_WITH_CHANGES = dict(
         "Author Someone <br>Message here.",
         "Author Someone <br>Message here.",
     ],
-    marker={"size": 0, "color": [0, 1, 2, 3, 4, 5]},
-    xcalendar="gregorian",
-    hoveron="points+fills",
-)
+    "marker": {"size": 0, "color": [0, 1, 2, 3, 4, 5]},
+    "xcalendar": "gregorian",
+    "hoveron": "points+fills",
+}
 
-LAYOUT_EXPECTED_WITH_CHANGES = dict(
-    title="History of Lines of Code for test.py",
-    xaxis={"title": "history"},
-    yaxis={"title": "Lines of Code"},
-)
+LAYOUT_EXPECTED_WITH_CHANGES = {
+    "title": "History of Lines of Code for test.py",
+    "xaxis": {"title": "history"},
+    "yaxis": {"title": "Lines of Code"},
+}
 
 
 def test_graph_with_changes():
@@ -192,8 +193,8 @@ def test_graph_with_changes():
     mock_State.assert_called_once_with(mock_config)
 
 
-SCATTER_EXPECTED_ALL = dict(
-    x=[
+SCATTER_EXPECTED_ALL = {
+    "x": [
         "1969-12-31T21:00:00",
         "1969-12-31T21:00:01",
         "1969-12-31T21:00:02",
@@ -202,11 +203,11 @@ SCATTER_EXPECTED_ALL = dict(
         "1969-12-31T21:00:10",
         "1969-12-31T21:00:10",
     ],
-    y=[0, 1, 2, 3, 4, 3, 3],
-    mode="lines+markers",
-    name="test.py",
-    ids=("abcdeff",),
-    text=[
+    "y": [0, 1, 2, 3, 4, 3, 3],
+    "mode": "lines+markers",
+    "name": "test.py",
+    "ids": ("abcdeff",),
+    "text": [
         "Author 0 <br>Message 0",
         "Author 1 <br>Message 1",
         "Author 2 <br>Message 2",
@@ -215,16 +216,16 @@ SCATTER_EXPECTED_ALL = dict(
         "Author Someone <br>Message here.",
         "Author Someone <br>Message here.",
     ],
-    marker={"size": 0, "color": [0, 1, 2, 3, 4, 5, 6]},
-    xcalendar="gregorian",
-    hoveron="points+fills",
-)
+    "marker": {"size": 0, "color": [0, 1, 2, 3, 4, 5, 6]},
+    "xcalendar": "gregorian",
+    "hoveron": "points+fills",
+}
 
-LAYOUT_EXPECTED_ALL = dict(
-    title="History of Lines of Code for test.py",
-    xaxis={"title": "history"},
-    yaxis={"title": "Lines of Code"},
-)
+LAYOUT_EXPECTED_ALL = {
+    "title": "History of Lines of Code for test.py",
+    "xaxis": {"title": "history"},
+    "yaxis": {"title": "Lines of Code"},
+}
 
 
 def test_graph_all():
