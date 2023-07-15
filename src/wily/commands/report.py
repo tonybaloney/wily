@@ -4,6 +4,7 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+import shutil
 from pathlib import Path
 from shutil import copytree
 from string import Template
@@ -207,8 +208,29 @@ def report(
 
         logger.info(f"wily report was saved to {report_path}")
     else:
+        maxcolwidth = get_maxcolwidth(headers)
         print(
             tabulate.tabulate(
-                headers=headers, tabular_data=data[::-1], tablefmt=console_format
+                headers=headers,
+                tabular_data=data[::-1],
+                tablefmt=console_format,
+                maxcolwidths=maxcolwidth,
+                maxheadercolwidths=maxcolwidth,
             )
         )
+
+
+def get_maxcolwidth(headers):
+    """Calculate the maximum column width for a given terminal width."""
+    width = shutil.get_terminal_size()[0]
+    columns = len(headers)
+    if width > 125:
+        padding = 0
+    elif width > 95:
+        padding = 3
+    else:
+        padding = 5
+    maxcolwidth = round((width - padding * columns - width % columns) / columns)
+    if not width % columns:
+        maxcolwidth -= 1
+    return maxcolwidth
