@@ -1,5 +1,6 @@
 """Main command line."""
 
+import sys
 import traceback
 from pathlib import Path
 from sys import exit
@@ -278,6 +279,10 @@ def report(
         new_output = new_output / Path(output)
     else:
         new_output = new_output / "wily_report" / "index.html"
+
+    if console_format == DEFAULT_GRID_STYLE:
+        if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+            console_format = "grid"
 
     from wily.commands.report import report
 

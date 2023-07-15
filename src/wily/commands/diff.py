@@ -5,6 +5,7 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
+import sys
 from pathlib import Path
 from sys import exit
 
@@ -160,9 +161,11 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
+        style = DEFAULT_GRID_STYLE
+        if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+            style = "grid"
+
         print(
             # But it still makes more sense to show the newest at the top, so reverse again
-            tabulate.tabulate(
-                headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
-            )
+            tabulate.tabulate(headers=headers, tabular_data=results, tablefmt=style)
         )

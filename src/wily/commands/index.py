@@ -3,6 +3,8 @@ Print command.
 
 Print information about the wily cache and what is in the index.
 """
+import sys
+
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
@@ -54,8 +56,8 @@ def index(config, include_message=False):
         headers = ("Revision", "Author", "Message", "Date")
     else:
         headers = ("Revision", "Author", "Date")
-    print(
-        tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
-        )
-    )
+
+    style = DEFAULT_GRID_STYLE
+    if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+        style = "grid"
+    print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))

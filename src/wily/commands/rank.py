@@ -9,6 +9,7 @@ TODO: Layer on Click invocation in operators section, __main__.py file
 """
 import operator as op
 import os
+import sys
 from pathlib import Path
 from sys import exit
 
@@ -117,11 +118,12 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
     data.append(["Total", total])
 
     headers = ("File", metric.description)
-    print(
-        tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
-        )
-    )
+
+    style = DEFAULT_GRID_STYLE
+    if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+        style = "grid"
+
+    print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
 
     if threshold and total < threshold:
         logger.error(
