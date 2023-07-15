@@ -3,7 +3,6 @@ Print command.
 
 Print information about the wily cache and what is in the index.
 """
-
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger

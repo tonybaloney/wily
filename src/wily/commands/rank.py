@@ -118,9 +118,7 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
     data.append(["Total", total])
 
     headers = ("File", metric.description)
-
     style = get_style()
-
     print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
 
     if threshold and total < threshold:
