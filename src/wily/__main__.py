@@ -1,6 +1,5 @@
 """Main command line."""
 
-import sys
 import traceback
 from pathlib import Path
 from sys import exit
@@ -12,6 +11,7 @@ from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
+from wily.helper import get_style
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import resolve_operators
@@ -280,9 +280,7 @@ def report(
     else:
         new_output = new_output / "wily_report" / "index.html"
 
-    if console_format == DEFAULT_GRID_STYLE:
-        if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-            console_format = "grid"
+    style = get_style(console_format)
 
     from wily.commands.report import report
 
@@ -297,7 +295,7 @@ def report(
         output=new_output,
         include_message=message,
         format=ReportFormat[format],
-        console_format=console_format,
+        console_format=style,
         changes_only=changes,
     )
 
