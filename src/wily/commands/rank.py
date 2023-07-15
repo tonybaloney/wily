@@ -9,7 +9,6 @@ TODO: Layer on Click invocation in operators section, __main__.py file
 """
 import operator as op
 import os
-import sys
 from pathlib import Path
 from sys import exit
 
@@ -18,7 +17,8 @@ import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_PATH
+from wily.helper import get_style
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
@@ -119,9 +119,7 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
 
     headers = ("File", metric.description)
 
-    style = DEFAULT_GRID_STYLE
-    if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-        style = "grid"
+    style = get_style()
 
     print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
 

@@ -3,12 +3,11 @@ Print command.
 
 Print information about the wily cache and what is in the index.
 """
-import sys
 
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
-from wily.config import DEFAULT_GRID_STYLE
+from wily.helper import get_style
 from wily.state import State
 
 
@@ -57,7 +56,5 @@ def index(config, include_message=False):
     else:
         headers = ("Revision", "Author", "Date")
 
-    style = DEFAULT_GRID_STYLE
-    if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-        style = "grid"
+    style = get_style()
     print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))

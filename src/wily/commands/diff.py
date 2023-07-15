@@ -5,7 +5,6 @@ Compares metrics between uncommitted files and indexed files.
 """
 import multiprocessing
 import os
-import sys
 from pathlib import Path
 from sys import exit
 
@@ -15,7 +14,8 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_PATH
+from wily.helper import get_style
 from wily.operators import (
     BAD_COLORS,
     GOOD_COLORS,
@@ -161,10 +161,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
-        style = DEFAULT_GRID_STYLE
-        if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
-            style = "grid"
-
+        style = get_style()
         print(
             # But it still makes more sense to show the newest at the top, so reverse again
             tabulate.tabulate(headers=headers, tabular_data=results, tablefmt=style)
