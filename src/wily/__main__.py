@@ -157,7 +157,7 @@ def build(ctx, max_revisions, targets, operators, archiver):
     "-w",
     "--wrap/--no-wrap",
     default=False,
-    help=_("Wrap report text to fit in terminal"),
+    help=_("Wrap index text to fit in terminal"),
 )
 def index(ctx, message, wrap):
     """Show the history archive in the .wily/ folder."""
@@ -442,8 +442,14 @@ def clean(ctx, yes):
 
 
 @cli.command("list-metrics", help=_("""List the available metrics."""))
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=False,
+    help=_("Wrap metrics text to fit in terminal"),
+)
 @click.pass_context
-def list_metrics(ctx):
+def list_metrics(ctx, wrap):
     """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
@@ -452,7 +458,7 @@ def list_metrics(ctx):
 
     from wily.commands.list_metrics import list_metrics
 
-    list_metrics()
+    list_metrics(wrap)
 
 
 @cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))
