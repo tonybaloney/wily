@@ -215,7 +215,7 @@ def index(ctx, message, wrap):
     "-w",
     "--wrap/--no-wrap",
     default=False,
-    help=_("Wrap index text to fit in terminal"),
+    help=_("Wrap rank text to fit in terminal"),
 )
 @click.pass_context
 def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
@@ -339,8 +339,14 @@ def report(
 @click.option(
     "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
 )
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=False,
+    help=_("Wrap diff text to fit in terminal"),
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision):
+def diff(ctx, files, metrics, all, detail, revision, wrap):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -364,6 +370,7 @@ def diff(ctx, files, metrics, all, detail, revision):
         changes_only=not all,
         detail=detail,
         revision=revision,
+        wrap=wrap,
     )
 
 
