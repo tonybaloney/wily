@@ -7,10 +7,11 @@ import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.config import DEFAULT_GRID_STYLE
+from wily.helper import get_maxcolwidth
 from wily.state import State
 
 
-def index(config, include_message=False):
+def index(config, include_message=False, wrap=False):
     """
     Show information about the cache and runtime.
 
@@ -54,8 +55,13 @@ def index(config, include_message=False):
         headers = ("Revision", "Author", "Message", "Date")
     else:
         headers = ("Revision", "Author", "Date")
+    maxcolwidth = get_maxcolwidth(headers, wrap)
     print(
         tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
+            headers=headers,
+            tabular_data=data,
+            tablefmt=DEFAULT_GRID_STYLE,
+            maxcolwidths=maxcolwidth,
+            maxheadercolwidths=maxcolwidth,
         )
     )

@@ -153,7 +153,13 @@ def build(ctx, max_revisions, targets, operators, archiver):
 @click.option(
     "-m", "--message/--no-message", default=False, help=_("Include revision message")
 )
-def index(ctx, message):
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=False,
+    help=_("Wrap report text to fit in terminal"),
+)
+def index(ctx, message, wrap):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
@@ -162,7 +168,7 @@ def index(ctx, message):
 
     from wily.commands.index import index
 
-    index(config=config, include_message=message)
+    index(config=config, include_message=message, wrap=wrap)
 
 
 @cli.command(
