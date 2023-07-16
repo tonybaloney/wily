@@ -18,6 +18,15 @@ def test_rank_single_file_default_metric(builddir):
     assert result.exit_code == 0, result.stdout
 
 
+def test_rank_single_file_default_metric_wrapped(builddir):
+    """Test the rank feature with default metric and wrapping"""
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "rank", "--wrap", "src/test.py"]
+    )
+    assert result.exit_code == 0, result.stdout
+
+
 def test_rank_directory_default_metric(builddir):
     """Test the rank feature with default (AimLow) metric on a directory"""
     runner = CliRunner()

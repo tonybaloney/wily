@@ -138,6 +138,18 @@ def test_report_high_metric(builddir):
     assert "Not found" not in result.stdout
 
 
+def test_report_wrapped(builddir):
+    """
+    Test that report works with wrapping
+    """
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "report", "--wrap", _path, "raw.comments"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "Not found" not in result.stdout
+
+
 def test_report_short_metric(builddir):
     """
     Test that report works with a build on shorthand metric
