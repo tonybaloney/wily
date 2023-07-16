@@ -9,7 +9,7 @@ def get_maxcolwidth(headers, wrap=True):
     width = shutil.get_terminal_size()[0]
     columns = len(headers)
     if width < 80:
-        padding = columns + 1
+        padding = columns + 2
     elif width < 120:
         padding = columns - 2
     else:
