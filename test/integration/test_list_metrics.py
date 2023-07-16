@@ -3,7 +3,7 @@ from click.testing import CliRunner
 import wily.__main__ as main
 
 
-def test_list_metrics():
+def test_list_metrics(builddir):
     """
     Test that list-metrics works and is ordered
     """
@@ -19,7 +19,7 @@ def test_list_metrics():
     assert i("cyclomatic") < i("maintainability") < i("raw") < i("halstead")
 
 
-def test_list_metrics_wrapped():
+def test_list_metrics_wrapped(builddir):
     """
     Test that list-metrics works with wrapping
     """
