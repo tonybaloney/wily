@@ -230,7 +230,7 @@ def get_maxcolwidth(headers):
         padding = 3
     else:
         padding = 5
-    maxcolwidth = round((width - padding * columns - width % columns) / columns)
+    maxcolwidth = width // columns - padding
     if not width % columns:
         maxcolwidth -= 1
     return maxcolwidth
