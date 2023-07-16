@@ -259,9 +259,15 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
     default=False,
     help=_("Only show revisions that have changes"),
 )
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=False,
+    help=_("Wrap report text to fit in terminal"),
+)
 @click.pass_context
 def report(
-    ctx, file, metrics, number, message, format, console_format, output, changes
+    ctx, file, metrics, number, message, format, console_format, output, changes, wrap
 ):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
@@ -294,6 +300,7 @@ def report(
         format=ReportFormat[format],
         console_format=console_format,
         changes_only=changes,
+        wrap=wrap,
     )
 
 

@@ -32,6 +32,7 @@ def report(
     format=ReportFormat.CONSOLE,
     console_format=None,
     changes_only=False,
+    wrap=False,
 ):
     """
     Show information about the cache and runtime.
@@ -208,7 +209,7 @@ def report(
 
         logger.info(f"wily report was saved to {report_path}")
     else:
-        maxcolwidth = get_maxcolwidth(headers)
+        maxcolwidth = get_maxcolwidth(headers, wrap)
         print(
             tabulate.tabulate(
                 headers=headers,
@@ -220,8 +221,10 @@ def report(
         )
 
 
-def get_maxcolwidth(headers):
+def get_maxcolwidth(headers, wrap=True):
     """Calculate the maximum column width for a given terminal width."""
+    if not wrap:
+        return
     width = shutil.get_terminal_size()[0]
     columns = len(headers)
     if width > 125:
