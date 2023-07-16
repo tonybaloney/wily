@@ -211,8 +211,14 @@ def index(ctx, message, wrap):
     help=_("Return a non-zero exit code under the specified threshold"),
     type=click.INT,
 )
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=False,
+    help=_("Wrap index text to fit in terminal"),
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold):
+def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
@@ -230,6 +236,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
         limit=limit,
         threshold=threshold,
         descending=desc,
+        wrap=wrap,
     )
 
 

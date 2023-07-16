@@ -18,11 +18,12 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.helper import get_maxcolwidth
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
 
-def rank(config, path, metric, revision_index, limit, threshold, descending):
+def rank(config, path, metric, revision_index, limit, threshold, descending, wrap):
     """
     Rank command ordering files, methods or functions using metrics.
 
@@ -117,9 +118,14 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
     data.append(["Total", total])
 
     headers = ("File", metric.description)
+    maxcolwidth = get_maxcolwidth(headers, wrap)
     print(
         tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
+            headers=headers,
+            tabular_data=data,
+            tablefmt=DEFAULT_GRID_STYLE,
+            maxcolwidths=maxcolwidth,
+            maxheadercolwidths=maxcolwidth,
         )
     )
 
