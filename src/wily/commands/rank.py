@@ -17,7 +17,8 @@ import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_PATH
+from wily.helper import get_style
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
@@ -117,11 +118,8 @@ def rank(config, path, metric, revision_index, limit, threshold, descending):
     data.append(["Total", total])
 
     headers = ("File", metric.description)
-    print(
-        tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
-        )
-    )
+    style = get_style()
+    print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
 
     if threshold and total < threshold:
         logger.error(
