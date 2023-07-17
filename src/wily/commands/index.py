@@ -6,8 +6,7 @@ Print information about the wily cache and what is in the index.
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
-from wily.config import DEFAULT_GRID_STYLE
-from wily.helper import get_maxcolwidth
+from wily.helper import get_maxcolwidth, get_style
 from wily.state import State
 
 
@@ -56,11 +55,12 @@ def index(config, include_message=False, wrap=False):
     else:
         headers = ("Revision", "Author", "Date")
     maxcolwidth = get_maxcolwidth(headers, wrap)
+    style = get_style()
     print(
         tabulate.tabulate(
             headers=headers,
             tabular_data=data,
-            tablefmt=DEFAULT_GRID_STYLE,
+            tablefmt=style,
             maxcolwidths=maxcolwidth,
             maxheadercolwidths=maxcolwidth,
         )

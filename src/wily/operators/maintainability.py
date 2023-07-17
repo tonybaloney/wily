@@ -16,7 +16,7 @@ from wily.operators import BaseOperator, Metric, MetricType
 
 def mode(data):
     """
-    Return the modal value of a iterable with discrete values.
+    Return the modal value of an iterable with discrete values.
 
     If there is more than 1 modal value, arbitrarily return the first top n.
     """

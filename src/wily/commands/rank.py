@@ -17,8 +17,8 @@ import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
-from wily.helper import get_maxcolwidth
+from wily.config import DEFAULT_PATH
+from wily.helper import get_maxcolwidth, get_style
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
@@ -27,23 +27,26 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, wra
     """
     Rank command ordering files, methods or functions using metrics.
 
-    :param config: The configuration
+    :param config: The configuration.
     :type config: :class:'wily.config.WilyConfig'
 
-    :param path: The path to the file
+    :param path: The path to the file.
     :type path ''str''
 
-    :param metric: Name of the metric to report on
+    :param metric: Name of the metric to report on.
     :type metric: ''str''
 
     :param revision_index: Version of git repository to revert to.
     :type revision_index: ``str``
 
-    :param limit: Limit the number of items in the table
+    :param limit: Limit the number of items in the table.
     :type  limit: ``int``
 
-    :param threshold: For total values beneath the threshold return a non-zero exit code
+    :param threshold: For total values beneath the threshold return a non-zero exit code.
     :type  threshold: ``int``
+
+    :type descending: Rank in descending order
+    :param descending: ``bool``
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -119,11 +122,12 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, wra
 
     headers = ("File", metric.description)
     maxcolwidth = get_maxcolwidth(headers, wrap)
+    style = get_style()
     print(
         tabulate.tabulate(
             headers=headers,
             tabular_data=data,
-            tablefmt=DEFAULT_GRID_STYLE,
+            tablefmt=style,
             maxcolwidths=maxcolwidth,
             maxheadercolwidths=maxcolwidth,
         )
