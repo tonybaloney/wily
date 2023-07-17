@@ -5,7 +5,7 @@ Print information about the wily cache and what is in the index.
 """
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
-from wily.config import DEFAULT_GRID_STYLE
+from wily.helper import get_style
 from wily.helper.output import print_result
 from wily.state import State
 
@@ -55,4 +55,5 @@ def index(config, include_message=False, as_json=False):
     else:
         headers = ("Revision", "Author", "Date")
 
-    print_result(as_json, data, headers, DEFAULT_GRID_STYLE)
+    style = get_style()
+    print_result(as_json, data, headers, style)

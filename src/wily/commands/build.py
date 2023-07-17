@@ -22,8 +22,8 @@ def run_operator(operator, revision, config, targets):
     """
     Run an operator for the multiprocessing pool.
 
-    :param operator: The operator name
-    :type  operator: ``str``
+    :param operator: The operator to use
+    :type  operator: :class:`Operator`
 
     :param revision: The revision index
     :type  revision: :class:`Revision`
@@ -54,7 +54,7 @@ def run_operator(operator, revision, config, targets):
 
 def build(config, archiver, operators):
     """
-    Build the history given a archiver and collection of operators.
+    Build the history given an archiver and collection of operators.
 
     :param config: The wily configuration
     :type  config: :namedtuple:`wily.config.WilyConfig`

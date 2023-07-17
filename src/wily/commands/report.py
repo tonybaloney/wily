@@ -33,7 +33,7 @@ def report(
     as_json=False,
 ):
     """
-    Show information about the cache and runtime.
+    Show metrics for a given file.
 
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
