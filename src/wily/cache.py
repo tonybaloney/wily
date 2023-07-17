@@ -99,11 +99,11 @@ def store(config, archiver, revision, stats):
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
 
-    :param archiver: The name of the archiver type (e.g. 'git')
-    :type  archiver: ``str``
+    :param archiver: The archiver to get name from (e.g. 'git')
+    :type  archiver: :class:`Archiver`
 
-    :param revision: The revision ID
-    :type  revision: ``str``
+    :param revision: The revision
+    :type  revision: :class:`Revision` or :class:`LazyRevision`
 
     :param stats: The collected data
     :type  stats: ``dict``
@@ -150,11 +150,11 @@ def store_archiver_index(config, archiver, index):
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
 
-    :param archiver: The name of the archiver type (e.g. 'git')
-    :type  archiver: ``str``
+    :param archiver: The archiver to get name from (e.g. 'git')
+    :type  archiver: :class:`Archiver`
 
     :param index: The archiver index record
-    :type  index: ``dict``
+    :type  index: ``list``
 
     :rtype: `pathlib.Path`
     """
@@ -230,7 +230,7 @@ def has_archiver_index(config, archiver):
     :param archiver: The name of the archiver type (e.g. 'git')
     :type  archiver: ``str``
 
-    :return: the exist
+    :return: Whether the archiver's index exists.
     :rtype: ``bool``
     """
     root = pathlib.Path(config.cache_path) / archiver / "index.json"
@@ -263,8 +263,8 @@ def get(config, archiver, revision):
     :param config: The configuration
     :type  config: :class:`wily.config.WilyConfig`
 
-    :param archiver: The name of the archiver type (e.g. 'git')
-    :type  archiver: ``str``
+    :param archiver: The archiver to get name from (e.g. 'git')
+    :type  archiver: :class:`Archiver`
 
     :param revision: The revision ID
     :type  revision: ``str``

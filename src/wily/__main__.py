@@ -306,7 +306,7 @@ def report(
     "-m",
     "--metrics",
     default=None,
-    help=_("comma-seperated list of metrics, see list-metrics for choices"),
+    help=_("comma-separated list of metrics, see list-metrics for choices"),
 )
 @click.option(
     "-a/-c",

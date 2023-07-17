@@ -44,6 +44,18 @@ def graph(
 
     :param output: Save report to specified path instead of opening browser.
     :type  output: ``str``
+
+    :param x_axis: Name of metric for x-axis or "history".
+    :type x_axis: ``str``
+
+    :param changes: Only graph changes.
+    :type changes: ``bool``
+
+    :param text: Show commit message inline in graph.
+    :type text: ``bool``
+
+    :param aggregate: Aggregate values for graph.
+    :type aggregate: ``bool``
     """
     logger.debug("Running graph command")
 
