@@ -11,6 +11,7 @@ from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
+from wily.helper import get_style
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import resolve_operators
@@ -279,6 +280,8 @@ def report(
     else:
         new_output = new_output / "wily_report" / "index.html"
 
+    style = get_style(console_format)
+
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
@@ -292,7 +295,7 @@ def report(
         output=new_output,
         include_message=message,
         format=ReportFormat[format],
-        console_format=console_format,
+        console_format=style,
         changes_only=changes,
     )
 
@@ -303,7 +306,7 @@ def report(
     "-m",
     "--metrics",
     default=None,
-    help=_("comma-seperated list of metrics, see list-metrics for choices"),
+    help=_("comma-separated list of metrics, see list-metrics for choices"),
 )
 @click.option(
     "-a/-c",
