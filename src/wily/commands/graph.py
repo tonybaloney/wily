@@ -137,7 +137,7 @@ def graph(
             x=x,
             y=y,
             mode="lines+markers+text" if text else "lines+markers",
-            name=f"{path}",
+            name=f"{path_}",
             ids=state.index[state.default_archiver].revision_keys,
             text=labels,
             marker={
