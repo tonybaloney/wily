@@ -157,7 +157,7 @@ def build(ctx, max_revisions, targets, operators, archiver):
 @click.option(
     "-w",
     "--wrap/--no-wrap",
-    default=False,
+    default=True,
     help=_("Wrap index text to fit in terminal"),
 )
 def index(ctx, message, wrap):
@@ -215,7 +215,7 @@ def index(ctx, message, wrap):
 @click.option(
     "-w",
     "--wrap/--no-wrap",
-    default=False,
+    default=True,
     help=_("Wrap rank text to fit in terminal"),
 )
 @click.pass_context
@@ -276,7 +276,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
 @click.option(
     "-w",
     "--wrap/--no-wrap",
-    default=False,
+    default=True,
     help=_("Wrap report text to fit in terminal"),
 )
 @click.pass_context
@@ -345,7 +345,7 @@ def report(
 @click.option(
     "-w",
     "--wrap/--no-wrap",
-    default=False,
+    default=True,
     help=_("Wrap diff text to fit in terminal"),
 )
 @click.pass_context
@@ -462,7 +462,7 @@ def clean(ctx, yes):
 @click.option(
     "-w",
     "--wrap/--no-wrap",
-    default=False,
+    default=True,
     help=_("Wrap metrics text to fit in terminal"),
 )
 @click.pass_context
