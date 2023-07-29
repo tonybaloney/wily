@@ -141,15 +141,6 @@ def test_report_with_message(capsys):
     mock_State.assert_called_once_with(mock_config)
 
 
-EXPECTED_EMPTY = """
-╒════════════╤══════════╤════════╤═════════════════╕
-│ Revision   │ Author   │ Date   │ Lines of Code   │
-╞════════════╪══════════╪════════╪═════════════════╡
-╘════════════╧══════════╧════════╧═════════════════╛
-"""
-EXPECTED_EMPTY = EXPECTED_EMPTY[1:]
-
-
 def test_empty_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
@@ -169,17 +160,8 @@ def test_empty_report_no_message(capsys):
             changes_only=False,
         )
     captured = capsys.readouterr()
-    assert captured.out == EXPECTED_EMPTY
+    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
-
-
-EXPECTED_EMPTY_WITH_MESSAGE = """
-╒════════════╤═══════════╤══════════╤════════╤═════════════════╕
-│ Revision   │ Message   │ Author   │ Date   │ Lines of Code   │
-╞════════════╪═══════════╪══════════╪════════╪═════════════════╡
-╘════════════╧═══════════╧══════════╧════════╧═════════════════╛
-"""
-EXPECTED_EMPTY_WITH_MESSAGE = EXPECTED_EMPTY_WITH_MESSAGE[1:]
 
 
 def test_empty_report_with_message(capsys):
@@ -201,7 +183,7 @@ def test_empty_report_with_message(capsys):
             changes_only=False,
         )
     captured = capsys.readouterr()
-    assert captured.out == EXPECTED_EMPTY_WITH_MESSAGE
+    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
 
 
