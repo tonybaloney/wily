@@ -12,21 +12,21 @@ func_len = len(str(mean))
 EXPECTED = f"""
 cyclomatic operator:
 ╒════════════╤═══════════════════════╤═════════════════╤═══════════════════╤═{"═" * func_len}═╕
-│            │                       │ Name            │ Description       │ Type{" " * (func_len - 3)}│
+│ Name       │ Description           │ Type            │ Measure           │ Aggregate{" " * (func_len - 8)}│
 ╞════════════╪═══════════════════════╪═════════════════╪═══════════════════╪═{"═" * func_len}═╡
 │ complexity │ Cyclomatic Complexity │ <class 'float'> │ MetricType.AimLow │ {mean} │
 ╘════════════╧═══════════════════════╧═════════════════╧═══════════════════╧═{"═" * func_len}═╛
 maintainability operator:
-╒══════╤═════════════════════════╤═════════════════╤══════════════════════════╤═{"═" * func_len}═╕
-│      │                         │ Name            │ Description              │ Type{" " * (func_len - 3)}│
-╞══════╪═════════════════════════╪═════════════════╪══════════════════════════╪═{"═" * func_len}═╡
-│ rank │ Maintainability Ranking │ <class 'str'>   │ MetricType.Informational │ {mode} │
-├──────┼─────────────────────────┼─────────────────┼──────────────────────────┼─{"─" * func_len}─┤
-│ mi   │ Maintainability Index   │ <class 'float'> │ MetricType.AimHigh       │ {mean} │
-╘══════╧═════════════════════════╧═════════════════╧══════════════════════════╧═{"═" * func_len}═╛
+╒════════╤═════════════════════════╤═════════════════╤══════════════════════════╤═{"═" * func_len}═╕
+│ Name   │ Description             │ Type            │ Measure                  │ Aggregate{" " * (func_len - 8)}│
+╞════════╪═════════════════════════╪═════════════════╪══════════════════════════╪═{"═" * func_len}═╡
+│ rank   │ Maintainability Ranking │ <class 'str'>   │ MetricType.Informational │ {mode} │
+├────────┼─────────────────────────┼─────────────────┼──────────────────────────┼─{"─" * func_len}─┤
+│ mi     │ Maintainability Index   │ <class 'float'> │ MetricType.AimHigh       │ {mean} │
+╘════════╧═════════════════════════╧═════════════════╧══════════════════════════╧═{"═" * func_len}═╛
 raw operator:
 ╒═════════════════╤══════════════════════╤═══════════════╤══════════════════════════╤═════════════════════════╕
-│                 │                      │ Name          │ Description              │ Type                    │
+│ Name            │ Description          │ Type          │ Measure                  │ Aggregate               │
 ╞═════════════════╪══════════════════════╪═══════════════╪══════════════════════════╪═════════════════════════╡
 │ loc             │ Lines of Code        │ <class 'int'> │ MetricType.Informational │ <built-in function sum> │
 ├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┼─────────────────────────┤
@@ -44,7 +44,7 @@ raw operator:
 ╘═════════════════╧══════════════════════╧═══════════════╧══════════════════════════╧═════════════════════════╛
 halstead operator:
 ╒════════════╤═════════════════════════════╤═════════════════╤═══════════════════╤═════════════════════════╕
-│            │                             │ Name            │ Description       │ Type                    │
+│ Name       │ Description                 │ Type            │ Measure           │ Aggregate               │
 ╞════════════╪═════════════════════════════╪═════════════════╪═══════════════════╪═════════════════════════╡
 │ h1         │ Unique Operands             │ <class 'int'>   │ MetricType.AimLow │ <built-in function sum> │
 ├────────────┼─────────────────────────────┼─────────────────┼───────────────────┼─────────────────────────┤
@@ -68,10 +68,8 @@ halstead operator:
 EXPECTED = EXPECTED[1:]
 
 
-def test_list_metrics():
-    stdout = StringIO()
+def test_list_metrics(capsys):
 
-    with mock.patch("sys.stdout", stdout):
-        list_metrics()
-
-    assert stdout.getvalue() == EXPECTED
+    list_metrics(wrap=False)
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED
