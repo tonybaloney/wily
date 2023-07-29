@@ -48,6 +48,52 @@ def test_rank(capsys):
     mock_resolve.assert_called_once()
 
 
+EXPECTED_WRAPPED = """
+╒════════╤════════════╕
+│ File   │   Lines of │
+│        │       Code │
+╞════════╪════════════╡
+│ file1  │          0 │
+├────────┼────────────┤
+│ file2  │          1 │
+├────────┼────────────┤
+│ Total  │          1 │
+╘════════╧════════════╛
+"""
+EXPECTED_WRAPPED = EXPECTED_WRAPPED[1:]
+
+
+def test_rank_wrapped(capsys):
+    metric = "raw.loc"
+    revision_id = "abcdeff"
+    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
+    mock_resolve = mock.MagicMock()
+    mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
+
+    mock_get_terminal_size = mock.Mock(return_value=(25, 24))
+    mock_shutil = mock.Mock(get_terminal_size=mock_get_terminal_size)
+
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ), mock.patch("wily.helper.shutil", mock_shutil):
+        rank(
+            config=mock_config,
+            path=None,
+            metric=metric,
+            revision_index=revision_id,
+            limit=None,
+            threshold=None,
+            descending=False,
+            wrap=True,
+        )
+
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_WRAPPED
+    mock_State.assert_called_once_with(mock_config)
+    mock_resolve.assert_called_once()
+
+
 EXPECTED_DESCENDING = """
 ╒════════╤═════════════════╕
 │ File   │   Lines of Code │
