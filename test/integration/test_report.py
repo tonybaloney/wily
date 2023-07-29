@@ -112,7 +112,7 @@ def test_report_with_message_and_n(builddir):
     assert "Not found" not in result.stdout
 
 
-def test_report_changes_only(builddir):
+def test_report_changes_only(builddir, caplog):
     """
     Test that report works when only displaying changes
     """
@@ -124,6 +124,7 @@ def test_report_changes_only(builddir):
     assert "basic test" not in result.stdout
     assert "remove line" not in result.stdout
     assert "Not found" not in result.stdout
+    assert "No data found" in caplog.text
 
 
 def test_report_high_metric(builddir):

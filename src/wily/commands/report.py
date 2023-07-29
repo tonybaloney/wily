@@ -164,6 +164,10 @@ def report(
                             *vals,
                         )
                     )
+    if not data:
+        logger.error(f"No data found for {path} with changes={changes_only}.")
+        return
+
     descriptions = [meta["title"] for meta in metric_metas]
     if include_message:
         headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
