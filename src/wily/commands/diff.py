@@ -15,7 +15,7 @@ from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
 from wily.config import DEFAULT_PATH
-from wily.helper import get_style
+from wily.helper import get_maxcolwidth, get_style
 from wily.operators import (
     BAD_COLORS,
     GOOD_COLORS,
@@ -27,7 +27,9 @@ from wily.operators import (
 from wily.state import State
 
 
-def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
+def diff(
+    config, files, metrics, changes_only=True, detail=True, revision=None, wrap=False
+):
     """
     Show the differences in metrics for each of the files.
 
@@ -161,8 +163,15 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     descriptions = [metric.description for operator, metric in metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
+        maxcolwidth = get_maxcolwidth(headers, wrap)
         style = get_style()
         print(
             # But it still makes more sense to show the newest at the top, so reverse again
-            tabulate.tabulate(headers=headers, tabular_data=results, tablefmt=style)
+            tabulate.tabulate(
+                headers=headers,
+                tabular_data=results,
+                tablefmt=style,
+                maxcolwidths=maxcolwidth,
+                maxheadercolwidths=maxcolwidth,
+            )
         )

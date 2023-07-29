@@ -11,6 +11,7 @@ from string import Template
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
+from wily.helper import get_maxcolwidth
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import MetricType, resolve_metric_as_tuple
@@ -31,6 +32,7 @@ def report(
     format=ReportFormat.CONSOLE,
     console_format=None,
     changes_only=False,
+    wrap=False,
 ):
     """
     Show metrics for a given file.
@@ -162,6 +164,10 @@ def report(
                             *vals,
                         )
                     )
+    if not data:
+        logger.error(f"No data found for {path} with changes={changes_only}.")
+        return
+
     descriptions = [meta["title"] for meta in metric_metas]
     if include_message:
         headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
@@ -207,8 +213,13 @@ def report(
 
         logger.info(f"wily report was saved to {report_path}")
     else:
+        maxcolwidth = get_maxcolwidth(headers, wrap)
         print(
             tabulate.tabulate(
-                headers=headers, tabular_data=data[::-1], tablefmt=console_format
+                headers=headers,
+                tabular_data=data[::-1],
+                tablefmt=console_format,
+                maxcolwidths=maxcolwidth,
+                maxheadercolwidths=maxcolwidth,
             )
         )
