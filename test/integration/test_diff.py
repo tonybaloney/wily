@@ -45,6 +45,18 @@ def test_diff_output_all(builddir):
     assert "test.py" in result.stdout
 
 
+def test_diff_output_all_wrapped(builddir):
+    """Test the diff feature with wrapping"""
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--debug", "--path", builddir, "diff", _path, "--all", "--wrap"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    assert "test.py" in result.stdout
+
+
 def test_diff_output_bad_path(builddir):
     """Test the diff feature with no changes"""
     runner = CliRunner()
