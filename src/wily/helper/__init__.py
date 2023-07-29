@@ -24,6 +24,8 @@ def get_maxcolwidth(headers, wrap=True):
 def get_style(style=DEFAULT_GRID_STYLE):
     """Select the tablefmt style for tabulate according to what sys.stdout can handle."""
     if style == DEFAULT_GRID_STYLE:
-        if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+        encoding = sys.stdout.encoding
+        # StringIO has encoding=None, but it handles utf-8 fine.
+        if encoding is not None and encoding.lower() not in ("utf-8", "utf8"):
             style = "grid"
     return style

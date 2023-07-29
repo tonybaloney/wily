@@ -1,4 +1,4 @@
-from io import BytesIO, TextIOWrapper
+from io import BytesIO, StringIO, TextIOWrapper
 from unittest import mock
 
 import tabulate
@@ -149,3 +149,10 @@ def test_get_style_charmap_not_default_grid_style():
     with mock.patch("sys.stdout", output):
         style = get_style("something_else")
     assert style == "something_else"
+
+
+def test_get_style_none():
+    output = StringIO()  # output.encoding is None
+    with mock.patch("sys.stdout", output):
+        style = get_style()
+    assert style == "fancy_grid"
