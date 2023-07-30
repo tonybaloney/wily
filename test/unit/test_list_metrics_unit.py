@@ -1,6 +1,7 @@
 """Unit tests for the list_metrics command."""
 
 from statistics import mean
+from textwrap import wrap
 from unittest import mock
 
 from wily.commands.list_metrics import list_metrics
@@ -78,21 +79,21 @@ cyclomatic operator:
 ╒════════════╤═══════════════╤══════════╤════════════════╤════════════════╕
 │ Name       │ Description   │ Type     │ Measure        │ Aggregate      │
 ╞════════════╪═══════════════╪══════════╪════════════════╪════════════════╡
-│ complexity │ Cyclomatic    │ <class   │ MetricType.Aim │ {str(mean)[:15]}│
-│            │ Complexity    │ 'float'> │ Low            │ {str(mean)[15:29]} │
-│            │               │          │                │ {str(mean)[29:]:<15}│
+│ complexity │ Cyclomatic    │ <class   │ MetricType.Aim │ {wrap(str(mean), 14)[0]} │
+│            │ Complexity    │ 'float'> │ Low            │ {wrap(str(mean), 14)[1]} │
+│            │               │          │                │ {wrap(str(mean), 14)[2]:<15}│
 ╘════════════╧═══════════════╧══════════╧════════════════╧════════════════╛
 maintainability operator:
 ╒════════╤════════════════╤═══════════════╤════════════════╤════════════════╕
 │ Name   │ Description    │ Type          │ Measure        │ Aggregate      │
 ╞════════╪════════════════╪═══════════════╪════════════════╪════════════════╡
-│ rank   │ Maintainabilit │ <class 'str'> │ MetricType.Inf │ {str(mode)[:15]}│
-│        │ y Ranking      │               │ ormational     │ {str(mode)[15:29]} │
-│        │                │               │                │ {str(mode)[29:]:<15}│
+│ rank   │ Maintainabilit │ <class 'str'> │ MetricType.Inf │ {wrap(str(mode), 14)[0]} │
+│        │ y Ranking      │               │ ormational     │ {wrap(str(mode), 14)[1]} │
+│        │                │               │                │ {wrap(str(mode), 14)[2]:<15}│
 ├────────┼────────────────┼───────────────┼────────────────┼────────────────┤
-│ mi     │ Maintainabilit │ <class        │ MetricType.Aim │ {str(mean)[:15]}│
-│        │ y Index        │ 'float'>      │ High           │ {str(mean)[15:29]} │
-│        │                │               │                │ {str(mean)[29:]:<15}│
+│ mi     │ Maintainabilit │ <class        │ MetricType.Aim │ {wrap(str(mean), 14)[0]} │
+│        │ y Index        │ 'float'>      │ High           │ {wrap(str(mean), 14)[1]} │
+│        │                │               │                │ {wrap(str(mean), 14)[2]:<15}│
 ╘════════╧════════════════╧═══════════════╧════════════════╧════════════════╛
 raw operator:
 ╒════════════════╤════════════════╤═══════════════╤════════════════╤═══════════════╕
