@@ -68,7 +68,6 @@ EXPECTED = EXPECTED[1:]
 
 
 def test_list_metrics(capsys):
-
     list_metrics(wrap=False)
     captured = capsys.readouterr()
     assert captured.out == EXPECTED
