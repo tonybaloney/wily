@@ -79,20 +79,20 @@ cyclomatic operator:
 ╒════════════╤═══════════════╤══════════╤════════════════╤════════════════╕
 │ Name       │ Description   │ Type     │ Measure        │ Aggregate      │
 ╞════════════╪═══════════════╪══════════╪════════════════╪════════════════╡
-│ complexity │ Cyclomatic    │ <class   │ MetricType.Aim │ {wrap(str(mean), 14)[0]} │
-│            │ Complexity    │ 'float'> │ Low            │ {wrap(str(mean), 14)[1]} │
+│ complexity │ Cyclomatic    │ <class   │ MetricType.Aim │ {wrap(str(mean), 14)[0]:<15}│
+│            │ Complexity    │ 'float'> │ Low            │ {wrap(str(mean), 14)[1]:<15}│
 │            │               │          │                │ {wrap(str(mean), 14)[2]:<15}│
 ╘════════════╧═══════════════╧══════════╧════════════════╧════════════════╛
 maintainability operator:
 ╒════════╤════════════════╤═══════════════╤════════════════╤════════════════╕
 │ Name   │ Description    │ Type          │ Measure        │ Aggregate      │
 ╞════════╪════════════════╪═══════════════╪════════════════╪════════════════╡
-│ rank   │ Maintainabilit │ <class 'str'> │ MetricType.Inf │ {wrap(str(mode), 14)[0]} │
-│        │ y Ranking      │               │ ormational     │ {wrap(str(mode), 14)[1]} │
+│ rank   │ Maintainabilit │ <class 'str'> │ MetricType.Inf │ {wrap(str(mode), 14)[0]:<15}│
+│        │ y Ranking      │               │ ormational     │ {wrap(str(mode), 14)[1]:<15}│
 │        │                │               │                │ {wrap(str(mode), 14)[2]:<15}│
 ├────────┼────────────────┼───────────────┼────────────────┼────────────────┤
-│ mi     │ Maintainabilit │ <class        │ MetricType.Aim │ {wrap(str(mean), 14)[0]} │
-│        │ y Index        │ 'float'>      │ High           │ {wrap(str(mean), 14)[1]} │
+│ mi     │ Maintainabilit │ <class        │ MetricType.Aim │ {wrap(str(mean), 14)[0]:<15}│
+│        │ y Index        │ 'float'>      │ High           │ {wrap(str(mean), 14)[1]:<15}│
 │        │                │               │                │ {wrap(str(mean), 14)[2]:<15}│
 ╘════════╧════════════════╧═══════════════╧════════════════╧════════════════╛
 raw operator:
