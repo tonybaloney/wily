@@ -55,6 +55,71 @@ def test_report_no_message(capsys):
     mock_State.assert_called_once_with(mock_config)
 
 
+EXPECTED_WRAPPED = f"""
+╒══════════╤══════════╤════════╤═════════╕
+│ Revisi   │ Author   │ Date   │ Lines   │
+│ on       │          │        │ of      │
+│          │          │        │ Code    │
+╞══════════╪══════════╪════════╪═════════╡
+│ abcdef   │ Author   │ {fd(0)[:6]} │ 0 (\u001b[33m-1\u001b[0m)  │
+│ 0        │ 0        │ {fd(0)[6:]:<6} │         │
+├──────────┼──────────┼────────┼─────────┤
+│ abcdef   │ Author   │ {fd(1)[:6]} │ 1 (\u001b[33m-1\u001b[0m)  │
+│ 1        │ 1        │ {fd(1)[6:]:<6} │         │
+├──────────┼──────────┼────────┼─────────┤
+│ abcdef   │ Author   │ {fd(2)[:6]} │ 2 (\u001b[33m-1\u001b[0m)  │
+│ 2        │ 2        │ {fd(2)[6:]:<6} │         │
+├──────────┼──────────┼────────┼─────────┤
+│ abcdef   │ Author   │ {fd(3)[:6]} │ 3 (\u001b[33m-1\u001b[0m)  │
+│ f        │ Someon   │ {fd(3)[6:]:<6} │         │
+│          │ e        │        │         │
+├──────────┼──────────┼────────┼─────────┤
+│ abcdef   │ Author   │ {fd(4)[:6]} │ 4 (\u001b[33m+1\u001b[0m)  │
+│ f        │ Someon   │ {fd(4)[6:]:<6} │         │
+│          │ e        │        │         │
+├──────────┼──────────┼────────┼─────────┤
+│ abcdef   │ Author   │ {fd(5)[:6]} │ 3 (0)   │
+│ f        │ Someon   │ {fd(5)[6:]:<6} │         │
+│          │ e        │        │         │
+├──────────┼──────────┼────────┼─────────┤
+│ abcdef   │ Author   │ {fd(6)[:6]} │ 3 (0)   │
+│ f        │ Someon   │ {fd(6)[6:]:<6} │         │
+│          │ e        │        │         │
+╘══════════╧══════════╧════════╧═════════╛
+"""
+EXPECTED_WRAPPED = EXPECTED_WRAPPED[1:]
+
+
+def test_report_no_message_wrapped(capsys):
+    path = "test.py"
+    metrics = ("raw.loc",)
+    format = "CONSOLE"
+    mock_State, mock_config = get_mock_State_and_config(3)
+
+    mock_get_terminal_size = mock.Mock(return_value=(50, 24))
+    mock_shutil = mock.Mock(get_terminal_size=mock_get_terminal_size)
+
+    with mock.patch("wily.commands.report.State", mock_State), mock.patch(
+        "wily.helper.shutil", mock_shutil
+    ):
+        report(
+            config=mock_config,
+            path=path,
+            metrics=metrics,
+            n=10,
+            output=None,
+            include_message=False,
+            format=ReportFormat[format],
+            console_format=DEFAULT_GRID_STYLE,
+            changes_only=False,
+            wrap=True,
+        )
+    captured = capsys.readouterr()
+    print(captured.out)
+    assert captured.out == EXPECTED_WRAPPED
+    mock_State.assert_called_once_with(mock_config)
+
+
 EXPECTED_CHANGES_ONLY = f"""
 ╒════════════╤════════════════╤════════════╤═════════════════╕
 │ Revision   │ Author         │ Date       │ Lines of Code   │
