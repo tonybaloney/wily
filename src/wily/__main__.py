@@ -503,7 +503,7 @@ def handle_no_cache(context):
 
 if __name__ == "__main__":  # pragma: no cover
     try:
-        cli()
+        cli()  # type: ignore
     except Exception as runtime:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
         logger.info(

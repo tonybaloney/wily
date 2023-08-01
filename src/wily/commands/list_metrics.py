@@ -9,7 +9,7 @@ from wily.helper import get_maxcolwidth, get_style
 from wily.operators import ALL_OPERATORS
 
 
-def list_metrics(wrap):
+def list_metrics(wrap: bool):
     """List metrics available."""
     headers = ("Name", "Description", "Type", "Measure", "Aggregate")
     maxcolwidth = get_maxcolwidth(headers, wrap)

@@ -5,11 +5,13 @@ TODO: Add multiple lines for multiple files
 """
 
 from pathlib import Path
+from typing import Optional, Tuple
 
 import plotly.graph_objs as go
 import plotly.offline
 
 from wily import format_datetime, logger
+from wily.config import WilyConfig
 from wily.operators import resolve_metric, resolve_metric_as_tuple
 from wily.state import State
 
@@ -21,41 +23,26 @@ def metric_parts(metric):
 
 
 def graph(
-    config,
-    path,
-    metrics,
-    output=None,
-    x_axis=None,
-    changes=True,
-    text=False,
-    aggregate=False,
+    config: WilyConfig,
+    path: str,
+    metrics: Tuple[str, str],
+    output: Optional[str] = None,
+    x_axis: Optional[str] = None,
+    changes: bool = True,
+    text: bool = False,
+    aggregate: bool = False,
 ):
     """
     Graph information about the cache and runtime.
 
     :param config: The configuration.
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param path: The path to the files.
-    :type  path: ``str``
-
     :param metrics: The Y and Z-axis metrics to report on.
-    :type  metrics: ``tuple``
-
     :param output: Save report to specified path instead of opening browser.
-    :type  output: ``str``
-
     :param x_axis: Name of metric for x-axis or "history".
-    :type x_axis: ``str``
-
     :param changes: Only graph changes.
-    :type changes: ``bool``
-
     :param text: Show commit message inline in graph.
-    :type text: ``bool``
-
     :param aggregate: Aggregate values for graph.
-    :type aggregate: ``bool``
     """
     logger.debug("Running graph command")
 

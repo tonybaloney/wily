@@ -7,6 +7,7 @@ import multiprocessing
 import os
 from pathlib import Path
 from sys import exit
+from typing import List, Optional
 
 import radon.cli.harvest
 import tabulate
@@ -14,7 +15,7 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
-from wily.config import DEFAULT_PATH
+from wily.config import DEFAULT_PATH, WilyConfig
 from wily.helper import get_maxcolwidth, get_style
 from wily.operators import (
     BAD_COLORS,
@@ -28,28 +29,23 @@ from wily.state import State
 
 
 def diff(
-    config, files, metrics, changes_only=True, detail=True, revision=None, wrap=False
+    config: WilyConfig,
+    files: List[str],
+    metrics: List[str],
+    changes_only: bool = True,
+    detail: bool = True,
+    revision: Optional[str] = None,
+    wrap: bool = False,
 ):
     """
     Show the differences in metrics for each of the files.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param files: The files to compare.
-    :type  files: ``list`` of ``str``
-
     :param metrics: The metrics to measure.
-    :type  metrics: ``list`` of ``str``
-
     :param changes_only: Only include changes files in output.
-    :type  changes_only: ``bool``
-
     :param detail: Show details (function-level)
-    :type  detail: ``bool``
-
     :param revision: Compare with specific revision
-    :type  revision: ``str``
     """
     config.targets = files
     files = list(files)
@@ -87,7 +83,9 @@ def diff(
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    resolved_metrics = [
+        (metric.split(".")[0], resolve_metric(metric)) for metric in metrics
+    ]
     results = []
 
     # Build a set of operators
@@ -101,7 +99,7 @@ def diff(
 
     # Write a summary table
     extra = []
-    for operator, metric in metrics:
+    for operator, metric in resolved_metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
             for file in files:
                 try:
@@ -122,7 +120,7 @@ def diff(
     for file in files:
         metrics_data = []
         has_changes = False
-        for operator, metric in metrics:
+        for operator, metric in resolved_metrics:
             try:
                 current = target_revision.get(
                     config, state.default_archiver, operator, file, metric.name
@@ -160,7 +158,7 @@ def diff(
         else:
             logger.debug(metrics_data)
 
-    descriptions = [metric.description for operator, metric in metrics]
+    descriptions = [metric.description for _, metric in resolved_metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
         maxcolwidth = get_maxcolwidth(headers, wrap)

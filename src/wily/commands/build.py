@@ -8,34 +8,28 @@ import multiprocessing
 import os
 import pathlib
 from sys import exit
+from typing import Any, Dict, List, Tuple
 
 from progress.bar import Bar
 
 from wily import logger
-from wily.archivers import FilesystemArchiver
+from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.operators import resolve_operator
+from wily.config import WilyConfig
+from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
-def run_operator(operator, revision, config, targets):
+def run_operator(
+    operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]
+) -> Tuple[str, Dict[str, Any]]:
     """
     Run an operator for the multiprocessing pool.
 
     :param operator: The operator to use
-    :type  operator: :class:`Operator`
-
     :param revision: The revision index
-    :type  revision: :class:`Revision`
-
     :param config: The runtime configuration
-    :type  config: :class:`WilyConfig`
-
     :param targets: Files/paths to scan
-    :type  targets: ``list`` of ``str``
-
-    :rtype: ``tuple``
-    :returns: A tuple of operator name (``str``), and data (``dict``)
     """
     instance = operator.cls(config, targets)
     logger.debug(f"Running {operator.name} operator on {revision}")
@@ -52,18 +46,13 @@ def run_operator(operator, revision, config, targets):
     return operator.name, data
 
 
-def build(config, archiver, operators):
+def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     """
     Build the history given an archiver and collection of operators.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param archiver: The archiver to use
-    :type  archiver: :namedtuple:`wily.archivers.Archiver`
-
     :param operators: The list of operators to execute
-    :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
     try:
         logger.debug(f"Using {archiver.name} archiver module")

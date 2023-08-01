@@ -1,11 +1,12 @@
 """Helper package for wily."""
 import shutil
 import sys
+from typing import Sized
 
 from wily.config import DEFAULT_GRID_STYLE
 
 
-def get_maxcolwidth(headers, wrap=True):
+def get_maxcolwidth(headers: Sized, wrap=True):
     """Calculate the maximum column width for a given terminal width."""
     if not wrap:
         return
@@ -21,7 +22,7 @@ def get_maxcolwidth(headers, wrap=True):
     return max(maxcolwidth, 1)
 
 
-def get_style(style=DEFAULT_GRID_STYLE):
+def get_style(style: str = DEFAULT_GRID_STYLE):
     """Select the tablefmt style for tabulate according to what sys.stdout can handle."""
     if style == DEFAULT_GRID_STYLE:
         if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):

@@ -3,7 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from wily.lang import _
 
@@ -42,19 +42,19 @@ class BaseOperator:
     """Abstract Operator Class."""
 
     """Name of the operator."""
-    name = "abstract"
+    name: str = "abstract"
 
     """Default settings."""
-    defaults = {}
+    defaults: Dict[str, Any] = {}
 
     """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)."""
-    metrics = ()
+    metrics: Tuple[Metric, ...] = ()
 
     """Which metric is the default to display in the report command."""
-    default_metric_index = None
+    default_metric_index: Optional[int] = None
 
     """Level at which the operator goes to."""
-    level = OperatorLevel.File
+    level: OperatorLevel = OperatorLevel.File
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -146,11 +146,6 @@ def resolve_operator(name: str) -> Operator:
 def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operator]:
     """
     Resolve a list of operator names to their corresponding types.
-
-    :param operators: The list of operators
-    :type  operators: iterable or ``str``
-
-    :rtype: ``list`` of :class:`Operator`
     """
     return [resolve_operator(operator) for operator in iter(operators)]
 
@@ -159,24 +154,14 @@ def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operato
 def resolve_metric(metric: str) -> Metric:
     """
     Resolve metric key to a given target.
-
-    :param metric: the metric name.
-    :type  metric: ``str``
-
-    :rtype: :class:`Metric`
     """
     return resolve_metric_as_tuple(metric)[1]
 
 
 @lru_cache(maxsize=128)
-def resolve_metric_as_tuple(metric):
+def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
     """
     Resolve metric key to a given target.
-
-    :param metric: the metric name.
-    :type  metric: ``str``
-
-    :rtype: tuple(:class:`Operator`, :class:`Metric`)
     """
     if "." in metric:
         _, metric = metric.split(".")
@@ -188,24 +173,16 @@ def resolve_metric_as_tuple(metric):
         return r[0]
 
 
-def get_metric(revision, operator, path, key):
+def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> Dict:
     """
     Get a metric from the cache.
 
     :param revision: The revision data.
-    :type  revision: ``dict``
-
     :param operator: The operator name.
-    :type  operator: ``str``
-
     :param path: The path to the file/function
-    :type  path: ``str``
-
     :param key: The key of the data
-    :type  key: ``str``
 
     :return: Data from the cache
-    :rtype: ``dict``
     """
     if ":" in path:
         part, entry = path.split(":")
