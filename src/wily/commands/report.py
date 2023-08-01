@@ -58,8 +58,8 @@ def report(
     data = []
     metric_metas = []
 
-    for metric in metrics:
-        operator, metric = resolve_metric_as_tuple(metric)
+    for metric_name in metrics:
+        operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
         operator = operator.name
         # Set the delta colors depending on the metric type
