@@ -11,7 +11,7 @@ import logging
 import pathlib
 from dataclasses import InitVar, dataclass, field
 from functools import lru_cache
-from typing import Any, List
+from typing import Any, Iterable, List, Optional
 
 from wily import operators
 from wily.archivers import ARCHIVER_GIT
@@ -46,13 +46,13 @@ class WilyConfig:
     A data class to reflect the configurable options within Wily.
     """
 
-    operators: List[str]
+    operators: Iterable[str]
     archiver: Any
     path: str
     max_revisions: int
     include_ipynb: bool = True
     ipynb_cells: bool = True
-    targets: List[str] = None
+    targets: Optional[List[str]] = None
     checkout_options: dict = field(default_factory=dict)
     _cache_path: InitVar[str] = ""
 
