@@ -144,25 +144,19 @@ def resolve_operator(name: str) -> Operator:
 
 
 def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operator]:
-    """
-    Resolve a list of operator names to their corresponding types.
-    """
+    """Resolve a list of operator names to their corresponding types."""
     return [resolve_operator(operator) for operator in iter(operators)]
 
 
 @lru_cache(maxsize=128)
 def resolve_metric(metric: str) -> Metric:
-    """
-    Resolve metric key to a given target.
-    """
+    """Resolve metric key to a given target."""
     return resolve_metric_as_tuple(metric)[1]
 
 
 @lru_cache(maxsize=128)
 def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
-    """
-    Resolve metric key to a given target.
-    """
+    """Resolve metric key to a given target."""
     if "." in metric:
         _, metric = metric.split(".")
 

@@ -7,7 +7,7 @@ Will compare the values between revisions and highlight changes in green/red.
 from pathlib import Path
 from shutil import copytree
 from string import Template
-from typing import Collection, Iterable, Optional
+from typing import Iterable, Optional
 
 import tabulate
 
