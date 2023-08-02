@@ -64,10 +64,8 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
         archiver = FilesystemArchiver(config)
         revisions = archiver.revisions(config.path, config.max_revisions)
     except Exception as e:
-        if hasattr(e, "message"):
-            logger.error(f"Failed to setup archiver: '{e.message}'")
-        else:
-            logger.error(f"Failed to setup archiver: '{type(e)} - {e}'")
+        message = getattr(e, "message", f"{type(e)} - {e}")
+        logger.error(f"Failed to setup archiver: '{message}'")
         exit(1)
 
     state = State(config, archiver=archiver)
