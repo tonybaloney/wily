@@ -38,10 +38,16 @@ class DirtyGitRepositoryError(Exception):
 def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[str]]:
     """Get tracked files in a repo for a commit hash using ls-tree."""
     paths = repo.git.execute(
-        ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha]
+        ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha],
+        with_extended_output=False,
+        as_process=False,
+        stdout_as_string=True,
     ).split("\n")
     dirs = [""] + repo.git.execute(
-        ["git", "ls-tree", "--name-only", "--full-tree", "-r", "-d", commit.hexsha]
+        ["git", "ls-tree", "--name-only", "--full-tree", "-r", "-d", commit.hexsha],
+        with_extended_output=False,
+        as_process=False,
+        stdout_as_string=True,
     ).split("\n")
     return paths, dirs
 
