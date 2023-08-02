@@ -9,7 +9,6 @@ from typing import (
     Generic,
     Iterable,
     List,
-    NamedTuple,
     Optional,
     Set,
     Tuple,

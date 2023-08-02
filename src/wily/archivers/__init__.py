@@ -5,7 +5,7 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, List, NamedTuple, Optional, Type, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
 
 @dataclass
