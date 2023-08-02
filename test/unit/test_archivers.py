@@ -5,7 +5,7 @@ import pytest
 
 import wily.archivers
 import wily.config
-from wily.archivers import Revision, git
+from wily.archivers import git
 
 
 class MockAuthor:
