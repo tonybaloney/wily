@@ -5,7 +5,7 @@ import pytest
 
 import wily.archivers
 import wily.config
-from wily.archivers import git
+from wily.archivers import Revision, git
 
 
 class MockAuthor:
@@ -76,12 +76,7 @@ def repo(tmpdir):
 
 
 def test_basearchiver():
-    archiver = wily.archivers.BaseArchiver()
-    with pytest.raises(NotImplementedError):
-        archiver.revisions("", 10)
-
-    with pytest.raises(NotImplementedError):
-        archiver.checkout("")
+    wily.archivers.BaseArchiver(None)
 
 
 def test_defaults():

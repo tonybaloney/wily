@@ -46,7 +46,7 @@ class BaseArchiver:
         :return: A list of revisions.
         :rtype: ``list`` of :class:`Revision`
         """
-        raise NotImplementedError
+        ...
 
     def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
         """
@@ -55,7 +55,7 @@ class BaseArchiver:
         :param revision: The revision identifier.
         :param options: Any additional options.
         """
-        raise NotImplementedError
+        ...
 
     def finish(self):
         """Clean up any state if processing completed/failed."""
@@ -71,7 +71,7 @@ class BaseArchiver:
         :return: An instance of revision.
         :rtype: Instance of :class:`Revision`
         """
-        raise NotImplementedError
+        ...
 
 
 from wily.archivers.filesystem import FilesystemArchiver
