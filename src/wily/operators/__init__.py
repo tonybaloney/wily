@@ -167,7 +167,9 @@ def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
         return r[0]
 
 
-def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> Dict:
+def get_metric(
+    revision: Dict[Any, Any], operator: str, path: str, key: str
+) -> Dict[Any, Any]:
     """
     Get a metric from the cache.
 
