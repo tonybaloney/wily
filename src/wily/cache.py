@@ -10,9 +10,11 @@ import json
 import os.path
 import pathlib
 import shutil
+from typing import Any, Dict, List, Union
 
 from wily import __version__, logger
-from wily.archivers import ALL_ARCHIVERS
+from wily.archivers import ALL_ARCHIVERS, Archiver, Revision
+from wily.config import WilyConfig
 from wily.lang import _
 from wily.operators import resolve_operator
 
@@ -92,28 +94,26 @@ def clean(config):
     logger.debug("Deleted wily cache")
 
 
-def store(config, archiver, revision, stats):
+def store(
+    config: WilyConfig,
+    archiver: Union[Archiver, str],
+    revision: Revision,
+    stats: Dict[str, Any],
+) -> pathlib.Path:
     """
     Store a revision record within an archiver folder.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param archiver: The archiver to get name from (e.g. 'git')
-    :type  archiver: :class:`Archiver`
-
     :param revision: The revision
-    :type  revision: :class:`Revision` or :class:`LazyRevision`
-
     :param stats: The collected data
-    :type  stats: ``dict``
 
     :return: The absolute path to the created file
     :rtype: ``str``
 
     :rtype: `pathlib.Path`
     """
-    root = pathlib.Path(config.cache_path) / archiver.name
+    root = pathlib.Path(config.cache_path) / str(archiver)
 
     if not root.exists():
         logger.debug("Creating wily cache")
@@ -143,22 +143,20 @@ def store(config, archiver, revision, stats):
     return filename
 
 
-def store_archiver_index(config, archiver, index):
+def store_archiver_index(
+    config: WilyConfig, archiver: Union[Archiver, str], index: List[Dict[str, Any]]
+) -> pathlib.Path:
     """
     Store an archiver's index record for faster search.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param archiver: The archiver to get name from (e.g. 'git')
-    :type  archiver: :class:`Archiver`
-
     :param index: The archiver index record
     :type  index: ``list``
 
     :rtype: `pathlib.Path`
     """
-    root = pathlib.Path(config.cache_path) / archiver.name
+    root = pathlib.Path(config.cache_path) / str(archiver)
 
     if not root.exists():
         root.mkdir()
@@ -256,21 +254,14 @@ def get_archiver_index(config, archiver):
     return index
 
 
-def get(config, archiver, revision):
+def get(config: WilyConfig, archiver: str, revision: str) -> Dict[Any, Any]:
     """
     Get the data for a given revision.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param archiver: The archiver to get name from (e.g. 'git')
-    :type  archiver: :class:`Archiver`
-
     :param revision: The revision ID
-    :type  revision: ``str``
-
     :return: The data record for that revision
-    :rtype: ``dict``
     """
     root = pathlib.Path(config.cache_path) / archiver
     # TODO : string escaping!!!

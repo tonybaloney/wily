@@ -1,9 +1,20 @@
 """Models and types for "operators" the basic measure of a module that measures code."""
 
-from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from wily.lang import _
 
@@ -16,7 +27,16 @@ class MetricType(Enum):
     Informational = 3  # Doesn't matter
 
 
-Metric = namedtuple("Metric", "name description type measure aggregate")
+TValue = TypeVar("TValue")
+
+
+class Metric(NamedTuple, Generic[TValue]):
+    name: str
+    description: str
+    type: TValue
+    measure: MetricType
+    aggregate: Callable[[Iterable[TValue]], TValue]
+
 
 GOOD_COLORS = {
     MetricType.AimHigh: 32,
@@ -56,6 +76,9 @@ class BaseOperator:
     """Level at which the operator goes to."""
     level: OperatorLevel = OperatorLevel.File
 
+    def __init__(self, *args, **kwargs):
+        ...
+
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
         Run the operator.
@@ -78,7 +101,14 @@ from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator."""
-Operator = namedtuple("Operator", "name cls description level")
+
+
+class Operator(NamedTuple):
+    name: str
+    cls: BaseOperator
+    description: str
+    level: OperatorLevel
+
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",

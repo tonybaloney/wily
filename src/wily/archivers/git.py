@@ -11,6 +11,7 @@ from git import Commit
 from git.repo import Repo
 
 from wily.archivers import BaseArchiver, Revision
+from wily.config import WilyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class GitArchiver(BaseArchiver):
 
     name = "git"
 
-    def __init__(self, config):
+    def __init__(self, config: WilyConfig):
         """
         Instantiate a new Git Archiver.
 

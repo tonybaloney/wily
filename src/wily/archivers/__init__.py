@@ -4,9 +4,10 @@ Archivers module.
 Specifies a standard interface for finding revisions (versions) of a path and switching to them.
 """
 
-from collections import namedtuple
 from dataclasses import dataclass
-from typing import List
+from typing import List, NamedTuple
+
+from wily.config import WilyConfig
 
 
 @dataclass
@@ -27,6 +28,9 @@ class Revision:
 
 class BaseArchiver:
     """Abstract Archiver Class."""
+
+    def __init__(self, config: WilyConfig, *args, **kwargs):
+        ...
 
     def revisions(self, path: str, max_revisions: int) -> List[Revision]:
         """
@@ -76,7 +80,15 @@ from wily.archivers.filesystem import FilesystemArchiver
 from wily.archivers.git import GitArchiver
 
 """Type for an operator"""
-Archiver = namedtuple("Archiver", "name cls description")
+
+
+class Archiver(NamedTuple):
+    name: str
+    cls: BaseArchiver
+    description: str
+
+    def __str__(self):
+        return self.name
 
 
 """Git Operator defined in `wily.archivers.git`"""

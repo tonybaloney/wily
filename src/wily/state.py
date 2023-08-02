@@ -46,7 +46,7 @@ class IndexedRevision:
         return d
 
     def get(
-        self, config: WilyConfig, archiver: Archiver, operator: str, path: str, key: str
+        self, config: WilyConfig, archiver: str, operator: str, path: str, key: str
     ) -> Dict[Any, Any]:
         """
         Get the metric data for this indexed revision.
@@ -64,9 +64,7 @@ class IndexedRevision:
         logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
         return get_metric(self._data, operator, path, key)
 
-    def get_paths(
-        self, config: WilyConfig, archiver: Archiver, operator: str
-    ) -> List[str]:
+    def get_paths(self, config: WilyConfig, archiver: str, operator: str) -> List[str]:
         """
         Get the indexed paths for this indexed revision.
 

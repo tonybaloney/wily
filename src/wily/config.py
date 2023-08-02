@@ -62,20 +62,20 @@ class WilyConfig:
             self.operators = self._parse_to_list(self.operators)
         if self.targets is None or "":
             self.targets = [self.path]
-        self._cache_path = _cache_path
+        self._cache_path = _cache_path  # type: ignore
 
     @property
     def cache_path(self):
         """Path to the cache."""
-        if not self._cache_path:
-            self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())
-        return self._cache_path
+        if not self._cache_path:  # type: ignore
+            self._cache_path = generate_cache_path(pathlib.Path(self.path).absolute())  # type: ignore
+        return self._cache_path  # type: ignore
 
     @cache_path.setter
     def cache_path(self, value):
         """Override the cache path."""
         logger.debug(f"Setting custom cache path to {value}")
-        self._cache_path = value
+        self._cache_path = value  # type: ignore
 
     @staticmethod
     def _parse_to_list(string, separator=","):
