@@ -135,7 +135,7 @@ def graph(
             },
             xcalendar="gregorian",
             hoveron="points+fills",
-        ) # type: ignore
+        )  # type: ignore
         data.append(trace)
     if output:
         filename = output
@@ -150,7 +150,7 @@ def graph(
                 title=title,
                 xaxis={"title": x_axis},
                 yaxis={"title": y_metric.description},
-            ), # type: ignore
+            ),  # type: ignore
         },
         auto_open=auto_open,
         filename=filename,

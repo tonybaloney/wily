@@ -229,9 +229,7 @@ def has_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> bo
     return root.exists()
 
 
-def get_archiver_index(
-    config: WilyConfig, archiver: Union[Archiver, str]
-) -> Any:
+def get_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> Any:
     """
     Get the contents of the archiver index file.
 

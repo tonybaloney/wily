@@ -5,7 +5,6 @@ Provided by the radon library.
 """
 import statistics
 
-import radon
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 from radon.complexity import SCORE

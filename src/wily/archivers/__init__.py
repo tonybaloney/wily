@@ -32,6 +32,7 @@ class BaseArchiver:
     name: str
 
     def __init__(self, config: WilyConfig):
+        """Initialise the archiver."""
         ...
 
     def revisions(self, path: str, max_revisions: int) -> List[Revision]:
@@ -82,12 +83,16 @@ from wily.archivers.git import GitArchiver
 
 T = TypeVar("T", bound=Type)
 
+
 class Archiver(NamedTuple, Generic[T]):
+    """Holder for archivers."""
+
     name: str
     cls: T
     description: str
 
     def __str__(self):
+        """Return the name of the archiver."""
         return self.name
 
 

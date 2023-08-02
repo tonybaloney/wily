@@ -33,6 +33,8 @@ TValue = TypeVar("TValue")
 
 
 class Metric(NamedTuple, Generic[TValue]):
+    """Represents a metric."""
+
     name: str
     description: str
     type: TValue
@@ -79,6 +81,7 @@ class BaseOperator:
     level: OperatorLevel = OperatorLevel.File
 
     def __init__(self, *args, **kwargs):
+        """Initialise the operator."""
         ...
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
@@ -108,6 +111,8 @@ T = TypeVar("T", bound=Type)
 
 
 class Operator(NamedTuple, Generic[T]):
+    """Operator type."""
+
     name: str
     cls: T
     description: str
@@ -201,9 +206,7 @@ def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
         return r[0]
 
 
-def get_metric(
-    revision: Dict[Any, Any], operator: str, path: str, key: str
-) -> Any:
+def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> Any:
     """
     Get a metric from the cache.
 
