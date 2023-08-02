@@ -28,7 +28,7 @@ class MetricType(Enum):
     Informational = 3  # Doesn't matter
 
 
-TValue = TypeVar("TValue")
+TValue = TypeVar("TValue", str, int, float)
 
 
 class Metric(Generic[TValue]):

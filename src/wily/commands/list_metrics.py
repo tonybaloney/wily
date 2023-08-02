@@ -20,7 +20,10 @@ def list_metrics(wrap: bool):
             print(
                 tabulate.tabulate(
                     headers=headers,
-                    tabular_data=operator.cls.metrics,
+                    tabular_data=[
+                        (m.name, m.description, m.type, m.measure, m.aggregate)
+                        for m in operator.cls.metrics
+                    ],
                     tablefmt=style,
                     maxcolwidths=maxcolwidth,
                     maxheadercolwidths=maxcolwidth,
