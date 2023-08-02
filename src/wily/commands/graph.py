@@ -51,6 +51,7 @@ def graph(
 
     if x_axis is None:
         x_axis = "history"
+        x_operator = x_key = None
     else:
         x_operator, x_key = metric_parts(x_axis)
 
@@ -71,7 +72,7 @@ def graph(
 
     operator, key = metric_parts(metrics[0])
     if len(metrics) == 1:  # only y-axis
-        z_axis = None
+        z_axis = z_operator = z_key = None
     else:
         z_axis = resolve_metric(metrics[1])
         z_operator, z_key = metric_parts(metrics[1])

@@ -62,6 +62,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    - name: install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install flit
+        flit install --extras=all
     - uses: jakebailey/pyright-action@v1
       with:
         working-directory: src
