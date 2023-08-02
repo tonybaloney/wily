@@ -4,7 +4,7 @@ Git Archiver.
 Implementation of the archiver API for the gitpython module.
 """
 import logging
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import git.exc
 from git import Commit
@@ -25,7 +25,7 @@ class InvalidGitRepositoryError(Exception):
 class DirtyGitRepositoryError(Exception):
     """Error for a dirty git repository (untracked files)."""
 
-    def __init__(self, untracked_files):
+    def __init__(self, untracked_files: List[str]):
         """
         Raise error for untracked files.
 
@@ -114,7 +114,7 @@ class GitArchiver(BaseArchiver):
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
-        revisions = []
+        revisions: List[Revision] = []
         for commit in self.repo.iter_commits(
             self.current_branch, max_count=max_revisions, reverse=True
         ):
@@ -140,7 +140,7 @@ class GitArchiver(BaseArchiver):
                 author_name=commit.author.name,
                 author_email=commit.author.email,
                 date=commit.committed_date,
-                message=commit.message,
+                message=str(commit.message),
                 tracked_files=tracked_files,
                 tracked_dirs=tracked_dirs,
                 added_files=added_files,
@@ -150,7 +150,7 @@ class GitArchiver(BaseArchiver):
             revisions.append(rev)
         return revisions[::-1]
 
-    def checkout(self, revision: Revision, options: Dict):
+    def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
@@ -198,7 +198,7 @@ class GitArchiver(BaseArchiver):
             author_name=commit.author.name,
             author_email=commit.author.email,
             date=commit.committed_date,
-            message=commit.message,
+            message=str(commit.message),
             tracked_files=tracked_files,
             tracked_dirs=tracked_dirs,
             added_files=added_files,

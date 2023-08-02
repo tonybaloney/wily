@@ -5,7 +5,7 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 """
 
 from dataclasses import dataclass
-from typing import List, NamedTuple
+from typing import Any, Dict, List, NamedTuple, Optional
 
 from wily.config import WilyConfig
 
@@ -15,9 +15,9 @@ class Revision:
     """Represents a revision in the archiver."""
 
     key: str
-    author_name: str
-    author_email: str
-    date: str
+    author_name: Optional[str]
+    author_email: Optional[str]
+    date: int
     message: str
     tracked_files: List[str]
     tracked_dirs: List[str]
@@ -29,7 +29,7 @@ class Revision:
 class BaseArchiver:
     """Abstract Archiver Class."""
 
-    def __init__(self, config: WilyConfig, *args, **kwargs):
+    def __init__(self, config: WilyConfig):
         ...
 
     def revisions(self, path: str, max_revisions: int) -> List[Revision]:
@@ -47,15 +47,12 @@ class BaseArchiver:
         """
         raise NotImplementedError
 
-    def checkout(self, revision: Revision, **options):
+    def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
         :param revision: The revision identifier.
-        :type  revision: :class:`Revision`
-
         :param options: Any additional options.
-        :type  options: ``dict``
         """
         raise NotImplementedError
 
@@ -84,7 +81,7 @@ from wily.archivers.git import GitArchiver
 
 class Archiver(NamedTuple):
     name: str
-    cls: BaseArchiver
+    cls: type[BaseArchiver]
     description: str
 
     def __str__(self):
