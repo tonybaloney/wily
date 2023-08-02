@@ -133,7 +133,11 @@ class Operator(Generic[T]):
     level: OperatorLevel
 
     def __init__(
-        self, name: str, cls: Type[T], description: str, level: OperatorLevel = OperatorLevel.File
+        self,
+        name: str,
+        cls: Type[T],
+        description: str,
+        level: OperatorLevel = OperatorLevel.File,
     ):
         """Initialise the operator."""
         self.name = name
