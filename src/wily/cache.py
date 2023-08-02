@@ -231,7 +231,7 @@ def has_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> bo
 
 def get_archiver_index(
     config: WilyConfig, archiver: Union[Archiver, str]
-) -> Dict[Any, Any]:
+) -> Any:
     """
     Get the contents of the archiver index file.
 

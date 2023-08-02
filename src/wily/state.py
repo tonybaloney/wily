@@ -47,7 +47,7 @@ class IndexedRevision:
 
     def get(
         self, config: WilyConfig, archiver: str, operator: str, path: str, key: str
-    ) -> Dict[Any, Any]:
+    ) -> Any:
         """
         Get the metric data for this indexed revision.
 
@@ -183,6 +183,7 @@ class State:
     config: WilyConfig
     index: Dict[str, Index]
     default_archiver: str
+    operators: Optional[List[Operator]] = None
 
     def __init__(self, config: WilyConfig, archiver: Optional[Archiver] = None):
         """

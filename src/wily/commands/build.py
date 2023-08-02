@@ -56,13 +56,13 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     """
     try:
         logger.debug(f"Using {archiver.name} archiver module")
-        archiver = archiver.cls(config)
-        revisions = archiver.revisions(config.path, config.max_revisions)
+        archiver_instance = archiver.cls(config)
+        revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
         # TODO: This logic shouldn't really be here (SoC)
         logger.info("Defaulting back to the filesystem archiver, not a valid git repo")
-        archiver = FilesystemArchiver(config)
-        revisions = archiver.revisions(config.path, config.max_revisions)
+        archiver_instance = FilesystemArchiver(config)
+        revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except Exception as e:
         message = getattr(e, "message", f"{type(e)} - {e}")
         logger.error(f"Failed to setup archiver: '{message}'")
@@ -78,7 +78,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     revisions = [revision for revision in revisions if revision not in index][::-1]
 
     logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
+        f"Found {len(revisions)} revisions from '{archiver_instance.name}' archiver in '{config.path}'."
     )
 
     _op_desc = ",".join([operator.name for operator in operators])
@@ -91,9 +91,10 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     seed = True
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
+            prev_stats = {}
             for revision in revisions:
                 # Checkout target revision
-                archiver.checkout(revision, config.checkout_options)
+                archiver_instance.checkout(revision, config.checkout_options)
                 stats = {"operator_data": {}}
 
                 # TODO : Check that changed files are children of the targets
@@ -190,4 +191,4 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
         raise e
     finally:
         # Reset the archive after every run back to the head of the branch
-        archiver.finish()
+        archiver_instance.finish()

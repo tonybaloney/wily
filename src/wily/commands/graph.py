@@ -51,7 +51,7 @@ def graph(
 
     if x_axis is None:
         x_axis = "history"
-        x_operator = x_key = None
+        x_operator = x_key = ""
     else:
         x_operator, x_key = metric_parts(x_axis)
 
@@ -72,7 +72,7 @@ def graph(
 
     operator, key = metric_parts(metrics[0])
     if len(metrics) == 1:  # only y-axis
-        z_axis = z_operator = z_key = None
+        z_axis = z_operator = z_key = ""
     else:
         z_axis = resolve_metric(metrics[1])
         z_operator, z_key = metric_parts(metrics[1])
@@ -135,7 +135,7 @@ def graph(
             },
             xcalendar="gregorian",
             hoveron="points+fills",
-        )
+        ) # type: ignore
         data.append(trace)
     if output:
         filename = output
@@ -150,7 +150,7 @@ def graph(
                 title=title,
                 xaxis={"title": x_axis},
                 yaxis={"title": y_metric.description},
-            ),
+            ), # type: ignore
         },
         auto_open=auto_open,
         filename=filename,

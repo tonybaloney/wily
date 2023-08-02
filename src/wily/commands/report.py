@@ -205,7 +205,7 @@ def report(
             tabulate.tabulate(
                 headers=headers,
                 tabular_data=data[::-1],
-                tablefmt=console_format,
+                tablefmt=console_format if console_format else "simple",
                 maxcolwidths=maxcolwidth,
                 maxheadercolwidths=maxcolwidth,
             )

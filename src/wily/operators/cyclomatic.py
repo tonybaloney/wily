@@ -8,6 +8,7 @@ import statistics
 import radon
 import radon.cli.harvest as harvesters
 from radon.cli import Config
+from radon.complexity import SCORE
 from radon.visitors import Class, Function
 
 from wily import logger
@@ -26,7 +27,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         "max": "F",
         "no_assert": True,
         "show_closures": False,
-        "order": radon.complexity.SCORE,
+        "order": SCORE,
         "include_ipynb": True,
         "ipynb_cells": True,
     }

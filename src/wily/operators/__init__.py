@@ -11,7 +11,9 @@ from typing import (
     List,
     NamedTuple,
     Optional,
+    Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -102,10 +104,12 @@ from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator."""
 
+T = TypeVar("T", bound=Type)
 
-class Operator(NamedTuple):
+
+class Operator(NamedTuple, Generic[T]):
     name: str
-    cls: BaseOperator
+    cls: T
     description: str
     level: OperatorLevel
 
@@ -140,7 +144,7 @@ OPERATOR_HALSTEAD = Operator(
 
 
 """Dictionary of all operators"""
-ALL_OPERATORS = {
+ALL_OPERATORS: Dict[str, Operator] = {
     operator.name: operator
     for operator in (
         OPERATOR_CYCLOMATIC,
@@ -152,7 +156,7 @@ ALL_OPERATORS = {
 
 
 """Set of all metrics"""
-ALL_METRICS = {
+ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {
     (operator, metric)
     for operator in ALL_OPERATORS.values()
     for metric in operator.cls.metrics
@@ -199,7 +203,7 @@ def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
 
 def get_metric(
     revision: Dict[Any, Any], operator: str, path: str, key: str
-) -> Dict[Any, Any]:
+) -> Any:
     """
     Get a metric from the cache.
 
