@@ -58,7 +58,7 @@ class MockGit:
     def checkout(self, *args):
         ...
 
-    def execute(self, command):
+    def execute(self, command, *args, **kwargs):
         if command[1] == "ls-tree":
             assert command[-1] == "123abc"
             return "\n"
