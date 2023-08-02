@@ -7,8 +7,6 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 from dataclasses import dataclass
 from typing import Any, Dict, Generic, List, NamedTuple, Optional, Type, TypeVar
 
-from wily.config import WilyConfig
-
 
 @dataclass
 class Revision:
@@ -31,7 +29,7 @@ class BaseArchiver:
 
     name: str
 
-    def __init__(self, config: WilyConfig):
+    def __init__(self, config: "WilyConfig"):
         """Initialise the archiver."""
         ...
 
@@ -81,15 +79,21 @@ from wily.archivers.git import GitArchiver
 
 """Type for an operator"""
 
-T = TypeVar("T", bound=Type)
+T = TypeVar("T")
 
 
-class Archiver(NamedTuple, Generic[T]):
+class Archiver(Generic[T]):
     """Holder for archivers."""
 
     name: str
-    cls: T
+    cls: Type[T]
     description: str
+
+    def __init__(self, name: str, cls: Type[T], description: str):
+        """Initialise the archiver."""
+        self.name = name
+        self.cls = cls
+        self.description = description
 
     def __str__(self):
         """Return the name of the archiver."""

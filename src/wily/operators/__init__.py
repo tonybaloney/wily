@@ -32,7 +32,7 @@ class MetricType(Enum):
 TValue = TypeVar("TValue")
 
 
-class Metric(NamedTuple, Generic[TValue]):
+class Metric(Generic[TValue]):
     """Represents a metric."""
 
     name: str
@@ -40,6 +40,21 @@ class Metric(NamedTuple, Generic[TValue]):
     type: TValue
     measure: MetricType
     aggregate: Callable[[Iterable[TValue]], TValue]
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        type: TValue,
+        measure: MetricType,
+        aggregate: Callable[[Iterable[TValue]], TValue],
+    ):
+        """Initialise the metric."""
+        self.name = name
+        self.description = description
+        self.type = type
+        self.measure = measure
+        self.aggregate = aggregate
 
 
 GOOD_COLORS = {
@@ -107,16 +122,29 @@ from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator."""
 
-T = TypeVar("T", bound=Type)
+T = TypeVar("T", bound=BaseOperator)
 
 
-class Operator(NamedTuple, Generic[T]):
-    """Operator type."""
+class Operator(Generic[T]):
+    """Operator holder."""
 
     name: str
-    cls: T
+    cls: Type[T]
     description: str
     level: OperatorLevel
+
+    def __init__(
+        self, name: str, cls: Type[T], description: str, level: OperatorLevel = OperatorLevel.File
+    ):
+        """Initialise the operator."""
+        self.name = name
+        self.cls = cls
+        self.description = description
+        self.level = level
+
+    def __call__(self, config: "WilyConfig") -> T:
+        """Initialise the operator."""
+        return self.cls(config)
 
 
 OPERATOR_CYCLOMATIC = Operator(
@@ -199,7 +227,7 @@ def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
     if "." in metric:
         _, metric = metric.split(".")
 
-    r = [(operator, match) for operator, match in ALL_METRICS if match[0] == metric]
+    r = [(operator, match) for operator, match in ALL_METRICS if match.name == metric]
     if not r or len(r) == 0:
         raise ValueError(f"Metric {metric} not recognised.")
     else:
