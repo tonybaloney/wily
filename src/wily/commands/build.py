@@ -15,7 +15,7 @@ from progress.bar import Bar
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.config import WilyConfig
+from wily.config.types import WilyConfig
 from wily.operators import Operator, resolve_operator
 from wily.state import State
 

@@ -7,12 +7,12 @@ Will compare the values between revisions and highlight changes in green/red.
 from pathlib import Path
 from shutil import copytree
 from string import Template
-from typing import Iterable, Optional
+from typing import Iterable
 
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
-from wily.config import WilyConfig
+from wily.config.types import WilyConfig
 from wily.helper import get_maxcolwidth
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
@@ -30,9 +30,9 @@ def report(
     metrics: Iterable[str],
     n: int,
     output: Path,
+    console_format: str,
     include_message: bool = False,
     format: ReportFormat = ReportFormat.CONSOLE,
-    console_format: Optional[str] = None,
     changes_only: bool = False,
     wrap: bool = False,
 ):
@@ -205,7 +205,7 @@ def report(
             tabulate.tabulate(
                 headers=headers,
                 tabular_data=data[::-1],
-                tablefmt=console_format if console_format else "simple",
+                tablefmt=console_format,
                 maxcolwidths=maxcolwidth,
                 maxheadercolwidths=maxcolwidth,
             )

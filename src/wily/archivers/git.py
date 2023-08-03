@@ -11,6 +11,7 @@ from git import Commit
 from git.repo import Repo
 
 from wily.archivers import BaseArchiver, Revision
+from wily.config.types import WilyConfig
 
 logger = logging.getLogger(__name__)
 

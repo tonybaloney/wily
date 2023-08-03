@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Union
 
 from wily import __version__, logger
 from wily.archivers import ALL_ARCHIVERS, Archiver, Revision
-from wily.config import WilyConfig
+from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import resolve_operator
 

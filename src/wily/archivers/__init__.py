@@ -7,6 +7,8 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 from dataclasses import dataclass
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
+from wily.config.types import WilyConfig
+
 
 @dataclass
 class Revision:

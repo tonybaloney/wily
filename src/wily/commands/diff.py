@@ -15,7 +15,8 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
-from wily.config import DEFAULT_PATH, WilyConfig
+from wily.config import DEFAULT_PATH
+from wily.config.types import WilyConfig
 from wily.helper import get_maxcolwidth, get_style
 from wily.operators import (
     BAD_COLORS,

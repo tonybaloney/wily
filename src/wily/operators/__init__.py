@@ -17,6 +17,7 @@ from typing import (
     Union,
 )
 
+from wily.config.types import WilyConfig
 from wily.lang import _
 
 

@@ -9,6 +9,7 @@ import os.path
 from typing import Any, Dict, List
 
 from wily.archivers import BaseArchiver, Revision
+from wily.config.types import WilyConfig
 
 logger = logging.getLogger(__name__)
 

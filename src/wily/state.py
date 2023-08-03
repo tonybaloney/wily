@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from wily import cache, logger
 from wily.archivers import Archiver, Revision, resolve_archiver
-from wily.config import WilyConfig
+from wily.config.types import WilyConfig
 from wily.operators import Operator, get_metric
 
 
