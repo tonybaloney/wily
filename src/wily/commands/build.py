@@ -31,7 +31,7 @@ def run_operator(
     :param config: The runtime configuration
     :param targets: Files/paths to scan
     """
-    instance = operator.cls(config, targets)
+    instance = operator.operator_cls(config, targets)
     logger.debug(f"Running {operator.name} operator on {revision}")
 
     data = instance.run(revision, config)
@@ -56,7 +56,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
     """
     try:
         logger.debug(f"Using {archiver.name} archiver module")
-        archiver_instance = archiver.cls(config)
+        archiver_instance = archiver.archiver_cls(config)
         revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
         # TODO: This logic shouldn't really be here (SoC)
@@ -165,7 +165,9 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
 
                         result[str(root)] = {"total": {}}
                         # aggregate values
-                        for metric in resolve_operator(operator_name).cls.metrics:
+                        for metric in resolve_operator(
+                            operator_name
+                        ).operator_cls.metrics:
                             func = metric.aggregate
                             values = [
                                 result[aggregate]["total"][metric.name]

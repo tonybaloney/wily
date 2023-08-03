@@ -68,7 +68,9 @@ def diff(
     if not revision:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        rev = (
+            resolve_archiver(state.default_archiver).archiver_cls(config).find(revision)
+        )
         logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
         try:
             target_revision = state.index[state.default_archiver][rev.key]

@@ -206,9 +206,9 @@ def get_default_metrics(config: WilyConfig) -> List[str]:
         operators = index[0]["operators"]
         for operator in operators:
             o = resolve_operator(operator)
-            if o.cls.default_metric_index is not None:
-                metric = o.cls.metrics[o.cls.default_metric_index]
-                default_metrics.append(f"{o.cls.name}.{metric.name}")
+            if o.operator_cls.default_metric_index is not None:
+                metric = o.operator_cls.metrics[o.operator_cls.default_metric_index]
+                default_metrics.append(f"{o.operator_cls.name}.{metric.name}")
     return default_metrics
 
 

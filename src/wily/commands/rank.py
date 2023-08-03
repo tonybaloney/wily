@@ -58,7 +58,11 @@ def rank(
     if not revision_index:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision_index)
+        rev = (
+            resolve_archiver(state.default_archiver)
+            .archiver_cls(config)
+            .find(revision_index)
+        )
         logger.debug(f"Resolved {revision_index} to {rev.key} ({rev.message})")
         try:
             target_revision = state.index[state.default_archiver][rev.key]

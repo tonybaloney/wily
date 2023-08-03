@@ -16,13 +16,13 @@ def list_metrics(wrap: bool):
     style = get_style()
     for name, operator in ALL_OPERATORS.items():
         print(f"{name} operator:")
-        if len(operator.cls.metrics) > 0:
+        if len(operator.operator_cls.metrics) > 0:
             print(
                 tabulate.tabulate(
                     headers=headers,
                     tabular_data=[
                         (m.name, m.description, m.type, m.measure, m.aggregate)
-                        for m in operator.cls.metrics
+                        for m in operator.operator_cls.metrics
                     ],
                     tablefmt=style,
                     maxcolwidths=maxcolwidth,

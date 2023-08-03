@@ -37,7 +37,7 @@ class Metric(Generic[TValue]):
 
     name: str
     description: str
-    type: TValue
+    metric_type: TValue
     measure: MetricType
     aggregate: Callable[[Iterable[TValue]], TValue]
 
@@ -45,14 +45,14 @@ class Metric(Generic[TValue]):
         self,
         name: str,
         description: str,
-        type: TValue,
+        metric_type: TValue,
         measure: MetricType,
         aggregate: Callable[[Iterable[TValue]], TValue],
     ):
         """Initialise the metric."""
         self.name = name
         self.description = description
-        self.type = type
+        self.metric_type = metric_type
         self.measure = measure
         self.aggregate = aggregate
 
@@ -129,52 +129,52 @@ class Operator(Generic[T]):
     """Operator holder."""
 
     name: str
-    cls: Type[T]
+    operator_cls: Type[T]
     description: str
     level: OperatorLevel
 
     def __init__(
         self,
         name: str,
-        cls: Type[T],
+        operator_cls: Type[T],
         description: str,
         level: OperatorLevel = OperatorLevel.File,
     ):
         """Initialise the operator."""
         self.name = name
-        self.cls = cls
+        self.operator_cls = operator_cls
         self.description = description
         self.level = level
 
     def __call__(self, config: "WilyConfig") -> T:
         """Initialise the operator."""
-        return self.cls(config)
+        return self.operator_cls(config)
 
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
-    cls=CyclomaticComplexityOperator,
+    operator_cls=CyclomaticComplexityOperator,
     description=_("Cyclomatic Complexity of modules"),
     level=OperatorLevel.Object,
 )
 
 OPERATOR_RAW = Operator(
     name="raw",
-    cls=RawMetricsOperator,
+    operator_cls=RawMetricsOperator,
     description=_("Raw Python statistics"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
-    cls=MaintainabilityIndexOperator,
+    operator_cls=MaintainabilityIndexOperator,
     description=_("Maintainability index (lines of code and branching)"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_HALSTEAD = Operator(
     name="halstead",
-    cls=HalsteadOperator,
+    operator_cls=HalsteadOperator,
     description=_("Halstead metrics"),
     level=OperatorLevel.Object,
 )
@@ -196,7 +196,7 @@ ALL_OPERATORS: Dict[str, Operator] = {
 ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {
     (operator, metric)
     for operator in ALL_OPERATORS.values()
-    for metric in operator.cls.metrics
+    for metric in operator.operator_cls.metrics
 }
 
 

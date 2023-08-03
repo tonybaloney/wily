@@ -88,13 +88,13 @@ class Archiver(Generic[T]):
     """Holder for archivers."""
 
     name: str
-    cls: Type[T]
+    archiver_cls: Type[T]
     description: str
 
-    def __init__(self, name: str, cls: Type[T], description: str):
+    def __init__(self, name: str, archiver_cls: Type[T], description: str):
         """Initialise the archiver."""
         self.name = name
-        self.cls = cls
+        self.archiver_cls = archiver_cls
         self.description = description
 
     def __str__(self):
@@ -103,11 +103,15 @@ class Archiver(Generic[T]):
 
 
 """Git Operator defined in `wily.archivers.git`"""
-ARCHIVER_GIT = Archiver(name="git", cls=GitArchiver, description="Git archiver")
+ARCHIVER_GIT = Archiver(
+    name="git", archiver_cls=GitArchiver, description="Git archiver"
+)
 
 """Filesystem archiver"""
 ARCHIVER_FILESYSTEM = Archiver(
-    name="filesystem", cls=FilesystemArchiver, description="Filesystem archiver"
+    name="filesystem",
+    archiver_cls=FilesystemArchiver,
+    description="Filesystem archiver",
 )
 
 """Set of all available archivers"""
