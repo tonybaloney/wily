@@ -136,7 +136,7 @@ def diff(
                 new = "-"
             if new != current:
                 has_changes = True
-            if metric.type in (int, float) and new != "-" and current != "-":
+            if metric.metric_type in (int, float) and new != "-" and current != "-":
                 if current > new:  # type: ignore
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(

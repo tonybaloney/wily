@@ -81,7 +81,7 @@ def report(
             "increase_color": increase_color,
             "decrease_color": decrease_color,
             "title": metric.description,
-            "type": metric.type,
+            "type": metric.metric_type,
         }
         metric_metas.append(metric_meta)
 
