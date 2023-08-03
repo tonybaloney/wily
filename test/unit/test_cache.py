@@ -5,8 +5,8 @@ import sys
 import pytest
 
 from wily import cache
-from wily.archivers import Revision
-from wily.config import ARCHIVER_GIT, DEFAULT_CONFIG
+from wily.archivers import ARCHIVER_GIT, Revision
+from wily.config import DEFAULT_CONFIG
 
 
 def test_exists(tmpdir):

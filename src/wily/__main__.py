@@ -9,8 +9,8 @@ import click
 from wily import WILY_LOG_NAME, __version__, logger
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
+from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.helper import get_style
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _

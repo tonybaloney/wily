@@ -3,7 +3,7 @@ from unittest import mock
 
 import tabulate
 
-from wily.config import DEFAULT_GRID_STYLE
+from wily.defaults import DEFAULT_GRID_STYLE
 from wily.helper import get_maxcolwidth, get_style
 
 SHORT_DATA = [list("abcdefgh"), list("abcdefgh")]

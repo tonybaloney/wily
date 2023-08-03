@@ -6,35 +6,20 @@ TODO : Better utilise default values and factory in @dataclass to replace DEFAUL
  and replace the logic in load() to set default values.
 """
 import configparser
-import hashlib
 import logging
 import pathlib
-from functools import lru_cache
 
 from wily import operators
-from wily.archivers import ARCHIVER_GIT
 from wily.config.types import WilyConfig
+from wily.defaults import (
+    DEFAULT_ARCHIVER,
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_CONFIG_SECTION,
+    DEFAULT_MAX_REVISIONS,
+    DEFAULT_PATH,
+)
 
 logger = logging.getLogger(__name__)
-
-
-@lru_cache(maxsize=128)
-def generate_cache_path(path):
-    """
-    Generate a reusable path to cache results.
-
-    Will use the --path of the target and hash into
-    a 9-character directory within the HOME folder.
-
-    :return: The cache path
-    :rtype: ``str``
-    """
-    logger.debug(f"Generating cache for {path}")
-    sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
-    HOME = pathlib.Path.home()
-    cache_path = str(HOME / ".wily" / sha)
-    logger.debug(f"Cache path is {cache_path}")
-    return cache_path
 
 
 # Default values for Wily
@@ -47,19 +32,6 @@ DEFAULT_OPERATORS = {
     operators.OPERATOR_HALSTEAD.name,
 }
 
-""" The name of the default archiver """
-DEFAULT_ARCHIVER = ARCHIVER_GIT.name
-
-""" The default configuration file name """
-DEFAULT_CONFIG_PATH = "wily.cfg"
-
-""" The default section name in the config """
-DEFAULT_CONFIG_SECTION = "wily"
-
-""" The default maximum number of revisions to archiver """
-DEFAULT_MAX_REVISIONS = 50
-
-DEFAULT_PATH = "."
 
 """ The default configuration for Wily (if no config file exists) """
 DEFAULT_CONFIG = WilyConfig(
@@ -68,9 +40,6 @@ DEFAULT_CONFIG = WilyConfig(
     path=DEFAULT_PATH,
     max_revisions=DEFAULT_MAX_REVISIONS,
 )
-
-""" Default table style in console. See tabulate docs for more. """
-DEFAULT_GRID_STYLE = "fancy_grid"
 
 
 def load(config_path=DEFAULT_CONFIG_PATH):

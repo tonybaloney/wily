@@ -6,6 +6,8 @@ import pathlib
 from dataclasses import InitVar, dataclass, field
 from typing import Any, Iterable, List, Optional
 
+from wily.helper import generate_cache_path
+
 logger = logging.getLogger(__name__)
 
 
