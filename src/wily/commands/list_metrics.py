@@ -21,7 +21,7 @@ def list_metrics(wrap: bool):
                 tabulate.tabulate(
                     headers=headers,
                     tabular_data=[
-                        (m.name, m.description, m.type, m.measure, m.aggregate)
+                        (m.name, m.description, m.metric_type, m.measure, m.aggregate)
                         for m in operator.operator_cls.metrics
                     ],
                     tablefmt=style,
