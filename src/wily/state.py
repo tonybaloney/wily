@@ -5,6 +5,7 @@ Contains a lazy revision, index and process state model.
 """
 from collections import OrderedDict
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from wily import cache, logger
@@ -83,7 +84,7 @@ class IndexedRevision:
 
     def store(
         self, config: WilyConfig, archiver: Union[Archiver, str], stats: Dict[str, Any]
-    ):
+    ) -> Path:
         """
         Store the stats for this indexed revision.
 
