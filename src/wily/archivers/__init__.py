@@ -40,13 +40,9 @@ class BaseArchiver:
         Get the list of revisions.
 
         :param path: the path to target.
-        :type  path: ``str``
-
         :param max_revisions: the maximum number of revisions.
-        :type  max_revisions: ``int``
 
         :return: A list of revisions.
-        :rtype: ``list`` of :class:`Revision`
         """
         ...
 
@@ -79,7 +75,7 @@ class BaseArchiver:
 from wily.archivers.filesystem import FilesystemArchiver
 from wily.archivers.git import GitArchiver
 
-"""Type for an operator"""
+"""Type for an Archiver"""
 
 T = TypeVar("T")
 
@@ -102,7 +98,7 @@ class Archiver(Generic[T]):
         return self.name
 
 
-"""Git Operator defined in `wily.archivers.git`"""
+"""Git Archiver defined in `wily.archivers.git`"""
 ARCHIVER_GIT = Archiver(
     name="git", archiver_cls=GitArchiver, description="Git archiver"
 )

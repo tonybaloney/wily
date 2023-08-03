@@ -32,7 +32,7 @@ def rank(
     threshold: int,
     descending: bool,
     wrap: bool,
-):
+) -> None:
     """
     Rank command ordering files, methods or functions using metrics.
 
@@ -42,7 +42,8 @@ def rank(
     :param revision_index: Version of git repository to revert to.
     :param limit: Limit the number of items in the table.
     :param threshold: For total values beneath the threshold return a non-zero exit code.
-    :type descending: Rank in descending order
+    :param descending: Rank in descending order
+    :param wrap: Wrap output
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """

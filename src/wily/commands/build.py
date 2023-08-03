@@ -46,7 +46,7 @@ def run_operator(
     return operator.name, data
 
 
-def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
+def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> None:
     """
     Build the history given an archiver and collection of operators.
 

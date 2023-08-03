@@ -24,10 +24,8 @@ def exists(config: WilyConfig) -> bool:
     Check whether the .wily/ directory exists.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
 
     :return: Whether the .wily directory exists
-    :rtype: ``boolean``
     """
     exists = (
         pathlib.Path(config.cache_path).exists()
@@ -76,13 +74,11 @@ def create(config: WilyConfig) -> str:
     return config.cache_path
 
 
-def clean(config: WilyConfig):
+def clean(config: WilyConfig) -> None:
     """
     Delete a wily cache.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     """
     if not exists(config):
         logger.debug("Wily cache does not exist, skipping")
@@ -106,9 +102,6 @@ def store(
     :param stats: The collected data
 
     :return: The absolute path to the created file
-    :rtype: ``str``
-
-    :rtype: `pathlib.Path`
     """
     root = pathlib.Path(config.cache_path) / str(archiver)
 
@@ -149,9 +142,8 @@ def store_archiver_index(
     :param config: The configuration
     :param archiver: The archiver to get name from (e.g. 'git')
     :param index: The archiver index record
-    :type  index: ``list``
 
-    :rtype: `pathlib.Path`
+    :return: The absolute path to the created file
     """
     root = pathlib.Path(config.cache_path) / str(archiver)
 
@@ -173,10 +165,8 @@ def list_archivers(config: WilyConfig) -> List[str]:
     List the names of archivers with data.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
 
     :return: A list of archiver names
-    :rtype: ``list`` of ``str``
     """
     root = pathlib.Path(config.cache_path)
     result = []
@@ -217,13 +207,9 @@ def has_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> bo
     Check if this archiver has an index file.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param archiver: The name of the archiver type (e.g. 'git')
-    :type  archiver: ``str``
 
     :return: Whether the archiver's index exists.
-    :rtype: ``bool``
     """
     root = pathlib.Path(config.cache_path) / str(archiver) / "index.json"
     return root.exists()

@@ -102,13 +102,9 @@ class GitArchiver(BaseArchiver):
         Get the list of revisions.
 
         :param path: the path to target.
-        :type  path: ``str``
-
         :param max_revisions: the maximum number of revisions.
-        :type  max_revisions: ``int``
 
         :return: A list of revisions.
-        :rtype: ``list`` of :class:`Revision`
         """
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
@@ -154,10 +150,7 @@ class GitArchiver(BaseArchiver):
         Checkout a specific revision.
 
         :param revision: The revision identifier.
-        :type  revision: :class:`Revision`
-
         :param options: Any additional options.
-        :type  options: ``dict``
         """
         rev = revision.key
         self.repo.git.checkout(rev)
@@ -176,10 +169,8 @@ class GitArchiver(BaseArchiver):
         Search a string and return a single revision.
 
         :param search: The search term.
-        :type  search: ``str``
 
         :return: An instance of revision.
-        :rtype: Instance of :class:`Revision`
         """
         commit = self.repo.commit(search)
         tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)

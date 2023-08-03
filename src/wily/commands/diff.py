@@ -37,7 +37,7 @@ def diff(
     detail: bool = True,
     revision: Optional[str] = None,
     wrap: bool = False,
-):
+) -> None:
     """
     Show the differences in metrics for each of the files.
 
@@ -47,6 +47,7 @@ def diff(
     :param changes_only: Only include changes files in output.
     :param detail: Show details (function-level)
     :param revision: Compare with specific revision
+    :param wrap: Wrap output
     """
     config.targets = files
     files = list(files)

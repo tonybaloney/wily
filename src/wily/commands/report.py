@@ -35,7 +35,7 @@ def report(
     format: ReportFormat = ReportFormat.CONSOLE,
     changes_only: bool = False,
     wrap: bool = False,
-):
+) -> None:
     """
     Show metrics for a given file.
 
@@ -50,6 +50,7 @@ def report(
     :param format: Output format
     :param console_format: Grid format style for tabulate
     :param changes_only: Only report revisions where delta != 0
+    :param wrap: Wrap output
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")

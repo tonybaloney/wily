@@ -5,7 +5,7 @@ TODO: Add multiple lines for multiple files
 """
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -25,13 +25,13 @@ def metric_parts(metric):
 def graph(
     config: WilyConfig,
     path: str,
-    metrics: Tuple[str, str],
+    metrics: Union[Tuple[str], Tuple[str, str]],
     output: Optional[str] = None,
     x_axis: Optional[str] = None,
     changes: bool = True,
     text: bool = False,
     aggregate: bool = False,
-):
+) -> None:
     """
     Graph information about the cache and runtime.
 
