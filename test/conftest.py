@@ -1,5 +1,4 @@
 import pathlib
-import shutil
 import tempfile
 from textwrap import dedent
 
@@ -277,4 +276,4 @@ def cache_path(monkeypatch):
     tmp = tempfile.mkdtemp()
     monkeypatch.setenv("HOME", tmp)
     yield tmp
-    shutil.rmtree(tmp)
+    # shutil.rmtree(tmp)

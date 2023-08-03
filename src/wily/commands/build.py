@@ -68,11 +68,11 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
         logger.error(f"Failed to setup archiver: '{message}'")
         exit(1)
 
-    state = State(config, archiver=archiver)
+    state = State(config, archiver=archiver_instance)
     # Check for existence of cache, else provision
     state.ensure_exists()
 
-    index = state.index[archiver.name]
+    index = state.index[archiver_instance.name]
 
     # remove existing revisions from the list
     revisions = [revision for revision in revisions if revision not in index][::-1]
@@ -183,7 +183,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]):
                 prev_stats = stats
                 seed = False
                 ir = index.add(revision, operators=operators)
-                ir.store(config, archiver, stats)
+                ir.store(config, archiver_instance.name, stats)
         index.save()
         bar.finish()
     except Exception as e:

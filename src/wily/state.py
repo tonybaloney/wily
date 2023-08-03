@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Union
 
 from wily import cache, logger
-from wily.archivers import Archiver, Revision, resolve_archiver
+from wily.archivers import Archiver, BaseArchiver, Revision, resolve_archiver
 from wily.config.types import WilyConfig
 from wily.operators import Operator, get_metric
 
@@ -81,7 +81,9 @@ class IndexedRevision:
         logger.debug("Fetching keys")
         return list(self._data[operator].keys())
 
-    def store(self, config: WilyConfig, archiver: Archiver, stats: Dict[str, Any]):
+    def store(
+        self, config: WilyConfig, archiver: Union[Archiver, str], stats: Dict[str, Any]
+    ):
         """
         Store the stats for this indexed revision.
 
@@ -185,15 +187,16 @@ class State:
     default_archiver: str
     operators: Optional[List[Operator]] = None
 
-    def __init__(self, config: WilyConfig, archiver: Optional[Archiver] = None):
+    def __init__(
+        self,
+        config: WilyConfig,
+        archiver: Optional[Union[Archiver, BaseArchiver]] = None,
+    ):
         """
         Instantiate a new process state.
 
         :param config: The wily configuration.
-        :type  config: :class:`WilyConfig`
-
         :param archiver: The archiver (optional).
-        :type  archiver: :class:`wily.archivers.Archiver`
         """
         if archiver:
             self.archivers = [archiver.name]
