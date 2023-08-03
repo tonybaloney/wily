@@ -12,11 +12,12 @@ from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
-from git import Actor, Repo
+from git.repo.base import Repo
+from git.util import Actor
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
-from wily.config import generate_cache_path
+from wily.helper import generate_cache_path
 
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
