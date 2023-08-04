@@ -7,10 +7,12 @@ Will compare the values between revisions and highlight changes in green/red.
 from pathlib import Path
 from shutil import copytree
 from string import Template
+from typing import Iterable
 
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
+from wily.config.types import WilyConfig
 from wily.helper import get_maxcolwidth
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
@@ -23,17 +25,17 @@ ANSI_YELLOW = 33
 
 
 def report(
-    config,
-    path,
-    metrics,
-    n,
-    output,
-    include_message=False,
-    format=ReportFormat.CONSOLE,
-    console_format=None,
-    changes_only=False,
-    wrap=False,
-):
+    config: WilyConfig,
+    path: str,
+    metrics: Iterable[str],
+    n: int,
+    output: Path,
+    console_format: str,
+    include_message: bool = False,
+    format: ReportFormat = ReportFormat.CONSOLE,
+    changes_only: bool = False,
+    wrap: bool = False,
+) -> None:
     """
     Show metrics for a given file.
 
@@ -41,28 +43,14 @@ def report(
     :type  config: :class:`wily.config.WilyConfig`
 
     :param path: The path to the file
-    :type  path: ``str``
-
-    :param metrics: Name of the metric to report on
-    :type  metrics: ``str``
-
+    :param metrics: List of metrics to report on
     :param n: Number of items to list
-    :type  n: ``int``
-
     :param output: Output path
-    :type  output: ``Path``
-
     :param include_message: Include revision messages
-    :type  include_message: ``bool``
-
     :param format: Output format
-    :type  format: ``ReportFormat``
-
     :param console_format: Grid format style for tabulate
-    :type  console_format: ``str``
-
     :param changes_only: Only report revisions where delta != 0
-    :type  changes_only: ``bool``
+    :param wrap: Wrap output
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")
@@ -71,8 +59,8 @@ def report(
     data = []
     metric_metas = []
 
-    for metric in metrics:
-        operator, metric = resolve_metric_as_tuple(metric)
+    for metric_name in metrics:
+        operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
         operator = operator.name
         # Set the delta colors depending on the metric type
@@ -94,7 +82,7 @@ def report(
             "increase_color": increase_color,
             "decrease_color": decrease_color,
             "title": metric.description,
-            "type": metric.type,
+            "type": metric.metric_type,
         }
         metric_metas.append(metric_meta)
 
@@ -203,8 +191,8 @@ def report(
             headers=table_headers, content=table_content
         )
 
-        with report_output.open("w", errors="xmlcharrefreplace") as output:
-            output.write(report_template)
+        with report_output.open("w", errors="xmlcharrefreplace") as output_f:
+            output_f.write(report_template)
 
         try:
             copytree(str(templates_dir / "css"), str(report_path / "css"))

@@ -9,18 +9,21 @@ from wily.helper import get_maxcolwidth, get_style
 from wily.operators import ALL_OPERATORS
 
 
-def list_metrics(wrap):
+def list_metrics(wrap: bool) -> None:
     """List metrics available."""
     headers = ("Name", "Description", "Type", "Measure", "Aggregate")
     maxcolwidth = get_maxcolwidth(headers, wrap)
     style = get_style()
     for name, operator in ALL_OPERATORS.items():
         print(f"{name} operator:")
-        if len(operator.cls.metrics) > 0:
+        if len(operator.operator_cls.metrics) > 0:
             print(
                 tabulate.tabulate(
                     headers=headers,
-                    tabular_data=operator.cls.metrics,
+                    tabular_data=[
+                        (m.name, m.description, m.metric_type, m.measure, m.aggregate)
+                        for m in operator.operator_cls.metrics
+                    ],
                     tablefmt=style,
                     maxcolwidths=maxcolwidth,
                     maxheadercolwidths=maxcolwidth,

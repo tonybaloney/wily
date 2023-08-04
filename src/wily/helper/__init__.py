@@ -1,11 +1,18 @@
 """Helper package for wily."""
+import hashlib
+import logging
+import pathlib
 import shutil
 import sys
+from functools import lru_cache
+from typing import Optional, Sized, Union
 
-from wily.config import DEFAULT_GRID_STYLE
+from wily.defaults import DEFAULT_GRID_STYLE
+
+logger = logging.getLogger(__name__)
 
 
-def get_maxcolwidth(headers, wrap=True):
+def get_maxcolwidth(headers: Sized, wrap=True) -> Optional[int]:
     """Calculate the maximum column width for a given terminal width."""
     if not wrap:
         return
@@ -21,9 +28,29 @@ def get_maxcolwidth(headers, wrap=True):
     return max(maxcolwidth, 1)
 
 
-def get_style(style=DEFAULT_GRID_STYLE):
+def get_style(style: str = DEFAULT_GRID_STYLE) -> str:
     """Select the tablefmt style for tabulate according to what sys.stdout can handle."""
     if style == DEFAULT_GRID_STYLE:
-        if sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+        encoding = sys.stdout.encoding
+        # StringIO has encoding=None, but it handles utf-8 fine.
+        if encoding is not None and encoding.lower() not in ("utf-8", "utf8"):
             style = "grid"
     return style
+
+
+@lru_cache(maxsize=128)
+def generate_cache_path(path: Union[pathlib.Path, str]) -> str:
+    """
+    Generate a reusable path to cache results.
+
+    Will use the --path of the target and hash into
+    a 9-character directory within the HOME folder.
+
+    :return: The cache path
+    """
+    logger.debug(f"Generating cache for {path}")
+    sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
+    HOME = pathlib.Path.home()
+    cache_path = str(HOME / ".wily" / sha)
+    logger.debug(f"Cache path is {cache_path}")
+    return cache_path

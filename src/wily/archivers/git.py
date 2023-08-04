@@ -4,13 +4,14 @@ Git Archiver.
 Implementation of the archiver API for the gitpython module.
 """
 import logging
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import git.exc
 from git import Commit
 from git.repo import Repo
 
 from wily.archivers import BaseArchiver, Revision
+from wily.config.types import WilyConfig
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class InvalidGitRepositoryError(Exception):
 class DirtyGitRepositoryError(Exception):
     """Error for a dirty git repository (untracked files)."""
 
-    def __init__(self, untracked_files):
+    def __init__(self, untracked_files: List[str]):
         """
         Raise error for untracked files.
 
@@ -38,10 +39,16 @@ class DirtyGitRepositoryError(Exception):
 def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[str]]:
     """Get tracked files in a repo for a commit hash using ls-tree."""
     paths = repo.git.execute(
-        ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha]
+        ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha],
+        with_extended_output=False,
+        as_process=False,
+        stdout_as_string=True,
     ).split("\n")
     dirs = [""] + repo.git.execute(
-        ["git", "ls-tree", "--name-only", "--full-tree", "-r", "-d", commit.hexsha]
+        ["git", "ls-tree", "--name-only", "--full-tree", "-r", "-d", commit.hexsha],
+        with_extended_output=False,
+        as_process=False,
+        stdout_as_string=True,
     ).split("\n")
     return paths, dirs
 
@@ -72,12 +79,11 @@ class GitArchiver(BaseArchiver):
 
     name = "git"
 
-    def __init__(self, config):
+    def __init__(self, config: "WilyConfig"):
         """
         Instantiate a new Git Archiver.
 
         :param config: The wily configuration
-        :type  config: :class:`wily.config.WilyConfig`
         """
         try:
             self.repo = Repo(config.path)
@@ -96,18 +102,14 @@ class GitArchiver(BaseArchiver):
         Get the list of revisions.
 
         :param path: the path to target.
-        :type  path: ``str``
-
         :param max_revisions: the maximum number of revisions.
-        :type  max_revisions: ``int``
 
         :return: A list of revisions.
-        :rtype: ``list`` of :class:`Revision`
         """
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
-        revisions = []
+        revisions: List[Revision] = []
         for commit in self.repo.iter_commits(
             self.current_branch, max_count=max_revisions, reverse=True
         ):
@@ -133,7 +135,7 @@ class GitArchiver(BaseArchiver):
                 author_name=commit.author.name,
                 author_email=commit.author.email,
                 date=commit.committed_date,
-                message=commit.message,
+                message=str(commit.message),
                 tracked_files=tracked_files,
                 tracked_dirs=tracked_dirs,
                 added_files=added_files,
@@ -143,15 +145,12 @@ class GitArchiver(BaseArchiver):
             revisions.append(rev)
         return revisions[::-1]
 
-    def checkout(self, revision: Revision, options: Dict):
+    def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
         :param revision: The revision identifier.
-        :type  revision: :class:`Revision`
-
         :param options: Any additional options.
-        :type  options: ``dict``
         """
         rev = revision.key
         self.repo.git.checkout(rev)
@@ -170,10 +169,8 @@ class GitArchiver(BaseArchiver):
         Search a string and return a single revision.
 
         :param search: The search term.
-        :type  search: ``str``
 
         :return: An instance of revision.
-        :rtype: Instance of :class:`Revision`
         """
         commit = self.repo.commit(search)
         tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
@@ -191,7 +188,7 @@ class GitArchiver(BaseArchiver):
             author_name=commit.author.name,
             author_email=commit.author.email,
             date=commit.committed_date,
-            message=commit.message,
+            message=str(commit.message),
             tracked_files=tracked_files,
             tracked_dirs=tracked_dirs,
             added_files=added_files,

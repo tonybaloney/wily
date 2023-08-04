@@ -1,10 +1,23 @@
 """Models and types for "operators" the basic measure of a module that measures code."""
 
-from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
+from wily.config.types import WilyConfig
 from wily.lang import _
 
 
@@ -16,7 +29,33 @@ class MetricType(Enum):
     Informational = 3  # Doesn't matter
 
 
-Metric = namedtuple("Metric", "name description type measure aggregate")
+TValue = TypeVar("TValue", str, int, float)
+
+
+class Metric(Generic[TValue]):
+    """Represents a metric."""
+
+    name: str
+    description: str
+    metric_type: TValue
+    measure: MetricType
+    aggregate: Callable[[Iterable[TValue]], TValue]
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        metric_type: TValue,
+        measure: MetricType,
+        aggregate: Callable[[Iterable[TValue]], TValue],
+    ):
+        """Initialise the metric."""
+        self.name = name
+        self.description = description
+        self.metric_type = metric_type
+        self.measure = measure
+        self.aggregate = aggregate
+
 
 GOOD_COLORS = {
     MetricType.AimHigh: 32,
@@ -42,19 +81,23 @@ class BaseOperator:
     """Abstract Operator Class."""
 
     """Name of the operator."""
-    name = "abstract"
+    name: str = "abstract"
 
     """Default settings."""
-    defaults = {}
+    defaults: Dict[str, Any] = {}
 
     """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)."""
-    metrics = ()
+    metrics: Tuple[Metric, ...] = ()
 
     """Which metric is the default to display in the report command."""
-    default_metric_index = None
+    default_metric_index: Optional[int] = None
 
     """Level at which the operator goes to."""
-    level = OperatorLevel.File
+    level: OperatorLevel = OperatorLevel.File
+
+    def __init__(self, *args, **kwargs):
+        """Initialise the operator."""
+        ...
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -78,39 +121,67 @@ from wily.operators.maintainability import MaintainabilityIndexOperator
 from wily.operators.raw import RawMetricsOperator
 
 """Type for an operator."""
-Operator = namedtuple("Operator", "name cls description level")
+
+T = TypeVar("T", bound=BaseOperator)
+
+
+class Operator(Generic[T]):
+    """Operator holder."""
+
+    name: str
+    operator_cls: Type[T]
+    description: str
+    level: OperatorLevel
+
+    def __init__(
+        self,
+        name: str,
+        operator_cls: Type[T],
+        description: str,
+        level: OperatorLevel = OperatorLevel.File,
+    ):
+        """Initialise the operator."""
+        self.name = name
+        self.operator_cls = operator_cls
+        self.description = description
+        self.level = level
+
+    def __call__(self, config: "WilyConfig") -> T:
+        """Initialise the operator."""
+        return self.operator_cls(config)
+
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
-    cls=CyclomaticComplexityOperator,
+    operator_cls=CyclomaticComplexityOperator,
     description=_("Cyclomatic Complexity of modules"),
     level=OperatorLevel.Object,
 )
 
 OPERATOR_RAW = Operator(
     name="raw",
-    cls=RawMetricsOperator,
+    operator_cls=RawMetricsOperator,
     description=_("Raw Python statistics"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
-    cls=MaintainabilityIndexOperator,
+    operator_cls=MaintainabilityIndexOperator,
     description=_("Maintainability index (lines of code and branching)"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_HALSTEAD = Operator(
     name="halstead",
-    cls=HalsteadOperator,
+    operator_cls=HalsteadOperator,
     description=_("Halstead metrics"),
     level=OperatorLevel.Object,
 )
 
 
 """Dictionary of all operators"""
-ALL_OPERATORS = {
+ALL_OPERATORS: Dict[str, Operator] = {
     operator.name: operator
     for operator in (
         OPERATOR_CYCLOMATIC,
@@ -122,10 +193,10 @@ ALL_OPERATORS = {
 
 
 """Set of all metrics"""
-ALL_METRICS = {
+ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {
     (operator, metric)
     for operator in ALL_OPERATORS.values()
-    for metric in operator.cls.metrics
+    for metric in operator.operator_cls.metrics
 }
 
 
@@ -144,68 +215,39 @@ def resolve_operator(name: str) -> Operator:
 
 
 def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operator]:
-    """
-    Resolve a list of operator names to their corresponding types.
-
-    :param operators: The list of operators
-    :type  operators: iterable or ``str``
-
-    :rtype: ``list`` of :class:`Operator`
-    """
+    """Resolve a list of operator names to their corresponding types."""
     return [resolve_operator(operator) for operator in iter(operators)]
 
 
 @lru_cache(maxsize=128)
 def resolve_metric(metric: str) -> Metric:
-    """
-    Resolve metric key to a given target.
-
-    :param metric: the metric name.
-    :type  metric: ``str``
-
-    :rtype: :class:`Metric`
-    """
+    """Resolve metric key to a given target."""
     return resolve_metric_as_tuple(metric)[1]
 
 
 @lru_cache(maxsize=128)
-def resolve_metric_as_tuple(metric):
-    """
-    Resolve metric key to a given target.
-
-    :param metric: the metric name.
-    :type  metric: ``str``
-
-    :rtype: tuple(:class:`Operator`, :class:`Metric`)
-    """
+def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
+    """Resolve metric key to a given target."""
     if "." in metric:
         _, metric = metric.split(".")
 
-    r = [(operator, match) for operator, match in ALL_METRICS if match[0] == metric]
+    r = [(operator, match) for operator, match in ALL_METRICS if match.name == metric]
     if not r or len(r) == 0:
         raise ValueError(f"Metric {metric} not recognised.")
     else:
         return r[0]
 
 
-def get_metric(revision, operator, path, key):
+def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> Any:
     """
     Get a metric from the cache.
 
     :param revision: The revision data.
-    :type  revision: ``dict``
-
     :param operator: The operator name.
-    :type  operator: ``str``
-
     :param path: The path to the file/function
-    :type  path: ``str``
-
     :param key: The key of the data
-    :type  key: ``str``
 
     :return: Data from the cache
-    :rtype: ``dict``
     """
     if ":" in path:
         part, entry = path.split(":")

@@ -1,9 +1,9 @@
-from io import BytesIO, TextIOWrapper
+from io import BytesIO, StringIO, TextIOWrapper
 from unittest import mock
 
 import tabulate
 
-from wily.config import DEFAULT_GRID_STYLE
+from wily.defaults import DEFAULT_GRID_STYLE
 from wily.helper import get_maxcolwidth, get_style
 
 SHORT_DATA = [list("abcdefgh"), list("abcdefgh")]
@@ -149,3 +149,10 @@ def test_get_style_charmap_not_default_grid_style():
     with mock.patch("sys.stdout", output):
         style = get_style("something_else")
     assert style == "something_else"
+
+
+def test_get_style_none():
+    output = StringIO()  # output.encoding is None
+    with mock.patch("sys.stdout", output):
+        style = get_style()
+    assert style == "fancy_grid"
