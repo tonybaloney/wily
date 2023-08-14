@@ -1,5 +1,6 @@
 from click.testing import CliRunner
-from git import Actor, Repo
+from git.repo.base import Repo
+from git.util import Actor
 
 import wily.__main__ as main
 
@@ -15,6 +16,15 @@ def test_rank_single_file_default_metric(builddir):
     """Test the rank feature with default (AimLow) metric on a single file"""
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/test.py"])
+    assert result.exit_code == 0, result.stdout
+
+
+def test_rank_single_file_default_metric_wrapped(builddir):
+    """Test the rank feature with default metric and wrapping"""
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", builddir, "rank", "--wrap", "src/test.py"]
+    )
     assert result.exit_code == 0, result.stdout
 
 

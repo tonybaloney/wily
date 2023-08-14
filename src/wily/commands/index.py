@@ -6,19 +6,20 @@ Print information about the wily cache and what is in the index.
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
-from wily.config import DEFAULT_GRID_STYLE
+from wily.config.types import WilyConfig
+from wily.helper import get_maxcolwidth, get_style
 from wily.state import State
 
 
-def index(config, include_message=False):
+def index(
+    config: WilyConfig, include_message: bool = False, wrap: bool = False
+) -> None:
     """
     Show information about the cache and runtime.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param include_message: Include revision messages
-    :type  include_message: ``bool``
+    :param wrap: Wrap long lines
     """
     state = State(config=config)
     logger.debug("Running show command")
@@ -54,8 +55,14 @@ def index(config, include_message=False):
         headers = ("Revision", "Author", "Message", "Date")
     else:
         headers = ("Revision", "Author", "Date")
+    maxcolwidth = get_maxcolwidth(headers, wrap)
+    style = get_style()
     print(
         tabulate.tabulate(
-            headers=headers, tabular_data=data, tablefmt=DEFAULT_GRID_STYLE
+            headers=headers,
+            tabular_data=data,
+            tablefmt=style,
+            maxcolwidths=maxcolwidth,
+            maxheadercolwidths=maxcolwidth,
         )
     )

@@ -7,6 +7,7 @@ import multiprocessing
 import os
 from pathlib import Path
 from sys import exit
+from typing import List, Optional
 
 import radon.cli.harvest
 import tabulate
@@ -14,7 +15,9 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
-from wily.config import DEFAULT_GRID_STYLE, DEFAULT_PATH
+from wily.config import DEFAULT_PATH
+from wily.config.types import WilyConfig
+from wily.helper import get_maxcolwidth, get_style
 from wily.operators import (
     BAD_COLORS,
     GOOD_COLORS,
@@ -26,27 +29,25 @@ from wily.operators import (
 from wily.state import State
 
 
-def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
+def diff(
+    config: WilyConfig,
+    files: List[str],
+    metrics: List[str],
+    changes_only: bool = True,
+    detail: bool = True,
+    revision: Optional[str] = None,
+    wrap: bool = False,
+) -> None:
     """
     Show the differences in metrics for each of the files.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param files: The files to compare.
-    :type  files: ``list`` of ``str``
-
     :param metrics: The metrics to measure.
-    :type  metrics: ``list`` of ``str``
-
     :param changes_only: Only include changes files in output.
-    :type  changes_only: ``bool``
-
     :param detail: Show details (function-level)
-    :type  detail: ``bool``
-
     :param revision: Compare with specific revision
-    :type  revision: ``str``
+    :param wrap: Wrap output
     """
     config.targets = files
     files = list(files)
@@ -68,7 +69,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     if not revision:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision)
+        rev = (
+            resolve_archiver(state.default_archiver).archiver_cls(config).find(revision)
+        )
         logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
         try:
             target_revision = state.index[state.default_archiver][rev.key]
@@ -84,7 +87,9 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    resolved_metrics = [
+        (metric.split(".")[0], resolve_metric(metric)) for metric in metrics
+    ]
     results = []
 
     # Build a set of operators
@@ -98,7 +103,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
 
     # Write a summary table
     extra = []
-    for operator, metric in metrics:
+    for operator, metric in resolved_metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
             for file in files:
                 try:
@@ -119,7 +124,7 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
     for file in files:
         metrics_data = []
         has_changes = False
-        for operator, metric in metrics:
+        for operator, metric in resolved_metrics:
             try:
                 current = target_revision.get(
                     config, state.default_archiver, operator, file, metric.name
@@ -132,14 +137,14 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
                 new = "-"
             if new != current:
                 has_changes = True
-            if metric.type in (int, float) and new != "-" and current != "-":
-                if current > new:
+            if metric.metric_type in (int, float) and new != "-" and current != "-":
+                if current > new:  # type: ignore
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
                             current, new, BAD_COLORS[metric.measure]
                         )
                     )
-                elif current < new:
+                elif current < new:  # type: ignore
                     metrics_data.append(
                         "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
                             current, new, GOOD_COLORS[metric.measure]
@@ -157,12 +162,18 @@ def diff(config, files, metrics, changes_only=True, detail=True, revision=None):
         else:
             logger.debug(metrics_data)
 
-    descriptions = [metric.description for operator, metric in metrics]
+    descriptions = [metric.description for _, metric in resolved_metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
+        maxcolwidth = get_maxcolwidth(headers, wrap)
+        style = get_style()
         print(
             # But it still makes more sense to show the newest at the top, so reverse again
             tabulate.tabulate(
-                headers=headers, tabular_data=results, tablefmt=DEFAULT_GRID_STYLE
+                headers=headers,
+                tabular_data=results,
+                tablefmt=style,
+                maxcolwidths=maxcolwidth,
+                maxheadercolwidths=maxcolwidth,
             )
         )

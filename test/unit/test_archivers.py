@@ -58,7 +58,7 @@ class MockGit:
     def checkout(self, *args):
         ...
 
-    def execute(self, command):
+    def execute(self, command, *args, **kwargs):
         if command[1] == "ls-tree":
             assert command[-1] == "123abc"
             return "\n"
@@ -76,12 +76,7 @@ def repo(tmpdir):
 
 
 def test_basearchiver():
-    archiver = wily.archivers.BaseArchiver()
-    with pytest.raises(NotImplementedError):
-        archiver.revisions("", 10)
-
-    with pytest.raises(NotImplementedError):
-        archiver.checkout("")
+    wily.archivers.BaseArchiver(None)
 
 
 def test_defaults():

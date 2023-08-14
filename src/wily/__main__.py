@@ -9,8 +9,9 @@ import click
 from wily import WILY_LOG_NAME, __version__, logger
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
-from wily.config import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
 from wily.config import load as load_config
+from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
+from wily.helper import get_style
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import resolve_operators
@@ -153,7 +154,13 @@ def build(ctx, max_revisions, targets, operators, archiver):
 @click.option(
     "-m", "--message/--no-message", default=False, help=_("Include revision message")
 )
-def index(ctx, message):
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=True,
+    help=_("Wrap index text to fit in terminal"),
+)
+def index(ctx, message, wrap):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
@@ -162,7 +169,7 @@ def index(ctx, message):
 
     from wily.commands.index import index
 
-    index(config=config, include_message=message)
+    index(config=config, include_message=message, wrap=wrap)
 
 
 @cli.command(
@@ -205,8 +212,14 @@ def index(ctx, message):
     help=_("Return a non-zero exit code under the specified threshold"),
     type=click.INT,
 )
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=True,
+    help=_("Wrap rank text to fit in terminal"),
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold):
+def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
@@ -224,6 +237,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
         limit=limit,
         threshold=threshold,
         descending=desc,
+        wrap=wrap,
     )
 
 
@@ -259,9 +273,15 @@ def rank(ctx, path, metric, revision, limit, desc, threshold):
     default=False,
     help=_("Only show revisions that have changes"),
 )
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=True,
+    help=_("Wrap report text to fit in terminal"),
+)
 @click.pass_context
 def report(
-    ctx, file, metrics, number, message, format, console_format, output, changes
+    ctx, file, metrics, number, message, format, console_format, output, changes, wrap
 ):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
@@ -279,6 +299,8 @@ def report(
     else:
         new_output = new_output / "wily_report" / "index.html"
 
+    style = get_style(console_format)
+
     from wily.commands.report import report
 
     logger.debug(f"Running report on {file} for metric {metrics}")
@@ -292,8 +314,9 @@ def report(
         output=new_output,
         include_message=message,
         format=ReportFormat[format],
-        console_format=console_format,
+        console_format=style,
         changes_only=changes,
+        wrap=wrap,
     )
 
 
@@ -303,7 +326,7 @@ def report(
     "-m",
     "--metrics",
     default=None,
-    help=_("comma-seperated list of metrics, see list-metrics for choices"),
+    help=_("comma-separated list of metrics, see list-metrics for choices"),
 )
 @click.option(
     "-a/-c",
@@ -319,8 +342,14 @@ def report(
 @click.option(
     "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
 )
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=True,
+    help=_("Wrap diff text to fit in terminal"),
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision):
+def diff(ctx, files, metrics, all, detail, revision, wrap):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -344,6 +373,7 @@ def diff(ctx, files, metrics, all, detail, revision):
         changes_only=not all,
         detail=detail,
         revision=revision,
+        wrap=wrap,
     )
 
 
@@ -429,8 +459,14 @@ def clean(ctx, yes):
 
 
 @cli.command("list-metrics", help=_("""List the available metrics."""))
+@click.option(
+    "-w",
+    "--wrap/--no-wrap",
+    default=True,
+    help=_("Wrap metrics text to fit in terminal"),
+)
 @click.pass_context
-def list_metrics(ctx):
+def list_metrics(ctx, wrap):
     """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
@@ -439,7 +475,7 @@ def list_metrics(ctx):
 
     from wily.commands.list_metrics import list_metrics
 
-    list_metrics()
+    list_metrics(wrap)
 
 
 @cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))
@@ -467,7 +503,7 @@ def handle_no_cache(context):
 
 if __name__ == "__main__":  # pragma: no cover
     try:
-        cli()
+        cli()  # type: ignore
     except Exception as runtime:
         logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
         logger.info(
