@@ -1,11 +1,11 @@
 """
-Draw graph in HTML for a specific metric.
+Graph command.
 
-TODO: Add multiple lines for multiple files
+Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -22,9 +22,16 @@ def metric_parts(metric):
     return operator.name, met.name
 
 
+def path_startswith(filename: str, path: str) -> bool:
+    """Check whether a filename starts with a given path in platform-agnostic way."""
+    filepath = Path(filename).resolve()
+    path_ = Path(path).resolve()
+    return str(filepath).startswith(str(path_))
+
+
 def graph(
     config: WilyConfig,
-    path: str,
+    path: Tuple[str, ...],
     metrics: str,
     output: Optional[str] = None,
     x_axis: Optional[str] = None,
@@ -64,11 +71,14 @@ def graph(
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        paths = tuple(
-            tracked_file
-            for tracked_file in tracked_files
-            if any(tracked_file.startswith(p) for p in path)
-        ) or path
+        paths = (
+            tuple(
+                tracked_file
+                for tracked_file in tracked_files
+                if any(path_startswith(tracked_file, p) for p in path)
+            )
+            or path
+        )
     else:
         paths = path
     operator, key = metric_parts(metrics[0])
