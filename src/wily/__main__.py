@@ -386,20 +386,25 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
 
     Graph all .py files within src/ for the raw.loc metric
 
-        $ wily graph src/ raw.loc
+        $ wily graph src/ -m raw.loc
 
     Graph test.py against raw.loc and cyclomatic.complexity metrics
 
-        $ wily graph src/test.py raw.loc cyclomatic.complexity
+        $ wily graph src/test.py -m raw.loc,cyclomatic.complexity
 
     Graph test.py against raw.loc and raw.sloc on the x-axis
 
-        $ wily graph src/test.py raw.loc --x-axis raw.sloc
+        $ wily graph src/test.py -m raw.loc --x-axis raw.sloc
     """
     )
 )
 @click.argument("path", nargs=-1, type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=1, required=True)
+@click.option(
+    "-m",
+    "--metrics",
+    required=True,
+    help=_("Comma-separated list of metrics, see list-metrics for choices"),
+)
 @click.option(
     "-o",
     "--output",
