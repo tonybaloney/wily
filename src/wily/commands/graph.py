@@ -65,7 +65,6 @@ def graph(
     metrics = metrics.split(",")
 
     y_metric = resolve_metric(metrics[0])
-    title = f"{x_axis.capitalize()} of {y_metric.description} for {', '.join(path)}{' aggregated' if aggregate else ''}"
 
     if not aggregate:
         tracked_files = set()
@@ -81,6 +80,11 @@ def graph(
         )
     else:
         paths = path
+
+    title = (
+        f"{x_axis.capitalize()} of {y_metric.description}"
+        f"{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
+    )
     operator, key = metric_parts(metrics[0])
     if len(metrics) == 1:  # only y-axis
         z_axis = z_operator = z_key = ""
