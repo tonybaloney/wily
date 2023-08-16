@@ -31,7 +31,7 @@ def graph(
     changes: bool = True,
     text: bool = False,
     aggregate: bool = False,
-    plotlyjs: Union[bool, str] = False,
+    plotlyjs: Union[bool, str] = True,
 ) -> None:
     """
     Graph information about the cache and runtime.
