@@ -31,6 +31,7 @@ def graph(
     changes: bool = True,
     text: bool = False,
     aggregate: bool = False,
+    plotlyjs: Union[bool, str] = False,
 ) -> None:
     """
     Graph information about the cache and runtime.
@@ -43,6 +44,7 @@ def graph(
     :param changes: Only graph changes.
     :param text: Show commit message inline in graph.
     :param aggregate: Aggregate values for graph.
+    :param plotlyjs: How to include plotly.min.js.
     """
     logger.debug("Running graph command")
 
@@ -154,4 +156,5 @@ def graph(
         },
         auto_open=auto_open,
         filename=filename,
+        include_plotlyjs=plotlyjs,
     )
