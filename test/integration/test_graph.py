@@ -37,6 +37,17 @@ def test_graph(builddir):
     assert result.exit_code == 0, result.stdout
 
 
+def test_graph_plotlyjs(builddir):
+    """Test the graph feature with plotlyjs option"""
+    runner = CliRunner()
+    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
+        result = runner.invoke(
+            main.cli,
+            ["--path", builddir, "graph", _path, "raw.loc", "--plotlyjs", "directory"],
+        )
+    assert result.exit_code == 0, result.stdout
+
+
 def test_graph_all(builddir):
     """Test the graph feature"""
     runner = CliRunner()
