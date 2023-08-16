@@ -287,12 +287,32 @@ def test_graph():
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.commands.graph.graph") as graph:
             runner = CliRunner()
-            result = runner.invoke(main.cli, ["graph", "foo.py", "example_metric"])
+            result = runner.invoke(
+                main.cli, ["graph", "foo.py", "-m", "example_metric"]
+            )
             assert result.exit_code == 0
             assert graph.called_once
             assert check_cache.called_once
-            assert graph.call_args[1]["path"] == "foo.py"
-            assert graph.call_args[1]["metrics"] == ("example_metric",)
+            assert graph.call_args[1]["path"] == ("foo.py",)
+            assert graph.call_args[1]["metrics"] == "example_metric"
+
+
+def test_graph_multiple_paths():
+    """
+    Test that graph calls the graph command with multiple paths
+    """
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.graph.graph") as graph:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli,
+                ["graph", "foo.py", "bar.py", "baz.py", "-m", "example_metric"],
+            )
+            assert result.exit_code == 0
+            assert graph.called_once
+            assert check_cache.called_once
+            assert graph.call_args[1]["path"] == ("foo.py", "bar.py", "baz.py")
+            assert graph.call_args[1]["metrics"] == "example_metric"
 
 
 def test_graph_multiple_metrics():
@@ -303,13 +323,13 @@ def test_graph_multiple_metrics():
         with patch("wily.commands.graph.graph") as graph:
             runner = CliRunner()
             result = runner.invoke(
-                main.cli, ["graph", "foo.py", "example_metric", "another_metric"]
+                main.cli, ["graph", "foo.py", "-m", "example_metric,another_metric"]
             )
             assert result.exit_code == 0
             assert graph.called_once
             assert check_cache.called_once
-            assert graph.call_args[1]["path"] == "foo.py"
-            assert graph.call_args[1]["metrics"] == ("example_metric", "another_metric")
+            assert graph.call_args[1]["path"] == ("foo.py",)
+            assert graph.call_args[1]["metrics"] == "example_metric,another_metric"
 
 
 def test_graph_with_output():
@@ -320,13 +340,13 @@ def test_graph_with_output():
         with patch("wily.commands.graph.graph") as graph:
             runner = CliRunner()
             result = runner.invoke(
-                main.cli, ["graph", "foo.py", "example_metric", "-o", "foo.html"]
+                main.cli, ["graph", "foo.py", "-m", "example_metric", "-o", "foo.html"]
             )
             assert result.exit_code == 0
             assert graph.called_once
             assert check_cache.called_once
-            assert graph.call_args[1]["path"] == "foo.py"
-            assert graph.call_args[1]["metrics"] == ("example_metric",)
+            assert graph.call_args[1]["path"] == ("foo.py",)
+            assert graph.call_args[1]["metrics"] == "example_metric"
             assert graph.call_args[1]["output"] == "foo.html"
 
 
