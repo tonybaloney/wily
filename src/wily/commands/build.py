@@ -135,7 +135,10 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                 # Run each operator as a separate process
                 data = pool.starmap(
                     run_operator,
-                    [(operator, revision, config, targets, ignore) for operator in operators],
+                    [
+                        (operator, revision, config, targets, ignore)
+                        for operator in operators
+                    ],
                 )
                 # data is a list of tuples, where for each operator, it is a tuple of length 2,
                 operator_data_len = 2
