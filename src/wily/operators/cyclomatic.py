@@ -43,7 +43,7 @@ class CyclomaticComplexityOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config, targets):
+    def __init__(self, config, targets, **kwargs):
         """
         Instantiate a new Cyclomatic Complexity operator.
 
@@ -53,6 +53,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         # TODO: Import config for harvester from .wily.cfg
         logger.debug(f"Using {targets} with {self.defaults} for CC metrics")
 
+        self.defaults.update(kwargs)
         self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):

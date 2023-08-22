@@ -39,7 +39,7 @@ class RawMetricsOperator(BaseOperator):
     )
     default_metric_index = 0  # LOC
 
-    def __init__(self, config, targets):
+    def __init__(self, config, targets, **kwargs):
         """
         Instantiate a new raw operator.
 
@@ -48,6 +48,8 @@ class RawMetricsOperator(BaseOperator):
         """
         # TODO: Use config from wily.cfg for harvester
         logger.debug(f"Using {targets} with {self.defaults} for Raw metrics")
+
+        self.defaults.update(kwargs)
         self.harvester = harvesters.RawHarvester(
             targets, config=Config(**self.defaults)
         )

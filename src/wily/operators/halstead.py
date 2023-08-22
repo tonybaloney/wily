@@ -44,7 +44,7 @@ class HalsteadOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config, targets):
+    def __init__(self, config, targets, **kwargs):
         """
         Instantiate a new HC operator.
 
@@ -54,6 +54,7 @@ class HalsteadOperator(BaseOperator):
         # TODO : Import config from wily.cfg
         logger.debug(f"Using {targets} with {self.defaults} for HC metrics")
 
+        self.defaults.update(kwargs)
         self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
     def run(self, module, options):
