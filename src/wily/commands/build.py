@@ -10,7 +10,6 @@ import pathlib
 from sys import exit
 from typing import Any, Dict, List, Tuple
 
-from git import Repo
 from progress.bar import Bar
 
 from wily import logger
@@ -26,8 +25,10 @@ from wily.state import State
 def gitignore_to_radon():
     """Convert entries in a .gitignore file to radon ignore/exclude configs."""
     config = load_config(DEFAULT_CONFIG_PATH)
-    repo = Repo(config.path)
-    gitignore_path = pathlib.Path(repo.git_dir) / ".gitignore"
+    gitignore_path = pathlib.Path(config.path) / ".gitignore"
+    if not gitignore_path.exists():
+        logger.info(f".gitignore file not found at {pathlib.Path(config.path)}")
+        return ""
     ignore = []
     with gitignore_path.open() as gitignore:
         for line in gitignore:
