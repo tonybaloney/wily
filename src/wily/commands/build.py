@@ -1,8 +1,7 @@
 """
+Build command.
+
 Builds a cache based on a source-control history.
-
-TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
-
 """
 import multiprocessing
 import os
@@ -22,7 +21,7 @@ from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
-def gitignore_to_radon():
+def gitignore_to_radon() -> str:
     """Convert entries in a .gitignore file to radon ignore/exclude configs."""
     config = load_config(DEFAULT_CONFIG_PATH)
     gitignore_path = pathlib.Path(config.path) / ".gitignore"
