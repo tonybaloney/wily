@@ -156,5 +156,5 @@ def graph(
         },
         auto_open=auto_open,
         filename=filename,
-        include_plotlyjs=plotlyjs,
-    )  # type: ignore
+        include_plotlyjs=plotlyjs,  # type: ignore
+    )
