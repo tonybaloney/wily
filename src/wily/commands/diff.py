@@ -95,7 +95,8 @@ def diff(
     # Build a set of operators
     with multiprocessing.Pool(processes=len(operators)) as pool:
         operator_exec_out = pool.starmap(
-            run_operator, [(operator, None, config, targets) for operator in operators]
+            run_operator,
+            [(operator, None, config, targets, "") for operator in operators],
         )
     data = {}
     for operator_name, result in operator_exec_out:
