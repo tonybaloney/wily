@@ -140,15 +140,11 @@ def diff(
             if metric.metric_type in (int, float) and new != "-" and current != "-":
                 if current > new:  # type: ignore
                     metrics_data.append(
-                        "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
-                            current, new, BAD_COLORS[metric.measure]
-                        )
+                        f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
                 elif current < new:  # type: ignore
                     metrics_data.append(
-                        "{0:n} -> \u001b[{2}m{1:n}\u001b[0m".format(
-                            current, new, GOOD_COLORS[metric.measure]
-                        )
+                        f"{current:n} -> \u001b[{GOOD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
                 else:
                     metrics_data.append(f"{current:n} -> {new:n}")
