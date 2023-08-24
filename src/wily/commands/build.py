@@ -14,19 +14,21 @@ from progress.bar import Bar
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.config import load as load_config
 from wily.config.types import WilyConfig
-from wily.defaults import DEFAULT_CONFIG_PATH
 from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
-def gitignore_to_radon() -> str:
-    """Convert entries in a .gitignore file to radon ignore/exclude configs."""
-    config = load_config(DEFAULT_CONFIG_PATH)
-    gitignore_path = pathlib.Path(config.path) / ".gitignore"
+def gitignore_to_radon(path: str) -> str:
+    """
+    Convert entries in a .gitignore file to radon ignore/exclude configs.
+
+    :param path: The path where to find .gitignore.
+    :return: A comma-separated string containing glob patterns from .gitignore.
+    """
+    gitignore_path = pathlib.Path(path) / ".gitignore"
     if not gitignore_path.exists():
-        logger.info(f".gitignore file not found at {pathlib.Path(config.path)}")
+        logger.info(f".gitignore file not found at {pathlib.Path(path)}")
         return ""
     ignore = []
     with gitignore_path.open() as gitignore:
@@ -111,7 +113,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     state.operators = operators
 
     # Get patterns to ignore from .gitignore
-    ignore = gitignore_to_radon()
+    ignore = gitignore_to_radon(config.path)
 
     # Index all files the first time, only scan changes afterward
     seed = True
