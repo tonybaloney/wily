@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
@@ -61,3 +61,36 @@ def test_build_simple(config):
     with patch("wily.state.resolve_archiver", return_value=MockArchiver):
         result = build.build(config, MockArchiver, _test_operators)
     assert result is None
+
+
+def test_gitignore_to_radon():
+    mock_file = mock_open(read_data="test1.py\n\n\\not_included\n#comment\ntest2/")
+    mock_file = mock_file()
+    mock_opener = MagicMock()
+    mock_opener.__enter__.return_value = mock_file
+    mock_opener.open.return_value = mock_opener
+    mock_opener.__truediv__.return_value = mock_opener
+
+    mock_path = MagicMock(return_value=mock_opener)
+    with patch("wily.commands.build.pathlib.Path", mock_path):
+        result = build.gitignore_to_radon("")
+    assert result == "test1.py,test2/"
+    mock_file.__iter__.assert_called_once()
+    assert len(mock_opener.mock_calls) == 6
+
+
+def test_gitignore_to_radon_no_gitignore():
+    mock_file = mock_open(read_data="test1.py\n\n\\not_included\n#comment\ntest2/")
+    mock_file = mock_file()
+    mock_opener = MagicMock()
+    mock_opener.__enter__.return_value = mock_file
+    mock_opener.open.return_value = mock_opener
+    mock_opener.__truediv__.return_value = mock_opener
+
+    # Make gitignore_path.exists() return False
+    mock_opener.exists.return_value = False
+    mock_path = MagicMock(return_value=mock_opener)
+    with patch("wily.commands.build.pathlib.Path", mock_path):
+        result = build.gitignore_to_radon("")
+    assert result == ""
+    assert len(mock_opener.mock_calls) == 3
