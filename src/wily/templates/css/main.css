@@ -3,8 +3,8 @@
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
 * {
-	margin: 0px; 
-	padding: 0px; 
+	margin: 0px;
+	padding: 0px;
 	box-sizing: border-box;
 }
 
@@ -69,7 +69,7 @@ ul, li {
 .wrap-table100 {
   width: 960px;
   border-radius: 10px;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 table {
@@ -175,7 +175,7 @@ tr:hover {
     padding-right: 15px;
     margin: 0;
   }
-  
+
   tr td {
     border: none;
     padding-left: 30px;
@@ -185,7 +185,7 @@ tr:hover {
   tr td:nth-child(1) {
     padding-left: 30px;
   }
-  
+
   tr td {
     font-size: 18px;
     color: #555555;
