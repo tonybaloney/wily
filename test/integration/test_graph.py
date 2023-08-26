@@ -51,7 +51,16 @@ def test_graph_plotlyjs_directory(builddir):
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", _path, "raw.loc", "--plotlyjs", "directory"],
+            [
+                "--path",
+                builddir,
+                "graph",
+                _path,
+                "-m",
+                "raw.loc",
+                "--plotlyjs",
+                "directory",
+            ],
         )
     assert result.exit_code == 0, result.stdout
 
@@ -62,7 +71,7 @@ def test_graph_plotlyjs_True(builddir):
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", _path, "raw.loc", "--plotlyjs", "True"],
+            ["--path", builddir, "graph", _path, "-m", "raw.loc", "--plotlyjs", "True"],
         )
     assert result.exit_code == 0, result.stdout
 
@@ -73,7 +82,16 @@ def test_graph_plotlyjs_False(builddir):
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", _path, "raw.loc", "--plotlyjs", "False"],
+            [
+                "--path",
+                builddir,
+                "graph",
+                _path,
+                "-m",
+                "raw.loc",
+                "--plotlyjs",
+                "False",
+            ],
         )
     assert result.exit_code == 0, result.stdout
 

@@ -5,7 +5,7 @@ Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import plotly.graph_objs as go
 import plotly.offline
