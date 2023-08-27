@@ -38,9 +38,7 @@ class MockArchiverCls(BaseArchiver):
 
 class MockOperatorCls(BaseOperator):
     name = "test"
-    data = {
-        "C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py": None
-    }
+    data = {"C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py": None}
 
     def __init__(self, *args, **kwargs):
         pass
