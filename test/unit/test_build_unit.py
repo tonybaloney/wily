@@ -24,11 +24,23 @@ class MockArchiverCls(BaseArchiver):
                 author_email="-",  # as above
                 date=12_345_679,
                 message="None",
-                tracked_files=[],
-                tracked_dirs=[],
+                tracked_files=["a", "b", "c"],
+                tracked_dirs=["d"],
                 added_files=[],
                 modified_files=[],
                 deleted_files=[],
+            ),
+            Revision(
+                key="67890",
+                author_name="Local User",  # Don't want to leak local data
+                author_email="-",  # as above
+                date=12_345_679,
+                message="None again",
+                tracked_files=["a", "b", "c", "d"],
+                tracked_dirs=["d"],
+                added_files=["e"],
+                modified_files=["f"],
+                deleted_files=["a"],
             )
         ]
 
