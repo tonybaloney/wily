@@ -27,8 +27,8 @@ LAYOUT_EXPECTED = {
 
 
 def test_graph():
-    metrics = ("raw.loc",)
-    path = "test.py"
+    metrics = "raw.loc"
+    path = ("test.py",)
     output = ""
     mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
     mock_offline = mock.MagicMock()
@@ -84,8 +84,8 @@ LAYOUT_EXPECTED_WITH_KEYERROR = {
 
 
 def test_graph_with_keyerror():
-    metrics = ("raw.loc",)
-    path = "test.py"
+    metrics = "raw.loc"
+    path = ("test.py",)
     output = ""
     mock_State, mock_config = get_mock_State_and_config(
         3, ascending=True, with_keyerror=True
@@ -157,8 +157,8 @@ LAYOUT_EXPECTED_WITH_CHANGES = {
 
 
 def test_graph_with_changes():
-    metrics = ("raw.loc",)
-    path = "test.py"
+    metrics = "raw.loc"
+    path = ("test.py",)
     output = ""
     mock_State, mock_config = get_mock_State_and_config(3)
     mock_offline = mock.MagicMock()
@@ -230,8 +230,8 @@ LAYOUT_EXPECTED_ALL = {
 
 
 def test_graph_all():
-    metrics = ("raw.loc",)
-    path = "test.py"
+    metrics = "raw.loc"
+    path = ("test.py",)
     output = ""
     mock_State, mock_config = get_mock_State_and_config(3)
     mock_offline = mock.MagicMock()

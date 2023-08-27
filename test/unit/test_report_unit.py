@@ -7,7 +7,7 @@ from util import get_mock_State_and_config
 
 from wily import format_date as fd
 from wily.commands.report import report
-from wily.config import DEFAULT_GRID_STYLE
+from wily.defaults import DEFAULT_GRID_STYLE
 from wily.helper.custom_enums import ReportFormat
 
 EXPECTED = f"""
