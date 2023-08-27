@@ -39,7 +39,7 @@ class MockArchiverCls(BaseArchiver):
 class MockOperatorCls(BaseOperator):
     name = "test"
     data = {
-        "C:\\home\\test1.py " if sys.platform == "win32" else "/home/test1.py": None
+        "C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py": None
     }
 
     def __init__(self, *args, **kwargs):
@@ -70,4 +70,5 @@ def test_build_simple(config):
 def test_run_operator(config):
     name, data = build.run_operator(MockOperator, "123", config, ["test1.py"])
     assert name == "mock"
-    assert data == {os.path.relpath("/home/test1.py", config.path): None}
+    path = "C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py"
+    assert data == {os.path.relpath(path, config.path): None}
