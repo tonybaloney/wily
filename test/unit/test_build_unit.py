@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 
 import pytest
@@ -36,7 +37,7 @@ class MockArchiverCls(BaseArchiver):
 
 class MockOperatorCls(BaseOperator):
     name = "test"
-    data = {}
+    data = {"/home/test1.py": None}
 
     def __init__(self, *args, **kwargs):
         pass
@@ -61,3 +62,9 @@ def test_build_simple(config):
     with patch("wily.state.resolve_archiver", return_value=MockArchiver):
         result = build.build(config, MockArchiver, _test_operators)
     assert result is None
+
+
+def test_run_operator(config):
+    name, data = build.run_operator(MockOperator, "123", config, ["test1.py"])
+    assert name == "mock"
+    assert data == {os.path.relpath("/home/test1.py", config.path): None}
