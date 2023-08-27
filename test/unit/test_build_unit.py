@@ -1,4 +1,5 @@
 import os
+import sys
 from unittest.mock import patch
 
 import pytest
@@ -37,7 +38,9 @@ class MockArchiverCls(BaseArchiver):
 
 class MockOperatorCls(BaseOperator):
     name = "test"
-    data = {"/home/test1.py": None}
+    data = {
+        "C:\\home\\test1.py " if sys.platform == "win32" else "/home/test1.py": None
+    }
 
     def __init__(self, *args, **kwargs):
         pass
