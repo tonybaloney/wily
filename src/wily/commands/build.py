@@ -1,8 +1,7 @@
 """
+Build command.
+
 Builds a cache based on a source-control history.
-
-TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
-
 """
 import multiprocessing
 import os
@@ -20,8 +19,33 @@ from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
+def gitignore_to_radon(path: str) -> str:
+    """
+    Convert entries in a .gitignore file to radon ignore/exclude configs.
+
+    :param path: The path where to find .gitignore.
+    :return: A comma-separated string containing glob patterns from .gitignore.
+    """
+    gitignore_path = pathlib.Path(path) / ".gitignore"
+    if not gitignore_path.exists():
+        logger.info(f".gitignore file not found at {pathlib.Path(path)}")
+        return ""
+    ignore = []
+    with gitignore_path.open() as gitignore:
+        for line in gitignore:
+            line = line.strip()
+            if not line or line.startswith(("#", "\\")):
+                continue
+            ignore.append(line)
+    return ",".join(ignore)
+
+
 def run_operator(
-    operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]
+    operator: Operator,
+    revision: Revision,
+    config: WilyConfig,
+    targets: List[str],
+    ignore: str,
 ) -> Tuple[str, Dict[str, Any]]:
     """
     Run an operator for the multiprocessing pool.
@@ -30,8 +54,9 @@ def run_operator(
     :param revision: The revision index
     :param config: The runtime configuration
     :param targets: Files/paths to scan
+    :param ignore: Files/paths to ignore/exclude
     """
-    instance = operator.operator_cls(config, targets)
+    instance = operator.operator_cls(config, targets, ignore=ignore, exclude=ignore)
     logger.debug(f"Running {operator.name} operator on {revision}")
 
     data = instance.run(revision, config)
@@ -87,6 +112,9 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
 
+    # Get patterns to ignore from .gitignore
+    ignore = gitignore_to_radon(config.path)
+
     # Index all files the first time, only scan changes afterward
     seed = True
     try:
@@ -108,7 +136,10 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                 # Run each operator as a separate process
                 data = pool.starmap(
                     run_operator,
-                    [(operator, revision, config, targets) for operator in operators],
+                    [
+                        (operator, revision, config, targets, ignore)
+                        for operator in operators
+                    ],
                 )
                 # data is a list of tuples, where for each operator, it is a tuple of length 2,
                 operator_data_len = 2
