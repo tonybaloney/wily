@@ -41,7 +41,7 @@ class MockArchiverCls(BaseArchiver):
                 added_files=["e"],
                 modified_files=["f"],
                 deleted_files=["a"],
-            )
+            ),
         ]
 
     def checkout(self, revision, options):
