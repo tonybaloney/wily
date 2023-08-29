@@ -395,6 +395,10 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
     Graph test.py against raw.loc and raw.sloc on the x-axis
 
         $ wily graph src/test.py -m raw.loc --x-axis raw.sloc
+
+    Graph test.py against raw.loc creating a standalone plotly.min.js file
+
+        $ wily graph src/test.py -m raw.loc --shared-js
     """
     )
 )
@@ -421,22 +425,32 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
     help=_("Aggregate if path is directory"),
 )
 @click.option(
-    "--plotlyjs",
-    default="True",
-    help=_("Embed plotlyjs or put it in the graph directory."),
+    "--shared-js/--no-shared-js",
+    default=False,
+    type=click.BOOL,
+    help=_("Create standalone plotly.min.js in the graph directory."),
+)
+@click.option(
+    "--cdn-js/--no-cdn-js",
+    default=False,
+    type=click.BOOL,
+    help=_("Point to a CDN hosted plotly.min.js."),
 )
 @click.pass_context
-def graph(ctx, path, metrics, output, x_axis, changes, aggregate, plotlyjs):
+def graph(ctx, path, metrics, output, x_axis, changes, aggregate, shared_js, cdn_js):
     """Output report to specified HTML path, e.g. reports/out.html."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
 
-    if plotlyjs == "True":
-        plotlyjs = True
-    elif plotlyjs == "False":
-        plotlyjs = False
+    # Embed plotly.min.js in the HTML file by default
+    plotlyjs = True
+    if shared_js:
+        plotlyjs = "directory"
+    # CDN takes precedence over directory
+    if cdn_js:
+        plotlyjs = "cdn"
 
     from wily.commands.graph import graph
 
