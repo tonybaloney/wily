@@ -45,8 +45,8 @@ def test_graph(builddir):
     assert result.exit_code == 0, result.stdout
 
 
-def test_graph_plotlyjs_directory(builddir):
-    """Test the graph feature with plotlyjs option"""
+def test_graph_shared_js(builddir):
+    """Test the graph feature with --shared-js option"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
@@ -58,40 +58,19 @@ def test_graph_plotlyjs_directory(builddir):
                 _path,
                 "-m",
                 "raw.loc",
-                "--plotlyjs",
-                "directory",
+                "--shared-js",
             ],
         )
     assert result.exit_code == 0, result.stdout
 
 
-def test_graph_plotlyjs_True(builddir):
-    """Test the graph feature with plotlyjs option"""
+def test_graph_plotlyjs_cdn_js(builddir):
+    """Test the graph feature with --cdn_js option"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
         result = runner.invoke(
             main.cli,
-            ["--path", builddir, "graph", _path, "-m", "raw.loc", "--plotlyjs", "True"],
-        )
-    assert result.exit_code == 0, result.stdout
-
-
-def test_graph_plotlyjs_False(builddir):
-    """Test the graph feature with plotlyjs option"""
-    runner = CliRunner()
-    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli,
-            [
-                "--path",
-                builddir,
-                "graph",
-                _path,
-                "-m",
-                "raw.loc",
-                "--plotlyjs",
-                "False",
-            ],
+            ["--path", builddir, "graph", _path, "-m", "raw.loc", " --cdn_js"],
         )
     assert result.exit_code == 0, result.stdout
 
