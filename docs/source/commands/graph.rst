@@ -6,11 +6,11 @@ The graph command generates HTML graphs for metrics, trends and data in the wily
 Examples
 --------
 
-``wily graph`` will take 1 or 2 metrics as the 2nd and 3rd arguments. The first metric will be the Y-axis and the 3rd metric (if provided) will control the size of the bubble.
+``wily graph`` will take 1 or 2 comma-separated metrics as the -m option. The first metric will be the Y-axis and the 2nd metric (if provided) will control the size of the bubble.
 
 .. code-block:: none
 
-   $ wily graph example.py loc
+   $ wily graph example.py -m loc
 
 .. image:: ../_static/single_metric_graph.png
    :align: center
@@ -19,7 +19,7 @@ You can provide a second metric which will be used to control the size of the bu
 
 .. code-block:: none
 
-   $ wily graph example.py loc complexity
+   $ wily graph example.py loc,complexity
 
 .. image:: ../_static/two_metric_graph.png
    :align: center
@@ -28,7 +28,7 @@ The x-axis will be the historic revisions (typically git commits) on a scale of 
 
 .. code-block:: none
 
-   $ wily graph example.py loc complexity --x-axis sloc
+   $ wily graph example.py -m loc,complexity --x-axis sloc
 
 .. image:: ../_static/custom_x_axis_graph.png
    :align: center
@@ -38,7 +38,15 @@ To save the output to a specific HTML file and not open it, provide the ``-o`` f
 
 .. code-block:: none
 
-   $ wily report example.py loc -o example.html
+   $ wily report example.py -m loc -o example.html
+
+By default, ``wily graph`` will create an HTML file containing all the JS necessary to render the graph.
+To create a standalone plotly.min.js file in the same directory as the HTML file instead, pass the ``--shared-js`´ option.
+To point the HTML file to a CDN hosted plotly.min.js instead, pass the ``--cdn-js`´ option.
+
+.. code-block:: none
+
+   $ wily report example.py -m loc --shared=js
 
 
 Command Line Usage
