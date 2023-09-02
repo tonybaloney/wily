@@ -105,6 +105,8 @@ class CyclomaticComplexityOperator(BaseOperator):
             "complexity": l.complexity,
             "fullname": l.fullname,
             "loc": l.endline - l.lineno,
+            "lineno": l.lineno,
+            "endline": l.endline,
         }
 
     @staticmethod
@@ -116,4 +118,6 @@ class CyclomaticComplexityOperator(BaseOperator):
             "complexity": l.complexity,
             "fullname": l.fullname,
             "loc": l.endline - l.lineno,
+            "lineno": l.lineno,
+            "endline": l.endline,
         }
