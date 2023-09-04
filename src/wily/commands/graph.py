@@ -1,11 +1,11 @@
 """
-Draw graph in HTML for a specific metric.
+Graph command.
 
-TODO: Add multiple lines for multiple files
+Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -22,10 +22,17 @@ def metric_parts(metric):
     return operator.name, met.name
 
 
+def path_startswith(filename: str, path: str) -> bool:
+    """Check whether a filename starts with a given path in platform-agnostic way."""
+    filepath = Path(filename).resolve()
+    path_ = Path(path).resolve()
+    return str(filepath).startswith(str(path_))
+
+
 def graph(
     config: WilyConfig,
-    path: str,
-    metrics: Union[Tuple[str], Tuple[str, str]],
+    path: Tuple[str, ...],
+    metrics: str,
     output: Optional[str] = None,
     x_axis: Optional[str] = None,
     changes: bool = True,
@@ -55,27 +62,35 @@ def graph(
     else:
         x_operator, x_key = metric_parts(x_axis)
 
-    y_metric = resolve_metric(metrics[0])
-    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}{' aggregated' if aggregate else ''}"
+    metrics_list = metrics.split(",")
+
+    y_metric = resolve_metric(metrics_list[0])
 
     if not aggregate:
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        paths = {
-            tracked_file
-            for tracked_file in tracked_files
-            if tracked_file.startswith(path)
-        } or {path}
+        paths = (
+            tuple(
+                tracked_file
+                for tracked_file in tracked_files
+                if any(path_startswith(tracked_file, p) for p in path)
+            )
+            or path
+        )
     else:
-        paths = {path}
+        paths = path
 
-    operator, key = metric_parts(metrics[0])
-    if len(metrics) == 1:  # only y-axis
+    title = (
+        f"{x_axis.capitalize()} of {y_metric.description}"
+        f"{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
+    )
+    operator, key = metric_parts(metrics_list[0])
+    if len(metrics_list) == 1:  # only y-axis
         z_axis = z_operator = z_key = ""
     else:
-        z_axis = resolve_metric(metrics[1])
-        z_operator, z_key = metric_parts(metrics[1])
+        z_axis = resolve_metric(metrics_list[1])
+        z_operator, z_key = metric_parts(metrics_list[1])
     for path_ in paths:
         current_path = str(Path(path_))
         x = []
@@ -129,7 +144,7 @@ def graph(
             ids=state.index[state.default_archiver].revision_keys,
             text=labels,
             marker={
-                "size": 0 if z_axis is None else z,
+                "size": 0 if not z_axis else z,
                 "color": list(range(len(y))),
                 # "colorscale": "Viridis",
             },
