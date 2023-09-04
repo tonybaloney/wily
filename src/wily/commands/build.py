@@ -134,7 +134,10 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
 
                     # Copy the ir from any unchanged files from the prev revision
                     if not seed:
-                        missing_indices = set(revision.tracked_files) - indices
+                        # File names in result are platform dependent, so we convert
+                        # to Path and back to str.
+                        files = {str(pathlib.Path(f)) for f in revision.tracked_files}
+                        missing_indices = files - indices
                         # TODO: Check existence of file path.
                         for missing in missing_indices:
                             # Don't copy aggregate keys as their values may have changed
@@ -155,9 +158,14 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                         for deleted in revision.deleted_files:
                             result.pop(deleted, None)
 
+                    # Add empty path for storing total aggregates
+                    dirs = [""]
+                    # Directory names in result are platform dependent, so we convert
+                    # to Path and back to str.
+                    dirs += [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
                     # Aggregate metrics across all root paths using the aggregate function in the metric
-                    # Note assumption is that nested dirs are listed after parent..
-                    for root in revision.tracked_dirs:
+                    # Note assumption is that nested dirs are listed after parent, hence sorting.
+                    for root in sorted(dirs):
                         # find all matching entries recursively
                         aggregates = [
                             path for path in result.keys() if path.startswith(root)
