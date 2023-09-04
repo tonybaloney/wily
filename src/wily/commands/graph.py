@@ -146,7 +146,7 @@ def graph(
             ids=state.index[state.default_archiver].revision_keys,
             text=labels,
             marker={
-                "size": 0 if z_axis is None else z,
+                "size": 0 if not z_axis else z,
                 "color": list(range(len(y))),
                 # "colorscale": "Viridis",
             },

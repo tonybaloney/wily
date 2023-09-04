@@ -33,6 +33,24 @@ The x-axis will be the historic revisions (typically git commits) on a scale of 
 .. image:: ../_static/custom_x_axis_graph.png
    :align: center
 
+You can provide more than one path for ``wily graph`` so it displays one line per file path. If the path is a directory, all files contained in it and subdirectories will be added to the graph.
+
+.. code-block:: none
+
+   $ wily graph example.py example2.py example3.py tests/ -m loc
+
+If one or more of the provided paths is a directory, you can use the ``--aggregate`` option to get a line with aggregated total metric values for all files in that path.
+
+.. code-block:: none
+
+   $ wily tests/ -m loc --aggregate
+
+By default, ``wily graph`` will only plot revisions where metric values have changed. To show all revisions, use the ``--all`` option.
+
+.. code-block:: none
+
+   $ wily tests/ -m loc --all
+
 By default, ``wily graph`` will create a file, ``wily-report.html`` in the current directory and open it using the browser configured in the $BROWSER environment variable (the default on the OS).
 To save the output to a specific HTML file and not open it, provide the ``-o`` flag and the name of the output file.
 
