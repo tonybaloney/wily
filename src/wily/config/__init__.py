@@ -50,7 +50,7 @@ def load(config_path=DEFAULT_CONFIG_PATH):
     :rtype: :class:`wily.config.WilyConfig`
     """
     if not pathlib.Path(config_path).exists():
-        logger.debug(f"Could not locate {config_path}, using default config.")
+        logger.debug("Could not locate %s, using default config.", config_path)
         return DEFAULT_CONFIG
 
     config = configparser.ConfigParser(default_section=DEFAULT_CONFIG_SECTION)
