@@ -1,5 +1,5 @@
 """
-Print command.
+Index command.
 
 Print information about the wily cache and what is in the index.
 """

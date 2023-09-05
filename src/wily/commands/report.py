@@ -40,8 +40,6 @@ def report(
     Show metrics for a given file.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param path: The path to the file
     :param metrics: List of metrics to report on
     :param n: Number of items to list

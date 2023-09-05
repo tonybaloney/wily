@@ -42,12 +42,12 @@ DEFAULT_CONFIG = WilyConfig(
 )
 
 
-def load(config_path=DEFAULT_CONFIG_PATH):
+def load(config_path: str = DEFAULT_CONFIG_PATH) -> WilyConfig:
     """
     Load config file and set values to defaults where no present.
 
+    :param config_path: The path where to search for the config file.
     :return: The configuration ``WilyConfig``
-    :rtype: :class:`wily.config.WilyConfig`
     """
     if not pathlib.Path(config_path).exists():
         logger.debug(f"Could not locate {config_path}, using default config.")
