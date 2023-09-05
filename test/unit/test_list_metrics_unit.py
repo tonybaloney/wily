@@ -1,11 +1,9 @@
 """Unit tests for the list_metrics command."""
 
 from statistics import mean
-from textwrap import wrap
 from unittest import mock
 
 from wily.commands.list_metrics import list_metrics
-from wily.operators.maintainability import mode
 
 func_len = len(str(mean))
 
