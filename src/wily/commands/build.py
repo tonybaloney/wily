@@ -91,11 +91,11 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     seed = True
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
-            prev_stats = {}
+            prev_stats: Dict[str, Dict] = {}
             for revision in revisions:
                 # Checkout target revision
                 archiver_instance.checkout(revision, config.checkout_options)
-                stats = {"operator_data": {}}
+                stats: Dict[str, Dict] = {"operator_data": {}}
 
                 # TODO : Check that changed files are children of the targets
                 targets = [

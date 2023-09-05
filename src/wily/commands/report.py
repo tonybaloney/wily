@@ -7,7 +7,7 @@ Will compare the values between revisions and highlight changes in green/red.
 from pathlib import Path
 from shutil import copytree
 from string import Template
-from typing import Iterable
+from typing import Dict, Iterable, List, Tuple
 
 import tabulate
 
@@ -54,13 +54,12 @@ def report(
     logger.debug("Running report command")
     logger.info(f"-----------History for {metrics}------------")
 
-    data = []
+    data: List[Tuple[str, ...]] = []
     metric_metas = []
 
     for metric_name in metrics:
         operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
-        operator = operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
             increase_color = ANSI_GREEN
@@ -76,7 +75,7 @@ def report(
             decrease_color = ANSI_YELLOW
         metric_meta = {
             "key": key,
-            "operator": operator,
+            "operator": operator.name,
             "increase_color": increase_color,
             "decrease_color": decrease_color,
             "title": metric.description,
@@ -87,7 +86,7 @@ def report(
     state = State(config)
     for archiver in state.archivers:
         history = state.index[archiver].revisions[:n][::-1]
-        last = {}
+        last: Dict = {}
         for rev in history:
             deltas = []
             vals = []
@@ -136,7 +135,7 @@ def report(
                         (
                             format_revision(rev.revision.key),
                             rev.revision.message[:MAX_MESSAGE_WIDTH],
-                            rev.revision.author_name,
+                            str(rev.revision.author_name),
                             format_date(rev.revision.date),
                             *vals,
                         )
@@ -145,7 +144,7 @@ def report(
                     data.append(
                         (
                             format_revision(rev.revision.key),
-                            rev.revision.author_name,
+                            str(rev.revision.author_name),
                             format_date(rev.revision.date),
                             *vals,
                         )
@@ -161,7 +160,7 @@ def report(
         headers = (_("Revision"), _("Author"), _("Date"), *descriptions)
 
     if format == ReportFormat.HTML:
-        if output.is_file and output.suffix == ".html":
+        if output.suffix == ".html":
             report_path = output.parents[0]
             report_output = output
         else:
@@ -185,12 +184,12 @@ def report(
                 table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 
-        report_template = report_template.safe_substitute(
+        rendered_report = report_template.safe_substitute(
             headers=table_headers, content=table_content
         )
 
         with report_output.open("w", errors="xmlcharrefreplace") as output_f:
-            output_f.write(report_template)
+            output_f.write(rendered_report)
 
         try:
             copytree(str(templates_dir / "css"), str(report_path / "css"))

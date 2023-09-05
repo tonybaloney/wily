@@ -5,14 +5,14 @@ Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import plotly.graph_objs as go
 import plotly.offline
 
 from wily import format_datetime, logger
 from wily.config.types import WilyConfig
-from wily.operators import resolve_metric, resolve_metric_as_tuple
+from wily.operators import Metric, resolve_metric, resolve_metric_as_tuple
 from wily.state import State
 
 
@@ -86,6 +86,7 @@ def graph(
         f"{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
     )
     operator, key = metric_parts(metrics_list[0])
+    z_axis: Union[Metric, str]
     if len(metrics_list) == 1:  # only y-axis
         z_axis = z_operator = z_key = ""
     else:
