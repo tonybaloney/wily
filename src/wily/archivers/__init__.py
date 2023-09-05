@@ -107,8 +107,9 @@ ARCHIVER_FILESYSTEM = Archiver(
     description="Filesystem archiver",
 )
 
+_ARCHIVERS: List[Archiver] = [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]
 """Set of all available archivers"""
-ALL_ARCHIVERS = {a.name: a for a in [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]}
+ALL_ARCHIVERS = {a.name: a for a in _ARCHIVERS}
 
 
 def resolve_archiver(name: str) -> Archiver:
