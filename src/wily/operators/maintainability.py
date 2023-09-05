@@ -5,11 +5,13 @@ Measures the "maintainability" using the Halstead index.
 """
 import statistics
 from collections import Counter
+from typing import Any, Dict, Iterable
 
 import radon.cli.harvest as harvesters
 from radon.cli import Config
 
 from wily import logger
+from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
 
@@ -52,30 +54,25 @@ class MaintainabilityIndexOperator(BaseOperator):
 
     default_metric_index = 1  # MI
 
-    def __init__(self, config, targets):
+    def __init__(self, config: WilyConfig, targets: Iterable[str]):
         """
         Instantiate a new MI operator.
 
         :param config: The wily configuration.
-        :type  config: :class:`WilyConfig`
+        :param targets: An iterable of paths from which to harvest metrics.
         """
         # TODO : Import config from wily.cfg
         logger.debug(f"Using {targets} with {self.defaults} for MI metrics")
 
         self.harvester = harvesters.MIHarvester(targets, config=Config(**self.defaults))
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
         Run the operator.
 
         :param module: The target module path.
-        :type  module: ``str``
-
         :param options: Any runtime options.
-        :type  options: ``dict``
-
         :return: The operator results.
-        :rtype: ``dict``
         """
         logger.debug("Running maintainability harvester")
         results = {}
