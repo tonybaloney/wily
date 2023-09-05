@@ -66,7 +66,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         :return: The operator results.
         """
         logger.debug("Running CC harvester")
-        results = {}
+        results: Dict[str, Dict[str, Any]] = {}
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {"detailed": {}, "total": {}}
             total = 0  # running CC total

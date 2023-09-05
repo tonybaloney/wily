@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def get_maxcolwidth(headers: Sized, wrap=True) -> Optional[int]:
     """Calculate the maximum column width for a given terminal width."""
     if not wrap:
-        return
+        return None
     width = shutil.get_terminal_size()[0]
     columns = len(headers)
     if width < 80:

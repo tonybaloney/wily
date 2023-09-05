@@ -175,15 +175,16 @@ OPERATOR_HALSTEAD = Operator(
 )
 
 
+_OPERATORS: tuple[Operator, ...] = (
+    OPERATOR_CYCLOMATIC,
+    OPERATOR_MAINTAINABILITY,
+    OPERATOR_RAW,
+    OPERATOR_HALSTEAD,
+)
 """Dictionary of all operators"""
 ALL_OPERATORS: Dict[str, Operator] = {
     operator.name: operator
-    for operator in (
-        OPERATOR_CYCLOMATIC,
-        OPERATOR_MAINTAINABILITY,
-        OPERATOR_RAW,
-        OPERATOR_HALSTEAD,
-    )
+    for operator in _OPERATORS
 }
 
 

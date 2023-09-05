@@ -7,7 +7,7 @@ import logging
 from typing import Any, Dict, List, Tuple
 
 import git.exc
-from git import Commit
+from git.objects import Commit
 from git.repo import Repo
 
 from wily.archivers import BaseArchiver, Revision
@@ -116,8 +116,8 @@ class GitArchiver(BaseArchiver):
             tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
             if not commit.parents or not revisions:
                 added_files = tracked_files
-                modified_files = []
-                deleted_files = []
+                modified_files: List[str] = []
+                deleted_files: List[str] = []
             else:
                 added_files, modified_files, deleted_files = whatchanged(
                     commit, self.repo.commit(commit.hexsha + "~1")
@@ -176,8 +176,8 @@ class GitArchiver(BaseArchiver):
         tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
         if not commit.parents:
             added_files = tracked_files
-            modified_files = []
-            deleted_files = []
+            modified_files: List[str] = []
+            deleted_files: List[str] = []
         else:
             added_files, modified_files, deleted_files = whatchanged(
                 commit, self.repo.commit(commit.hexsha + "~1")

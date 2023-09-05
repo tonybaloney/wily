@@ -69,7 +69,7 @@ class HalsteadOperator(BaseOperator):
         :return: The operator results.
         """
         logger.debug("Running halstead harvester")
-        results = {}
+        results: Dict[str, Dict[str, Any]] = {}
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {"detailed": {}, "total": {}}
             for instance in details:
