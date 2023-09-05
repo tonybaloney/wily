@@ -183,8 +183,7 @@ _OPERATORS: tuple[Operator, ...] = (
 )
 """Dictionary of all operators"""
 ALL_OPERATORS: Dict[str, Operator] = {
-    operator.name: operator
-    for operator in _OPERATORS
+    operator.name: operator for operator in _OPERATORS
 }
 
 
