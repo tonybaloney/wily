@@ -175,7 +175,7 @@ OPERATOR_HALSTEAD = Operator(
 )
 
 
-_OPERATORS: tuple[Operator, ...] = (
+_OPERATORS: Tuple[Operator, ...] = (
     OPERATOR_CYCLOMATIC,
     OPERATOR_MAINTAINABILITY,
     OPERATOR_RAW,
