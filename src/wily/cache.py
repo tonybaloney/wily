@@ -68,7 +68,7 @@ def create(config: WilyConfig) -> str:
     if exists(config):
         logger.debug("Wily cache exists, skipping")
         return config.cache_path
-    logger.debug(f"Creating wily cache {config.cache_path}")
+    logger.debug("Creating wily cache %s", config.cache_path)
     pathlib.Path(config.cache_path).mkdir(parents=True, exist_ok=True)
     create_index(config)
     return config.cache_path
@@ -124,7 +124,7 @@ def store(
                 del stats["operator_data"][operator]
                 stats["operator_data"][operator] = new_operator_data
 
-    logger.debug(f"Creating {revision.key} output")
+    logger.debug("Creating %s output", revision.key)
     filename = root / (revision.key + ".json")
     if filename.exists():
         raise RuntimeError(f"File {filename} already exists, index may be corrupt.")
