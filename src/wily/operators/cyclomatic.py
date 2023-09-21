@@ -51,7 +51,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO: Import config for harvester from .wily.cfg
-        logger.debug(f"Using {targets} with {self.defaults} for CC metrics")
+        logger.debug("Using %s with %s for CC metrics", targets, self.defaults)
 
         self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
 
@@ -81,12 +81,16 @@ class CyclomaticComplexityOperator(BaseOperator):
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.debug(
-                            f"Failed to run CC harvester on {filename} : {details['error']}"
+                            "Failed to run CC harvester on %s : %s",
+                            filename,
+                            details["error"],
                         )
                         continue
                     else:
                         logger.warning(
-                            f"Unexpected result from Radon : {instance} of {type(instance)}. Please report on Github."
+                            "Unexpected result from Radon : %s of %s. Please report on Github.",
+                            instance,
+                            type(instance),
                         )
                         continue
                 results[filename]["detailed"][i["fullname"]] = i

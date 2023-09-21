@@ -48,9 +48,9 @@ def generate_cache_path(path: Union[pathlib.Path, str]) -> str:
 
     :return: The cache path
     """
-    logger.debug(f"Generating cache for {path}")
+    logger.debug("Generating cache for %s", path)
     sha = hashlib.sha1(str(path).encode()).hexdigest()[:9]
     HOME = pathlib.Path.home()
     cache_path = str(HOME / ".wily" / sha)
-    logger.debug(f"Cache path is {cache_path}")
+    logger.debug("Cache path is %s", cache_path)
     return cache_path
