@@ -47,7 +47,7 @@ class WilyConfig:
     @cache_path.setter
     def cache_path(self, value):
         """Override the cache path."""
-        logger.debug(f"Setting custom cache path to {value}")
+        logger.debug("Setting custom cache path to %s", value)
         self._cache_path = value  # type: ignore
 
     @staticmethod

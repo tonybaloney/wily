@@ -64,7 +64,7 @@ def diff(
         os.path.relpath(fn, config.path)
         for fn in radon.cli.harvest.iter_filenames(targets)
     ]
-    logger.debug(f"Targeting - {files}")
+    logger.debug("Targeting - %s", files)
 
     if not revision:
         target_revision = state.index[state.default_archiver].last_revision
@@ -72,17 +72,21 @@ def diff(
         rev = (
             resolve_archiver(state.default_archiver).archiver_cls(config).find(revision)
         )
-        logger.debug(f"Resolved {revision} to {rev.key} ({rev.message})")
+        logger.debug("Resolved %s to %s (%s)", revision, rev.key, rev.message)
         try:
             target_revision = state.index[state.default_archiver][rev.key]
         except KeyError:
             logger.error(
-                f"Revision {revision} is not in the cache, make sure you have run wily build."
+                "Revision %s is not in the cache, make sure you have run wily build.",
+                revision,
             )
             exit(1)
 
     logger.info(
-        f"Comparing current with {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}."
+        "Comparing current with %s by %s on %s.",
+        format_revision(target_revision.revision.key),
+        target_revision.revision.author_name,
+        format_date(target_revision.revision.date),
     )
 
     # Convert the list of metrics to a list of metric instances
@@ -116,7 +120,7 @@ def diff(
                         ]
                     )
                 except KeyError:
-                    logger.debug(f"File {file} not in cache")
+                    logger.debug("File %s not in cache", file)
                     logger.debug("Cache follows -- ")
                     logger.debug(data[operator])
     files.extend(extra)

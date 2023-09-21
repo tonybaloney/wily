@@ -52,7 +52,7 @@ class HalsteadOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {targets} with {self.defaults} for HC metrics")
+        logger.debug("Using %s with %s for HC metrics", targets, self.defaults)
 
         self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
@@ -83,7 +83,9 @@ class HalsteadOperator(BaseOperator):
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.debug(
-                            f"Failed to run Halstead harvester on {filename} : {details['error']}"
+                            "Failed to run Halstead harvester on %s : %s",
+                            filename,
+                            details["error"],
                         )
                         continue
                     results[filename]["total"] = self._report_to_dict(instance)
