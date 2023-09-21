@@ -47,7 +47,7 @@ class RawMetricsOperator(BaseOperator):
         :type  config: :class:`WilyConfig`
         """
         # TODO: Use config from wily.cfg for harvester
-        logger.debug(f"Using {targets} with {self.defaults} for Raw metrics")
+        logger.debug("Using %s with %s for Raw metrics", targets, self.defaults)
         self.harvester = harvesters.RawHarvester(
             targets, config=Config(**self.defaults)
         )

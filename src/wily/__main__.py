@@ -83,13 +83,13 @@ def cli(ctx, debug, config, path, cache):
 
     ctx.obj["CONFIG"] = load_config(config)
     if path:
-        logger.debug(f"Fixing path to {path}")
+        logger.debug("Fixing path to %s", path)
         ctx.obj["CONFIG"].path = path
     if cache:
-        logger.debug(f"Fixing cache to {cache}")
+        logger.debug("Fixing cache to %s", cache)
         ctx.obj["CONFIG"].cache_path = cache
-    logger.debug(f"Loaded configuration from {config}")
-    logger.debug(f"Capturing logs to {WILY_LOG_NAME}")
+    logger.debug("Loaded configuration from %s", config)
+    logger.debug("Capturing logs to %s", WILY_LOG_NAME)
 
 
 @cli.command(help=_("""Build the wily cache."""))
@@ -122,19 +122,19 @@ def build(ctx, max_revisions, targets, operators, archiver):
     from wily.commands.build import build
 
     if max_revisions:
-        logger.debug(f"Fixing revisions to {max_revisions}")
+        logger.debug("Fixing revisions to %s", max_revisions)
         config.max_revisions = max_revisions
 
     if operators:
-        logger.debug(f"Fixing operators to {operators}")
+        logger.debug("Fixing operators to %s", operators)
         config.operators = operators.strip().split(",")
 
     if archiver:
-        logger.debug(f"Fixing archiver to {archiver}")
+        logger.debug("Fixing archiver to %s", archiver)
         config.archiver = archiver
 
     if targets:
-        logger.debug(f"Fixing targets to {targets}")
+        logger.debug("Fixing targets to %s", targets)
         config.targets = targets
 
     build(
@@ -228,7 +228,9 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
 
     from wily.commands.rank import rank
 
-    logger.debug(f"Running rank on {path} for metric {metric} and revision {revision}")
+    logger.debug(
+        "Running rank on %s for metric %s and revision %s", path, metric, revision
+    )
     rank(
         config=config,
         path=path,
@@ -291,7 +293,7 @@ def report(
 
     if not metrics:
         metrics = get_default_metrics(config)
-        logger.info(f"Using default metrics {metrics}")
+        logger.info("Using default metrics %s", metrics)
 
     new_output = Path().cwd()
     if output:
@@ -303,8 +305,8 @@ def report(
 
     from wily.commands.report import report
 
-    logger.debug(f"Running report on {file} for metric {metrics}")
-    logger.debug(f"Output format is {format}")
+    logger.debug("Running report on %s for metric %s", file, metrics)
+    logger.debug("Output format is %s", format)
 
     report(
         config=config,
@@ -358,14 +360,14 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
 
     if not metrics:
         metrics = get_default_metrics(config)
-        logger.info(f"Using default metrics {metrics}")
+        logger.info("Using default metrics %s", metrics)
     else:
         metrics = metrics.split(",")
-        logger.info(f"Using specified metrics {metrics}")
+        logger.info("Using specified metrics %s", metrics)
 
     from wily.commands.diff import diff
 
-    logger.debug(f"Running diff on {files} for metric {metrics}")
+    logger.debug("Running diff on %s for metric %s", files, metrics)
     diff(
         config=config,
         files=files,
@@ -454,7 +456,7 @@ def graph(ctx, path, metrics, output, x_axis, changes, aggregate, shared_js, cdn
 
     from wily.commands.graph import graph
 
-    logger.debug(f"Running report on {path} for metrics {metrics}")
+    logger.debug("Running report on %s for metrics %s", path, metrics)
     graph(
         config=config,
         path=path,
@@ -535,7 +537,7 @@ if __name__ == "__main__":  # pragma: no cover
     try:
         cli()  # type: ignore
     except Exception as runtime:
-        logger.error(f"Oh no, Wily crashed! See {WILY_LOG_NAME} for information.")
+        logger.error("Oh no, Wily crashed! See %s for information.", WILY_LOG_NAME)
         logger.info(
             "If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."
         )

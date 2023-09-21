@@ -62,7 +62,7 @@ class IndexedRevision:
             self._data = cache.get(
                 config=config, archiver=archiver, revision=self.revision.key
             )["operator_data"]
-        logger.debug(f"Fetching metric {path} - {key} for operator {operator}")
+        logger.debug("Fetching metric %s - %s for operator %s", path, key, operator)
         return get_metric(self._data, operator, path, key)
 
     def get_paths(self, config: WilyConfig, archiver: str, operator: str) -> List[str]:
@@ -203,7 +203,7 @@ class State:
             self.archivers = [archiver.name]
         else:
             self.archivers = cache.list_archivers(config)
-        logger.debug(f"Initialised state indexes for archivers {self.archivers}")
+        logger.debug("Initialised state indexes for archivers %s", self.archivers)
         self.config = config
         self.index = {}
         for _archiver in self.archivers:
@@ -217,4 +217,4 @@ class State:
             cache.create(self.config)
             logger.debug("Created wily cache")
         else:
-            logger.debug(f"Cache {self.config.cache_path} exists")
+            logger.debug("Cache %s exists", self.config.cache_path)
