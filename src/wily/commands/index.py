@@ -26,9 +26,9 @@ def index(
     state = State(config=config)
     logger.debug("Running show command")
     logger.info("--------Configuration---------")
-    logger.info(f"Path: {config.path}")
-    logger.info(f"Archiver: {config.archiver}")
-    logger.info(f"Operators: {config.operators}")
+    logger.info("Path: %s", config.path)
+    logger.info("Archiver: %s", config.archiver)
+    logger.info("Operators: %s", config.operators)
     logger.info("")
     logger.info("-----------History------------")
 

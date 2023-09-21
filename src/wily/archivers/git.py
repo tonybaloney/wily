@@ -123,12 +123,12 @@ class GitArchiver(BaseArchiver):
                     commit, self.repo.commit(commit.hexsha + "~1")
                 )
 
-            logger.debug(f"For revision {commit.name_rev.split(' ')[0]} found:")
-            logger.debug(f"Tracked files: {tracked_files}")
-            logger.debug(f"Tracked directories: {tracked_dirs}")
-            logger.debug(f"Added files: {added_files}")
-            logger.debug(f"Modified files: {modified_files}")
-            logger.debug(f"Deleted files: {deleted_files}")
+            logger.debug("For revision %s found:", commit.name_rev.split(" ")[0])
+            logger.debug("Tracked files: %s", tracked_files)
+            logger.debug("Tracked directories: %s", tracked_dirs)
+            logger.debug("Added files: %s", added_files)
+            logger.debug("Modified files: %s", modified_files)
+            logger.debug("Deleted files: %s", deleted_files)
 
             rev = Revision(
                 key=commit.name_rev.split(" ")[0],

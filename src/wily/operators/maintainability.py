@@ -62,7 +62,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         :param targets: An iterable of paths from which to harvest metrics.
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {targets} with {self.defaults} for MI metrics")
+        logger.debug("Using %s with %s for MI metrics", targets, self.defaults)
 
         self.harvester = harvesters.MIHarvester(targets, config=Config(**self.defaults))
 

@@ -64,22 +64,27 @@ def rank(
             .archiver_cls(config)
             .find(revision_index)
         )
-        logger.debug(f"Resolved {revision_index} to {rev.key} ({rev.message})")
+        logger.debug("Resolved %s to %s (%s)", revision_index, rev.key, rev.message)
         try:
             target_revision = state.index[state.default_archiver][rev.key]
         except KeyError:
             logger.error(
-                f"Revision {revision_index} is not in the cache, make sure you have run wily build."
+                "Revision %s is not in the cache, make sure you have run wily build.",
+                revision_index,
             )
             exit(1)
 
     logger.info(
-        f"-----------Rank for {resolved_metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
+        "-----------Rank for %s for %s by %s on %s.------------",
+        resolved_metric.description,
+        format_revision(target_revision.revision.key),
+        target_revision.revision.author_name,
+        format_date(target_revision.revision.date),
     )
 
     if path is None:
         files = target_revision.get_paths(config, state.default_archiver, operator)
-        logger.debug(f"Analysing {files}")
+        logger.debug("Analysing %s", files)
     else:
         # Resolve target paths when the cli has specified --path
         if config.path != DEFAULT_PATH:
@@ -92,13 +97,16 @@ def rank(
             os.path.relpath(fn, config.path)
             for fn in radon.cli.harvest.iter_filenames(targets)
         ]
-        logger.debug(f"Targeting - {files}")
+        logger.debug("Targeting - %s", files)
 
     for item in files:
         for archiver in state.archivers:
             try:
                 logger.debug(
-                    f"Fetching metric {resolved_metric.name} for {operator} in {str(item)}"
+                    "Fetching metric %s for %s in %s",
+                    resolved_metric.name,
+                    operator,
+                    str(item),
                 )
                 val = target_revision.get(
                     config, archiver, operator, str(item), resolved_metric.name
@@ -106,7 +114,7 @@ def rank(
                 value = val
                 data.append((item, value))
             except KeyError:
-                logger.debug(f"Could not find file {item} in index")
+                logger.debug("Could not find file %s in index", item)
 
     # Sort by ideal value
     data = sorted(data, key=op.itemgetter(1), reverse=descending)
@@ -136,6 +144,6 @@ def rank(
 
     if threshold and total < threshold:
         logger.error(
-            f"Total value below the specified threshold: {total} < {threshold}"
+            "Total value below the specified threshold: %s < %s", total, threshold
         )
         exit(1)

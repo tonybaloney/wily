@@ -56,7 +56,7 @@ class HalsteadOperator(BaseOperator):
         :param targets: An iterable of paths from which to harvest metrics.
         """
         # TODO : Import config from wily.cfg
-        logger.debug(f"Using {targets} with {self.defaults} for HC metrics")
+        logger.debug("Using %s with %s for HC metrics", targets, self.defaults)
 
         self.harvester = harvesters.HCHarvester(targets, config=Config(**self.defaults))
 
@@ -83,7 +83,9 @@ class HalsteadOperator(BaseOperator):
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.debug(
-                            f"Failed to run Halstead harvester on {filename} : {details['error']}"
+                            "Failed to run Halstead harvester on %s : %s",
+                            filename,
+                            details["error"],
                         )
                         continue
                     assert isinstance(instance, HalsteadReport)
