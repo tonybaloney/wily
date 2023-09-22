@@ -1,8 +1,10 @@
 """
-Print command.
+Index command.
 
 Print information about the wily cache and what is in the index.
 """
+from typing import List, Tuple
+
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
@@ -30,14 +32,14 @@ def index(
     logger.info("")
     logger.info("-----------History------------")
 
-    data = []
+    data: List[Tuple[str, ...]] = []
     for archiver in state.archivers:
         for rev in state.index[archiver].revisions:
             if include_message:
                 data.append(
                     (
                         format_revision(rev.revision.key),
-                        rev.revision.author_name,
+                        str(rev.revision.author_name),
                         rev.revision.message[:MAX_MESSAGE_WIDTH],
                         format_date(rev.revision.date),
                     )
@@ -46,11 +48,12 @@ def index(
                 data.append(
                     (
                         format_revision(rev.revision.key),
-                        rev.revision.author_name,
+                        str(rev.revision.author_name),
                         format_date(rev.revision.date),
                     )
                 )
 
+    headers: Tuple[str, ...]
     if include_message:
         headers = ("Revision", "Author", "Message", "Date")
     else:
