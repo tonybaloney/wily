@@ -5,7 +5,7 @@ Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -38,6 +38,7 @@ def graph(
     changes: bool = True,
     text: bool = False,
     aggregate: bool = False,
+    plotlyjs: Union[bool, str] = True,
 ) -> None:
     """
     Graph information about the cache and runtime.
@@ -50,6 +51,7 @@ def graph(
     :param changes: Only graph changes.
     :param text: Show commit message inline in graph.
     :param aggregate: Aggregate values for graph.
+    :param plotlyjs: How to include plotly.min.js.
     """
     logger.debug("Running graph command")
 
@@ -169,4 +171,5 @@ def graph(
         },
         auto_open=auto_open,
         filename=filename,
+        include_plotlyjs=plotlyjs,  # type: ignore
     )
