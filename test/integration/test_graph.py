@@ -45,6 +45,36 @@ def test_graph(builddir):
     assert result.exit_code == 0, result.stdout
 
 
+def test_graph_shared_js(builddir):
+    """Test the graph feature with --shared-js option"""
+    runner = CliRunner()
+    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
+        result = runner.invoke(
+            main.cli,
+            [
+                "--path",
+                builddir,
+                "graph",
+                _path,
+                "-m",
+                "raw.loc",
+                "--shared-js",
+            ],
+        )
+    assert result.exit_code == 0, result.stdout
+
+
+def test_graph_plotlyjs_cdn_js(builddir):
+    """Test the graph feature with --cdn_js option"""
+    runner = CliRunner()
+    with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
+        result = runner.invoke(
+            main.cli,
+            ["--path", builddir, "graph", _path, "-m", "raw.loc", " --cdn_js"],
+        )
+    assert result.exit_code == 0, result.stdout
+
+
 def test_graph_all(builddir):
     """Test the graph feature"""
     runner = CliRunner()
