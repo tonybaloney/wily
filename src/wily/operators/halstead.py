@@ -138,7 +138,7 @@ class HalsteadOperator(BaseOperator):
                 if isinstance(instance, list):
                     for item in instance:
                         function, report = item
-                        assert isinstance(report, HalsteadReport)
+                        assert isinstance(report, NumberedHalsteadReport)
                         results[filename]["detailed"][function] = self._report_to_dict(
                             report
                         )
@@ -150,11 +150,11 @@ class HalsteadOperator(BaseOperator):
                             details["error"],
                         )
                         continue
-                    assert isinstance(instance, HalsteadReport)
+                    assert isinstance(instance, NumberedHalsteadReport)
                     results[filename]["total"] = self._report_to_dict(instance)
         return results
 
-    def _report_to_dict(self, report: HalsteadReport) -> Dict[str, Any]:
+    def _report_to_dict(self, report: NumberedHalsteadReport) -> Dict[str, Any]:
         return {
             "h1": report.h1,
             "h2": report.h2,
