@@ -64,10 +64,7 @@ class BaseArchiver:
         Search a string and return a single revision.
 
         :param search: The search term.
-        :type  search: ``str``
-
         :return: An instance of revision.
-        :rtype: Instance of :class:`Revision`
         """
         ...
 
@@ -110,8 +107,9 @@ ARCHIVER_FILESYSTEM = Archiver(
     description="Filesystem archiver",
 )
 
+_ARCHIVERS: List[Archiver] = [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]
 """Set of all available archivers"""
-ALL_ARCHIVERS = {a.name: a for a in [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]}
+ALL_ARCHIVERS = {a.name: a for a in _ARCHIVERS}
 
 
 def resolve_archiver(name: str) -> Archiver:
@@ -119,7 +117,6 @@ def resolve_archiver(name: str) -> Archiver:
     Get the :class:`wily.archivers.Archiver` for a given name.
 
     :param name: The name of the archiver
-    :type  name: ``str``
     :return: The archiver type
     """
     if name not in ALL_ARCHIVERS:

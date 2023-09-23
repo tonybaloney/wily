@@ -104,13 +104,8 @@ class BaseOperator:
         Run the operator.
 
         :param module: The target module path.
-        :type  module: ``str``
-
         :param options: Any runtime options.
-        :type  options: ``dict``
-
         :return: The operator results.
-        :rtype: ``dict``
         """
         raise NotImplementedError
 
@@ -180,15 +175,15 @@ OPERATOR_HALSTEAD = Operator(
 )
 
 
+_OPERATORS: Tuple[Operator, ...] = (
+    OPERATOR_CYCLOMATIC,
+    OPERATOR_MAINTAINABILITY,
+    OPERATOR_RAW,
+    OPERATOR_HALSTEAD,
+)
 """Dictionary of all operators"""
 ALL_OPERATORS: Dict[str, Operator] = {
-    operator.name: operator
-    for operator in (
-        OPERATOR_CYCLOMATIC,
-        OPERATOR_MAINTAINABILITY,
-        OPERATOR_RAW,
-        OPERATOR_HALSTEAD,
-    )
+    operator.name: operator for operator in _OPERATORS
 }
 
 
@@ -246,7 +241,6 @@ def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> 
     :param operator: The operator name.
     :param path: The path to the file/function
     :param key: The key of the data
-
     :return: Data from the cache
     """
     if ":" in path:
