@@ -33,7 +33,7 @@ def test_rank(capsys):
     ):
         rank(
             config=mock_config,
-            path="",
+            path=None,
             metric=metric,
             revision_index=revision_id,
             limit=0,
@@ -79,7 +79,7 @@ def test_rank_wrapped(capsys):
     ), mock.patch("wily.helper.shutil", mock_shutil):
         rank(
             config=mock_config,
-            path="",
+            path=None,
             metric=metric,
             revision_index=revision_id,
             limit=0,
@@ -121,7 +121,7 @@ def test_rank_descending(capsys):
     ):
         rank(
             config=mock_config,
-            path="",
+            path=None,
             metric=metric,
             revision_index=revision_id,
             limit=0,
@@ -161,7 +161,7 @@ def test_rank_limit(capsys):
     ):
         rank(
             config=mock_config,
-            path="",
+            path=None,
             metric=metric,
             revision_index=revision_id,
             limit=1,
@@ -248,7 +248,7 @@ def test_keyerror(capsys):
         try:
             rank(
                 config=mock_config,
-                path="",
+                path=None,
                 metric=metric,
                 revision_index=revision_id,
                 limit=0,
@@ -280,7 +280,7 @@ def test_threshold(capsys):
         try:
             rank(
                 config=mock_config,
-                path="",
+                path=None,
                 metric=metric,
                 revision_index=revision_id,
                 limit=0,
