@@ -2,7 +2,7 @@
 
 from unittest import mock
 
-from util import get_mock_State_and_config
+from util import get_mock_state_and_config
 
 from wily.commands.rank import rank
 
@@ -23,7 +23,7 @@ EXPECTED = EXPECTED[1:]
 def test_rank(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -66,7 +66,7 @@ EXPECTED_WRAPPED = EXPECTED_WRAPPED[1:]
 def test_rank_wrapped(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -111,7 +111,7 @@ EXPECTED_DESCENDING = EXPECTED_DESCENDING[1:]
 def test_rank_descending(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -151,7 +151,7 @@ EXPECTED_LIMIT = EXPECTED_LIMIT[1:]
 def test_rank_limit(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -179,7 +179,7 @@ def test_rank_limit(capsys):
 def test_rank_path(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -207,7 +207,7 @@ def test_rank_path(capsys):
 def test_rank_path_output(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -236,7 +236,7 @@ def test_rank_path_output(capsys):
 def test_keyerror(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, empty=True, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, empty=True, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
@@ -268,7 +268,7 @@ def test_keyerror(capsys):
 def test_threshold(capsys):
     metric = "raw.loc"
     revision_id = "abcdeff"
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
     mock_resolve = mock.MagicMock()
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)

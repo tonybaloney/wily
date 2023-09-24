@@ -4,7 +4,7 @@ from io import StringIO
 from pathlib import Path
 from unittest import mock
 
-from util import get_mock_State_and_config
+from util import get_mock_state_and_config
 
 from wily import format_date as fd
 from wily.commands.report import report
@@ -37,7 +37,7 @@ def test_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3)
+    mock_State, mock_config = get_mock_state_and_config(3)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -95,7 +95,7 @@ def test_report_no_message_wrapped(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3)
+    mock_State, mock_config = get_mock_state_and_config(3)
 
     mock_get_terminal_size = mock.Mock(return_value=(50, 24))
     mock_shutil = mock.Mock(get_terminal_size=mock_get_terminal_size)
@@ -143,7 +143,7 @@ def test_report_no_message_changes_only(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3)
+    mock_State, mock_config = get_mock_state_and_config(3)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -188,7 +188,7 @@ def test_report_with_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3)
+    mock_State, mock_config = get_mock_state_and_config(3)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -211,7 +211,7 @@ def test_empty_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3, empty=True)
+    mock_State, mock_config = get_mock_state_and_config(3, empty=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -234,7 +234,7 @@ def test_empty_report_with_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3, empty=True)
+    mock_State, mock_config = get_mock_state_and_config(3, empty=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -279,7 +279,7 @@ def test_report_with_keyerror(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
+    mock_State, mock_config = get_mock_state_and_config(3, with_keyerror=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -320,7 +320,7 @@ def test_report_with_keyerror_changes_only(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
     format_ = "CONSOLE"
-    mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
+    mock_State, mock_config = get_mock_state_and_config(3, with_keyerror=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
         report(
@@ -382,7 +382,7 @@ def test_report_html():
 
     mock_output, output = get_outputs()
 
-    mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
+    mock_State, mock_config = get_mock_state_and_config(3, with_keyerror=True)
 
     with mock.patch("wily.commands.report.State", mock_State), mock.patch(
         "wily.commands.report.copytree"

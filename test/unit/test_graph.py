@@ -2,7 +2,7 @@
 
 from unittest import mock
 
-from util import get_mock_State_and_config
+from util import get_mock_state_and_config
 
 from wily import format_datetime
 from wily.commands.graph import graph, metric_parts
@@ -30,7 +30,7 @@ def test_graph():
     metrics = "raw.loc"
     path = ("test.py",)
     output = ""
-    mock_State, mock_config = get_mock_State_and_config(3, ascending=True)
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
     mock_offline = mock.MagicMock()
     mock_layout = mock.MagicMock()
     mock_Layout = mock.MagicMock(return_value=mock_layout)
@@ -88,7 +88,7 @@ def test_graph_with_keyerror():
     metrics = "raw.loc"
     path = ("test.py",)
     output = ""
-    mock_State, mock_config = get_mock_State_and_config(
+    mock_State, mock_config = get_mock_state_and_config(
         3, ascending=True, with_keyerror=True
     )
     mock_offline = mock.MagicMock()
@@ -162,7 +162,7 @@ def test_graph_with_changes():
     metrics = "raw.loc"
     path = ("test.py",)
     output = ""
-    mock_State, mock_config = get_mock_State_and_config(3)
+    mock_State, mock_config = get_mock_state_and_config(3)
     mock_offline = mock.MagicMock()
     mock_layout = mock.MagicMock()
     mock_Layout = mock.MagicMock(return_value=mock_layout)
@@ -236,7 +236,7 @@ def test_graph_all():
     metrics = "raw.loc"
     path = ("test.py",)
     output = ""
-    mock_State, mock_config = get_mock_State_and_config(3)
+    mock_State, mock_config = get_mock_state_and_config(3)
     mock_offline = mock.MagicMock()
     mock_layout = mock.MagicMock()
     mock_Layout = mock.MagicMock(return_value=mock_layout)
