@@ -2,7 +2,7 @@
 from unittest import mock
 
 
-def get_mock_State_and_config(revs, empty=False, with_keyerror=False, ascending=False):
+def get_mock_state_and_config(revs, empty=False, with_keyerror=False, ascending=False):
     """Build a mock State and a mock config for command tests."""
     revisions = []
     if not empty:
