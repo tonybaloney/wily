@@ -243,7 +243,8 @@ def test_metric_entries(tmpdir, cache_path):
     assert "lineno" in detailed_halstead["Class1.method"]
     assert detailed_halstead["Class1.method"]["lineno"] is not None
     assert "endline" in detailed_halstead["Class1.method"]
-    assert detailed_halstead["Class1.method"]["endline"] is not None
+    if sys.version_info >= (3, 8):
+        assert detailed_halstead["Class1.method"]["endline"] is not None
 
     expected_raw_total = {
         "loc": 14,
