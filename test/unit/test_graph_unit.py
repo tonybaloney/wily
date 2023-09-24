@@ -58,6 +58,7 @@ def test_graph():
         {"data": [mock_scatter], "layout": mock_layout},
         auto_open=True,
         filename="wily-report.html",
+        include_plotlyjs=True,
     )
     mock_Layout.assert_called_once_with(**LAYOUT_EXPECTED)
     mock_go.Scatter.assert_called_once_with(**SCATTER_EXPECTED)
@@ -117,6 +118,7 @@ def test_graph_with_keyerror():
         {"data": [mock_scatter], "layout": mock_layout},
         auto_open=True,
         filename="wily-report.html",
+        include_plotlyjs=True,
     )
     mock_Layout.assert_called_once_with(**LAYOUT_EXPECTED_WITH_KEYERROR)
     mock_go.Scatter.assert_called_once_with(**SCATTER_EXPECTED_WITH_KEYERROR)
@@ -188,6 +190,7 @@ def test_graph_with_changes():
         {"data": [mock_scatter], "layout": mock_layout},
         auto_open=True,
         filename="wily-report.html",
+        include_plotlyjs=True,
     )
     mock_Layout.assert_called_once_with(**LAYOUT_EXPECTED_WITH_CHANGES)
     mock_go.Scatter.assert_called_once_with(**SCATTER_EXPECTED_WITH_CHANGES)
@@ -261,6 +264,7 @@ def test_graph_all():
         {"data": [mock_scatter], "layout": mock_layout},
         auto_open=True,
         filename="wily-report.html",
+        include_plotlyjs=True,
     )
     mock_Layout.assert_called_once_with(**LAYOUT_EXPECTED_ALL)
     mock_go.Scatter.assert_called_once_with(**SCATTER_EXPECTED_ALL)
