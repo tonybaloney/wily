@@ -233,7 +233,9 @@ def test_metric_entries(tmpdir, cache_path):
     assert "lineno" in detailed_halstead["function1"]
     assert detailed_halstead["function1"]["lineno"] is not None
     assert "endline" in detailed_halstead["function1"]
-    assert detailed_halstead["function1"]["endline"] is not None
+    if sys.version_info > (3, 7):
+        # FuncDef is missing end_lineno in Python 3.7
+        assert detailed_halstead["function1"]["endline"] is not None
 
     assert "Class1" not in detailed_halstead
 

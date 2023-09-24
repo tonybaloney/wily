@@ -46,7 +46,9 @@ class NumberedHalsteadVisitor(HalsteadVisitor):
             node.name = f"{self.class_name}.{node.name}"
         super().visit_FunctionDef(node)
         self.function_visitors[-1].lineno = node.lineno
-        self.function_visitors[-1].endline = node.end_lineno
+        # FuncDef is missing end_lineno in Python 3.7
+        endline = node.end_lineno if hasattr(node, "end_lineno") else None
+        self.function_visitors[-1].endline = endline
 
     def visit_ClassDef(self, node):
         """Visit classes, adding class name and creating visitors for methods."""
