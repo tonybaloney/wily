@@ -1,6 +1,7 @@
 """Unit tests for the report command."""
 
 from io import StringIO
+from pathlib import Path
 from unittest import mock
 
 from util import get_mock_State_and_config
@@ -35,7 +36,7 @@ EXPECTED = EXPECTED[1:]
 def test_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -44,9 +45,9 @@ def test_report_no_message(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
@@ -93,7 +94,7 @@ EXPECTED_WRAPPED = EXPECTED_WRAPPED[1:]
 def test_report_no_message_wrapped(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
 
     mock_get_terminal_size = mock.Mock(return_value=(50, 24))
@@ -107,9 +108,9 @@ def test_report_no_message_wrapped(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
             wrap=True,
@@ -141,7 +142,7 @@ EXPECTED_CHANGES_ONLY = EXPECTED_CHANGES_ONLY[1:]
 def test_report_no_message_changes_only(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -150,9 +151,9 @@ def test_report_no_message_changes_only(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=True,
         )
@@ -186,7 +187,7 @@ EXPECTED_WITH_MESSAGE = EXPECTED_WITH_MESSAGE[1:]
 def test_report_with_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -195,9 +196,9 @@ def test_report_with_message(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=True,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
@@ -209,7 +210,7 @@ def test_report_with_message(capsys):
 def test_empty_report_no_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, empty=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -218,9 +219,9 @@ def test_empty_report_no_message(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
@@ -232,7 +233,7 @@ def test_empty_report_no_message(capsys):
 def test_empty_report_with_message(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, empty=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -241,9 +242,9 @@ def test_empty_report_with_message(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=True,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
@@ -277,7 +278,7 @@ EXPECTED_WITH_KEYERROR = EXPECTED_WITH_KEYERROR[1:]
 def test_report_with_keyerror(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -286,9 +287,9 @@ def test_report_with_keyerror(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )
@@ -318,7 +319,7 @@ EXPECTED_WITH_KEYERROR_CHANGES_ONLY = EXPECTED_WITH_KEYERROR_CHANGES_ONLY[1:]
 def test_report_with_keyerror_changes_only(capsys):
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "CONSOLE"
+    format_ = "CONSOLE"
     mock_State, mock_config = get_mock_State_and_config(3, with_keyerror=True)
 
     with mock.patch("wily.commands.report.State", mock_State):
@@ -327,9 +328,9 @@ def test_report_with_keyerror_changes_only(capsys):
             path=path,
             metrics=metrics,
             n=10,
-            output=None,
+            output=Path(),
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=True,
         )
@@ -377,7 +378,7 @@ EXPECTED_HTML += """
 def test_report_html():
     path = "test.py"
     metrics = ("raw.loc",)
-    format = "HTML"
+    format_ = "HTML"
 
     mock_output, output = get_outputs()
 
@@ -393,7 +394,7 @@ def test_report_html():
             n=10,
             output=mock_output,
             include_message=False,
-            format=ReportFormat[format],
+            format=ReportFormat[format_],
             console_format=DEFAULT_GRID_STYLE,
             changes_only=False,
         )

@@ -33,11 +33,11 @@ def test_rank(capsys):
     ):
         rank(
             config=mock_config,
-            path=None,
+            path="",
             metric=metric,
             revision_index=revision_id,
-            limit=None,
-            threshold=None,
+            limit=0,
+            threshold=0,
             descending=False,
             wrap=False,
         )
@@ -79,11 +79,11 @@ def test_rank_wrapped(capsys):
     ), mock.patch("wily.helper.shutil", mock_shutil):
         rank(
             config=mock_config,
-            path=None,
+            path="",
             metric=metric,
             revision_index=revision_id,
-            limit=None,
-            threshold=None,
+            limit=0,
+            threshold=0,
             descending=False,
             wrap=True,
         )
@@ -121,11 +121,11 @@ def test_rank_descending(capsys):
     ):
         rank(
             config=mock_config,
-            path=None,
+            path="",
             metric=metric,
             revision_index=revision_id,
-            limit=None,
-            threshold=None,
+            limit=0,
+            threshold=0,
             descending=True,
             wrap=False,
         )
@@ -161,11 +161,11 @@ def test_rank_limit(capsys):
     ):
         rank(
             config=mock_config,
-            path=None,
+            path="",
             metric=metric,
             revision_index=revision_id,
             limit=1,
-            threshold=None,
+            threshold=0,
             descending=False,
             wrap=False,
         )
@@ -192,8 +192,8 @@ def test_rank_path(capsys):
             path="directory1s",
             metric=metric,
             revision_index=revision_id,
-            limit=None,
-            threshold=None,
+            limit=0,
+            threshold=0,
             descending=False,
             wrap=False,
         )
@@ -221,8 +221,8 @@ def test_rank_path_output(capsys):
             path="directory1s",
             metric=metric,
             revision_index=revision_id,
-            limit=None,
-            threshold=None,
+            limit=0,
+            threshold=0,
             descending=False,
             wrap=False,
         )
@@ -248,11 +248,11 @@ def test_keyerror(capsys):
         try:
             rank(
                 config=mock_config,
-                path=None,
+                path="",
                 metric=metric,
                 revision_index=revision_id,
-                limit=None,
-                threshold=None,
+                limit=0,
+                threshold=0,
                 descending=False,
                 wrap=False,
             )
@@ -280,10 +280,10 @@ def test_threshold(capsys):
         try:
             rank(
                 config=mock_config,
-                path=None,
+                path="",
                 metric=metric,
                 revision_index=revision_id,
-                limit=None,
+                limit=0,
                 threshold=10,
                 descending=False,
                 wrap=False,
