@@ -11,6 +11,7 @@ import operator as op
 import os
 from pathlib import Path
 from sys import exit
+from typing import Optional
 
 import radon.cli.harvest
 import tabulate
@@ -25,7 +26,7 @@ from wily.state import State
 
 def rank(
     config: WilyConfig,
-    path: str,
+    path: Optional[str],
     metric: str,
     revision_index: str,
     limit: int,
