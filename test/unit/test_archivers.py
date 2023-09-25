@@ -43,6 +43,8 @@ class MockRepo:
     _is_dirty = False
     commits = [MockCommit("commit-1"), MockCommit("commit-2")]
     head = MockHead()
+    path: pathlib.Path
+    git: "MockGit"
 
     def is_dirty(self):
         return self._is_dirty
@@ -76,7 +78,7 @@ def repo(tmpdir):
 
 
 def test_basearchiver():
-    wily.archivers.BaseArchiver(None)
+    wily.archivers.BaseArchiver(wily.config.DEFAULT_CONFIG)
 
 
 def test_defaults():
