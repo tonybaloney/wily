@@ -77,7 +77,7 @@ target-version = ["py37", "py38", "py39", "py310", "py311"]
 
 [tool.codespell]
 check-filenames = "True"
-ignore-words-list = "fo,wil"
+ignore-words-list = "fo,wil,someon"
 skip = "./.*,*.json,*.po,*.svg"
 
 [tool.mypy]
