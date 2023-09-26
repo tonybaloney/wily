@@ -44,7 +44,7 @@ def test_report_granular(builddir):
             "cyclomatic.complexity",
             "--message",
             "-n",
-            1,
+            "1",
         ],
     )
     assert result.exit_code == 0, result.stdout
@@ -104,7 +104,7 @@ def test_report_with_message_and_n(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--path", builddir, "report", _path, "raw.multi", "--message", "-n", 1],
+        ["--path", builddir, "report", _path, "raw.multi", "--message", "-n", "1"],
     )
     assert result.exit_code == 0, result.stdout
     assert "basic test" not in result.stdout
