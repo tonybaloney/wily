@@ -4,6 +4,7 @@ Git Archiver.
 Implementation of the archiver API for the gitpython module.
 """
 import logging
+from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import git.exc
@@ -195,3 +196,32 @@ class GitArchiver(BaseArchiver):
             modified_files=modified_files,
             deleted_files=deleted_files,
         )
+
+    def is_data_outdated(self, filename: str, key: str) -> bool:
+        """
+        Check whether file contents match between revision and working directory.
+
+        :param filename: The name of the file to check.
+        :param key: The revision to which compare file contents.
+        :return: Whether the working directory copy of the file is outdated.
+        """
+        commit = self.repo.rev_parse(key)
+        filepath = str(Path(self.repo.working_dir) / filename)
+        diff = commit.diff(None, filepath)
+        return bool(diff and diff[0].change_type == "M")
+
+    def get_file_contents(self, rev_key: str, filename: str) -> str:
+        """
+        Get contents of a file in a given git revision.
+
+        :param rev_key: The key for the revision at which to fetch the file.
+        :param filename: The name of the file for which to get the contents.
+        :return: The file contents.
+        """
+        git_filename = filename.replace("\\", "/")
+        contents = self.repo.git.execute(
+            ["git", "show", f"{rev_key}:{git_filename}"],
+            as_process=False,
+            stdout_as_string=True,
+        )
+        return str(contents)
