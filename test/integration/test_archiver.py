@@ -57,7 +57,7 @@ def test_git_end_to_end(tmpdir):
         and revisions[1].key not in commit2.name_rev
     )
 
-    checkout = archiver.checkout(revisions[1], None)
+    checkout = archiver.checkout(revisions[1], {})
 
     assert not (tmppath / "test.py").exists()
 
