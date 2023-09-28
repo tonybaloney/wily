@@ -72,4 +72,4 @@ jobs:
         flit install --extras=all
     - uses: jakebailey/pyright-action@v1
       with:
-        working-directory: src
+        working-directory: .

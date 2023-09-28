@@ -164,7 +164,7 @@ def test_build_with_config(tmpdir, cache_path):
         [
             "--debug",
             "--config",
-            config_path,
+            str(config_path),
             "--path",
             tmpdir,
             "--cache",
