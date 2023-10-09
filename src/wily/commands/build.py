@@ -103,7 +103,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                 targets = [
                     str(pathlib.Path(config.path) / pathlib.Path(file))
                     for file in revision.added_files + revision.modified_files
-                    if config.targets == ["."]
+                    if config.targets == ["."]  # Add all files if no target is set
                     or any(
                         # Check that changed files are children of the targets
                         True
