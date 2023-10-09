@@ -100,12 +100,15 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                 archiver_instance.checkout(revision, config.checkout_options)
                 stats: Dict[str, Dict] = {"operator_data": {}}
 
-                # TODO : Check that changed files are children of the targets
                 targets = [
                     str(pathlib.Path(config.path) / pathlib.Path(file))
                     for file in revision.added_files + revision.modified_files
-                    # if any([True for target in config.targets if
-                    #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
+                    if any(  # Check that changed files are children of the targets
+                        True
+                        for target in config.targets
+                        if pathlib.Path(target)
+                        in (pathlib.Path(config.path) / file).parents
+                    )
                 ]
 
                 # Run each operator as a separate process
