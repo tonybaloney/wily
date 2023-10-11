@@ -3,10 +3,9 @@
 A command-line application for tracking, reporting on complexity of Python tests and applications.
 
 [![Wily](https://img.shields.io/badge/%F0%9F%A6%8A%20wily-passing-brightgreen.svg)](https://wily.readthedocs.io/)
-[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily) [![Documentation Status](https://readthedocs.org/projects/wily/badge/?version=latest)](https://wily.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/wily.svg)](https://badge.fury.io/py/wily) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/wily.svg)](https://anaconda.org/conda-forge/wily) ![black](https://img.shields.io/badge/code%20style-black-000000.svg)
+[![codecov](https://codecov.io/gh/tonybaloney/wily/branch/master/graph/badge.svg)](https://codecov.io/gh/tonybaloney/wily) [![Documentation Status](https://readthedocs.org/projects/wily/badge/?version=latest)](https://wily.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/wily.svg)](https://badge.fury.io/py/wily) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/wily.svg)](https://anaconda.org/conda-forge/wily) ![black](https://img.shields.io/badge/code%20style-black-000000.svg) ![PyPI - Downloads](https://img.shields.io/pypi/dm/wily)
 
-
-```
+```default
 wily [a]:
 quick to think of things, having a very good understanding of situations and possibilities, 
 and often willing to use tricks to achieve an aim.
@@ -42,7 +41,7 @@ Wily can be used via a command line interface, `wily`.
 
 ## Demo
 
-Here is a demo of wily analysing a Python project, giving a summary of changes to complexity in the last 10 commits and then showing changes against a specific git revision: 
+Here is a demo of wily analysing a Python project, giving a summary of changes to complexity in the last 10 commits and then showing changes against a specific git revision:
 
 ![demo](./docs/source/_static/termtosvg_leo0ur6s.svg)
 
@@ -86,7 +85,7 @@ repos:
 
 The first step to using `wily` is to build a wily cache with the statistics of your project. 
 
-```
+```default
 Usage: __main__.py build [OPTIONS] [TARGETS]...
 
   Build the wily cache
@@ -107,7 +106,6 @@ By default, wily will assume your project folder is a `git` directory. Wily will
 Limit the number of revisions (defaults to 50).
 
 ![wily-build](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_build.png)
-
 
 #### `wily report`
 
@@ -139,7 +137,6 @@ Show information about the build directory. Requires that `.wily/` exists.
 
 ![wily-graph](https://github.com/tonybaloney/wily/raw/master/docs/source/_static/wily_index.png)
 
- 
 ### `wily list-metrics`
 
 List the metrics available in the Wily operators. Each one of the metrics can be used in `wily graph` and `wily report`
@@ -202,7 +199,6 @@ Wily will detect and scan all Python code in .ipynb files automatically.
 
 You can disable this behaviour if you require by setting `ipynb_support = false` in the configuration.
 You can also disable the behaviour of reporting on individual cells by setting `ipynb_cells = false`.
-
 
 # Credits
 
