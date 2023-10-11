@@ -24,10 +24,9 @@ jobs:
           - '3.9'
           - '3.10'
           - '3.11'
-        continue-on-error:
-          - false
+          - '3.12'
     runs-on: "${{ matrix.os }}"
-    continue-on-error: "${{ matrix.continue-on-error }}"
+    continue-on-error: false
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
