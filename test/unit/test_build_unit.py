@@ -1,6 +1,7 @@
 import os
+import pathlib
 import sys
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -38,7 +39,7 @@ class MockArchiverCls(BaseArchiver):
                 message="None again",
                 tracked_files=["a", "b", "c", "d"],
                 tracked_dirs=["d"],
-                added_files=["e"],
+                added_files=["e", "d/h"],
                 modified_files=["f"],
                 deleted_files=["a"],
             ),
@@ -77,6 +78,42 @@ def test_build_simple(config):
     ):
         result = build.build(config, MockArchiver, _test_operators)  # type: ignore
     assert result is None
+
+
+def test_build_targets(config):
+    mock_state = MagicMock()
+    mock_starmap = MagicMock()
+    mock_pool = MagicMock()
+    mock_pool.return_value = mock_pool
+    mock_pool.__enter__.return_value = mock_pool
+    mock_pool.starmap = mock_starmap
+
+    _test_operators = (MockOperator,)
+    d_path = pathlib.Path("d/")
+    h_path = str(d_path / "h")
+
+    assert config.targets == ["."]
+    with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
+        "wily.commands.build.resolve_operator", return_value=MockOperator
+    ), patch("wily.commands.build.State", mock_state), patch(
+        "wily.commands.build.multiprocessing.Pool", mock_pool
+    ):
+        build.build(config, MockArchiver, _test_operators)  # type: ignore
+    assert len(mock_starmap.mock_calls) == 6
+    assert mock_starmap.mock_calls[0].args[-1][-1][-1] == ["e", h_path, "f"]
+    assert mock_starmap.mock_calls[3].args[-1][-1][-1] == []
+
+    config.targets = [str(d_path)]
+    mock_starmap.reset_mock()
+    with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
+        "wily.commands.build.resolve_operator", return_value=MockOperator
+    ), patch("wily.commands.build.State", mock_state), patch(
+        "wily.commands.build.multiprocessing.Pool", mock_pool
+    ):
+        build.build(config, MockArchiver, _test_operators)  # type: ignore
+    assert len(mock_starmap.mock_calls) == 6
+    assert mock_starmap.mock_calls[0].args[-1][-1][-1] == [h_path]
+    assert mock_starmap.mock_calls[3].args[-1][-1][-1] == []
 
 
 def test_run_operator(config):
