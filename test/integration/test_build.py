@@ -89,7 +89,7 @@ def test_build_crash(tmpdir):
     ) as bar_finish:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
-        assert bar_finish.called_once
+        assert bar_finish.called
         assert result.exit_code == 1, result.stdout
 
 

@@ -1,5 +1,41 @@
 # Release History
 
+## 1.25.0
+
+* Allow passing multiple file names to graph, to get multiple lines in HTML by @devdanzin in https://github.com/tonybaloney/wily/pull/206
+* Test support for Python 3.12 by @tonybaloney in https://github.com/tonybaloney/wily/pull/224
+* Add line numbers for metrics in Cyclomatic and Halstead operators by @devdanzin in https://github.com/tonybaloney/wily/pull/218
+* Standalone plotly.min.js for graph (fix #189) by @devdanzin in https://github.com/tonybaloney/wily/pull/209
+* Use class/function names for metric_type and aggregate in list-metrics by @devdanzin in https://github.com/tonybaloney/wily/pull/213
+
+### Bugfixes and minor updates
+
+* Use ruff to replace bandit, flake8 and plugins, isort, pydocstyle, pyupgrade by @cclauss in https://github.com/tonybaloney/wily/pull/174
+* ruff recommended code changes from #174 by @cclauss in https://github.com/tonybaloney/wily/pull/175
+* Use xmlcharrefreplace to handle codec errors in html report writing (fix #182) by @devdanzin in https://github.com/tonybaloney/wily/pull/183
+* HTML report: replace ESCAPE character (fix #184) by @devdanzin in https://github.com/tonybaloney/wily/pull/185
+* Allow report to only display revisions that have changes (fix #187) by @devdanzin in https://github.com/tonybaloney/wily/pull/188
+* Fix ruff CI checks by @devdanzin in https://github.com/tonybaloney/wily/pull/195
+* Fix creating graphs for directories in Windows (fix #190) by @devdanzin in https://github.com/tonybaloney/wily/pull/191
+* Avoid statistics.StatisticsError if rank finds no data (fix #196) by @devdanzin in https://github.com/tonybaloney/wily/pull/197
+* Avoid using unicode characters if `sys.stdout` doesn't support them (fix #65) by @devdanzin in https://github.com/tonybaloney/wily/pull/200
+* Fix some docstrings by @devdanzin in https://github.com/tonybaloney/wily/pull/198
+* Fix graph not displaying filenames as line labels by @devdanzin in https://github.com/tonybaloney/wily/pull/202
+* Avoid report erroring out if there is no data to show by @devdanzin in https://github.com/tonybaloney/wily/pull/203
+* Allow output from commands to be wrapped to terminal width (fix #81) by @devdanzin in https://github.com/tonybaloney/wily/pull/201
+* Handle sys.stdout.encoding being None in get_style() by @devdanzin in https://github.com/tonybaloney/wily/pull/204
+* Annotate core functions and remove sphinx style argument types by @tonybaloney in https://github.com/tonybaloney/wily/pull/205
+* Fix ruff error due to use of .format() in diff.py by @devdanzin in https://github.com/tonybaloney/wily/pull/207
+* Fix HTML report table not being scrollable (fix #186) by @devdanzin in https://github.com/tonybaloney/wily/pull/208
+* Delete unused, untested decorators.py by @devdanzin in https://github.com/tonybaloney/wily/pull/212
+* Fix aggregation in Windows (fix #210) by @devdanzin in https://github.com/tonybaloney/wily/pull/211
+* Restore displaying graph markers by @devdanzin in https://github.com/tonybaloney/wily/pull/215
+* Update graph and report documentation by @devdanzin in https://github.com/tonybaloney/wily/pull/216
+* Lazy-format all logging calls (fix #219) by @devdanzin in https://github.com/tonybaloney/wily/pull/220
+* Add some more typing by @devdanzin in https://github.com/tonybaloney/wily/pull/221
+* Add unit tests for some commands by @devdanzin in https://github.com/tonybaloney/wily/pull/199
+* Fix typing of tests and make pyright check them on CI by @devdanzin in https://github.com/tonybaloney/wily/pull/222
+
 ## 1.24.0 (20th October 2022)
 
 * refactor: apply black on wily codebase by @skarzi in https://github.com/tonybaloney/wily/pull/162
