@@ -95,6 +95,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             prev_stats: Dict[str, Dict] = {}
+            assert isinstance(config.targets, list)
             for revision in revisions:
                 # Checkout target revision
                 archiver_instance.checkout(revision, config.checkout_options)
