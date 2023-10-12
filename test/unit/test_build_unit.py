@@ -80,7 +80,7 @@ def test_build_simple(config):
     assert result is None
 
 
-def test_build_targets(config):
+def test_build_targets():
     mock_state = MagicMock()
     mock_starmap = MagicMock()
     mock_pool = MagicMock()
@@ -88,11 +88,13 @@ def test_build_targets(config):
     mock_pool.__enter__.return_value = mock_pool
     mock_pool.starmap = mock_starmap
 
+    config = DEFAULT_CONFIG
+    config.path = "."
     _test_operators = (MockOperator,)
     d_path = pathlib.Path("d/")
     h_path = str(d_path / "h")
 
-    assert config.targets == ["."]
+    config.targets = ["."]
     with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
         "wily.commands.build.resolve_operator", return_value=MockOperator
     ), patch("wily.commands.build.State", mock_state), patch(
