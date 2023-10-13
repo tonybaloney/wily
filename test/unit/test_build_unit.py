@@ -102,8 +102,8 @@ def test_build_targets():
     ):
         build.build(config, MockArchiver, _test_operators)  # type: ignore
     assert len(mock_starmap.mock_calls) == 6
-    assert mock_starmap.mock_calls[0].args[-1][-1][-1] == ["e", h_path, "f"]
-    assert mock_starmap.mock_calls[3].args[-1][-1][-1] == []
+    assert mock_starmap.call_args_list[0][0][1][-1][-1] == ["e", h_path, "f"]
+    assert mock_starmap.call_args_list[1][0][1][-1][-1] == []
 
     config.targets = [str(d_path)]
     mock_starmap.reset_mock()
@@ -114,8 +114,8 @@ def test_build_targets():
     ):
         build.build(config, MockArchiver, _test_operators)  # type: ignore
     assert len(mock_starmap.mock_calls) == 6
-    assert mock_starmap.mock_calls[0].args[-1][-1][-1] == [h_path]
-    assert mock_starmap.mock_calls[3].args[-1][-1][-1] == []
+    assert mock_starmap.call_args_list[0][0][1][-1][-1] == [h_path]
+    assert mock_starmap.call_args_list[1][0][1][-1][-1] == []
 
 
 def test_run_operator(config):
