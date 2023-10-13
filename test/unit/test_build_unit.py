@@ -122,5 +122,5 @@ def test_run_operator(config):
     rev = Revision("123", None, None, 1, "message", [], [], [], [], [])
     name, data = build.run_operator(MockOperator, rev, config, ["test1.py"])
     assert name == "mock"
-    path = "C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py"
+    path = "\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py"
     assert data == {os.path.relpath(path, config.path): None}
