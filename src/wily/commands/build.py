@@ -7,6 +7,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import multiprocessing
 import os
 import pathlib
+from collections.abc import Sequence
 from sys import exit
 from typing import Any, Dict, List, Tuple
 
@@ -95,7 +96,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             prev_stats: Dict[str, Dict] = {}
-            assert isinstance(config.targets, list)
+            assert isinstance(config.targets, Sequence)
             for revision in revisions:
                 # Checkout target revision
                 archiver_instance.checkout(revision, config.checkout_options)
