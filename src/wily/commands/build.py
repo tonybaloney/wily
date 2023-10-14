@@ -40,6 +40,7 @@ def run_operator(
     # Normalize paths for non-seed passes
     for key in list(data.keys()):
         if os.path.isabs(key):
+            # ToDo: Handle paths on different drives in Windows
             rel = os.path.relpath(key, config.path)
             data[rel] = data[key]
             del data[key]

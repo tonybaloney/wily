@@ -73,6 +73,11 @@ def config():
 
 def test_build_simple(config):
     _test_operators = (MockOperator,)
+    # Remove drive from config path, as that breaks os.path.relpath on GitHub
+    # test runner because config path and test directory point to diffent drives
+    path = config.path
+    config.path = str(pathlib.Path().joinpath("/", *pathlib.Path(path).parts[1:]))
+
     with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
         "wily.commands.build.resolve_operator", return_value=MockOperator
     ):
