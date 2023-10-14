@@ -74,7 +74,7 @@ def config():
 def test_build_simple(config):
     _test_operators = (MockOperator,)
     # Remove drive from config path, as that breaks os.path.relpath on GitHub
-    # test runner because config path and test directory point to diffent drives
+    # test runner because config path and test directory point to different drives
     path = config.path
     config.path = str(pathlib.Path().joinpath("/", *pathlib.Path(path).parts[1:]))
 
