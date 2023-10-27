@@ -1,16 +1,18 @@
 """
-Draw graph in HTML for a specific metric.
+Graph command.
 
-TODO: Add multiple lines for multiple files
+Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
+from typing import Optional, Tuple, Union
 
 import plotly.graph_objs as go
 import plotly.offline
 
 from wily import format_datetime, logger
-from wily.operators import resolve_metric, resolve_metric_as_tuple
+from wily.config.types import WilyConfig
+from wily.operators import Metric, resolve_metric, resolve_metric_as_tuple
 from wily.state import State
 
 
@@ -20,42 +22,36 @@ def metric_parts(metric):
     return operator.name, met.name
 
 
+def path_startswith(filename: str, path: str) -> bool:
+    """Check whether a filename starts with a given path in platform-agnostic way."""
+    filepath = Path(filename).resolve()
+    path_ = Path(path).resolve()
+    return str(filepath).startswith(str(path_))
+
+
 def graph(
-    config,
-    path,
-    metrics,
-    output=None,
-    x_axis=None,
-    changes=True,
-    text=False,
-    aggregate=False,
-):
+    config: WilyConfig,
+    path: Tuple[str, ...],
+    metrics: str,
+    output: Optional[str] = None,
+    x_axis: Optional[str] = None,
+    changes: bool = True,
+    text: bool = False,
+    aggregate: bool = False,
+    plotlyjs: Union[bool, str] = True,
+) -> None:
     """
     Graph information about the cache and runtime.
 
     :param config: The configuration.
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param path: The path to the files.
-    :type  path: ``str``
-
     :param metrics: The Y and Z-axis metrics to report on.
-    :type  metrics: ``tuple``
-
     :param output: Save report to specified path instead of opening browser.
-    :type  output: ``str``
-
     :param x_axis: Name of metric for x-axis or "history".
-    :type x_axis: ``str``
-
     :param changes: Only graph changes.
-    :type changes: ``bool``
-
     :param text: Show commit message inline in graph.
-    :type text: ``bool``
-
     :param aggregate: Aggregate values for graph.
-    :type aggregate: ``bool``
+    :param plotlyjs: How to include plotly.min.js.
     """
     logger.debug("Running graph command")
 
@@ -64,30 +60,40 @@ def graph(
 
     if x_axis is None:
         x_axis = "history"
+        x_operator = x_key = ""
     else:
         x_operator, x_key = metric_parts(x_axis)
 
-    y_metric = resolve_metric(metrics[0])
-    title = f"{x_axis.capitalize()} of {y_metric.description} for {path}{' aggregated' if aggregate else ''}"
+    metrics_list = metrics.split(",")
+
+    y_metric = resolve_metric(metrics_list[0])
 
     if not aggregate:
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        paths = {
-            tracked_file
-            for tracked_file in tracked_files
-            if tracked_file.startswith(path)
-        } or {path}
+        paths = (
+            tuple(
+                tracked_file
+                for tracked_file in tracked_files
+                if any(path_startswith(tracked_file, p) for p in path)
+            )
+            or path
+        )
     else:
-        paths = {path}
+        paths = path
 
-    operator, key = metric_parts(metrics[0])
-    if len(metrics) == 1:  # only y-axis
-        z_axis = None
+    title = (
+        f"{x_axis.capitalize()} of {y_metric.description}"
+        f"{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
+    )
+    operator, key = metric_parts(metrics_list[0])
+    z_axis: Union[Metric, str]
+    if len(metrics_list) == 1:  # only y-axis
+        z_axis = z_operator = z_key = ""
     else:
-        z_axis = resolve_metric(metrics[1])
-        z_operator, z_key = metric_parts(metrics[1])
+        z_axis = resolve_metric(metrics_list[1])
+        z_operator, z_key = metric_parts(metrics_list[1])
     for path_ in paths:
         current_path = str(Path(path_))
         x = []
@@ -141,13 +147,13 @@ def graph(
             ids=state.index[state.default_archiver].revision_keys,
             text=labels,
             marker={
-                "size": 0 if z_axis is None else z,
+                "size": 0 if not z_axis else z,
                 "color": list(range(len(y))),
                 # "colorscale": "Viridis",
             },
             xcalendar="gregorian",
             hoveron="points+fills",
-        )
+        )  # type: ignore
         data.append(trace)
     if output:
         filename = output
@@ -162,8 +168,9 @@ def graph(
                 title=title,
                 xaxis={"title": x_axis},
                 yaxis={"title": y_metric.description},
-            ),
+            ),  # type: ignore
         },
         auto_open=auto_open,
         filename=filename,
+        include_plotlyjs=plotlyjs,  # type: ignore
     )

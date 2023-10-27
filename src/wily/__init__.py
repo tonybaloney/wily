@@ -42,7 +42,7 @@ import tempfile
 
 import colorlog
 
-__version__ = "1.24.2"
+__version__ = "1.25.0"
 
 _, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 
@@ -60,16 +60,16 @@ logger.addHandler(_filehandler)
 MAX_MESSAGE_WIDTH = 50
 
 
-def format_date(timestamp):
+def format_date(timestamp: float) -> str:
     """Reusable timestamp -> date."""
     return datetime.date.fromtimestamp(timestamp).isoformat()
 
 
-def format_datetime(timestamp):
+def format_datetime(timestamp: float) -> str:
     """Reusable timestamp -> datetime."""
     return datetime.datetime.fromtimestamp(timestamp).isoformat()
 
 
-def format_revision(sha):
+def format_revision(sha: str) -> str:
     """Return a shorter git sha."""
     return sha[:7]

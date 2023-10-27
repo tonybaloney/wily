@@ -7,10 +7,13 @@ Will compare the values between revisions and highlight changes in green/red.
 from pathlib import Path
 from shutil import copytree
 from string import Template
+from typing import Dict, Iterable, List, Tuple
 
 import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
+from wily.config.types import WilyConfig
+from wily.helper import get_maxcolwidth
 from wily.helper.custom_enums import ReportFormat
 from wily.helper.output import print_json
 from wily.lang import _
@@ -23,58 +26,42 @@ ANSI_YELLOW = 33
 
 
 def report(
-    config,
-    path,
-    metrics,
-    n,
-    output,
-    include_message=False,
-    format=ReportFormat.CONSOLE,
-    console_format=None,
-    changes_only=False,
-    as_json=False,
-):
+    config: WilyConfig,
+    path: str,
+    metrics: Iterable[str],
+    n: int,
+    output: Path,
+    console_format: str,
+    include_message: bool = False,
+    format: ReportFormat = ReportFormat.CONSOLE,
+    changes_only: bool = False,
+    wrap: bool = False,
+    as_json: bool = False,
+) -> None:
     """
     Show metrics for a given file.
 
     :param config: The configuration
-    :type  config: :class:`wily.config.WilyConfig`
-
     :param path: The path to the file
-    :type  path: ``str``
-
-    :param metrics: Name of the metric to report on
-    :type  metrics: ``str``
-
+    :param metrics: List of metrics to report on
     :param n: Number of items to list
-    :type  n: ``int``
-
     :param output: Output path
-    :type  output: ``Path``
-
     :param include_message: Include revision messages
-    :type  include_message: ``bool``
-
     :param format: Output format
-    :type  format: ``ReportFormat``
-
     :param console_format: Grid format style for tabulate
-    :type  console_format: ``str``
-
     :param changes_only: Only report revisions where delta != 0
-    :type  changes_only: ``bool``
+    :param wrap: Wrap output
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")
-    logger.info(f"-----------History for {metrics}------------")
+    logger.info("-----------History for %s------------", metrics)
 
-    data = []
+    data: List[Tuple[str, ...]] = []
     metric_metas = []
 
-    for metric in metrics:
-        operator, metric = resolve_metric_as_tuple(metric)
+    for metric_name in metrics:
+        operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
-        operator = operator.name
         # Set the delta colors depending on the metric type
         if metric.measure == MetricType.AimHigh:
             increase_color = ANSI_GREEN
@@ -90,25 +77,28 @@ def report(
             decrease_color = ANSI_YELLOW
         metric_meta = {
             "key": key,
-            "operator": operator,
+            "operator": operator.name,
             "increase_color": increase_color,
             "decrease_color": decrease_color,
             "title": metric.description,
-            "type": metric.type,
+            "type": metric.metric_type,
         }
         metric_metas.append(metric_meta)
 
     state = State(config)
     for archiver in state.archivers:
         history = state.index[archiver].revisions[:n][::-1]
-        last = {}
+        last: Dict = {}
         for rev in history:
             deltas = []
             vals = []
             for meta in metric_metas:
                 try:
                     logger.debug(
-                        f"Fetching metric {meta['key']} for {meta['operator']} in {path}"
+                        "Fetching metric %s for %s in %s",
+                        meta["key"],
+                        meta["operator"],
+                        path,
                     )
                     val = rev.get(config, archiver, meta["operator"], path, meta["key"])
 
@@ -150,7 +140,7 @@ def report(
                         (
                             format_revision(rev.revision.key),
                             rev.revision.message[:MAX_MESSAGE_WIDTH],
-                            rev.revision.author_name,
+                            str(rev.revision.author_name),
                             format_date(rev.revision.date),
                             *vals,
                         )
@@ -159,11 +149,15 @@ def report(
                     data.append(
                         (
                             format_revision(rev.revision.key),
-                            rev.revision.author_name,
+                            str(rev.revision.author_name),
                             format_date(rev.revision.date),
                             *vals,
                         )
                     )
+    if not data:
+        logger.error("No data found for %s with changes=%s.", path, changes_only)
+        return
+
     descriptions = [meta["title"] for meta in metric_metas]
     if include_message:
         headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
@@ -171,7 +165,7 @@ def report(
         headers = (_("Revision"), _("Author"), _("Date"), *descriptions)
 
     if format == ReportFormat.HTML:
-        if output.is_file and output.suffix == ".html":
+        if output.suffix == ".html":
             report_path = output.parents[0]
             report_output = output
         else:
@@ -195,26 +189,30 @@ def report(
                 table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 
-        report_template = report_template.safe_substitute(
+        rendered_report = report_template.safe_substitute(
             headers=table_headers, content=table_content
         )
 
-        with report_output.open("w", errors="xmlcharrefreplace") as output:
-            output.write(report_template)
+        with report_output.open("w", errors="xmlcharrefreplace") as output_f:
+            output_f.write(rendered_report)
 
         try:
             copytree(str(templates_dir / "css"), str(report_path / "css"))
         except FileExistsError:
             pass
 
-        logger.info(f"wily report was saved to {report_path}")
+        logger.info("wily report was saved to %s", report_path)
     else:
-        data = data[::-1]
         if as_json:
-            print_json(data, headers, path)
+            print_json(data[::-1], headers, path)
         else:
+            maxcolwidth = get_maxcolwidth(headers, wrap)
             print(
                 tabulate.tabulate(
-                    headers=headers, tabular_data=data, tablefmt=console_format
+                    headers=headers,
+                    tabular_data=data[::-1],
+                    tablefmt=console_format,
+                    maxcolwidths=maxcolwidth,
+                    maxheadercolwidths=maxcolwidth,
                 )
             )

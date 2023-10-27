@@ -5,8 +5,8 @@ import sys
 import pytest
 
 from wily import cache
-from wily.archivers import Revision
-from wily.config import ARCHIVER_GIT, DEFAULT_CONFIG
+from wily.archivers import ARCHIVER_GIT, Revision
+from wily.config import DEFAULT_CONFIG
 
 
 def test_exists(tmpdir):
@@ -106,7 +106,7 @@ def test_store_basic(tmpdir):
         key="12345",
         author_name="Anthony Shaw",
         author_email="anthony@test.com",
-        date="17/01/1990",
+        date=632545200,
         message="my changes",
         tracked_files=[target_path],
         tracked_dirs=[target_path],
@@ -134,7 +134,7 @@ def test_store_twice(tmpdir):
         key="12345",
         author_name="Anthony Shaw",
         author_email="anthony@test.com",
-        date="17/01/1990",
+        date=632545200,
         message="my changes",
         tracked_files=[target_path],
         tracked_dirs=[target_path],
@@ -162,7 +162,7 @@ def test_store_relative_paths(tmpdir):
         key="12345",
         author_name="Anthony Shaw",
         author_email="anthony@test.com",
-        date="17/01/1990",
+        date=632545200,
         message="my changes",
         tracked_files=[target_path],
         tracked_dirs=[target_path],

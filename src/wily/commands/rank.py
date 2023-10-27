@@ -11,43 +11,42 @@ import operator as op
 import os
 from pathlib import Path
 from sys import exit
+from typing import Optional
 
 import radon.cli.harvest
 import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
-from wily.config import DEFAULT_PATH
-from wily.helper import get_style
+from wily.config import DEFAULT_PATH, WilyConfig
+from wily.helper import get_maxcolwidth, get_style
 from wily.helper.output import print_json
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
 
-def rank(config, path, metric, revision_index, limit, threshold, descending, as_json):
+def rank(
+    config: WilyConfig,
+    path: Optional[str],
+    metric: str,
+    revision_index: str,
+    limit: int,
+    threshold: int,
+    descending: bool,
+    wrap: bool,
+    as_json: bool,
+) -> None:
     """
     Rank command ordering files, methods or functions using metrics.
 
     :param config: The configuration.
-    :type config: :class:'wily.config.WilyConfig'
-
     :param path: The path to the file.
-    :type path ''str''
-
     :param metric: Name of the metric to report on.
-    :type metric: ''str''
-
     :param revision_index: Version of git repository to revert to.
-    :type revision_index: ``str``
-
     :param limit: Limit the number of items in the table.
-    :type  limit: ``int``
-
     :param threshold: For total values beneath the threshold return a non-zero exit code.
-    :type  threshold: ``int``
-
-    :type descending: Rank in descending order
-    :param descending: ``bool``
+    :param descending: Rank in descending order
+    :param wrap: Wrap output
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -55,31 +54,40 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, as_
 
     data = []
 
-    operator, metric = resolve_metric_as_tuple(metric)
-    operator = operator.name
+    _operator, resolved_metric = resolve_metric_as_tuple(metric)
+    operator = _operator.name
 
     state = State(config)
 
     if not revision_index:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = resolve_archiver(state.default_archiver).cls(config).find(revision_index)
-        logger.debug(f"Resolved {revision_index} to {rev.key} ({rev.message})")
+        rev = (
+            resolve_archiver(state.default_archiver)
+            .archiver_cls(config)
+            .find(revision_index)
+        )
+        logger.debug("Resolved %s to %s (%s)", revision_index, rev.key, rev.message)
         try:
             target_revision = state.index[state.default_archiver][rev.key]
         except KeyError:
             logger.error(
-                f"Revision {revision_index} is not in the cache, make sure you have run wily build."
+                "Revision %s is not in the cache, make sure you have run wily build.",
+                revision_index,
             )
             exit(1)
 
     logger.info(
-        f"-----------Rank for {metric.description} for {format_revision(target_revision.revision.key)} by {target_revision.revision.author_name} on {format_date(target_revision.revision.date)}.------------"
+        "-----------Rank for %s for %s by %s on %s.------------",
+        resolved_metric.description,
+        format_revision(target_revision.revision.key),
+        target_revision.revision.author_name,
+        format_date(target_revision.revision.date),
     )
 
     if path is None:
         files = target_revision.get_paths(config, state.default_archiver, operator)
-        logger.debug(f"Analysing {files}")
+        logger.debug("Analysing %s", files)
     else:
         # Resolve target paths when the cli has specified --path
         if config.path != DEFAULT_PATH:
@@ -92,21 +100,24 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, as_
             os.path.relpath(fn, config.path)
             for fn in radon.cli.harvest.iter_filenames(targets)
         ]
-        logger.debug(f"Targeting - {files}")
+        logger.debug("Targeting - %s", files)
 
     for item in files:
         for archiver in state.archivers:
             try:
                 logger.debug(
-                    f"Fetching metric {metric.name} for {operator} in {str(item)}"
+                    "Fetching metric %s for %s in %s",
+                    resolved_metric.name,
+                    operator,
+                    str(item),
                 )
                 val = target_revision.get(
-                    config, archiver, operator, str(item), metric.name
+                    config, archiver, operator, str(item), resolved_metric.name
                 )
                 value = val
                 data.append((item, value))
             except KeyError:
-                logger.debug(f"Could not find file {item} in index")
+                logger.debug("Could not find file %s in index", item)
 
     # Sort by ideal value
     data = sorted(data, key=op.itemgetter(1), reverse=descending)
@@ -118,18 +129,28 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, as_
         return
 
     # Tack on the total row at the end
-    total = metric.aggregate(rev[1] for rev in data)
-    data.append(["Total", total])
+    total = resolved_metric.aggregate(rev[1] for rev in data)
+    data.append(("Total", total))
 
-    headers = ("File", metric.description)
-    style = get_style()
+    headers = ("File", resolved_metric.description)
+
     if as_json:
         print_json(data, headers)
     else:
-        print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
+        maxcolwidth = get_maxcolwidth(headers, wrap)
+        style = get_style()
+        print(
+            tabulate.tabulate(
+                headers=headers,
+                tabular_data=data,
+                tablefmt=style,
+                maxcolwidths=maxcolwidth,
+                maxheadercolwidths=maxcolwidth,
+            )
+        )
 
     if threshold and total < threshold:
         logger.error(
-            f"Total value below the specified threshold: {total} < {threshold}"
+            "Total value below the specified threshold: %s < %s", total, threshold
         )
         exit(1)

@@ -8,37 +8,31 @@ import multiprocessing
 import os
 import pathlib
 from sys import exit
+from typing import Any, Dict, List, Tuple
 
 from progress.bar import Bar
 
 from wily import logger
-from wily.archivers import FilesystemArchiver
+from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.operators import resolve_operator
+from wily.config.types import WilyConfig
+from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
-def run_operator(operator, revision, config, targets):
+def run_operator(
+    operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]
+) -> Tuple[str, Dict[str, Any]]:
     """
     Run an operator for the multiprocessing pool.
 
     :param operator: The operator to use
-    :type  operator: :class:`Operator`
-
     :param revision: The revision index
-    :type  revision: :class:`Revision`
-
     :param config: The runtime configuration
-    :type  config: :class:`WilyConfig`
-
     :param targets: Files/paths to scan
-    :type  targets: ``list`` of ``str``
-
-    :rtype: ``tuple``
-    :returns: A tuple of operator name (``str``), and data (``dict``)
     """
-    instance = operator.cls(config, targets)
-    logger.debug(f"Running {operator.name} operator on {revision}")
+    instance = operator.operator_cls(config, targets)
+    logger.debug("Running %s operator on %s", operator.name, revision)
 
     data = instance.run(revision, config)
 
@@ -52,50 +46,46 @@ def run_operator(operator, revision, config, targets):
     return operator.name, data
 
 
-def build(config, archiver, operators):
+def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> None:
     """
     Build the history given an archiver and collection of operators.
 
     :param config: The wily configuration
-    :type  config: :namedtuple:`wily.config.WilyConfig`
-
     :param archiver: The archiver to use
-    :type  archiver: :namedtuple:`wily.archivers.Archiver`
-
     :param operators: The list of operators to execute
-    :type operators: `list` of :namedtuple:`wily.operators.Operator`
     """
     try:
-        logger.debug(f"Using {archiver.name} archiver module")
-        archiver = archiver.cls(config)
-        revisions = archiver.revisions(config.path, config.max_revisions)
+        logger.debug("Using %s archiver module", archiver.name)
+        archiver_instance = archiver.archiver_cls(config)
+        revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
         # TODO: This logic shouldn't really be here (SoC)
         logger.info("Defaulting back to the filesystem archiver, not a valid git repo")
-        archiver = FilesystemArchiver(config)
-        revisions = archiver.revisions(config.path, config.max_revisions)
+        archiver_instance = FilesystemArchiver(config)
+        revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except Exception as e:
-        if hasattr(e, "message"):
-            logger.error(f"Failed to setup archiver: '{e.message}'")
-        else:
-            logger.error(f"Failed to setup archiver: '{type(e)} - {e}'")
+        message = getattr(e, "message", f"{type(e)} - {e}")
+        logger.error("Failed to setup archiver: '%s'", message)
         exit(1)
 
-    state = State(config, archiver=archiver)
+    state = State(config, archiver=archiver_instance)
     # Check for existence of cache, else provision
     state.ensure_exists()
 
-    index = state.index[archiver.name]
+    index = state.index[archiver_instance.name]
 
     # remove existing revisions from the list
     revisions = [revision for revision in revisions if revision not in index][::-1]
 
     logger.info(
-        f"Found {len(revisions)} revisions from '{archiver.name}' archiver in '{config.path}'."
+        "Found %s revisions from '%s' archiver in '%s'.",
+        len(revisions),
+        archiver_instance.name,
+        config.path,
     )
 
     _op_desc = ",".join([operator.name for operator in operators])
-    logger.info(f"Running operators - {_op_desc}")
+    logger.info("Running operators - %s", _op_desc)
 
     bar = Bar("Processing", max=len(revisions) * len(operators))
     state.operators = operators
@@ -104,10 +94,11 @@ def build(config, archiver, operators):
     seed = True
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
+            prev_stats: Dict[str, Dict] = {}
             for revision in revisions:
                 # Checkout target revision
-                archiver.checkout(revision, config.checkout_options)
-                stats = {"operator_data": {}}
+                archiver_instance.checkout(revision, config.checkout_options)
+                stats: Dict[str, Dict] = {"operator_data": {}}
 
                 # TODO : Check that changed files are children of the targets
                 targets = [
@@ -132,7 +123,9 @@ def build(config, archiver, operators):
                         and len(data[i][1]) == 0
                     ):
                         logger.warning(
-                            f"In revision {revision.key}, for operator {operators[i].name}: No data collected"
+                            "In revision %s, for operator %s: No data collected",
+                            revision.key,
+                            operators[i].name,
                         )
 
                 # Map the data back into a dictionary
@@ -146,7 +139,10 @@ def build(config, archiver, operators):
 
                     # Copy the ir from any unchanged files from the prev revision
                     if not seed:
-                        missing_indices = set(revision.tracked_files) - indices
+                        # File names in result are platform dependent, so we convert
+                        # to Path and back to str.
+                        files = {str(pathlib.Path(f)) for f in revision.tracked_files}
+                        missing_indices = files - indices
                         # TODO: Check existence of file path.
                         for missing in missing_indices:
                             # Don't copy aggregate keys as their values may have changed
@@ -167,9 +163,14 @@ def build(config, archiver, operators):
                         for deleted in revision.deleted_files:
                             result.pop(deleted, None)
 
+                    # Add empty path for storing total aggregates
+                    dirs = [""]
+                    # Directory names in result are platform dependent, so we convert
+                    # to Path and back to str.
+                    dirs += [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
                     # Aggregate metrics across all root paths using the aggregate function in the metric
-                    # Note assumption is that nested dirs are listed after parent..
-                    for root in revision.tracked_dirs:
+                    # Note assumption is that nested dirs are listed after parent, hence sorting.
+                    for root in sorted(dirs):
                         # find all matching entries recursively
                         aggregates = [
                             path for path in result.keys() if path.startswith(root)
@@ -177,7 +178,9 @@ def build(config, archiver, operators):
 
                         result[str(root)] = {"total": {}}
                         # aggregate values
-                        for metric in resolve_operator(operator_name).cls.metrics:
+                        for metric in resolve_operator(
+                            operator_name
+                        ).operator_cls.metrics:
                             func = metric.aggregate
                             values = [
                                 result[aggregate]["total"][metric.name]
@@ -195,12 +198,12 @@ def build(config, archiver, operators):
                 prev_stats = stats
                 seed = False
                 ir = index.add(revision, operators=operators)
-                ir.store(config, archiver, stats)
+                ir.store(config, archiver_instance.name, stats)
         index.save()
         bar.finish()
     except Exception as e:
-        logger.error(f"Failed to build cache: {type(e)}: '{e}'")
+        logger.error("Failed to build cache: %s: '%s'", type(e), e)
         raise e
     finally:
         # Reset the archive after every run back to the head of the branch
-        archiver.finish()
+        archiver_instance.finish()

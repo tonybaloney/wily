@@ -1,7 +1,8 @@
 import pathlib
 
 import pytest
-from git import Actor, Repo
+from git.repo.base import Repo
+from git.util import Actor
 
 from wily.archivers.git import DirtyGitRepositoryError, GitArchiver
 from wily.config import DEFAULT_CONFIG
@@ -55,7 +56,7 @@ def test_git_end_to_end(tmpdir):
         and revisions[1].key not in commit2.name_rev
     )
 
-    checkout = archiver.checkout(revisions[1], None)
+    checkout = archiver.checkout(revisions[1], {})
 
     assert not (tmppath / "test.py").exists()
 

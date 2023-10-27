@@ -4,13 +4,15 @@ Cyclomatic complexity metric for each function/method.
 Provided by the radon library.
 """
 import statistics
+from typing import Any, Dict, Iterable
 
-import radon
 import radon.cli.harvest as harvesters
 from radon.cli import Config
+from radon.complexity import SCORE
 from radon.visitors import Class, Function
 
 from wily import logger
+from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
 
@@ -26,7 +28,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         "max": "F",
         "no_assert": True,
         "show_closures": False,
-        "order": radon.complexity.SCORE,
+        "order": SCORE,
         "include_ipynb": True,
         "ipynb_cells": True,
     }
@@ -43,33 +45,28 @@ class CyclomaticComplexityOperator(BaseOperator):
 
     default_metric_index = 0  # MI
 
-    def __init__(self, config, targets):
+    def __init__(self, config: WilyConfig, targets: Iterable[str]):
         """
         Instantiate a new Cyclomatic Complexity operator.
 
         :param config: The wily configuration.
-        :type  config: :class:`WilyConfig`
+        :param targets: An iterable of paths from which to harvest metrics.
         """
         # TODO: Import config for harvester from .wily.cfg
-        logger.debug(f"Using {targets} with {self.defaults} for CC metrics")
+        logger.debug("Using %s with %s for CC metrics", targets, self.defaults)
 
         self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
 
-    def run(self, module, options):
+    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
         Run the operator.
 
         :param module: The target module path.
-        :type  module: ``str``
-
         :param options: Any runtime options.
-        :type  options: ``dict``
-
         :return: The operator results.
-        :rtype: ``dict``
         """
         logger.debug("Running CC harvester")
-        results = {}
+        results: Dict[str, Dict[str, Any]] = {}
         for filename, details in dict(self.harvester.results).items():
             results[filename] = {"detailed": {}, "total": {}}
             total = 0  # running CC total
@@ -81,12 +78,16 @@ class CyclomaticComplexityOperator(BaseOperator):
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.debug(
-                            f"Failed to run CC harvester on {filename} : {details['error']}"
+                            "Failed to run CC harvester on %s : %s",
+                            filename,
+                            details["error"],
                         )
                         continue
                     else:
                         logger.warning(
-                            f"Unexpected result from Radon : {instance} of {type(instance)}. Please report on Github."
+                            "Unexpected result from Radon : %s of %s. Please report on Github.",
+                            instance,
+                            type(instance),
                         )
                         continue
                 results[filename]["detailed"][i["fullname"]] = i
@@ -96,7 +97,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         return results
 
     @staticmethod
-    def _dict_from_function(l):
+    def _dict_from_function(l: Function) -> Dict[str, Any]:
         return {
             "name": l.name,
             "is_method": l.is_method,
@@ -105,10 +106,12 @@ class CyclomaticComplexityOperator(BaseOperator):
             "complexity": l.complexity,
             "fullname": l.fullname,
             "loc": l.endline - l.lineno,
+            "lineno": l.lineno,
+            "endline": l.endline,
         }
 
     @staticmethod
-    def _dict_from_class(l):
+    def _dict_from_class(l: Class) -> Dict[str, Any]:
         return {
             "name": l.name,
             "inner_classes": l.inner_classes,
@@ -116,4 +119,6 @@ class CyclomaticComplexityOperator(BaseOperator):
             "complexity": l.complexity,
             "fullname": l.fullname,
             "loc": l.endline - l.lineno,
+            "lineno": l.lineno,
+            "endline": l.endline,
         }

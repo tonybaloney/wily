@@ -18,7 +18,7 @@ compile_messages:
 lint_python:
 	ruff .
 	@# TODO(skarzi): fix type hints and require `mypy` to pass
-	mypy . || true
+	mypy --install-types --non-interactive src || true
 
 .PHONY: lint_formatting
 lint_formatting:

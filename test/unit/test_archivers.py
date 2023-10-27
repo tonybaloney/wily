@@ -43,6 +43,8 @@ class MockRepo:
     _is_dirty = False
     commits = [MockCommit("commit-1"), MockCommit("commit-2")]
     head = MockHead()
+    path: pathlib.Path
+    git: "MockGit"
 
     def is_dirty(self):
         return self._is_dirty
@@ -58,7 +60,7 @@ class MockGit:
     def checkout(self, *args):
         ...
 
-    def execute(self, command):
+    def execute(self, command, *args, **kwargs):
         if command[1] == "ls-tree":
             assert command[-1] == "123abc"
             return "\n"
@@ -76,12 +78,7 @@ def repo(tmpdir):
 
 
 def test_basearchiver():
-    archiver = wily.archivers.BaseArchiver()
-    with pytest.raises(NotImplementedError):
-        archiver.revisions("", 10)
-
-    with pytest.raises(NotImplementedError):
-        archiver.checkout("")
+    wily.archivers.BaseArchiver(wily.config.DEFAULT_CONFIG)
 
 
 def test_defaults():

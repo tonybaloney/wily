@@ -12,11 +12,12 @@ from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
-from git import Actor, Repo
+from git.repo.base import Repo
+from git.util import Actor
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
-from wily.config import generate_cache_path
+from wily.helper import generate_cache_path
 
 _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
@@ -88,7 +89,7 @@ def test_build_crash(tmpdir):
     ) as bar_finish:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
-        assert bar_finish.called_once
+        assert bar_finish.called
         assert result.exit_code == 1, result.stdout
 
 
@@ -163,7 +164,7 @@ def test_build_with_config(tmpdir, cache_path):
         [
             "--debug",
             "--config",
-            config_path,
+            str(config_path),
             "--path",
             tmpdir,
             "--cache",
