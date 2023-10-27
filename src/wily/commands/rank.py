@@ -34,7 +34,7 @@ def rank(
     threshold: int,
     descending: bool,
     wrap: bool,
-    as_json: bool,
+    as_json: bool = False,
 ) -> None:
     """
     Rank command ordering files, methods or functions using metrics.
