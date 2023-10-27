@@ -8,9 +8,11 @@ from pathlib import Path
 from shutil import copytree
 from string import Template
 
+import tabulate
+
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.helper.custom_enums import ReportFormat
-from wily.helper.output import print_result
+from wily.helper.output import print_json
 from wily.lang import _
 from wily.operators import MetricType, resolve_metric_as_tuple
 from wily.state import State
@@ -208,5 +210,11 @@ def report(
         logger.info(f"wily report was saved to {report_path}")
     else:
         data = data[::-1]
-
-        print_result(as_json, data, headers, console_format, path)
+        if as_json:
+            print_json(data, headers, path)
+        else:
+            print(
+                tabulate.tabulate(
+                    headers=headers, tabular_data=data, tablefmt=console_format
+                )
+            )

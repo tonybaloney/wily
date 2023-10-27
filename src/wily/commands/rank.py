@@ -13,12 +13,13 @@ from pathlib import Path
 from sys import exit
 
 import radon.cli.harvest
+import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_PATH
 from wily.helper import get_style
-from wily.helper.output import print_result
+from wily.helper.output import print_json
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
@@ -122,7 +123,10 @@ def rank(config, path, metric, revision_index, limit, threshold, descending, as_
 
     headers = ("File", metric.description)
     style = get_style()
-    print_result(as_json, data, headers, style)
+    if as_json:
+        print_json(data, headers)
+    else:
+        print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
 
     if threshold and total < threshold:
         logger.error(

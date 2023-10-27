@@ -3,10 +3,11 @@ Print command.
 
 Print information about the wily cache and what is in the index.
 """
+import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.helper import get_style
-from wily.helper.output import print_result
+from wily.helper.output import print_json
 from wily.state import State
 
 
@@ -56,4 +57,7 @@ def index(config, include_message=False, as_json=False):
         headers = ("Revision", "Author", "Date")
 
     style = get_style()
-    print_result(as_json, data, headers, style)
+    if as_json:
+        print_json(data, headers)
+    else:
+        print(tabulate.tabulate(headers=headers, tabular_data=data, tablefmt=style))
