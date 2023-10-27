@@ -293,13 +293,23 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap, json):
     help=_("Wrap report text to fit in terminal"),
 )
 @click.option(
-   "--json/--table",
+    "--json/--table",
     help=_("Display results as JSON"),
     default=False,
 )
 @click.pass_context
 def report(
-    ctx, file, metrics, number, message, format, console_format, output, changes, wrap, json
+    ctx,
+    file,
+    metrics,
+    number,
+    message,
+    format,
+    console_format,
+    output,
+    changes,
+    wrap,
+    json,
 ):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
