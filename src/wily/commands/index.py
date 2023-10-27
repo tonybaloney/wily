@@ -23,9 +23,10 @@ def index(
     """
     Show information about the cache and runtime.
 
-    :param config: The wily configuration
-    :param include_message: Include revision messages
-    :param wrap: Wrap long lines
+    :param config: The wily configuration.
+    :param include_message: Include revision messages.
+    :param wrap: Wrap long lines.
+    :param as_json: Output results as JSON.
     """
     state = State(config=config)
     logger.debug("Running show command")

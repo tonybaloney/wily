@@ -41,16 +41,17 @@ def report(
     """
     Show metrics for a given file.
 
-    :param config: The configuration
-    :param path: The path to the file
-    :param metrics: List of metrics to report on
-    :param n: Number of items to list
-    :param output: Output path
-    :param include_message: Include revision messages
-    :param format: Output format
-    :param console_format: Grid format style for tabulate
-    :param changes_only: Only report revisions where delta != 0
-    :param wrap: Wrap output
+    :param config: The configuration.
+    :param path: The path to the file.
+    :param metrics: List of metrics to report on.
+    :param n: Number of items to list.
+    :param output: Output path.
+    :param include_message: Include revision messages.
+    :param format: Output format.
+    :param console_format: Grid format style for tabulate.
+    :param changes_only: Only report revisions where delta != 0.
+    :param wrap: Wrap output.
+    :param as_json: Output results as JSON.
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")

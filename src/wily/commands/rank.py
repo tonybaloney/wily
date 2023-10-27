@@ -45,8 +45,9 @@ def rank(
     :param revision_index: Version of git repository to revert to.
     :param limit: Limit the number of items in the table.
     :param threshold: For total values beneath the threshold return a non-zero exit code.
-    :param descending: Rank in descending order
-    :param wrap: Wrap output
+    :param descending: Rank in descending order.
+    :param wrap: Wrap output.
+    :param as_json: Output results as JSON.
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """

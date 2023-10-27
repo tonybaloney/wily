@@ -43,13 +43,15 @@ def diff(
     """
     Show the differences in metrics for each of the files.
 
-    :param config: The wily configuration
+    :param config: The wily configuration.
     :param files: The files to compare.
     :param metrics: The metrics to measure.
     :param changes_only: Only include changes files in output.
-    :param detail: Show details (function-level)
-    :param revision: Compare with specific revision
-    :param wrap: Wrap output
+    :param detail: Show details (function-level).
+    :param revision: Compare with specific revision.
+    :param wrap: Wrap output.
+    :param as_json: Output results as JSON.
+
     """
     config.targets = files
     files = list(files)
