@@ -117,6 +117,8 @@ def report(
 
                     if delta == 0:
                         delta_col = delta
+                    elif as_json:
+                        delta_col = f"{delta:n}"
                     elif delta < 0:
                         delta_col = (
                             f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"

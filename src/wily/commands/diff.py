@@ -146,11 +146,11 @@ def diff(
             if new != current:
                 has_changes = True
             if metric.metric_type in (int, float) and new != "-" and current != "-":
-                if current > new:  # type: ignore
+                if current > new and not as_json:  # type: ignore
                     metrics_data.append(
                         f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
-                elif current < new:  # type: ignore
+                elif current < new and not as_json:  # type: ignore
                     metrics_data.append(
                         f"{current:n} -> \u001b[{GOOD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
