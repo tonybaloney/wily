@@ -403,6 +403,319 @@ def test_report_html():
     mock_State.assert_called_once_with(mock_config)
 
 
+EXPECTED_JSON = f"""
+[
+  {{
+    "Revision": "abcdef0",
+    "Author": "Author 0",
+    "Date": "{fd(0)}",
+    "Lines of Code": "0 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef1",
+    "Author": "Author 1",
+    "Date": "{fd(1)}",
+    "Lines of Code": "1 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef2",
+    "Author": "Author 2",
+    "Date": "{fd(2)}",
+    "Lines of Code": "2 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(3)}",
+    "Lines of Code": "3 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "4 (1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "3 (0)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "3 (0)",
+    "Filename": "test.py"
+  }}
+]
+"""
+EXPECTED_JSON = EXPECTED_JSON[1:]
+
+
+def test_report_json(capsys):
+    path = "test.py"
+    metrics = ("raw.loc",)
+    format_ = "CONSOLE"
+    mock_State, mock_config = get_mock_state_and_config(3)
+
+    with mock.patch("wily.commands.report.State", mock_State):
+        report(
+            config=mock_config,
+            path=path,
+            metrics=metrics,
+            n=10,
+            output=Path(),
+            include_message=False,
+            format=ReportFormat[format_],
+            console_format=DEFAULT_GRID_STYLE,
+            changes_only=False,
+            as_json=True,
+        )
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON
+    mock_State.assert_called_once_with(mock_config)
+
+
+EXPECTED_JSON_WITH_MESSAGE = f"""
+[
+  {{
+    "Revision": "abcdef0",
+    "Message": "Message 0",
+    "Author": "Author 0",
+    "Date": "{fd(0)}",
+    "Lines of Code": "0 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef1",
+    "Message": "Message 1",
+    "Author": "Author 1",
+    "Date": "{fd(1)}",
+    "Lines of Code": "1 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef2",
+    "Message": "Message 2",
+    "Author": "Author 2",
+    "Date": "{fd(2)}",
+    "Lines of Code": "2 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Message": "Message here.",
+    "Author": "Author Someone",
+    "Date": "{fd(3)}",
+    "Lines of Code": "3 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Message": "Message here.",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "4 (1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Message": "Message here.",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "3 (0)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Message": "Message here.",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "3 (0)",
+    "Filename": "test.py"
+  }}
+]
+"""
+EXPECTED_JSON_WITH_MESSAGE = EXPECTED_JSON_WITH_MESSAGE[1:]
+
+
+def test_report_json_with_message(capsys):
+    path = "test.py"
+    metrics = ("raw.loc",)
+    format_ = "CONSOLE"
+    mock_State, mock_config = get_mock_state_and_config(3)
+
+    with mock.patch("wily.commands.report.State", mock_State):
+        report(
+            config=mock_config,
+            path=path,
+            metrics=metrics,
+            n=10,
+            output=Path(),
+            include_message=True,
+            format=ReportFormat[format_],
+            console_format=DEFAULT_GRID_STYLE,
+            changes_only=False,
+            as_json=True,
+        )
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON_WITH_MESSAGE
+    mock_State.assert_called_once_with(mock_config)
+
+
+EXPECTED_JSON_CHANGES_ONLY = f"""
+[
+  {{
+    "Revision": "abcdef0",
+    "Author": "Author 0",
+    "Date": "{fd(0)}",
+    "Lines of Code": "0 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef1",
+    "Author": "Author 1",
+    "Date": "{fd(1)}",
+    "Lines of Code": "1 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef2",
+    "Author": "Author 2",
+    "Date": "{fd(2)}",
+    "Lines of Code": "2 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(3)}",
+    "Lines of Code": "3 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "4 (1)",
+    "Filename": "test.py"
+  }}
+]
+"""
+EXPECTED_JSON_CHANGES_ONLY = EXPECTED_JSON_CHANGES_ONLY[1:]
+
+
+def test_report_json_changes_only(capsys):
+    path = "test.py"
+    metrics = ("raw.loc",)
+    format_ = "CONSOLE"
+    mock_State, mock_config = get_mock_state_and_config(3)
+
+    with mock.patch("wily.commands.report.State", mock_State):
+        report(
+            config=mock_config,
+            path=path,
+            metrics=metrics,
+            n=10,
+            output=Path(),
+            include_message=False,
+            format=ReportFormat[format_],
+            console_format=DEFAULT_GRID_STYLE,
+            changes_only=True,
+            as_json=True,
+        )
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON_CHANGES_ONLY
+    mock_State.assert_called_once_with(mock_config)
+
+
+EXPECTED_JSON_WITH_KEYERROR = f"""
+[
+  {{
+    "Revision": "abcdef0",
+    "Author": "Author 0",
+    "Date": "{fd(0)}",
+    "Lines of Code": "0 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef1",
+    "Author": "Author 1",
+    "Date": "{fd(1)}",
+    "Lines of Code": "1 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdef2",
+    "Author": "Author 2",
+    "Date": "{fd(2)}",
+    "Lines of Code": "2 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(3)}",
+    "Lines of Code": "3 (-1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "4 (1)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "3 (0)",
+    "Filename": "test.py"
+  }},
+  {{
+    "Revision": "abcdeff",
+    "Author": "Author Someone",
+    "Date": "{fd(10)}",
+    "Lines of Code": "Not found 'some_path.py'",
+    "Filename": "test.py"
+  }}
+]
+"""
+EXPECTED_JSON_WITH_KEYERROR = EXPECTED_JSON_WITH_KEYERROR[1:]
+
+
+def test_report_json_with_keyerror(capsys):
+    path = "test.py"
+    metrics = ("raw.loc",)
+    format_ = "CONSOLE"
+    mock_State, mock_config = get_mock_state_and_config(3, with_keyerror=True)
+
+    with mock.patch("wily.commands.report.State", mock_State):
+        report(
+            config=mock_config,
+            path=path,
+            metrics=metrics,
+            n=10,
+            output=Path(),
+            include_message=False,
+            format=ReportFormat[format_],
+            console_format=DEFAULT_GRID_STYLE,
+            changes_only=False,
+            as_json=True,
+        )
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON_WITH_KEYERROR
+    mock_State.assert_called_once_with(mock_config)
+
+
 def get_outputs():
     output = StringIO()
     enter = mock.MagicMock(return_value=output)
