@@ -117,7 +117,8 @@ def report(
 
                     if delta == 0:
                         delta_col = delta
-                    elif as_json:
+                    elif as_json and not format == ReportFormat.HTML:
+                        # Only strip colors if format isn't HTML, so HTML colors work
                         delta_col = f"{delta:n}"
                     elif delta < 0:
                         delta_col = (
