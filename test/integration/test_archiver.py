@@ -1,6 +1,7 @@
 import pathlib
 
 import pytest
+from git.exc import GitCommandError
 from git.repo.base import Repo
 from git.util import Actor
 
@@ -63,6 +64,24 @@ def test_git_end_to_end(tmpdir):
     finish = archiver.finish()
 
     assert (tmppath / "test.py").exists()
+
+    # Test that outdated file contents are detected
+    archiver2 = GitArchiver(config)
+    outdated = archiver2.is_data_outdated("test.py", "HEAD")
+    assert not outdated
+    with open(tmppath / "test.py", "w") as file2:
+        file2.write("print(2)")
+    outdated = archiver2.is_data_outdated("test.py", "HEAD")
+    assert outdated
+
+    # Test that file contents can be fetched for different revisions
+    content = archiver2.get_file_contents("HEAD", "test.py")
+    assert content == "print(1)"
+    with pytest.raises(GitCommandError):
+        # Error if file is not known in revision
+        content = archiver2.get_file_contents("HEAD~1", "test.py")
+    content = archiver2.get_file_contents("HEAD~1", ".gitignore")
+    assert content == ".wily/"
 
 
 def test_dirty_git(tmpdir):
