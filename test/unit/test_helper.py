@@ -57,21 +57,21 @@ JSON_DATA_WITH_PATH = """[
 """
 
 
-def test_print_result_empty_json():
+def test_print_json_empty_json():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_json([], ())
     assert stdout.getvalue() == "[]\n"
 
 
-def test_print_result_data_json():
+def test_print_json_data_json():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_json(DATA, HEADERS)
     assert stdout.getvalue() == JSON_DATA
 
 
-def test_print_result_data_json_path():
+def test_print_json_data_json_path():
     stdout = StringIO()
     with mock.patch("sys.stdout", stdout):
         print_json(DATA, HEADERS, "some_path")
