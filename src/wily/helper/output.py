@@ -3,7 +3,7 @@ import json
 from typing import List, Tuple
 
 
-def print_json(data: List, headers: Tuple, path: str = "") -> None:
+def print_json(data: List, headers: Tuple[str, ...], path: str = "") -> None:
     """
     Print data as JSON.
 
