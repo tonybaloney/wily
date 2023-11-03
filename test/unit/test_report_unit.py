@@ -409,49 +409,56 @@ EXPECTED_JSON = f"""
     "Revision": "abcdef0",
     "Author": "Author 0",
     "Date": "{fd(0)}",
-    "Lines of Code": "0 (-1)",
+    "Lines of Code": 0,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdef1",
     "Author": "Author 1",
     "Date": "{fd(1)}",
-    "Lines of Code": "1 (-1)",
+    "Lines of Code": 1,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdef2",
     "Author": "Author 2",
     "Date": "{fd(2)}",
-    "Lines of Code": "2 (-1)",
+    "Lines of Code": 2,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(3)}",
-    "Lines of Code": "3 (-1)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "4 (1)",
+    "Lines of Code": 4,
+    "Lines of Code Delta": 1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "3 (0)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": 0,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "3 (0)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": 0,
     "Filename": "test.py"
   }}
 ]
@@ -490,7 +497,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message 0",
     "Author": "Author 0",
     "Date": "{fd(0)}",
-    "Lines of Code": "0 (-1)",
+    "Lines of Code": 0,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
@@ -498,7 +506,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message 1",
     "Author": "Author 1",
     "Date": "{fd(1)}",
-    "Lines of Code": "1 (-1)",
+    "Lines of Code": 1,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
@@ -506,7 +515,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message 2",
     "Author": "Author 2",
     "Date": "{fd(2)}",
-    "Lines of Code": "2 (-1)",
+    "Lines of Code": 2,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
@@ -514,7 +524,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message here.",
     "Author": "Author Someone",
     "Date": "{fd(3)}",
-    "Lines of Code": "3 (-1)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
@@ -522,7 +533,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message here.",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "4 (1)",
+    "Lines of Code": 4,
+    "Lines of Code Delta": 1,
     "Filename": "test.py"
   }},
   {{
@@ -530,7 +542,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message here.",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "3 (0)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": 0,
     "Filename": "test.py"
   }},
   {{
@@ -538,7 +551,8 @@ EXPECTED_JSON_WITH_MESSAGE = f"""
     "Message": "Message here.",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "3 (0)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": 0,
     "Filename": "test.py"
   }}
 ]
@@ -576,35 +590,40 @@ EXPECTED_JSON_CHANGES_ONLY = f"""
     "Revision": "abcdef0",
     "Author": "Author 0",
     "Date": "{fd(0)}",
-    "Lines of Code": "0 (-1)",
+    "Lines of Code": 0,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdef1",
     "Author": "Author 1",
     "Date": "{fd(1)}",
-    "Lines of Code": "1 (-1)",
+    "Lines of Code": 1,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdef2",
     "Author": "Author 2",
     "Date": "{fd(2)}",
-    "Lines of Code": "2 (-1)",
+    "Lines of Code": 2,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(3)}",
-    "Lines of Code": "3 (-1)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "4 (1)",
+    "Lines of Code": 4,
+    "Lines of Code Delta": 1,
     "Filename": "test.py"
   }}
 ]
@@ -642,42 +661,48 @@ EXPECTED_JSON_WITH_KEYERROR = f"""
     "Revision": "abcdef0",
     "Author": "Author 0",
     "Date": "{fd(0)}",
-    "Lines of Code": "0 (-1)",
+    "Lines of Code": 0,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdef1",
     "Author": "Author 1",
     "Date": "{fd(1)}",
-    "Lines of Code": "1 (-1)",
+    "Lines of Code": 1,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdef2",
     "Author": "Author 2",
     "Date": "{fd(2)}",
-    "Lines of Code": "2 (-1)",
+    "Lines of Code": 2,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(3)}",
-    "Lines of Code": "3 (-1)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": -1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "4 (1)",
+    "Lines of Code": 4,
+    "Lines of Code Delta": 1,
     "Filename": "test.py"
   }},
   {{
     "Revision": "abcdeff",
     "Author": "Author Someone",
     "Date": "{fd(10)}",
-    "Lines of Code": "3 (0)",
+    "Lines of Code": 3,
+    "Lines of Code Delta": 0,
     "Filename": "test.py"
   }},
   {{
@@ -685,6 +710,7 @@ EXPECTED_JSON_WITH_KEYERROR = f"""
     "Author": "Author Someone",
     "Date": "{fd(10)}",
     "Lines of Code": "Not found 'some_path.py'",
+    "Lines of Code Delta": 0,
     "Filename": "test.py"
   }}
 ]

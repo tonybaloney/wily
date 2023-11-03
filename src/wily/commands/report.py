@@ -134,10 +134,15 @@ def report(
                     else:
                         k = f"{val}"
                 except KeyError as e:
-                    k = f"Not found {e}"
+                    k = val = f"Not found {e}"
                     delta = 0
                 deltas.append(delta)
-                vals.append(k)
+                if as_json:
+                    vals.append(val)
+                else:
+                    vals.append(k)
+            if as_json and format != ReportFormat.HTML:
+                vals += deltas
             if not changes_only or any(deltas):
                 if include_message:
                     data.append(
@@ -163,6 +168,9 @@ def report(
         return
 
     descriptions = [meta["title"] for meta in metric_metas]
+    if as_json and format != ReportFormat.HTML:
+        descriptions += [f"{meta['title']} Delta" for meta in metric_metas]
+
     if include_message:
         headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
     else:
