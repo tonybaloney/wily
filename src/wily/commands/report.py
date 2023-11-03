@@ -117,9 +117,6 @@ def report(
 
                     if delta == 0:
                         delta_col = delta
-                    elif as_json and not format == ReportFormat.HTML:
-                        # Only strip colors if format isn't HTML, so HTML colors work
-                        delta_col = f"{delta:n}"
                     elif delta < 0:
                         delta_col = (
                             f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
@@ -138,10 +135,12 @@ def report(
                     delta = 0
                 deltas.append(delta)
                 if as_json:
+                    # Output unformatted, raw values in JSON
                     vals.append(val)
                 else:
                     vals.append(k)
             if as_json and format != ReportFormat.HTML:
+                # Output deltas as their own columns in JSON output
                 vals += deltas
             if not changes_only or any(deltas):
                 if include_message:
