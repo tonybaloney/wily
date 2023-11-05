@@ -146,18 +146,22 @@ def diff(
             if new != current:
                 has_changes = True
             if metric.metric_type in (int, float) and new != "-" and current != "-":
-                if current > new and not as_json:  # type: ignore
+                if as_json:
+                    metrics_data.extend([current, new])
+                elif current > new:  # type: ignore
                     metrics_data.append(
                         f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
-                elif current < new and not as_json:  # type: ignore
+                elif current < new:  # type: ignore
                     metrics_data.append(
                         f"{current:n} -> \u001b[{GOOD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
                 else:
                     metrics_data.append(f"{current:n} -> {new:n}")
             else:
-                if current == "-" and new == "-":
+                if as_json:
+                    metrics_data.extend([current, new])
+                elif current == "-" and new == "-":
                     metrics_data.append("-")
                 else:
                     metrics_data.append(f"{current} -> {new}")
@@ -165,8 +169,13 @@ def diff(
             results.append((file, *metrics_data))
         else:
             logger.debug(metrics_data)
-
-    descriptions = [metric.description for _, metric in resolved_metrics]
+    if as_json:
+        descriptions = []
+        for _, metric in resolved_metrics:
+            desc = [f"{metric.description} Current", f"{metric.description} New"]
+            descriptions.extend(desc)
+    else:
+        descriptions = [metric.description for _, metric in resolved_metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
         if as_json:
