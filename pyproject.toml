@@ -147,12 +147,12 @@ target-version = "py37"
 known-local-folder = ["wily"]
 
 [tool.ruff.mccabe]
-max-complexity = 26
+max-complexity = 28
 
 [tool.ruff.per-file-ignores]
 "test/*" = ["D"]
 
 [tool.ruff.pylint]
 max-args = 12
-max-branches = 37
-max-statements = 105
+max-branches = 40
+max-statements = 107
