@@ -5,6 +5,7 @@ import tabulate
 
 from wily.defaults import DEFAULT_GRID_STYLE
 from wily.helper import get_maxcolwidth, get_style
+from wily.helper.output import print_json
 
 SHORT_DATA = [list("abcdefgh"), list("abcdefgh")]
 
@@ -18,6 +19,63 @@ LONG_LINE_MEDIUM_DATA = [
     ["long_line_for_some_medium_data"] * 2,
     ["long_line_for_some_medium_data"] * 2,
 ]
+
+HEADERS = ("header1", "header2", "header3")
+DATA = [
+    ("data1_1", "data1_2", "data1_3"),
+    ("data2_1", "data2_2", "data2_3"),
+]
+
+JSON_DATA = """[
+  {
+    "header1": "data1_1",
+    "header2": "data1_2",
+    "header3": "data1_3"
+  },
+  {
+    "header1": "data2_1",
+    "header2": "data2_2",
+    "header3": "data2_3"
+  }
+]
+"""
+
+JSON_DATA_WITH_PATH = """[
+  {
+    "header1": "data1_1",
+    "header2": "data1_2",
+    "header3": "data1_3",
+    "Filename": "some_path"
+  },
+  {
+    "header1": "data2_1",
+    "header2": "data2_2",
+    "header3": "data2_3",
+    "Filename": "some_path"
+  }
+]
+"""
+
+
+def test_print_json_empty_json():
+    stdout = StringIO()
+    with mock.patch("sys.stdout", stdout):
+        print_json([], ())
+    assert stdout.getvalue() == "[]\n"
+
+
+def test_print_json_data_json():
+    stdout = StringIO()
+    with mock.patch("sys.stdout", stdout):
+        print_json(DATA, HEADERS)
+    assert stdout.getvalue() == JSON_DATA
+
+
+def test_print_json_data_json_path():
+    stdout = StringIO()
+    with mock.patch("sys.stdout", stdout):
+        print_json(DATA, HEADERS, "some_path")
+    assert stdout.getvalue() == JSON_DATA_WITH_PATH
 
 
 def test_get_maxcolwidth_no_wrap():

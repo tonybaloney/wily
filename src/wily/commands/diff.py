@@ -18,6 +18,7 @@ from wily.commands.build import run_operator
 from wily.config import DEFAULT_PATH
 from wily.config.types import WilyConfig
 from wily.helper import get_maxcolwidth, get_style
+from wily.helper.output import print_json
 from wily.operators import (
     BAD_COLORS,
     GOOD_COLORS,
@@ -37,17 +38,20 @@ def diff(
     detail: bool = True,
     revision: Optional[str] = None,
     wrap: bool = False,
+    as_json: bool = False,
 ) -> None:
     """
     Show the differences in metrics for each of the files.
 
-    :param config: The wily configuration
+    :param config: The wily configuration.
     :param files: The files to compare.
     :param metrics: The metrics to measure.
     :param changes_only: Only include changes files in output.
-    :param detail: Show details (function-level)
-    :param revision: Compare with specific revision
-    :param wrap: Wrap output
+    :param detail: Show details (function-level).
+    :param revision: Compare with specific revision.
+    :param wrap: Wrap output.
+    :param as_json: Output results as JSON.
+
     """
     config.targets = files
     files = list(files)
@@ -142,7 +146,9 @@ def diff(
             if new != current:
                 has_changes = True
             if metric.metric_type in (int, float) and new != "-" and current != "-":
-                if current > new:  # type: ignore
+                if as_json:
+                    metrics_data.extend([current, new])
+                elif current > new:  # type: ignore
                     metrics_data.append(
                         f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m"
                     )
@@ -153,7 +159,9 @@ def diff(
                 else:
                     metrics_data.append(f"{current:n} -> {new:n}")
             else:
-                if current == "-" and new == "-":
+                if as_json:
+                    metrics_data.extend([current, new])
+                elif current == "-" and new == "-":
                     metrics_data.append("-")
                 else:
                     metrics_data.append(f"{current} -> {new}")
@@ -161,19 +169,27 @@ def diff(
             results.append((file, *metrics_data))
         else:
             logger.debug(metrics_data)
-
-    descriptions = [metric.description for _, metric in resolved_metrics]
+    if as_json:
+        descriptions = []
+        for _, metric in resolved_metrics:
+            desc = [f"{metric.description} Current", f"{metric.description} New"]
+            descriptions.extend(desc)
+    else:
+        descriptions = [metric.description for _, metric in resolved_metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
-        maxcolwidth = get_maxcolwidth(headers, wrap)
-        style = get_style()
-        print(
-            # But it still makes more sense to show the newest at the top, so reverse again
-            tabulate.tabulate(
-                headers=headers,
-                tabular_data=results,
-                tablefmt=style,
-                maxcolwidths=maxcolwidth,
-                maxheadercolwidths=maxcolwidth,
+        if as_json:
+            print_json(results, headers)
+        else:
+            maxcolwidth = get_maxcolwidth(headers, wrap)
+            style = get_style()
+            print(
+                # But it still makes more sense to show the newest at the top, so reverse again
+                tabulate.tabulate(
+                    headers=headers,
+                    tabular_data=results,
+                    tablefmt=style,
+                    maxcolwidths=maxcolwidth,
+                    maxheadercolwidths=maxcolwidth,
+                )
             )
-        )

@@ -15,6 +15,7 @@ from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.config.types import WilyConfig
 from wily.helper import get_maxcolwidth
 from wily.helper.custom_enums import ReportFormat
+from wily.helper.output import print_json
 from wily.lang import _
 from wily.operators import MetricType, resolve_metric_as_tuple
 from wily.state import State
@@ -35,20 +36,22 @@ def report(
     format: ReportFormat = ReportFormat.CONSOLE,
     changes_only: bool = False,
     wrap: bool = False,
+    as_json: bool = False,
 ) -> None:
     """
     Show metrics for a given file.
 
-    :param config: The configuration
-    :param path: The path to the file
-    :param metrics: List of metrics to report on
-    :param n: Number of items to list
-    :param output: Output path
-    :param include_message: Include revision messages
-    :param format: Output format
-    :param console_format: Grid format style for tabulate
-    :param changes_only: Only report revisions where delta != 0
-    :param wrap: Wrap output
+    :param config: The configuration.
+    :param path: The path to the file.
+    :param metrics: List of metrics to report on.
+    :param n: Number of items to list.
+    :param output: Output path.
+    :param include_message: Include revision messages.
+    :param format: Output format.
+    :param console_format: Grid format style for tabulate.
+    :param changes_only: Only report revisions where delta != 0.
+    :param wrap: Wrap output.
+    :param as_json: Output results as JSON.
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")
@@ -128,10 +131,17 @@ def report(
                     else:
                         k = f"{val}"
                 except KeyError as e:
-                    k = f"Not found {e}"
+                    k = val = f"Not found {e}"
                     delta = 0
                 deltas.append(delta)
-                vals.append(k)
+                if as_json:
+                    # Output unformatted, raw values in JSON
+                    vals.append(val)
+                else:
+                    vals.append(k)
+            if as_json and format != ReportFormat.HTML:
+                # Output deltas as their own columns in JSON output
+                vals += deltas
             if not changes_only or any(deltas):
                 if include_message:
                     data.append(
@@ -157,6 +167,9 @@ def report(
         return
 
     descriptions = [meta["title"] for meta in metric_metas]
+    if as_json and format != ReportFormat.HTML:
+        descriptions += [f"{meta['title']} Delta" for meta in metric_metas]
+
     if include_message:
         headers = (_("Revision"), _("Message"), _("Author"), _("Date"), *descriptions)
     else:
@@ -201,13 +214,16 @@ def report(
 
         logger.info("wily report was saved to %s", report_path)
     else:
-        maxcolwidth = get_maxcolwidth(headers, wrap)
-        print(
-            tabulate.tabulate(
-                headers=headers,
-                tabular_data=data[::-1],
-                tablefmt=console_format,
-                maxcolwidths=maxcolwidth,
-                maxheadercolwidths=maxcolwidth,
+        if as_json:
+            print_json(data[::-1], headers, path)
+        else:
+            maxcolwidth = get_maxcolwidth(headers, wrap)
+            print(
+                tabulate.tabulate(
+                    headers=headers,
+                    tabular_data=data[::-1],
+                    tablefmt=console_format,
+                    maxcolwidths=maxcolwidth,
+                    maxheadercolwidths=maxcolwidth,
+                )
             )
-        )

@@ -160,7 +160,12 @@ def build(ctx, max_revisions, targets, operators, archiver):
     default=True,
     help=_("Wrap index text to fit in terminal"),
 )
-def index(ctx, message, wrap):
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
+def index(ctx, message, wrap, json):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
@@ -169,7 +174,7 @@ def index(ctx, message, wrap):
 
     from wily.commands.index import index
 
-    index(config=config, include_message=message, wrap=wrap)
+    index(config=config, include_message=message, wrap=wrap, as_json=json)
 
 
 @cli.command(
@@ -218,8 +223,13 @@ def index(ctx, message, wrap):
     default=True,
     help=_("Wrap rank text to fit in terminal"),
 )
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
+def rank(ctx, path, metric, revision, limit, desc, threshold, wrap, json):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
@@ -240,6 +250,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
         threshold=threshold,
         descending=desc,
         wrap=wrap,
+        as_json=json,
     )
 
 
@@ -281,9 +292,24 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     default=True,
     help=_("Wrap report text to fit in terminal"),
 )
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
 @click.pass_context
 def report(
-    ctx, file, metrics, number, message, format, console_format, output, changes, wrap
+    ctx,
+    file,
+    metrics,
+    number,
+    message,
+    format,
+    console_format,
+    output,
+    changes,
+    wrap,
+    json,
 ):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
@@ -319,6 +345,7 @@ def report(
         console_format=style,
         changes_only=changes,
         wrap=wrap,
+        as_json=json,
     )
 
 
@@ -350,8 +377,13 @@ def report(
     default=True,
     help=_("Wrap diff text to fit in terminal"),
 )
+@click.option(
+    "--json/--table",
+    help=_("Display results as JSON"),
+    default=False,
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision, wrap):
+def diff(ctx, files, metrics, all, detail, revision, wrap, json):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -376,6 +408,7 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
         detail=detail,
         revision=revision,
         wrap=wrap,
+        as_json=json,
     )
 
 

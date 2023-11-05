@@ -181,3 +181,89 @@ def test_empty_index_with_message(capsys):
     captured = capsys.readouterr()
     assert captured.out == EXPECTED_EMPTY_WITH_MESSAGE
     mock_State.assert_called_once_with(config=mock_config)
+
+
+EXPECTED_JSON = f"""
+[
+  {{
+    "Revision": "abcdef0",
+    "Author": "Author 0",
+    "Date": "{fd(0)}"
+  }},
+  {{
+    "Revision": "abcdef1",
+    "Author": "Author 1",
+    "Date": "{fd(0)}"
+  }},
+  {{
+    "Revision": "abcdef2",
+    "Author": "Author 2",
+    "Date": "{fd(0)}"
+  }}
+]
+"""
+EXPECTED_JSON = EXPECTED_JSON[1:]
+
+
+def test_index_json_without_message(capsys):
+    mock_State, mock_config = get_mock_State_and_config(3)
+
+    with mock.patch("wily.commands.index.State", mock_State):
+        index(mock_config, include_message=False, as_json=True)
+
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON
+    mock_State.assert_called_once_with(config=mock_config)
+
+
+EXPECTED_JSON_WITH_MESSAGE = f"""
+[
+  {{
+    "Revision": "abcdef0",
+    "Author": "Author 0",
+    "Message": "Message 0",
+    "Date": "{fd(0)}"
+  }},
+  {{
+    "Revision": "abcdef1",
+    "Author": "Author 1",
+    "Message": "Message 1",
+    "Date": "{fd(0)}"
+  }},
+  {{
+    "Revision": "abcdef2",
+    "Author": "Author 2",
+    "Message": "Message 2",
+    "Date": "{fd(0)}"
+  }}
+]
+"""
+EXPECTED_JSON_WITH_MESSAGE = EXPECTED_JSON_WITH_MESSAGE[1:]
+
+
+def test_index_json_with_message(capsys):
+    mock_State, mock_config = get_mock_State_and_config(3)
+
+    with mock.patch("wily.commands.index.State", mock_State):
+        index(mock_config, include_message=True, as_json=True)
+
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON_WITH_MESSAGE
+    mock_State.assert_called_once_with(config=mock_config)
+
+
+EXPECTED_EMPTY_JSON = """
+[]
+"""
+EXPECTED_EMPTY_JSON = EXPECTED_EMPTY_JSON[1:]
+
+
+def test_empty_index_json_without_message(capsys):
+    mock_State, mock_config = get_mock_State_and_config(0)
+
+    with mock.patch("wily.commands.index.State", mock_State):
+        index(mock_config, include_message=False, as_json=True)
+
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_EMPTY_JSON
+    mock_State.assert_called_once_with(config=mock_config)

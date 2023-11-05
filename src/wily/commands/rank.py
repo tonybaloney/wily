@@ -20,6 +20,7 @@ from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_PATH, WilyConfig
 from wily.helper import get_maxcolwidth, get_style
+from wily.helper.output import print_json
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
@@ -33,6 +34,7 @@ def rank(
     threshold: int,
     descending: bool,
     wrap: bool,
+    as_json: bool = False,
 ) -> None:
     """
     Rank command ordering files, methods or functions using metrics.
@@ -43,8 +45,9 @@ def rank(
     :param revision_index: Version of git repository to revert to.
     :param limit: Limit the number of items in the table.
     :param threshold: For total values beneath the threshold return a non-zero exit code.
-    :param descending: Rank in descending order
-    :param wrap: Wrap output
+    :param descending: Rank in descending order.
+    :param wrap: Wrap output.
+    :param as_json: Output results as JSON.
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -131,17 +134,21 @@ def rank(
     data.append(("Total", total))
 
     headers = ("File", resolved_metric.description)
-    maxcolwidth = get_maxcolwidth(headers, wrap)
-    style = get_style()
-    print(
-        tabulate.tabulate(
-            headers=headers,
-            tabular_data=data,
-            tablefmt=style,
-            maxcolwidths=maxcolwidth,
-            maxheadercolwidths=maxcolwidth,
+
+    if as_json:
+        print_json(data, headers)
+    else:
+        maxcolwidth = get_maxcolwidth(headers, wrap)
+        style = get_style()
+        print(
+            tabulate.tabulate(
+                headers=headers,
+                tabular_data=data,
+                tablefmt=style,
+                maxcolwidths=maxcolwidth,
+                maxheadercolwidths=maxcolwidth,
+            )
         )
-    )
 
     if threshold and total < threshold:
         logger.error(

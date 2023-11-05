@@ -295,3 +295,51 @@ def test_threshold(capsys):
     assert captured.out == EXPECTED
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
+
+
+EXPECTED_JSON = """
+[
+  {
+    "File": "file1",
+    "Lines of Code": 0
+  },
+  {
+    "File": "file2",
+    "Lines of Code": 1
+  },
+  {
+    "File": "Total",
+    "Lines of Code": 1
+  }
+]
+"""
+EXPECTED_JSON = EXPECTED_JSON[1:]
+
+
+def test_rank_json(capsys):
+    metric = "raw.loc"
+    revision_id = "abcdeff"
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True)
+    mock_revision = mock.MagicMock(key="abcdeff123123", message="Nothing.")
+    mock_resolve = mock.MagicMock()
+    mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
+
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch(
+        "wily.commands.rank.resolve_archiver", mock_resolve
+    ):
+        rank(
+            config=mock_config,
+            path=None,
+            metric=metric,
+            revision_index=revision_id,
+            limit=0,
+            threshold=0,
+            descending=False,
+            wrap=False,
+            as_json=True,
+        )
+
+    captured = capsys.readouterr()
+    assert captured.out == EXPECTED_JSON
+    mock_State.assert_called_once_with(mock_config)
+    mock_resolve.assert_called_once()
