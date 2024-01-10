@@ -112,7 +112,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                         True
                         for target in config.targets
                         if pathlib.Path(target).resolve()
-                        in (pathlib.Path(config.path) / file).parents
+                        in (pathlib.Path(config.path).resolve() / file).parents
                     )
                 ]
 
