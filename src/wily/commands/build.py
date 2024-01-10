@@ -98,6 +98,10 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
         with multiprocessing.Pool(processes=len(operators)) as pool:
             prev_stats: Dict[str, Dict] = {}
             assert isinstance(config.targets, Sequence)
+            parents = (pathlib.Path(config.path).resolve()).parents
+            resolved_targets = [
+                pathlib.Path(target).resolve() for target in config.targets
+            ]
             for revision in revisions:
                 # Checkout target revision
                 archiver_instance.checkout(revision, config.checkout_options)
@@ -107,13 +111,8 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                     str(pathlib.Path(config.path) / pathlib.Path(file))
                     for file in revision.added_files + revision.modified_files
                     if config.targets == ["."]  # Add all files if no target is set
-                    or any(
-                        # Check that changed files are children of the targets
-                        True
-                        for target in config.targets
-                        if pathlib.Path(target).resolve()
-                        in (pathlib.Path(config.path).resolve() / file).parents
-                    )
+                    # Check that changed files are children of the targets
+                    or any(True for target in resolved_targets if target in parents)
                 ]
 
                 # Run each operator as a separate process
