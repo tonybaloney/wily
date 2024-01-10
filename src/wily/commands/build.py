@@ -7,6 +7,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import multiprocessing
 import os
 import pathlib
+from collections.abc import Sequence
 from sys import exit
 from typing import Any, Dict, List, Tuple
 
@@ -39,6 +40,7 @@ def run_operator(
     # Normalize paths for non-seed passes
     for key in list(data.keys()):
         if os.path.isabs(key):
+            # ToDo: Handle paths on different drives in Windows
             rel = os.path.relpath(key, config.path)
             data[rel] = data[key]
             del data[key]
@@ -95,17 +97,26 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     try:
         with multiprocessing.Pool(processes=len(operators)) as pool:
             prev_stats: Dict[str, Dict] = {}
+            assert isinstance(config.targets, Sequence)
+            resolved_path = pathlib.Path(config.path).resolve()
+            resolved_targets = [
+                pathlib.Path(target).resolve() for target in config.targets
+            ]
             for revision in revisions:
                 # Checkout target revision
                 archiver_instance.checkout(revision, config.checkout_options)
                 stats: Dict[str, Dict] = {"operator_data": {}}
 
-                # TODO : Check that changed files are children of the targets
                 targets = [
                     str(pathlib.Path(config.path) / pathlib.Path(file))
                     for file in revision.added_files + revision.modified_files
-                    # if any([True for target in config.targets if
-                    #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
+                    if config.targets == ["."]  # Add all files if no target is set
+                    # Check that changed files are children of the targets
+                    or any(
+                        True
+                        for target in resolved_targets
+                        if target in (resolved_path / file).parents
+                    )
                 ]
 
                 # Run each operator as a separate process

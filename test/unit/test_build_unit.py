@@ -1,6 +1,7 @@
 import os
+import pathlib
 import sys
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -38,7 +39,7 @@ class MockArchiverCls(BaseArchiver):
                 message="None again",
                 tracked_files=["a", "b", "c", "d"],
                 tracked_dirs=["d"],
-                added_files=["e"],
+                added_files=["e", "d/h"],
                 modified_files=["f"],
                 deleted_files=["a"],
             ),
@@ -50,7 +51,7 @@ class MockArchiverCls(BaseArchiver):
 
 class MockOperatorCls(BaseOperator):
     name = "test"
-    data = {"C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py": None}
+    data = {"\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py": None}
 
     def __init__(self, *args, **kwargs):
         pass
@@ -72,6 +73,11 @@ def config():
 
 def test_build_simple(config):
     _test_operators = (MockOperator,)
+    # Remove drive from config path, as that breaks os.path.relpath on GitHub
+    # test runner because config path and test directory point to different drives
+    path = config.path
+    config.path = str(pathlib.Path().joinpath("/", *pathlib.Path(path).parts[1:]))
+
     with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
         "wily.commands.build.resolve_operator", return_value=MockOperator
     ):
@@ -79,9 +85,47 @@ def test_build_simple(config):
     assert result is None
 
 
+def test_build_targets():
+    mock_state = MagicMock()
+    mock_starmap = MagicMock()
+    mock_pool = MagicMock()
+    mock_pool.return_value = mock_pool
+    mock_pool.__enter__.return_value = mock_pool
+    mock_pool.starmap = mock_starmap
+
+    config = DEFAULT_CONFIG
+    config.path = "."
+    _test_operators = (MockOperator,)
+    d_path = pathlib.Path("d/")
+    h_path = str(d_path / "h")
+
+    config.targets = ["."]
+    with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
+        "wily.commands.build.resolve_operator", return_value=MockOperator
+    ), patch("wily.commands.build.State", mock_state), patch(
+        "wily.commands.build.multiprocessing.Pool", mock_pool
+    ):
+        build.build(config, MockArchiver, _test_operators)  # type: ignore
+    assert len(mock_starmap.mock_calls) == 6
+    assert mock_starmap.call_args_list[0][0][1][-1][-1] == ["e", h_path, "f"]
+    assert mock_starmap.call_args_list[1][0][1][-1][-1] == []
+
+    config.targets = [str(d_path)]
+    mock_starmap.reset_mock()
+    with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch(
+        "wily.commands.build.resolve_operator", return_value=MockOperator
+    ), patch("wily.commands.build.State", mock_state), patch(
+        "wily.commands.build.multiprocessing.Pool", mock_pool
+    ):
+        build.build(config, MockArchiver, _test_operators)  # type: ignore
+    assert len(mock_starmap.mock_calls) == 6
+    assert mock_starmap.call_args_list[0][0][1][-1][-1] == [h_path]
+    assert mock_starmap.call_args_list[1][0][1][-1][-1] == []
+
+
 def test_run_operator(config):
     rev = Revision("123", None, None, 1, "message", [], [], [], [], [])
     name, data = build.run_operator(MockOperator, rev, config, ["test1.py"])
     assert name == "mock"
-    path = "C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py"
+    path = "\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py"
     assert data == {os.path.relpath(path, config.path): None}
