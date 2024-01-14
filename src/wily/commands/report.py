@@ -13,11 +13,14 @@ import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.config.types import WilyConfig
-from wily.helper import get_maxcolwidth
+from wily.helper import get_maxcolwidth, handle_long_word
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import MetricType, resolve_metric_as_tuple
 from wily.state import State
+
+# Monkeypatch tabulate to fix wrapping bug (https://github.com/astanin/python-tabulate/issues/307):
+tabulate._CustomTextWrap._handle_long_word = handle_long_word  # type: ignore
 
 ANSI_RED = 31
 ANSI_GREEN = 32
