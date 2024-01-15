@@ -5,7 +5,7 @@ import pathlib
 import shutil
 import sys
 from functools import lru_cache
-from typing import Optional, Sized, Union
+from typing import List, Optional, Sized, Union
 
 import tabulate
 
@@ -63,7 +63,7 @@ ansi_codes = tabulate._ansi_codes  # type: ignore
 
 
 def handle_long_word(
-    self, reversed_chunks: list[str], cur_line: list[str], cur_len: int, width: int
+    self, reversed_chunks: List[str], cur_line: List[str], cur_len: int, width: int
 ):
     """
     Handle a chunk of text that is too long to fit in any line.
