@@ -167,10 +167,10 @@ def test_handle_long_word():
         "\033[31mxtWrap\033[0m_with_",
         "colors",
     ]
-    wrapper = tabulate._CustomTextWrap(width=12)
+    wrapper = tabulate._CustomTextWrap(width=12)  # type: ignore
     result = wrapper.wrap(data)
     assert result != expected
     tabulate._CustomTextWrap._handle_long_word = handle_long_word  # type: ignore
-    wrapper = tabulate._CustomTextWrap(width=12)
+    wrapper = tabulate._CustomTextWrap(width=12)  # type: ignore
     result = wrapper.wrap(data)
     assert result == expected
