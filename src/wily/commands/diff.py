@@ -17,7 +17,7 @@ from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
 from wily.config import DEFAULT_PATH
 from wily.config.types import WilyConfig
-from wily.helper import get_maxcolwidth, get_style
+from wily.helper import get_maxcolwidth, get_style, handle_long_word
 from wily.operators import (
     BAD_COLORS,
     GOOD_COLORS,
@@ -27,6 +27,11 @@ from wily.operators import (
     resolve_operator,
 )
 from wily.state import State
+
+# Monkeypatch tabulate to fix wrapping bug (https://github.com/astanin/python-tabulate/issues/307):
+if not hasattr(tabulate._CustomTextWrap, "original_handle_long_word"):  # type: ignore
+    tabulate._CustomTextWrap.original_handle_long_word = tabulate._CustomTextWrap._handle_long_word  # type: ignore
+tabulate._CustomTextWrap._handle_long_word = handle_long_word  # type: ignore
 
 
 def diff(

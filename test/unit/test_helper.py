@@ -4,7 +4,7 @@ from unittest import mock
 import tabulate
 
 from wily.defaults import DEFAULT_GRID_STYLE
-from wily.helper import get_maxcolwidth, get_style
+from wily.helper import get_maxcolwidth, get_style, handle_long_word
 
 SHORT_DATA = [list("abcdefgh"), list("abcdefgh")]
 
@@ -156,3 +156,24 @@ def test_get_style_none():
     with mock.patch("sys.stdout", output):
         style = get_style()
     assert style == "fancy_grid"
+
+
+def test_handle_long_word():
+    data = "This_is_a_\033[31mtest_string_for_testing_TextWrap\033[0m_with_colors"
+    expected = [
+        "This_is_a_\033[31mte\033[0m",
+        "\033[31mst_string_fo\033[0m",
+        "\033[31mr_testing_Te\033[0m",
+        "\033[31mxtWrap\033[0m_with_",
+        "colors",
+    ]
+    if hasattr(tabulate._CustomTextWrap, "original_handle_long_word"):  # type: ignore
+        # We've already monkeypatched _CustomTextWrap, undo it.
+        tabulate._CustomTextWrap._handle_long_word = tabulate._CustomTextWrap.original_handle_long_word  # type: ignore
+    wrapper = tabulate._CustomTextWrap(width=12)  # type: ignore
+    result = wrapper.wrap(data)
+    assert result != expected
+    tabulate._CustomTextWrap._handle_long_word = handle_long_word  # type: ignore
+    wrapper = tabulate._CustomTextWrap(width=12)  # type: ignore
+    result = wrapper.wrap(data)
+    assert result == expected
