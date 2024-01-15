@@ -167,6 +167,9 @@ def test_handle_long_word():
         "\033[31mxtWrap\033[0m_with_",
         "colors",
     ]
+    if hasattr(tabulate._CustomTextWrap, "original_handle_long_word"):  # type: ignore
+        # We've already monkeypatched _CustomTextWrap, undo it.
+        tabulate._CustomTextWrap._handle_long_word = tabulate._CustomTextWrap.original_handle_long_word  # type: ignore
     wrapper = tabulate._CustomTextWrap(width=12)  # type: ignore
     result = wrapper.wrap(data)
     assert result != expected

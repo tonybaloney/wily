@@ -29,6 +29,8 @@ from wily.operators import (
 from wily.state import State
 
 # Monkeypatch tabulate to fix wrapping bug (https://github.com/astanin/python-tabulate/issues/307):
+if not hasattr(tabulate._CustomTextWrap, "original_handle_long_word"):  # type: ignore
+    tabulate._CustomTextWrap.original_handle_long_word = tabulate._CustomTextWrap._handle_long_word  # type: ignore
 tabulate._CustomTextWrap._handle_long_word = handle_long_word  # type: ignore
 
 
