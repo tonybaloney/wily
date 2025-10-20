@@ -87,6 +87,8 @@ When using Wily in a Github Workflows, you need to specify to the checkout step 
     evaluate-complexity:
       name: Evaluate Code complexity
       runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
 
       steps:
         - name: Checkout repository
