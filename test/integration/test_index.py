@@ -36,6 +36,26 @@ def test_index_with_messages(builddir):
     assert result.exit_code == 0, result.stdout
 
 
+def test_index_json(builddir):
+    """
+    Test that index works with JSON output
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "index", "--json"])
+    assert result.stdout.count("An author") >= 3
+    assert result.exit_code == 0, result.stdout
+
+
+def test_index_table(builddir):
+    """
+    Test that index works with table output
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "index", "--table"])
+    assert result.stdout.count("An author") >= 3
+    assert result.exit_code == 0, result.stdout
+
+
 def test_index_with_messages_wrapped(builddir):
     """
     Test that index works with a build with git commit messages and wrapping
