@@ -1,8 +1,7 @@
 """Raw statistics operator built on top of the Rust parser backend."""
 
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple, TypedDict
 
-import radon.cli.harvest as harvesters
 from radon.cli import Config
 from radon.cli.tools import _open, iter_filenames
 
@@ -14,6 +13,16 @@ from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
 
 from wily._rust import harvest_raw_metrics
+
+
+class RawCounts(TypedDict):
+    loc: int
+    lloc: int
+    sloc: int
+    comments: int
+    multi: int
+    blank: int
+    single_comments: int
 
 
 class RawMetricsOperator(BaseOperator):
@@ -55,7 +64,6 @@ class RawMetricsOperator(BaseOperator):
         logger.debug("Using %s with %s for Raw metrics", targets, self.defaults)
         self._targets = tuple(targets)
         self._radon_config = Config(**self.defaults)
-        self.harvester = harvesters.RawHarvester(self._targets, config=self._radon_config)
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -71,8 +79,8 @@ class RawMetricsOperator(BaseOperator):
         results: Dict[Any, Any] = {}
 
         if sources:
-            results = harvest_raw_metrics(sources)
-            for filename, metrics in results:
+            raw_counts: Iterable[Tuple[str, RawCounts]] = harvest_raw_metrics(sources)
+            for filename, metrics in raw_counts:
                 results[filename] = {"total": metrics}
 
         for filename, error_payload in errors.items():
