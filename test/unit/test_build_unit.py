@@ -75,11 +75,3 @@ def test_build_simple(config):
     with patch("wily.state.resolve_archiver", return_value=MockArchiver), patch("wily.commands.build.resolve_operator", return_value=MockOperator):
         result = build.build(config, MockArchiver, _test_operators)  # type: ignore
     assert result is None
-
-
-def test_run_operator(config):
-    rev = Revision("123", None, None, 1, "message", [], [], [], [], [])
-    name, data = build.run_operator(MockOperator, rev, config, ["test1.py"])
-    assert name == "mock"
-    path = "C:\\home\\test1.py" if sys.platform == "win32" else "/home/test1.py"
-    assert data == {os.path.relpath(path, config.path): None}

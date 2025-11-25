@@ -8,7 +8,7 @@ import wily.operators.cyclomatic
 from wily.config import DEFAULT_CONFIG
 
 
-@mock.patch("wily.operators.cyclomatic.iter_filenames", return_value=["test.py"])
+@mock.patch("wily.operators.iter_filenames", return_value=["test.py"])
 @mock.patch("builtins.open", mock.mock_open(read_data="def foo(): pass"))
 @mock.patch("wily.operators.cyclomatic.harvest_cyclomatic_metrics")
 def test_cyclomatic_parse_error(mock_harvest, mock_iter):
@@ -19,7 +19,7 @@ def test_cyclomatic_parse_error(mock_harvest, mock_iter):
     assert results == {"test.py": {"detailed": {}, "total": {"complexity": 0}}}
 
 
-@mock.patch("wily.operators.cyclomatic.iter_filenames", return_value=["test.py"])
+@mock.patch("wily.operators.iter_filenames", return_value=["test.py"])
 @mock.patch("builtins.open", mock.mock_open(read_data="def foo(): pass"))
 @mock.patch("wily.operators.cyclomatic.harvest_cyclomatic_metrics")
 def test_cyclomatic_empty_results(mock_harvest, mock_iter):
@@ -30,7 +30,7 @@ def test_cyclomatic_empty_results(mock_harvest, mock_iter):
     assert results == {"test.py": {"detailed": {}, "total": {"complexity": 0}}}
 
 
-@mock.patch("wily.operators.cyclomatic.iter_filenames", return_value=["test.py"])
+@mock.patch("wily.operators.iter_filenames", return_value=["test.py"])
 @mock.patch("builtins.open", side_effect=OSError("file not found"))
 def test_cyclomatic_file_read_error(mock_open, mock_iter):
     """Test handling of file read errors."""
@@ -39,7 +39,7 @@ def test_cyclomatic_file_read_error(mock_open, mock_iter):
     assert "error" in results["test.py"]["total"]
 
 
-@mock.patch("wily.operators.cyclomatic.iter_filenames", return_value=["test.py"])
+@mock.patch("wily.operators.iter_filenames", return_value=["test.py"])
 @mock.patch("builtins.open", mock.mock_open(read_data="def foo():\n    if x:\n        return 1\n    return 0"))
 @mock.patch("wily.operators.cyclomatic.harvest_cyclomatic_metrics")
 def test_cyclomatic_function_result(mock_harvest, mock_iter):

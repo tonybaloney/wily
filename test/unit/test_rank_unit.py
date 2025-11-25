@@ -203,7 +203,7 @@ def test_rank_path_output(capsys):
     mock_resolve.cls.find = mock.Mock(return_value=mock_revision)
     mock_iterfilenames = mock.Mock(return_value=("file1", "file2"))
 
-    with mock.patch("wily.commands.rank.State", mock_State), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve), mock.patch("radon.cli.harvest.iter_filenames", mock_iterfilenames):
+    with mock.patch("wily.commands.rank.State", mock_State), mock.patch("wily.commands.rank.resolve_archiver", mock_resolve), mock.patch("wily.commands.rank.iter_filenames", mock_iterfilenames):
         rank(
             config=mock_config,
             path="directory1s",
