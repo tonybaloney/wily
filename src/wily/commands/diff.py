@@ -4,7 +4,6 @@ Diff command.
 Compares metrics between uncommitted files and indexed files.
 """
 
-import multiprocessing
 import os
 import sys
 from pathlib import Path
