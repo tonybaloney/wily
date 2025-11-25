@@ -1780,7 +1780,6 @@ dependencies = [
     { name = "gitpython" },
     { name = "nbformat" },
     { name = "plotly" },
-    { name = "radon" },
     { name = "rich" },
     { name = "tabulate" },
 ]
@@ -1802,6 +1801,7 @@ doc = [
 test = [
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "radon" },
 ]
 
 [package.dev-dependencies]
@@ -1849,7 +1849,7 @@ requires-dist = [
     { name = "plotly", specifier = ">=4.0.0,<6.0.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = "~=7.2" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = "~=4.1.0" },
-    { name = "radon", specifier = ">=5.1,<5.2" },
+    { name = "radon", marker = "extra == 'test'", specifier = ">=5.1,<5.2" },
     { name = "rich", specifier = ">=13,<14" },
     { name = "ruff", marker = "extra == 'dev'", specifier = "~=0.0.277" },
     { name = "safety", marker = "extra == 'dev'", specifier = "~=2.3.4" },
