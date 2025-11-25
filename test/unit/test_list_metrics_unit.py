@@ -44,13 +44,13 @@ halstead operator:
 ╒════════════╤═════════════════════════════╤════════╤═══════════════════╤═════════════╕
 │ Name       │ Description                 │ Type   │ Measure           │ Aggregate   │
 ╞════════════╪═════════════════════════════╪════════╪═══════════════════╪═════════════╡
-│ h1         │ Unique Operands             │ int    │ MetricType.AimLow │ sum         │
+│ h1         │ Unique Operators            │ int    │ MetricType.AimLow │ sum         │
 ├────────────┼─────────────────────────────┼────────┼───────────────────┼─────────────┤
-│ h2         │ Unique Operators            │ int    │ MetricType.AimLow │ sum         │
+│ h2         │ Unique Operands             │ int    │ MetricType.AimLow │ sum         │
 ├────────────┼─────────────────────────────┼────────┼───────────────────┼─────────────┤
-│ N1         │ Number of Operands          │ int    │ MetricType.AimLow │ sum         │
+│ N1         │ Number of Operators         │ int    │ MetricType.AimLow │ sum         │
 ├────────────┼─────────────────────────────┼────────┼───────────────────┼─────────────┤
-│ N2         │ Number of Operators         │ int    │ MetricType.AimLow │ sum         │
+│ N2         │ Number of Operands          │ int    │ MetricType.AimLow │ sum         │
 ├────────────┼─────────────────────────────┼────────┼───────────────────┼─────────────┤
 │ vocabulary │ Unique vocabulary (h1 + h2) │ int    │ MetricType.AimLow │ sum         │
 ├────────────┼─────────────────────────────┼────────┼───────────────────┼─────────────┤
@@ -120,16 +120,16 @@ halstead operator:
 │ Name       │ Description    │ Type   │ Measure        │ Aggregate   │
 ╞════════════╪════════════════╪════════╪════════════════╪═════════════╡
 │ h1         │ Unique         │ int    │ MetricType.Aim │ sum         │
-│            │ Operands       │        │ Low            │             │
+│            │ Operators      │        │ Low            │             │
 ├────────────┼────────────────┼────────┼────────────────┼─────────────┤
 │ h2         │ Unique         │ int    │ MetricType.Aim │ sum         │
-│            │ Operators      │        │ Low            │             │
-├────────────┼────────────────┼────────┼────────────────┼─────────────┤
-│ N1         │ Number of      │ int    │ MetricType.Aim │ sum         │
 │            │ Operands       │        │ Low            │             │
 ├────────────┼────────────────┼────────┼────────────────┼─────────────┤
-│ N2         │ Number of      │ int    │ MetricType.Aim │ sum         │
+│ N1         │ Number of      │ int    │ MetricType.Aim │ sum         │
 │            │ Operators      │        │ Low            │             │
+├────────────┼────────────────┼────────┼────────────────┼─────────────┤
+│ N2         │ Number of      │ int    │ MetricType.Aim │ sum         │
+│            │ Operands       │        │ Low            │             │
 ├────────────┼────────────────┼────────┼────────────────┼─────────────┤
 │ vocabulary │ Unique         │ int    │ MetricType.Aim │ sum         │
 │            │ vocabulary (h1 │        │ Low            │             │
