@@ -72,7 +72,7 @@ class RawMetricsOperator(BaseOperator):
 
         if sources:
             results = harvest_raw_metrics(sources)
-            for filename, metrics in results.items():
+            for filename, metrics in results:
                 results[filename] = {"total": metrics}
 
         for filename, error_payload in errors.items():
