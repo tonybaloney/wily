@@ -116,3 +116,8 @@ docs/build/
 
 # tests
 .tests-reports/
+
+# test artifacts
+foo/
+plotly.min.js
+wily_report/
