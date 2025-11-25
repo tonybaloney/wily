@@ -13,7 +13,7 @@ from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
 
-import wily._rust as rust_backend
+from wily._rust import harvest_raw_metrics
 
 
 class RawMetricsOperator(BaseOperator):
@@ -66,16 +66,13 @@ class RawMetricsOperator(BaseOperator):
         :return: The operator results.
         """
         logger.debug("Running raw harvester via Wily")
-        return self._run_with_rust()
 
-    def _run_with_rust(self) -> Dict[Any, Any]:
-        logger.debug("Running raw harvester via Rust backend")
         sources, errors = self._collect_sources()
         results: Dict[Any, Any] = {}
 
         if sources:
-            rust_payload = rust_backend.rust_harvest_raw_metrics(sources)
-            for filename, metrics in rust_payload.items():
+            results = harvest_raw_metrics(sources)
+            for filename, metrics in results.items():
                 results[filename] = {"total": metrics}
 
         for filename, error_payload in errors.items():
