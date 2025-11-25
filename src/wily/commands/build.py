@@ -7,6 +7,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 
 import os
 import pathlib
+import sys
 from typing import Any
 
 from rich.progress import (
@@ -33,7 +34,7 @@ def run_operators_parallel(
     config: WilyConfig,
 ) -> dict[str, dict[str, Any]]:
     """
-    Run all operators in parallel
+    Run all operators in parallel.
 
     :param operators: List of operators to run
     :param targets: List of file paths to analyze
@@ -96,7 +97,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
     except Exception as e:
         message = getattr(e, "message", f"{type(e)} - {e}")
         logger.error("Failed to setup archiver: '%s'", message)
-        exit(1)
+        sys.exit(1)
 
     state = State(config, archiver=archiver_instance)
     state.ensure_exists()

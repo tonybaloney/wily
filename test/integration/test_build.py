@@ -79,7 +79,7 @@ def test_build_crash(tmpdir):
     index.commit("basic test", author=author, committer=committer)
     repo.close()
 
-    import wily.commands.build
+    import wily.commands.build  # noqa: PLC0415
 
     # Simulate a crash by patching run_operators_parallel to raise an error
     with patch.object(wily.commands.build, "run_operators_parallel", side_effect=RuntimeError("arggh")):

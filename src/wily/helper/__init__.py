@@ -7,7 +7,6 @@ import shutil
 import sys
 from collections.abc import Sized
 from functools import lru_cache
-from typing import Optional, Union
 
 from wily.defaults import DEFAULT_GRID_STYLE
 

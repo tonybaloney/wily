@@ -9,9 +9,9 @@ from typing import (
     TypeVar,
 )
 
+from wily.backend import iter_filenames
 from wily.config.types import WilyConfig
 from wily.lang import _
-from wily.backend import iter_filenames
 
 
 class MetricType(Enum):

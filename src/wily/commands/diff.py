@@ -6,13 +6,14 @@ Compares metrics between uncommitted files and indexed files.
 
 import multiprocessing
 import os
+import sys
 from pathlib import Path
 
 import tabulate
 
 from wily import format_date, format_revision, logger
-from wily.backend import iter_filenames
 from wily.archivers import resolve_archiver
+from wily.backend import iter_filenames
 from wily.commands.build import run_operator
 from wily.config import DEFAULT_PATH
 from wily.config.types import WilyConfig
@@ -74,7 +75,7 @@ def diff(
                 "Revision %s is not in the cache, make sure you have run wily build.",
                 revision,
             )
-            exit(1)
+            sys.exit(1)
 
     logger.info(
         "Comparing current with %s by %s on %s.",

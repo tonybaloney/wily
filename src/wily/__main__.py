@@ -119,7 +119,7 @@ def build(ctx, max_revisions, targets, operators, archiver):
     """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
-    from wily.commands.build import build
+    from wily.commands.build import build  # noqa: PLC0415
 
     if max_revisions:
         logger.debug("Fixing revisions to %s", max_revisions)
@@ -161,7 +161,7 @@ def index(ctx, message, wrap):
     if not exists(config):
         handle_no_cache(ctx)
 
-    from wily.commands.index import index
+    from wily.commands.index import index  # noqa: PLC0415
 
     index(config=config, include_message=message, wrap=wrap)
 
@@ -216,7 +216,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     if not exists(config):
         handle_no_cache(ctx)
 
-    from wily.commands.rank import rank
+    from wily.commands.rank import rank  # noqa: PLC0415
 
     logger.debug("Running rank on %s for metric %s and revision %s", path, metric, revision)
     rank(
@@ -285,7 +285,7 @@ def report(ctx, file, metrics, number, message, format, console_format, output, 
 
     style = get_style(console_format)
 
-    from wily.commands.report import report
+    from wily.commands.report import report  # noqa: PLC0415
 
     logger.debug("Running report on %s for metric %s", file, metrics)
     logger.debug("Output format is %s", format)
@@ -345,7 +345,7 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
         metrics = metrics.split(",")
         logger.info("Using specified metrics %s", metrics)
 
-    from wily.commands.diff import diff
+    from wily.commands.diff import diff  # noqa: PLC0415
 
     logger.debug("Running diff on %s for metric %s", files, metrics)
     diff(
@@ -432,7 +432,7 @@ def graph(ctx, path, metrics, output, x_axis, changes, aggregate, shared_js, cdn
     if cdn_js:
         plotlyjs = "cdn"
 
-    from wily.commands.graph import graph
+    from wily.commands.graph import graph  # noqa: PLC0415
 
     logger.debug("Running report on %s for metrics %s", path, metrics)
     graph(
@@ -463,7 +463,7 @@ def clean(ctx, yes):
         if p.lower() != "y":
             exit(0)
 
-    from wily.cache import clean
+    from wily.cache import clean  # noqa: PLC0415
 
     clean(config)
 
@@ -483,7 +483,7 @@ def list_metrics(ctx, wrap):
     if not exists(config):
         handle_no_cache(ctx)
 
-    from wily.commands.list_metrics import list_metrics
+    from wily.commands.list_metrics import list_metrics  # noqa: PLC0415
 
     list_metrics(wrap)
 

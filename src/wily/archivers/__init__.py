@@ -5,7 +5,7 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 from wily.config.types import WilyConfig
 
@@ -69,8 +69,8 @@ class BaseArchiver:
         ...
 
 
-from wily.archivers.filesystem import FilesystemArchiver
-from wily.archivers.git import GitArchiver
+from wily.archivers.filesystem import FilesystemArchiver  # noqa: E402
+from wily.archivers.git import GitArchiver  # noqa: E402
 
 """Type for an Archiver"""
 

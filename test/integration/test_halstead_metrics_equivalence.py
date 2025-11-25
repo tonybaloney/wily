@@ -11,6 +11,8 @@ import math
 from radon.metrics import halstead_visitor_report
 from radon.visitors import HalsteadVisitor
 
+from wily.backend import harvest_halstead_metrics
+
 SAMPLE_PROGRAM = """\
 def simple_function(x, y):
     return x + y
@@ -118,7 +120,6 @@ def test_radon_halstead_baseline() -> None:
 
 def test_rust_halstead_matches_radon() -> None:
     """The Rust harvester should match Radon's Halstead metrics."""
-    from wily.backend import harvest_halstead_metrics
 
     filename = "sample.py"
     rust_results = dict(harvest_halstead_metrics([(filename, SAMPLE_PROGRAM)]))[filename]

@@ -10,13 +10,14 @@ TODO: Layer on Click invocation in operators section, __main__.py file
 
 import operator as op
 import os
+import sys
 from pathlib import Path
 
 import tabulate
 
 from wily import format_date, format_revision, logger
-from wily.backend import iter_filenames
 from wily.archivers import resolve_archiver
+from wily.backend import iter_filenames
 from wily.config import DEFAULT_PATH, WilyConfig
 from wily.helper import get_maxcolwidth, get_style
 from wily.operators import resolve_metric_as_tuple
@@ -68,7 +69,7 @@ def rank(
                 "Revision %s is not in the cache, make sure you have run wily build.",
                 revision_index,
             )
-            exit(1)
+            sys.exit(1)
 
     logger.info(
         "-----------Rank for %s for %s by %s on %s.------------",
@@ -135,4 +136,4 @@ def rank(
 
     if threshold and total < threshold:
         logger.error("Total value below the specified threshold: %s < %s", total, threshold)
-        exit(1)
+        sys.exit(1)

@@ -8,6 +8,8 @@ while we use Ruff's AST, but they should be close.
 
 from radon.metrics import mi_rank, mi_visit
 
+from wily.backend import harvest_maintainability_metrics
+
 SAMPLE_PROGRAM = """\
 def simple_function(x, y):
     '''A simple function that adds two numbers.'''
@@ -24,7 +26,7 @@ def function_with_if(a, b, c):
 def function_with_loop(items):
     '''
     Sum all items in the list.
-    
+
     This is a multiline docstring.
     '''
     total = 0
@@ -40,7 +42,7 @@ def function_with_multiple_ops(x, y, z):
 
 class MyClass:
     '''A sample class with methods.'''
-    
+
     def method_one(self, x):
         return x * 2
 
@@ -65,7 +67,6 @@ def test_radon_mi_baseline() -> None:
 
 def test_rust_mi_matches_radon() -> None:
     """The Rust harvester should produce similar MI to Radon."""
-    from wily.backend import harvest_maintainability_metrics
 
     # Get Radon results
     radon_mi = mi_visit(SAMPLE_PROGRAM, multi=True)
@@ -93,7 +94,6 @@ def test_rust_mi_matches_radon() -> None:
 
 def test_rust_mi_multi_false() -> None:
     """Test MI with multi=False."""
-    from wily._rust import harvest_maintainability_metrics
 
     # Get Radon results
     radon_mi = mi_visit(SAMPLE_PROGRAM, multi=False)
@@ -113,7 +113,6 @@ def test_rust_mi_multi_false() -> None:
 
 def test_rust_mi_empty_code() -> None:
     """Test MI for empty/minimal code."""
-    from wily._rust import harvest_maintainability_metrics
 
     # Empty code should give high MI (100)
     empty_results = dict(harvest_maintainability_metrics([("empty.py", "")], multi=True))["empty.py"]
@@ -126,7 +125,6 @@ def test_rust_mi_empty_code() -> None:
 
 def test_rust_mi_syntax_error() -> None:
     """Test MI for code with syntax errors."""
-    from wily._rust import harvest_maintainability_metrics
 
     bad_code = "def foo(:\n    pass"
     results = dict(harvest_maintainability_metrics([("bad.py", bad_code)], multi=True))["bad.py"]

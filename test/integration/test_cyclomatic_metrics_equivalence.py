@@ -8,8 +8,7 @@ should see the same cyclomatic complexity metrics as before.
 from radon.complexity import cc_visit
 from radon.visitors import Class, Function
 
-# We'll import from Rust once implemented
-# from wily._rust import harvest_cyclomatic_metrics
+from wily.backend import harvest_cyclomatic_metrics
 
 SAMPLE_PROGRAM = """\
 def simple_function():
@@ -204,7 +203,6 @@ def test_radon_cyclomatic_baseline() -> None:
 
 def test_rust_cyclomatic_matches_radon() -> None:
     """The Rust harvester should match Radon's cyclomatic complexity metrics."""
-    from wily.backend import harvest_cyclomatic_metrics
 
     filename = "sample.py"
     rust_results = dict(harvest_cyclomatic_metrics([(filename, SAMPLE_PROGRAM)]))[filename]

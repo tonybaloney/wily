@@ -13,6 +13,8 @@ from wily.operators import BaseOperator, Metric, MetricType
 
 
 class RawCounts(TypedDict):
+    """Raw metrics."""
+
     loc: int
     lloc: int
     sloc: int
