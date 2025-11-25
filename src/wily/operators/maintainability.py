@@ -5,7 +5,6 @@ Measures the "maintainability" using the Halstead index.
 """
 
 import statistics
-from collections import Counter
 from typing import Any, Dict, Iterable
 
 import radon.cli.harvest as harvesters
