@@ -2,10 +2,10 @@ SHELL:=/usr/bin/env bash
 
 
 build:
-	flit build
+	maturin build --release
 
 install:
-	flit install
+	maturin develop
 
 extract_messages:
 	find src/wily -iname "*.py" | xargs xgettext -o src/wily/locales/messages.pot

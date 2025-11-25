@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core>=2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["maturin>=1.10,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "wily"
@@ -32,7 +32,7 @@ dependencies = [
     "progress>=1.4,<2.0",
     "dataclasses; python_version == '3.6'",
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 dynamic=["version", "description"]
 
 [project.optional-dependencies]
@@ -41,14 +41,42 @@ test = [
     "pytest-cov~=4.1.0",
 ]
 dev = [
+    "maturin>=1.10,<2.0",
     "black~=22.6.0",
     "codespell[toml]",
     "mypy~=0.961",
     "ruff~=0.0.277",
     "safety~=2.3.4",
 ]
-# TODO: move here proper deps from `docs/requirements_docs.txt`
-doc = []
+doc = [
+    "sphinx>=7.0,<9.0",
+    "sphinx-click>=5.1,<6.0",
+    "urllib3>=2.5.0",
+]
+
+[dependency-groups]
+lint = [
+    "black~=22.6.0",
+    "codespell[toml]",
+    "mypy~=0.961",
+    "ruff~=0.0.277",
+    "safety~=2.3.4",
+]
+test = [
+    "pytest~=7.2",
+    "pytest-cov~=4.1.0",
+]
+docs = [
+    "sphinx>=7.0,<9.0",
+    "sphinx-click>=5.1,<6.0",
+    "urllib3>=2.5.0",
+]
+dev = [
+    "maturin>=1.5,<2.0",
+    { include-group = "lint" },
+    { include-group = "test" },
+    { include-group = "docs" },
+]
 
 [project.urls]
 Homepage = "https://github.com/tonybaloney/wily"
@@ -57,9 +85,16 @@ Documentation = "https://wily.readthedocs.io/en/latest/"
 [project.scripts]
 wily = "wily.__main__:cli"
 
-[tool.flit.sdist]
-include = ["doc/"]
-exclude = ["doc/*.html"]
+
+[tool.maturin]
+bindings = "pyo3"
+manifest-path = "rust/Cargo.toml"
+module-name = "wily._rust"
+python-source = "src"
+
+[tool.uv]
+package = true
+default-groups = ["dev"]
 
 [tool.black]
 extend-exclude = '''

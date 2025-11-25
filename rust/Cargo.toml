@@ -1,0 +1,15 @@
+[package]
+name = "wily_rust"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "wily_rust"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.27", features = ["extension-module"] }
+ruff_python_parser = { git = "https://github.com/astral-sh/ruff", package = "ruff_python_parser", branch = "main" }
+ruff_python_ast = { git = "https://github.com/astral-sh/ruff", package = "ruff_python_ast", branch = "main" }
+ruff_python_trivia = { git = "https://github.com/astral-sh/ruff", package = "ruff_python_trivia", branch = "main" }
+ruff_text_size = { git = "https://github.com/astral-sh/ruff", package = "ruff_text_size", branch = "main" }
