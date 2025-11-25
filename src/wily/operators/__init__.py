@@ -182,17 +182,11 @@ _OPERATORS: Tuple[Operator, ...] = (
     OPERATOR_HALSTEAD,
 )
 """Dictionary of all operators"""
-ALL_OPERATORS: Dict[str, Operator] = {
-    operator.name: operator for operator in _OPERATORS
-}
+ALL_OPERATORS: Dict[str, Operator] = {operator.name: operator for operator in _OPERATORS}
 
 
 """Set of all metrics"""
-ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {
-    (operator, metric)
-    for operator in ALL_OPERATORS.values()
-    for metric in operator.operator_cls.metrics
-}
+ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {(operator, metric) for operator in ALL_OPERATORS.values() for metric in operator.operator_cls.metrics}
 
 
 @lru_cache(maxsize=128)

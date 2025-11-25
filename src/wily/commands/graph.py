@@ -72,21 +72,11 @@ def graph(
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        paths = (
-            tuple(
-                tracked_file
-                for tracked_file in tracked_files
-                if any(path_startswith(tracked_file, p) for p in path)
-            )
-            or path
-        )
+        paths = tuple(tracked_file for tracked_file in tracked_files if any(path_startswith(tracked_file, p) for p in path)) or path
     else:
         paths = path
 
-    title = (
-        f"{x_axis.capitalize()} of {y_metric.description}"
-        f"{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
-    )
+    title = f"{x_axis.capitalize()} of {y_metric.description}{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
     operator, key = metric_parts(metrics_list[0])
     z_axis: Union[Metric, str]
     if len(metrics_list) == 1:  # only y-axis
@@ -103,9 +93,7 @@ def graph(
         last_y = None
         for rev in state.index[state.default_archiver].revisions:
             try:
-                val = rev.get(
-                    config, state.default_archiver, operator, current_path, key
-                )
+                val = rev.get(config, state.default_archiver, operator, current_path, key)
                 if val != last_y or not changes:
                     y.append(val)
                     if z_axis:
@@ -130,9 +118,7 @@ def graph(
                                 x_key,
                             )
                         )
-                    labels.append(
-                        f"{rev.revision.author_name} <br>{rev.revision.message}"
-                    )
+                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                 last_y = val
             except KeyError:
                 # missing data

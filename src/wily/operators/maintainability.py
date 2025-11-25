@@ -3,6 +3,7 @@ Maintainability operator.
 
 Measures the "maintainability" using the Halstead index.
 """
+
 import statistics
 from collections import Counter
 from typing import Any, Dict, Iterable
@@ -44,12 +45,8 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric(
-            "rank", _("Maintainability Ranking"), str, MetricType.Informational, mode
-        ),
-        Metric(
-            "mi", _("Maintainability Index"), float, MetricType.AimHigh, statistics.mean
-        ),
+        Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational, mode),
+        Metric("mi", _("Maintainability Index"), float, MetricType.AimHigh, statistics.mean),
     )
 
     default_metric_index = 1  # MI

@@ -1,6 +1,5 @@
 """Define a standard data class for Wily Configuration."""
 
-
 import logging
 import pathlib
 from dataclasses import InitVar, dataclass, field

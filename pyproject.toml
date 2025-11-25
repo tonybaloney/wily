@@ -85,7 +85,6 @@ Documentation = "https://wily.readthedocs.io/en/latest/"
 [project.scripts]
 wily = "wily.__main__:cli"
 
-
 [tool.maturin]
 bindings = "pyo3"
 manifest-path = "rust/Cargo.toml"
@@ -95,21 +94,6 @@ python-source = "src"
 [tool.uv]
 package = true
 default-groups = ["dev"]
-
-[tool.black]
-extend-exclude = '''
-/(
-    \.git
-  | \.tox
-  | \.venv
-  | \.mypy_cache
-  | build/
-  | dist
-)/
-'''
-include = '\.pyi?$'
-line-length = 88
-target-version = ["py37", "py38", "py39", "py310", "py311"]
 
 [tool.codespell]
 check-filenames = "True"
@@ -145,6 +129,10 @@ addopts = """
 --cov-report=xml"""
 
 [tool.ruff]
+line-length = 217
+target-version = "py310"
+
+[tool.ruff.lint]
 select = [
     "B",
     "C4",
@@ -174,20 +162,17 @@ extend-ignore = [
     "S324",
     "UP030",
 ]
-line-length = 217
-show-source = true
-target-version = "py37"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-local-folder = ["wily"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 24
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "test/*" = ["D"]
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 10
 max-branches = 35
 max-statements = 100

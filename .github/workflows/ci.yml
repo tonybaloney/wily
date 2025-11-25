@@ -32,13 +32,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Install uv
         uses: astral-sh/setup-uv@v2
-      - name: Install GNU make (Windows)
-        if: runner.os == 'Windows'
-        run: choco install make -y
       - name: Sync project environment
         run: uv sync --all-groups --python "${{ matrix.python-version }}"
-      - name: lint and test
-        run: uv run make ci
+      - name: test
+        run: uv run pytest
       - name: upload coverage to codecov
         uses: codecov/codecov-action@v3
         with:

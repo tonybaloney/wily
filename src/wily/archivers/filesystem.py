@@ -3,6 +3,7 @@ Filesystem Archiver.
 
 Implementation of the archiver API for a standard directory (no revisions)
 """
+
 import hashlib
 import logging
 import os.path

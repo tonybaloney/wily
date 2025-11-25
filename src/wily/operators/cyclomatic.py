@@ -3,6 +3,7 @@ Cyclomatic complexity metric for each function/method.
 
 Provided by the radon library.
 """
+
 import statistics
 from typing import Any, Dict, Iterable
 

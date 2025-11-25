@@ -1,4 +1,5 @@
 """A module containing custom enums for wily."""
+
 from enum import Enum
 
 

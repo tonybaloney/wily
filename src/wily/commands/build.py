@@ -4,6 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+
 import multiprocessing
 import os
 import pathlib
@@ -20,9 +21,7 @@ from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
-def run_operator(
-    operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]
-) -> Tuple[str, Dict[str, Any]]:
+def run_operator(operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]) -> Tuple[str, Dict[str, Any]]:
     """
     Run an operator for the multiprocessing pool.
 
@@ -117,11 +116,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                 operator_data_len = 2
                 # second element in the tuple, i.e data[i][1]) has the collected data
                 for i in range(0, len(operators)):
-                    if (
-                        i < len(data)
-                        and len(data[i]) >= operator_data_len
-                        and len(data[i][1]) == 0
-                    ):
+                    if i < len(data) and len(data[i]) >= operator_data_len and len(data[i][1]) == 0:
                         logger.warning(
                             "In revision %s, for operator %s: No data collected",
                             revision.key,
@@ -152,14 +147,9 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                             if operator_name not in prev_stats["operator_data"]:
                                 continue
                             # previous index may not have file either
-                            if (
-                                missing
-                                not in prev_stats["operator_data"][operator_name]
-                            ):
+                            if missing not in prev_stats["operator_data"][operator_name]:
                                 continue
-                            result[missing] = prev_stats["operator_data"][
-                                operator_name
-                            ][missing]
+                            result[missing] = prev_stats["operator_data"][operator_name][missing]
                         for deleted in revision.deleted_files:
                             result.pop(deleted, None)
 
@@ -172,22 +162,13 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
                     # Note assumption is that nested dirs are listed after parent, hence sorting.
                     for root in sorted(dirs):
                         # find all matching entries recursively
-                        aggregates = [
-                            path for path in result.keys() if path.startswith(root)
-                        ]
+                        aggregates = [path for path in result.keys() if path.startswith(root)]
 
                         result[str(root)] = {"total": {}}
                         # aggregate values
-                        for metric in resolve_operator(
-                            operator_name
-                        ).operator_cls.metrics:
+                        for metric in resolve_operator(operator_name).operator_cls.metrics:
                             func = metric.aggregate
-                            values = [
-                                result[aggregate]["total"][metric.name]
-                                for aggregate in aggregates
-                                if aggregate in result
-                                and metric.name in result[aggregate]["total"]
-                            ]
+                            values = [result[aggregate]["total"][metric.name] for aggregate in aggregates if aggregate in result and metric.name in result[aggregate]["total"]]
                             if len(values) > 0:
                                 result[str(root)]["total"][metric.name] = func(values)
 

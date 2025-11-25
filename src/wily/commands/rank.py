@@ -7,6 +7,7 @@ Will compare the values between files and return a sorted table.
 
 TODO: Layer on Click invocation in operators section, __main__.py file
 """
+
 import operator as op
 import os
 from pathlib import Path
@@ -60,11 +61,7 @@ def rank(
     if not revision_index:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = (
-            resolve_archiver(state.default_archiver)
-            .archiver_cls(config)
-            .find(revision_index)
-        )
+        rev = resolve_archiver(state.default_archiver).archiver_cls(config).find(revision_index)
         logger.debug("Resolved %s to %s (%s)", revision_index, rev.key, rev.message)
         try:
             target_revision = state.index[state.default_archiver][rev.key]
@@ -94,10 +91,7 @@ def rank(
             targets = [path]
 
         # Expand directories to paths
-        files = [
-            os.path.relpath(fn, config.path)
-            for fn in radon.cli.harvest.iter_filenames(targets)
-        ]
+        files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
         logger.debug("Targeting - %s", files)
 
     for item in files:
@@ -109,9 +103,7 @@ def rank(
                     operator,
                     str(item),
                 )
-                val = target_revision.get(
-                    config, archiver, operator, str(item), resolved_metric.name
-                )
+                val = target_revision.get(config, archiver, operator, str(item), resolved_metric.name)
                 value = val
                 data.append((item, value))
             except KeyError:
@@ -144,7 +136,5 @@ def rank(
     )
 
     if threshold and total < threshold:
-        logger.error(
-            "Total value below the specified threshold: %s < %s", total, threshold
-        )
+        logger.error("Total value below the specified threshold: %s < %s", total, threshold)
         exit(1)

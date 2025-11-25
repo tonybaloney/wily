@@ -1,4 +1,5 @@
 """Raw statistics operator built on top of the Rust parser backend."""
+
 from typing import Any, Dict, Iterable, List, Tuple
 
 import radon.cli.harvest as harvesters
@@ -54,9 +55,7 @@ class RawMetricsOperator(BaseOperator):
         logger.debug("Using %s with %s for Raw metrics", targets, self.defaults)
         self._targets = tuple(targets)
         self._radon_config = Config(**self.defaults)
-        self.harvester = harvesters.RawHarvester(
-            self._targets, config=self._radon_config
-        )
+        self.harvester = harvesters.RawHarvester(self._targets, config=self._radon_config)
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -68,7 +67,6 @@ class RawMetricsOperator(BaseOperator):
         """
         logger.debug("Running raw harvester via Wily")
         return self._run_with_rust()
-
 
     def _run_with_rust(self) -> Dict[Any, Any]:
         logger.debug("Running raw harvester via Rust backend")
@@ -88,9 +86,7 @@ class RawMetricsOperator(BaseOperator):
     def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
         sources: List[Tuple[str, str]] = []
         errors: Dict[str, Dict[str, str]] = {}
-        for name in iter_filenames(
-            self._targets, self._radon_config.exclude, self._radon_config.ignore
-        ):
+        for name in iter_filenames(self._targets, self._radon_config.exclude, self._radon_config.ignore):
             try:
                 with _open(name) as fobj:
                     sources.append((name, fobj.read()))

@@ -3,6 +3,7 @@ Diff command.
 
 Compares metrics between uncommitted files and indexed files.
 """
+
 import multiprocessing
 import os
 from pathlib import Path
@@ -60,18 +61,13 @@ def diff(
         targets = files
 
     # Expand directories to paths
-    files = [
-        os.path.relpath(fn, config.path)
-        for fn in radon.cli.harvest.iter_filenames(targets)
-    ]
+    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
     logger.debug("Targeting - %s", files)
 
     if not revision:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = (
-            resolve_archiver(state.default_archiver).archiver_cls(config).find(revision)
-        )
+        rev = resolve_archiver(state.default_archiver).archiver_cls(config).find(revision)
         logger.debug("Resolved %s to %s (%s)", revision, rev.key, rev.message)
         try:
             target_revision = state.index[state.default_archiver][rev.key]
@@ -91,16 +87,12 @@ def diff(
 
     # Convert the list of metrics to a list of metric instances
     operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    resolved_metrics = [
-        (metric.split(".")[0], resolve_metric(metric)) for metric in metrics
-    ]
+    resolved_metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     results = []
 
     # Build a set of operators
     with multiprocessing.Pool(processes=len(operators)) as pool:
-        operator_exec_out = pool.starmap(
-            run_operator, [(operator, None, config, targets) for operator in operators]
-        )
+        operator_exec_out = pool.starmap(run_operator, [(operator, None, config, targets) for operator in operators])
     data = {}
     for operator_name, result in operator_exec_out:
         data[operator_name] = result
@@ -111,14 +103,7 @@ def diff(
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
             for file in files:
                 try:
-                    extra.extend(
-                        [
-                            f"{file}:{k}"
-                            for k in data[operator][file]["detailed"].keys()
-                            if k != metric.name
-                            and isinstance(data[operator][file]["detailed"][k], dict)
-                        ]
-                    )
+                    extra.extend([f"{file}:{k}" for k in data[operator][file]["detailed"].keys() if k != metric.name and isinstance(data[operator][file]["detailed"][k], dict)])
                 except KeyError:
                     logger.debug("File %s not in cache", file)
                     logger.debug("Cache follows -- ")
@@ -130,9 +115,7 @@ def diff(
         has_changes = False
         for operator, metric in resolved_metrics:
             try:
-                current = target_revision.get(
-                    config, state.default_archiver, operator, file, metric.name
-                )
+                current = target_revision.get(config, state.default_archiver, operator, file, metric.name)
             except KeyError:
                 current = "-"
             try:
@@ -143,13 +126,9 @@ def diff(
                 has_changes = True
             if metric.metric_type in (int, float) and new != "-" and current != "-":
                 if current > new:  # type: ignore
-                    metrics_data.append(
-                        f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m"
-                    )
+                    metrics_data.append(f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m")
                 elif current < new:  # type: ignore
-                    metrics_data.append(
-                        f"{current:n} -> \u001b[{GOOD_COLORS[metric.measure]}m{new:n}\u001b[0m"
-                    )
+                    metrics_data.append(f"{current:n} -> \u001b[{GOOD_COLORS[metric.measure]}m{new:n}\u001b[0m")
                 else:
                     metrics_data.append(f"{current:n} -> {new:n}")
             else:

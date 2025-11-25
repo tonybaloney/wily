@@ -3,6 +3,7 @@ Halstead operator.
 
 Measures all of the halstead metrics (volume, vocab, difficulty)
 """
+
 import ast
 import collections
 from typing import Any, Dict, Iterable
@@ -62,9 +63,7 @@ class NumberedHalsteadVisitor(HalsteadVisitor):
 
 def number_report(visitor):
     """Create a report with added lineno and endline."""
-    return NumberedHalsteadReport(
-        *(halstead_visitor_report(visitor) + (visitor.lineno, visitor.endline))
-    )
+    return NumberedHalsteadReport(*(halstead_visitor_report(visitor) + (visitor.lineno, visitor.endline)))
 
 
 class NumberedHCHarvester(harvesters.HCHarvester):
@@ -101,9 +100,7 @@ class HalsteadOperator(BaseOperator):
         Metric("h2", _("Unique Operators"), int, MetricType.AimLow, sum),
         Metric("N1", _("Number of Operands"), int, MetricType.AimLow, sum),
         Metric("N2", _("Number of Operators"), int, MetricType.AimLow, sum),
-        Metric(
-            "vocabulary", _("Unique vocabulary (h1 + h2)"), int, MetricType.AimLow, sum
-        ),
+        Metric("vocabulary", _("Unique vocabulary (h1 + h2)"), int, MetricType.AimLow, sum),
         Metric("length", _("Length of application"), int, MetricType.AimLow, sum),
         Metric("volume", _("Code volume"), float, MetricType.AimLow, sum),
         Metric("difficulty", _("Difficulty"), float, MetricType.AimLow, sum),
@@ -141,9 +138,7 @@ class HalsteadOperator(BaseOperator):
                     for item in instance:
                         function, report = item
                         assert isinstance(report, NumberedHalsteadReport)
-                        results[filename]["detailed"][function] = self._report_to_dict(
-                            report
-                        )
+                        results[filename]["detailed"][function] = self._report_to_dict(report)
                 else:
                     if isinstance(instance, str) and instance == "error":
                         logger.debug(

@@ -18,7 +18,7 @@ from wily.operators import resolve_operators
 
 version_text = _("Version: ") + __version__ + "\n\n"
 help_header = version_text + _(
-    """\U0001F98A Inspect and search through the complexity of your source code.
+    """\U0001f98a Inspect and search through the complexity of your source code.
 To get started, run setup:
 
   $ wily setup
@@ -44,7 +44,7 @@ You can also graph specific metrics in a browser with:
     __version__,
     "-V",
     "--version",
-    message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version")),
+    message="\U0001f98a %(prog)s, {version} %(version)s".format(version=_("version")),
     help=_("Show the version and exit."),
 )
 @click.help_option(help=_("Show this message and exit."))
@@ -142,18 +142,12 @@ def build(ctx, max_revisions, targets, operators, archiver):
         archiver=resolve_archiver(config.archiver),
         operators=resolve_operators(config.operators),
     )
-    logger.info(
-        _(
-            "Completed building wily history, run `wily report <file>` or `wily index` to see more."
-        )
-    )
+    logger.info(_("Completed building wily history, run `wily report <file>` or `wily index` to see more."))
 
 
 @cli.command(help=_("""Show the history archive in the .wily/ folder."""))
 @click.pass_context
-@click.option(
-    "-m", "--message/--no-message", default=False, help=_("Include revision message")
-)
+@click.option("-m", "--message/--no-message", default=False, help=_("Include revision message"))
 @click.option(
     "-w",
     "--wrap/--no-wrap",
@@ -196,12 +190,8 @@ def index(ctx, message, wrap):
 )
 @click.argument("path", type=click.Path(resolve_path=False), required=False)
 @click.argument("metric", required=False, default="maintainability.mi")
-@click.option(
-    "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
-)
-@click.option(
-    "-l", "--limit", help=_("Limit the number of results shown"), type=click.INT
-)
+@click.option("-r", "--revision", help=_("Compare against specific revision"), type=click.STRING)
+@click.option("-l", "--limit", help=_("Limit the number of results shown"), type=click.INT)
 @click.option(
     "--desc/--asc",
     help=_("Order to show results (ascending or descending)"),
@@ -228,9 +218,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
 
     from wily.commands.rank import rank
 
-    logger.debug(
-        "Running rank on %s for metric %s and revision %s", path, metric, revision
-    )
+    logger.debug("Running rank on %s for metric %s and revision %s", path, metric, revision)
     rank(
         config=config,
         path=path,
@@ -247,9 +235,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option(
-    "-m", "--message/--no-message", default=False, help=_("Include revision message")
-)
+@click.option("-m", "--message/--no-message", default=False, help=_("Include revision message"))
 @click.option(
     "-f",
     "--format",
@@ -260,9 +246,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
 @click.option(
     "--console-format",
     default=DEFAULT_GRID_STYLE,
-    help=_(
-        "Style for the console grid, see Tabulate Documentation for a list of styles."
-    ),
+    help=_("Style for the console grid, see Tabulate Documentation for a list of styles."),
 )
 @click.option(
     "-o",
@@ -282,9 +266,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     help=_("Wrap report text to fit in terminal"),
 )
 @click.pass_context
-def report(
-    ctx, file, metrics, number, message, format, console_format, output, changes, wrap
-):
+def report(ctx, file, metrics, number, message, format, console_format, output, changes, wrap):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -341,9 +323,7 @@ def report(
     default=True,
     help=_("Show function/class level metrics where available"),
 )
-@click.option(
-    "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
-)
+@click.option("-r", "--revision", help=_("Compare against specific revision"), type=click.STRING)
 @click.option(
     "-w",
     "--wrap/--no-wrap",
@@ -417,9 +397,7 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
 @click.option("-x", "--x-axis", help=_("Metric to use on x-axis, defaults to history."))
-@click.option(
-    "-a/-c", "--changes/--all", default=True, help=_("All commits or changes only")
-)
+@click.option("-a/-c", "--changes/--all", default=True, help=_("All commits or changes only"))
 @click.option(
     "-s/-i",
     "--aggregate/--individual",
@@ -519,9 +497,7 @@ def setup(ctx):
 
 def handle_no_cache(context):
     """Handle lack-of-cache error, prompt user for index process."""
-    logger.error(
-        _("Could not locate wily cache, the cache is required to provide insights.")
-    )
+    logger.error(_("Could not locate wily cache, the cache is required to provide insights."))
     p = input(_("Do you want to run setup and index your project now? [y/N]"))
     if p.lower() != "y":
         exit(1)

@@ -3,6 +3,7 @@ For managing the state of the wily process.
 
 Contains a lazy revision, index and process state model.
 """
+
 from collections import OrderedDict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -46,9 +47,7 @@ class IndexedRevision:
         d["operators"] = self.operators
         return d
 
-    def get(
-        self, config: WilyConfig, archiver: str, operator: str, path: str, key: str
-    ) -> Any:
+    def get(self, config: WilyConfig, archiver: str, operator: str, path: str, key: str) -> Any:
         """
         Get the metric data for this indexed revision.
 
@@ -59,9 +58,7 @@ class IndexedRevision:
         :param key: The metric key
         """
         if not self._data:
-            self._data = cache.get(
-                config=config, archiver=archiver, revision=self.revision.key
-            )["operator_data"]
+            self._data = cache.get(config=config, archiver=archiver, revision=self.revision.key)["operator_data"]
         logger.debug("Fetching metric %s - %s for operator %s", path, key, operator)
         return get_metric(self._data, operator, path, key)
 
@@ -76,15 +73,11 @@ class IndexedRevision:
         :return: A list of paths
         """
         if not self._data:
-            self._data = cache.get(
-                config=config, archiver=archiver, revision=self.revision.key
-            )["operator_data"]
+            self._data = cache.get(config=config, archiver=archiver, revision=self.revision.key)["operator_data"]
         logger.debug("Fetching keys")
         return list(self._data[operator].keys())
 
-    def store(
-        self, config: WilyConfig, archiver: Union[Archiver, str], stats: Dict[str, Any]
-    ) -> Path:
+    def store(self, config: WilyConfig, archiver: Union[Archiver, str], stats: Dict[str, Any]) -> Path:
         """
         Store the stats for this indexed revision.
 
@@ -113,15 +106,9 @@ class Index:
         """
         self.config = config
         self.archiver = archiver
-        self.data = (
-            cache.get_archiver_index(config, archiver.name)
-            if cache.has_archiver_index(config, archiver.name)
-            else []
-        )
+        self.data = cache.get_archiver_index(config, archiver.name) if cache.has_archiver_index(config, archiver.name) else []
 
-        self._revisions = OrderedDict(
-            {d["key"]: IndexedRevision.fromdict(d) for d in self.data}
-        )
+        self._revisions = OrderedDict({d["key"]: IndexedRevision.fromdict(d) for d in self.data})
 
     def __len__(self):
         """Use length of revisions as len."""
@@ -162,9 +149,7 @@ class Index:
         :param revision: The revision.
         :param operators: Operators for the revision.
         """
-        ir = IndexedRevision(
-            revision=revision, operators=[operator.name for operator in operators]
-        )
+        ir = IndexedRevision(revision=revision, operators=[operator.name for operator in operators])
         self._revisions[revision.key] = ir
         return ir
 

@@ -27,10 +27,7 @@ def exists(config: WilyConfig) -> bool:
 
     :return: Whether the .wily directory exists
     """
-    exists = (
-        pathlib.Path(config.cache_path).exists()
-        and pathlib.Path(config.cache_path).is_dir()
-    )
+    exists = pathlib.Path(config.cache_path).exists() and pathlib.Path(config.cache_path).is_dir()
     if not exists:
         return False
     index_path = pathlib.Path(config.cache_path) / "index.json"
@@ -39,13 +36,9 @@ def exists(config: WilyConfig) -> bool:
             index = json.load(out)
         if index["version"] != __version__:
             # TODO: Inspect the versions properly.
-            logger.warning(
-                "Wily cache is old, you may incur errors until you rebuild the cache."
-            )
+            logger.warning("Wily cache is old, you may incur errors until you rebuild the cache.")
     else:
-        logger.warning(
-            "Wily cache was not versioned, you may incur errors until you rebuild the cache."
-        )
+        logger.warning("Wily cache was not versioned, you may incur errors until you rebuild the cache.")
         create_index(config)
     return True
 
@@ -133,9 +126,7 @@ def store(
     return filename
 
 
-def store_archiver_index(
-    config: WilyConfig, archiver: Union[Archiver, str], index: List[Dict[str, Any]]
-) -> pathlib.Path:
+def store_archiver_index(config: WilyConfig, archiver: Union[Archiver, str], index: List[Dict[str, Any]]) -> pathlib.Path:
     """
     Store an archiver's index record for faster search.
 
@@ -229,9 +220,7 @@ def get_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> An
     return index
 
 
-def get(
-    config: WilyConfig, archiver: Union[Archiver, str], revision: str
-) -> Dict[Any, Any]:
+def get(config: WilyConfig, archiver: Union[Archiver, str], revision: str) -> Dict[Any, Any]:
     """
     Get the data for a given revision.
 

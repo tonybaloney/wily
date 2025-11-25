@@ -4,6 +4,7 @@ Report command.
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+
 from pathlib import Path
 from shutil import copytree
 from string import Template
@@ -115,13 +116,9 @@ def report(
                     if delta == 0:
                         delta_col = delta
                     elif delta < 0:
-                        delta_col = (
-                            f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
-                        )
+                        delta_col = f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
                     else:
-                        delta_col = (
-                            f"\u001b[{meta['increase_color']}m+{delta:n}\u001b[0m"
-                        )
+                        delta_col = f"\u001b[{meta['increase_color']}m+{delta:n}\u001b[0m"
 
                     if meta["type"] in (int, float):
                         k = f"{val:n} ({delta_col})"
@@ -187,9 +184,7 @@ def report(
                 table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 
-        rendered_report = report_template.safe_substitute(
-            headers=table_headers, content=table_content
-        )
+        rendered_report = report_template.safe_substitute(headers=table_headers, content=table_content)
 
         with report_output.open("w", errors="xmlcharrefreplace") as output_f:
             output_f.write(rendered_report)

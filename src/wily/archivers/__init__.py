@@ -96,9 +96,7 @@ class Archiver(Generic[T]):
 
 
 """Git Archiver defined in `wily.archivers.git`"""
-ARCHIVER_GIT = Archiver(
-    name="git", archiver_cls=GitArchiver, description="Git archiver"
-)
+ARCHIVER_GIT = Archiver(name="git", archiver_cls=GitArchiver, description="Git archiver")
 
 """Filesystem archiver"""
 ARCHIVER_FILESYSTEM = Archiver(
