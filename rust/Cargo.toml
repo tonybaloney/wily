@@ -13,3 +13,4 @@ ruff_python_parser = { git = "https://github.com/astral-sh/ruff", package = "ruf
 ruff_python_ast = { git = "https://github.com/astral-sh/ruff", package = "ruff_python_ast", branch = "main" }
 ruff_python_trivia = { git = "https://github.com/astral-sh/ruff", package = "ruff_python_trivia", branch = "main" }
 ruff_text_size = { git = "https://github.com/astral-sh/ruff", package = "ruff_text_size", branch = "main" }
+ruff_source_file = { git = "https://github.com/astral-sh/ruff", package = "ruff_source_file", branch = "main" }

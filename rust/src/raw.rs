@@ -1,9 +1,21 @@
-use std::mem;
+//! Raw metrics calculation using Ruff's parser infrastructure.
+//!
+//! This module calculates raw source code metrics compatible with Radon:
+//! - loc: Total lines of code
+//! - lloc: Logical lines of code  
+//! - sloc: Source lines of code (excluding blanks, comments, docstrings)
+//! - comments: Total comment count
+//! - multi: Multi-line string/docstring lines
+//! - blank: Blank lines
+//! - single_comments: Lines containing only comments
 
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyModule};
-use ruff_python_parser::lexer::lex;
-use ruff_python_parser::{Mode, TokenKind};
+use ruff_python_ast::PySourceType;
+use ruff_python_parser::{parse_unchecked_source, TokenKind};
+use ruff_python_trivia::CommentRanges;
+use ruff_source_file::{LineIndex, OneIndexed};
+use ruff_text_size::{Ranged, TextRange};
 
 #[derive(Debug, Default, Clone, Copy)]
 struct RawCounts {
@@ -30,333 +42,172 @@ impl RawCounts {
     }
 }
 
-fn analyze_source(source: &str) -> Result<RawCounts, String> {
-    let line_table = LineTable::new(source);
-    if line_table.is_empty() {
-        return Ok(RawCounts::default());
+fn analyze_source(source: &str) -> RawCounts {
+    if source.is_empty() {
+        return RawCounts::default();
     }
 
-    let lex_summary = tokenize_source(source)?;
-    let docstring_stats = detect_docstrings(&lex_summary, &line_table);
+    let line_index = LineIndex::from_source_text(source);
+    let parsed = parse_unchecked_source(source, PySourceType::Python);
+    let tokens = parsed.tokens();
+    let comment_ranges: CommentRanges = tokens.into();
 
-    let mut blank = docstring_stats.blank_lines;
-    for idx in 0..line_table.len() {
-        if docstring_stats.mask[idx] {
-            continue;
+    // Count total lines
+    let loc = count_lines(source);
+    if loc == 0 {
+        return RawCounts::default();
+    }
+
+    // Track which lines are covered by multi-line strings
+    let mut multiline_string_lines = vec![false; loc as usize];
+    // Track single-line docstrings (string-only logical lines)  
+    let mut single_line_docstring_lines = vec![false; loc as usize];
+    
+    // Track comment count
+    let comments = comment_ranges.len() as u32;
+    
+    // Process tokens to find strings and identify single-line docstrings
+    // Group tokens by logical line (ending at Newline/EOF)
+    let mut current_line_tokens: Vec<(TokenKind, usize, usize)> = Vec::new();
+    
+    for token in tokens.iter() {
+        let kind = token.kind();
+        let range = token.range();
+        let start_line = line_index.line_index(range.start()).to_zero_indexed();
+        let end_line = line_index.line_index(range.end()).to_zero_indexed();
+        
+        // Track multi-line strings
+        if kind == TokenKind::String && end_line > start_line {
+            for line in start_line..=end_line {
+                if line < loc as usize {
+                    multiline_string_lines[line] = true;
+                }
+            }
         }
-        if line_table.line_text(idx).trim().is_empty() {
+        
+        current_line_tokens.push((kind, start_line, end_line));
+        
+        if matches!(kind, TokenKind::Newline | TokenKind::EndOfFile) {
+            // Check if this logical line is a single-line docstring
+            if is_single_line_docstring(&current_line_tokens) {
+                // Find the line with the string
+                for &(k, start, end) in &current_line_tokens {
+                    if k == TokenKind::String && start == end {
+                        if start < loc as usize {
+                            single_line_docstring_lines[start] = true;
+                        }
+                    }
+                }
+            }
+            current_line_tokens.clear();
+        }
+    }
+
+    // Count blank lines, multi-line string lines, and single-comment lines
+    let mut blank = 0u32;
+    let mut multi = 0u32;
+    let mut single_comments = 0u32;
+
+    for line_num in 0..loc as usize {
+        let line_idx = OneIndexed::from_zero_indexed(line_num);
+        let line_start = line_index.line_start(line_idx, source);
+        let line_end = line_index.line_end(line_idx, source);
+        let line_range = TextRange::new(line_start, line_end);
+        let line_text = &source[line_range];
+        let trimmed = line_text.trim();
+
+        if multiline_string_lines[line_num] {
+            // Line is part of a multi-line string
+            if trimmed.is_empty() {
+                blank += 1;
+            } else {
+                multi += 1;
+            }
+        } else if single_line_docstring_lines[line_num] {
+            // Single-line docstring counts as single_comments in Radon
+            single_comments += 1;
+        } else if trimmed.is_empty() {
             blank += 1;
-        }
-    }
-
-    let mut single_comments = docstring_stats.single_line;
-    for idx in 0..line_table.len() {
-        if docstring_stats.mask[idx] {
-            continue;
-        }
-        let trimmed = line_table.line_text(idx).trim_start();
-        if !trimmed.is_empty() && trimmed.starts_with('#') {
+        } else if trimmed.starts_with('#') {
             single_comments += 1;
         }
     }
 
-    let loc = line_table.len() as u32;
-    let sloc = loc.saturating_sub(blank + docstring_stats.multi_line + single_comments);
+    // Calculate lloc from logical lines
+    let lloc = count_logical_lines(tokens);
 
-    Ok(RawCounts {
+    // sloc = loc - blank - multi - single_comments
+    let sloc = loc.saturating_sub(blank + multi + single_comments);
+
+    RawCounts {
         loc,
-        lloc: lex_summary.lloc,
-        sloc,
-        comments: lex_summary.comment_count,
-        blank,
-        multi: docstring_stats.multi_line,
-        single_comments,
-    })
-}
-
-#[derive(Clone, Copy)]
-struct SimpleToken {
-    kind: TokenKind,
-}
-
-struct LexSummary {
-    logical_lines: Vec<Vec<SimpleToken>>,
-    line_numbers: Vec<usize>,
-    comment_count: u32,
-    lloc: u32,
-}
-
-fn tokenize_source(source: &str) -> Result<LexSummary, String> {
-    let mut lexer = lex(source, Mode::Module);
-    let mut logical_lines: Vec<Vec<SimpleToken>> = Vec::new();
-    let mut current_line: Vec<SimpleToken> = Vec::new();
-    let mut comment_count = 0u32;
-    let mut line_numbers: Vec<usize> = Vec::new();
-    let mut current_line_number = 1usize;
-
-    loop {
-        let kind = lexer.next_token();
-        if matches!(kind, TokenKind::Comment) {
-            comment_count += 1;
-        }
-        current_line.push(SimpleToken { kind });
-
-        if matches!(kind, TokenKind::Newline | TokenKind::EndOfFile) {
-            logical_lines.push(mem::take(&mut current_line));
-            line_numbers.push(current_line_number);
-            if matches!(kind, TokenKind::Newline) {
-                current_line_number += 1;
-            }
-        }
-
-        if matches!(kind, TokenKind::EndOfFile) {
-            break;
-        }
-    }
-
-    let errors = lexer.finish();
-    if !errors.is_empty() {
-        return Err(
-            errors
-                .into_iter()
-                .map(|err| err.to_string())
-                .collect::<Vec<_>>()
-                .join("; "),
-        );
-    }
-
-    let lloc = logical_lines
-        .iter()
-        .map(|line| count_logical_line(line))
-        .sum();
-
-    Ok(LexSummary {
-        logical_lines,
-        line_numbers,
-        comment_count,
         lloc,
-    })
-}
-
-struct LineTable<'a> {
-    texts: Vec<&'a str>,
-}
-
-impl<'a> LineTable<'a> {
-    fn new(source: &'a str) -> Self {
-        let mut texts = Vec::new();
-        let bytes = source.as_bytes();
-        let mut line_start = 0usize;
-        let mut idx = 0usize;
-
-        while idx < bytes.len() {
-            match bytes[idx] {
-                b'\n' => {
-                    texts.push(&source[line_start..idx]);
-                    idx += 1;
-                    line_start = idx;
-                }
-                b'\r' => {
-                    texts.push(&source[line_start..idx]);
-                    idx += 1;
-                    if idx < bytes.len() && bytes[idx] == b'\n' {
-                        idx += 1;
-                    }
-                    line_start = idx;
-                }
-                _ => idx += 1,
-            }
-        }
-
-        if line_start < source.len() {
-            texts.push(&source[line_start..source.len()]);
-        }
-
-        Self { texts }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.texts.is_empty()
-    }
-
-    fn len(&self) -> usize {
-        self.texts.len()
-    }
-
-    fn line_text(&self, idx: usize) -> &str {
-        self.texts[idx]
-    }
-
-}
-
-struct DocstringStats {
-    mask: Vec<bool>,
-    multi_line: u32,
-    blank_lines: u32,
-    single_line: u32,
-}
-
-fn detect_docstrings<'a>(summary: &LexSummary, lines: &LineTable<'a>) -> DocstringStats {
-    let mut mask = vec![false; lines.len()];
-    let mut multi = 0u32;
-    let mut blank = 0u32;
-    let mut single = 0u32;
-
-    for (tokens, &line_number) in summary.logical_lines.iter().zip(summary.line_numbers.iter()) {
-        if !is_docstring_candidate(tokens) {
-            continue;
-        }
-
-        match docstring_extent(lines, line_number) {
-            DocstringExtent::Single(line) => {
-                if line == 0 || line > lines.len() {
-                    continue;
-                }
-                mask[line - 1] = true;
-                single += 1;
-            }
-            DocstringExtent::Multi { start, end } => {
-                let bounded_end = end.min(lines.len());
-                let bounded_start = start.min(lines.len());
-                if bounded_start == 0 {
-                    continue;
-                }
-                for line in bounded_start..=bounded_end {
-                    mask[line - 1] = true;
-                    let text = lines.line_text(line - 1);
-                    if text.trim().is_empty() {
-                        blank += 1;
-                    } else {
-                        multi += 1;
-                    }
-                }
-            }
-        }
-    }
-
-    DocstringStats {
-        mask,
-        multi_line: multi,
-        blank_lines: blank,
-        single_line: single,
+        sloc,
+        comments,
+        blank,
+        multi,
+        single_comments,
     }
 }
 
-fn is_docstring_candidate(tokens: &[SimpleToken]) -> bool {
-    let mut iter = tokens.iter().filter(|token| {
-        !matches!(
-            token.kind,
-            TokenKind::Indent
-                | TokenKind::Dedent
-                | TokenKind::Newline
-                | TokenKind::NonLogicalNewline
-                | TokenKind::EndOfFile
-        )
-    });
-
-    matches!(iter.next(), Some(token) if token.kind == TokenKind::String) && iter.next().is_none()
-}
-
-enum DocstringExtent {
-    Single(usize),
-    Multi { start: usize, end: usize },
-}
-
-fn docstring_extent(lines: &LineTable<'_>, start_line: usize) -> DocstringExtent {
-    if start_line == 0 || start_line > lines.len() {
-        return DocstringExtent::Single(start_line);
-    }
-
-    let text = lines.line_text(start_line - 1);
-    let trimmed = text.trim_start();
-    let (prefix_len, is_raw) = parse_string_prefix(trimmed);
-    let rest = &trimmed[prefix_len..];
-
-    if rest.len() < 3 {
-        return DocstringExtent::Single(start_line);
-    }
-
-    let bytes = rest.as_bytes();
-    let quote = bytes[0];
-    if quote != b'"' && quote != b'\'' {
-        return DocstringExtent::Single(start_line);
-    }
-
-    let is_triple = bytes.len() >= 3 && bytes[0] == bytes[1] && bytes[1] == bytes[2];
-    if !is_triple {
-        return DocstringExtent::Single(start_line);
-    }
-
-    if closing_triple_in_slice(&rest[3..], quote, is_raw) {
-        return DocstringExtent::Single(start_line);
-    }
-
-    let mut line = start_line + 1;
-    while line <= lines.len() {
-        if closing_triple_in_slice(lines.line_text(line - 1), quote, is_raw) {
-            return DocstringExtent::Multi { start: start_line, end: line };
-        }
-        line += 1;
-    }
-
-    DocstringExtent::Multi {
-        start: start_line,
-        end: lines.len().max(start_line),
-    }
-}
-
-fn parse_string_prefix(text: &str) -> (usize, bool) {
-    let mut idx = 0usize;
-    let mut is_raw = false;
-    let bytes = text.as_bytes();
-
-    while idx < bytes.len() {
-        let lower = bytes[idx].to_ascii_lowercase();
-        if matches!(lower, b'r' | b'u' | b'f' | b'b' | b't') {
-            if lower == b'r' {
-                is_raw = true;
-            }
-            idx += 1;
-        } else {
-            break;
-        }
-    }
-
-    (idx, is_raw)
-}
-
-fn closing_triple_in_slice(text: &str, quote: u8, is_raw: bool) -> bool {
-    let bytes = text.as_bytes();
-    if bytes.len() < 3 {
+/// Check if a logical line contains only a single-line string (docstring)
+fn is_single_line_docstring(tokens: &[(TokenKind, usize, usize)]) -> bool {
+    // Filter out non-semantic tokens
+    let significant: Vec<_> = tokens
+        .iter()
+        .filter(|(k, _, _)| {
+            !matches!(
+                k,
+                TokenKind::Indent
+                    | TokenKind::Dedent
+                    | TokenKind::Newline
+                    | TokenKind::NonLogicalNewline
+                    | TokenKind::EndOfFile
+            )
+        })
+        .collect();
+    
+    // Must be exactly one token, and it must be a single-line string
+    if significant.len() != 1 {
         return false;
     }
-
-    let pattern = [quote, quote, quote];
-    let mut idx = 0usize;
-    while idx + 3 <= bytes.len() {
-        if bytes[idx..idx + 3] == pattern {
-            if is_raw {
-                return true;
-            }
-
-            let mut escapes = 0usize;
-            let mut pos = idx;
-            while pos > 0 && bytes[pos - 1] == b'\\' {
-                escapes += 1;
-                pos -= 1;
-            }
-
-            if escapes % 2 == 0 {
-                return true;
-            }
-        }
-        idx += 1;
-    }
-
-    false
+    
+    let (kind, start_line, end_line) = significant[0];
+    *kind == TokenKind::String && start_line == end_line
 }
 
-fn count_logical_line(tokens: &[SimpleToken]) -> u32 {
+/// Count physical lines in source
+fn count_lines(source: &str) -> u32 {
+    if source.is_empty() {
+        return 0;
+    }
+    source.lines().count() as u32
+}
+
+/// Count logical lines of code using token stream.
+/// A logical line ends at Newline tokens (not NonLogicalNewline).
+/// Each logical line can contain multiple statements separated by semicolons.
+fn count_logical_lines(tokens: &ruff_python_parser::Tokens) -> u32 {
+    let mut lloc = 0u32;
+    let mut current_line: Vec<TokenKind> = Vec::new();
+
+    for token in tokens.iter() {
+        let kind = token.kind();
+        current_line.push(kind);
+
+        if matches!(kind, TokenKind::Newline | TokenKind::EndOfFile) {
+            lloc += count_logical_line(&current_line);
+            current_line.clear();
+        }
+    }
+
+    lloc
+}
+
+/// Count logical statements in a single logical line.
+/// Semicolons separate multiple statements on one line.
+/// Colons followed by code (like `if x: pass`) count as 2.
+fn count_logical_line(tokens: &[TokenKind]) -> u32 {
     if tokens.is_empty() {
         return 0;
     }
@@ -364,8 +215,8 @@ fn count_logical_line(tokens: &[SimpleToken]) -> u32 {
     let mut total = 0u32;
     let mut start = 0usize;
 
-    for (idx, token) in tokens.iter().enumerate() {
-        if token.kind == TokenKind::Semi {
+    for (idx, &kind) in tokens.iter().enumerate() {
+        if kind == TokenKind::Semi {
             total += count_logical_segment(&tokens[start..idx]);
             start = idx + 1;
         }
@@ -374,14 +225,12 @@ fn count_logical_line(tokens: &[SimpleToken]) -> u32 {
     total + count_logical_segment(&tokens[start..])
 }
 
-fn count_logical_segment(tokens: &[SimpleToken]) -> u32 {
-    if tokens.is_empty() {
-        return 0;
-    }
-
-    let processed: Vec<TokenKind> = tokens
+/// Count a single segment (between semicolons) as 0, 1, or 2 logical lines.
+fn count_logical_segment(tokens: &[TokenKind]) -> u32 {
+    // Filter out non-code tokens
+    let code_tokens: Vec<TokenKind> = tokens
         .iter()
-        .map(|token| token.kind)
+        .copied()
         .filter(|kind| {
             !matches!(
                 kind,
@@ -390,29 +239,22 @@ fn count_logical_segment(tokens: &[SimpleToken]) -> u32 {
                     | TokenKind::NonLogicalNewline
                     | TokenKind::Indent
                     | TokenKind::Dedent
+                    | TokenKind::EndOfFile
             )
         })
         .collect();
 
-    if processed.is_empty() {
+    if code_tokens.is_empty() {
         return 0;
     }
 
-    if let Some(idx) = processed.iter().rposition(|kind| *kind == TokenKind::Colon) {
-        let trailing_has_code = processed[idx + 1..]
-            .iter()
-            .any(|kind| !matches!(kind, TokenKind::EndOfFile));
-        return if trailing_has_code { 2 } else { 1 };
+    // Check for colon with trailing code (e.g., `if x: pass`)
+    if let Some(colon_idx) = code_tokens.iter().rposition(|&k| k == TokenKind::Colon) {
+        let has_trailing_code = code_tokens[colon_idx + 1..].iter().any(|_| true);
+        return if has_trailing_code { 2 } else { 1 };
     }
 
-    if processed
-        .iter()
-        .any(|kind| !matches!(kind, TokenKind::EndOfFile))
-    {
-        1
-    } else {
-        0
-    }
+    1
 }
 
 #[pyfunction]
@@ -423,17 +265,9 @@ pub fn harvest_raw_metrics(
     let mut results = Vec::with_capacity(entries.len());
 
     for (name, source) in entries {
-        match analyze_source(&source) {
-            Ok(metrics) => {
-                let dict = metrics.to_pydict(py)?;
-                results.push((name, dict.unbind()));
-            }
-            Err(err) => {
-                let dict = PyDict::new(py);
-                dict.set_item("error", err)?;
-                results.push((name, dict.unbind()));
-            }
-        }
+        let metrics = analyze_source(&source);
+        let dict = metrics.to_pydict(py)?;
+        results.push((name, dict.unbind()));
     }
 
     Ok(results)
