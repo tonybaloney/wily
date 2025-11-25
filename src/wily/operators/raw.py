@@ -3,7 +3,7 @@
 from typing import Any, Dict, Iterable, List, Tuple, TypedDict
 
 from radon.cli import Config
-from radon.cli.tools import _open, iter_filenames
+from radon.cli.tools import iter_filenames
 
 from wily import (
     logger,
@@ -93,7 +93,7 @@ class RawMetricsOperator(BaseOperator):
         errors: Dict[str, Dict[str, str]] = {}
         for name in iter_filenames(self._targets, self._radon_config.exclude, self._radon_config.ignore):
             try:
-                with _open(name) as fobj:
+                with open(name) as fobj:
                     sources.append((name, fobj.read()))
             except Exception as exc:  # pragma: no cover - depends on filesystem state
                 errors[name] = {"error": str(exc)}
