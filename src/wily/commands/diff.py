@@ -14,7 +14,7 @@ import tabulate
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.backend import iter_filenames
-from wily.commands.build import run_operator
+from wily.commands.build import run_operators_parallel
 from wily.config import DEFAULT_PATH
 from wily.config.types import WilyConfig
 from wily.helper import get_maxcolwidth, get_style
@@ -89,12 +89,8 @@ def diff(
     resolved_metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     results = []
 
-    # Build a set of operators
-    with multiprocessing.Pool(processes=len(operators)) as pool:
-        operator_exec_out = pool.starmap(run_operator, [(operator, None, config, targets) for operator in operators])
-    data = {}
-    for operator_name, result in operator_exec_out:
-        data[operator_name] = result
+    # Build a set of operators and run them in parallel
+    data = run_operators_parallel(operators, targets, config)
 
     # Write a summary table
     extra = []
