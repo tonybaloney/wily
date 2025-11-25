@@ -8,7 +8,7 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import multiprocessing
 import os
 import pathlib
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from rich.progress import (
     BarColumn,
@@ -27,7 +27,7 @@ from wily.operators import Operator, resolve_operator
 from wily.state import State
 
 
-def run_operator(operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]) -> Tuple[str, Dict[str, Any]]:
+def run_operator(operator: Operator, revision: Revision, config: WilyConfig, targets: list[str]) -> tuple[str, dict[str, Any]]:
     """
     Run an operator for the multiprocessing pool.
 
@@ -51,7 +51,7 @@ def run_operator(operator: Operator, revision: Revision, config: WilyConfig, tar
     return operator.name, data
 
 
-def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> None:
+def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> None:
     """
     Build the history given an archiver and collection of operators.
 
@@ -108,11 +108,11 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
         with Progress(*progress_columns) as progress:
             task_id = progress.add_task("Processing", total=total_steps)
             with multiprocessing.Pool(processes=len(operators)) as pool:
-                prev_stats: Dict[str, Dict] = {}
+                prev_stats: dict[str, dict] = {}
                 for revision in revisions:
                     # Checkout target revision
                     archiver_instance.checkout(revision, config.checkout_options)
-                    stats: Dict[str, Dict] = {"operator_data": {}}
+                    stats: dict[str, dict] = {"operator_data": {}}
 
                     # TODO : Check that changed files are children of the targets
                     targets = [

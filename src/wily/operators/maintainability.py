@@ -7,12 +7,11 @@ Uses the Rust parser backend for performance.
 """
 
 import statistics
-from typing import Any, Dict, Iterable, List, Tuple
-
-from wily._rust import iter_filenames
+from collections.abc import Iterable
+from typing import Any
 
 from wily import logger
-from wily._rust import harvest_maintainability_metrics
+from wily._rust import harvest_maintainability_metrics, iter_filenames
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
@@ -53,7 +52,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         self._exclude = self.defaults.get("exclude") or None
         self._ignore = self.defaults.get("ignore") or None
 
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -64,7 +63,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         logger.debug("Running maintainability harvester via Rust")
 
         sources, errors = self._collect_sources()
-        results: Dict[str, Dict[str, Any]] = {}
+        results: dict[str, dict[str, Any]] = {}
 
         if sources:
             multi = self.defaults.get("multi", True)
@@ -92,10 +91,10 @@ class MaintainabilityIndexOperator(BaseOperator):
 
         return results
 
-    def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
+    def _collect_sources(self) -> tuple[list[tuple[str, str]], dict[str, dict[str, str]]]:
         """Collect source files and their contents."""
-        sources: List[Tuple[str, str]] = []
-        errors: Dict[str, Dict[str, str]] = {}
+        sources: list[tuple[str, str]] = []
+        errors: dict[str, dict[str, str]] = {}
         for name in iter_filenames(self._targets, self._exclude, self._ignore):
             try:
                 with open(name, encoding="utf-8") as fobj:

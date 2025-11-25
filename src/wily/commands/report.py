@@ -5,10 +5,10 @@ The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
 
+from collections.abc import Iterable
 from pathlib import Path
 from shutil import copytree
 from string import Template
-from typing import Dict, Iterable, List, Tuple
 
 import tabulate
 
@@ -55,7 +55,7 @@ def report(
     logger.debug("Running report command")
     logger.info("-----------History for %s------------", metrics)
 
-    data: List[Tuple[str, ...]] = []
+    data: list[tuple[str, ...]] = []
     metric_metas = []
 
     for metric_name in metrics:
@@ -87,7 +87,7 @@ def report(
     state = State(config)
     for archiver in state.archivers:
         history = state.index[archiver].revisions[:n][::-1]
-        last: Dict = {}
+        last: dict = {}
         for rev in history:
             deltas = []
             vals = []

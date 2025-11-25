@@ -5,11 +5,8 @@ Note: The results may not be exactly identical because radon uses Python's AST
 while we use Ruff's AST, but they should be close.
 """
 
-import math
 
-import pytest
-from radon.metrics import mi_visit, mi_rank
-
+from radon.metrics import mi_rank, mi_visit
 
 SAMPLE_PROGRAM = """\
 def simple_function(x, y):

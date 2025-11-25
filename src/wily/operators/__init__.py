@@ -1,13 +1,12 @@
 """Models and types for "operators" the basic measure of a module that measures code."""
 
+from collections.abc import Callable, Iterable
 from enum import Enum
 from functools import lru_cache
 from typing import (
     Any,
-    Callable,
     Dict,
     Generic,
-    Iterable,
     List,
     Optional,
     Set,
@@ -84,13 +83,13 @@ class BaseOperator:
     name: str = "abstract"
 
     """Default settings."""
-    defaults: Dict[str, Any] = {}
+    defaults: dict[str, Any] = {}
 
     """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)."""
-    metrics: Tuple[Metric, ...] = ()
+    metrics: tuple[Metric, ...] = ()
 
     """Which metric is the default to display in the report command."""
-    default_metric_index: Optional[int] = None
+    default_metric_index: int | None = None
 
     """Level at which the operator goes to."""
     level: OperatorLevel = OperatorLevel.File
@@ -99,7 +98,7 @@ class BaseOperator:
         """Initialise the operator."""
         ...
 
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -124,14 +123,14 @@ class Operator(Generic[T]):
     """Operator holder."""
 
     name: str
-    operator_cls: Type[T]
+    operator_cls: type[T]
     description: str
     level: OperatorLevel
 
     def __init__(
         self,
         name: str,
-        operator_cls: Type[T],
+        operator_cls: type[T],
         description: str,
         level: OperatorLevel = OperatorLevel.File,
     ):
@@ -175,18 +174,18 @@ OPERATOR_HALSTEAD = Operator(
 )
 
 
-_OPERATORS: Tuple[Operator, ...] = (
+_OPERATORS: tuple[Operator, ...] = (
     OPERATOR_CYCLOMATIC,
     OPERATOR_MAINTAINABILITY,
     OPERATOR_RAW,
     OPERATOR_HALSTEAD,
 )
 """Dictionary of all operators"""
-ALL_OPERATORS: Dict[str, Operator] = {operator.name: operator for operator in _OPERATORS}
+ALL_OPERATORS: dict[str, Operator] = {operator.name: operator for operator in _OPERATORS}
 
 
 """Set of all metrics"""
-ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {(operator, metric) for operator in ALL_OPERATORS.values() for metric in operator.operator_cls.metrics}
+ALL_METRICS: set[tuple[Operator, Metric[Any]]] = {(operator, metric) for operator in ALL_OPERATORS.values() for metric in operator.operator_cls.metrics}
 
 
 @lru_cache(maxsize=128)
@@ -203,7 +202,7 @@ def resolve_operator(name: str) -> Operator:
         raise ValueError(f"Operator {name} not recognised.")
 
 
-def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operator]:
+def resolve_operators(operators: Iterable[Operator | str]) -> list[Operator]:
     """Resolve a list of operator names to their corresponding types."""
     return [resolve_operator(operator) for operator in iter(operators)]
 
@@ -215,7 +214,7 @@ def resolve_metric(metric: str) -> Metric:
 
 
 @lru_cache(maxsize=128)
-def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
+def resolve_metric_as_tuple(metric: str) -> tuple[Operator, Metric]:
     """Resolve metric key to a given target."""
     if "." in metric:
         _, metric = metric.split(".")
@@ -227,7 +226,7 @@ def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
         return r[0]
 
 
-def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> Any:
+def get_metric(revision: dict[Any, Any], operator: str, path: str, key: str) -> Any:
     """
     Get a metric from the cache.
 

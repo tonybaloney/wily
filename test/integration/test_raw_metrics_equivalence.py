@@ -8,7 +8,6 @@ from radon.raw import analyze
 
 from wily._rust import harvest_raw_metrics
 
-
 SAMPLE_PROGRAM = textwrap.dedent(
     '''
     class Sample:

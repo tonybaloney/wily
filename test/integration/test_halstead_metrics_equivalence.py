@@ -8,10 +8,8 @@ should see the same Halstead metrics as before.
 import ast
 import math
 
-import pytest
 from radon.metrics import halstead_visitor_report
 from radon.visitors import HalsteadVisitor
-
 
 SAMPLE_PROGRAM = """\
 def simple_function(x, y):

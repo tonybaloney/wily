@@ -5,9 +5,8 @@ This test ensures backward compatibility - users migrating to the Rust backend
 should see the same cyclomatic complexity metrics as before.
 """
 
-import pytest
 from radon.complexity import cc_visit
-from radon.visitors import Function, Class
+from radon.visitors import Class, Function
 
 # We'll import from Rust once implemented
 # from wily._rust import harvest_cyclomatic_metrics

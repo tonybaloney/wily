@@ -11,12 +11,11 @@ TODO: Layer on Click invocation in operators section, __main__.py file
 import operator as op
 import os
 from pathlib import Path
-from typing import Optional
 
-from wily._rust import iter_filenames
 import tabulate
 
 from wily import format_date, format_revision, logger
+from wily._rust import iter_filenames
 from wily.archivers import resolve_archiver
 from wily.config import DEFAULT_PATH, WilyConfig
 from wily.helper import get_maxcolwidth, get_style
@@ -26,7 +25,7 @@ from wily.state import State
 
 def rank(
     config: WilyConfig,
-    path: Optional[str],
+    path: str | None,
     metric: str,
     revision_index: str,
     limit: int,

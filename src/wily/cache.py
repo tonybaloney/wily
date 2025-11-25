@@ -10,7 +10,7 @@ import json
 import os.path
 import pathlib
 import shutil
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from wily import __version__, logger
 from wily.archivers import ALL_ARCHIVERS, Archiver, Revision
@@ -82,9 +82,9 @@ def clean(config: WilyConfig) -> None:
 
 def store(
     config: WilyConfig,
-    archiver: Union[Archiver, str],
+    archiver: Archiver | str,
     revision: Revision,
-    stats: Dict[str, Any],
+    stats: dict[str, Any],
 ) -> pathlib.Path:
     """
     Store a revision record within an archiver folder.
@@ -126,7 +126,7 @@ def store(
     return filename
 
 
-def store_archiver_index(config: WilyConfig, archiver: Union[Archiver, str], index: List[Dict[str, Any]]) -> pathlib.Path:
+def store_archiver_index(config: WilyConfig, archiver: Archiver | str, index: list[dict[str, Any]]) -> pathlib.Path:
     """
     Store an archiver's index record for faster search.
 
@@ -151,7 +151,7 @@ def store_archiver_index(config: WilyConfig, archiver: Union[Archiver, str], ind
     return filename
 
 
-def list_archivers(config: WilyConfig) -> List[str]:
+def list_archivers(config: WilyConfig) -> list[str]:
     """
     List the names of archivers with data.
 
@@ -167,7 +167,7 @@ def list_archivers(config: WilyConfig) -> List[str]:
     return result
 
 
-def get_default_metrics(config: WilyConfig) -> List[str]:
+def get_default_metrics(config: WilyConfig) -> list[str]:
     """
     Get the default metrics for a configuration.
 
@@ -193,7 +193,7 @@ def get_default_metrics(config: WilyConfig) -> List[str]:
     return default_metrics
 
 
-def has_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> bool:
+def has_archiver_index(config: WilyConfig, archiver: Archiver | str) -> bool:
     """
     Check if this archiver has an index file.
 
@@ -206,7 +206,7 @@ def has_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> bo
     return root.exists()
 
 
-def get_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> Any:
+def get_archiver_index(config: WilyConfig, archiver: Archiver | str) -> Any:
     """
     Get the contents of the archiver index file.
 
@@ -220,7 +220,7 @@ def get_archiver_index(config: WilyConfig, archiver: Union[Archiver, str]) -> An
     return index
 
 
-def get(config: WilyConfig, archiver: Union[Archiver, str], revision: str) -> Dict[Any, Any]:
+def get(config: WilyConfig, archiver: Archiver | str, revision: str) -> dict[Any, Any]:
     """
     Get the data for a given revision.
 

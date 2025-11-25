@@ -6,12 +6,11 @@ Measures all of the halstead metrics (volume, vocab, difficulty)
 Uses the Rust parser backend for performance.
 """
 
-from typing import Any, Dict, Iterable, List, Tuple
-
-from wily._rust import iter_filenames
+from collections.abc import Iterable
+from typing import Any
 
 from wily import logger
-from wily._rust import harvest_halstead_metrics
+from wily._rust import harvest_halstead_metrics, iter_filenames
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
@@ -60,7 +59,7 @@ class HalsteadOperator(BaseOperator):
         self._exclude = self.defaults.get("exclude") or None
         self._ignore = self.defaults.get("ignore") or None
 
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -71,7 +70,7 @@ class HalsteadOperator(BaseOperator):
         logger.debug("Running halstead harvester via Rust")
 
         sources, errors = self._collect_sources()
-        results: Dict[str, Dict[str, Any]] = {}
+        results: dict[str, dict[str, Any]] = {}
 
         if sources:
             rust_results = dict(harvest_halstead_metrics(sources))
@@ -101,10 +100,10 @@ class HalsteadOperator(BaseOperator):
 
         return results
 
-    def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
+    def _collect_sources(self) -> tuple[list[tuple[str, str]], dict[str, dict[str, str]]]:
         """Collect source files and their contents."""
-        sources: List[Tuple[str, str]] = []
-        errors: Dict[str, Dict[str, str]] = {}
+        sources: list[tuple[str, str]] = []
+        errors: dict[str, dict[str, str]] = {}
         for name in iter_filenames(self._targets, self._exclude, self._ignore):
             try:
                 with open(name, encoding="utf-8") as fobj:
@@ -115,7 +114,7 @@ class HalsteadOperator(BaseOperator):
         return sources, errors
 
     @staticmethod
-    def _metrics_to_dict(metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def _metrics_to_dict(metrics: dict[str, Any]) -> dict[str, Any]:
         """Convert Rust metrics dict to wily format."""
         return {
             "h1": metrics.get("h1", 0),
@@ -132,7 +131,7 @@ class HalsteadOperator(BaseOperator):
         }
 
     @staticmethod
-    def _empty_metrics() -> Dict[str, Any]:
+    def _empty_metrics() -> dict[str, Any]:
         """Return empty metrics dict for error cases."""
         return {
             "h1": 0,

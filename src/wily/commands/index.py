@@ -4,7 +4,6 @@ Index command.
 Print information about the wily cache and what is in the index.
 """
 
-from typing import List, Tuple
 
 import tabulate
 
@@ -31,7 +30,7 @@ def index(config: WilyConfig, include_message: bool = False, wrap: bool = False)
     logger.info("")
     logger.info("-----------History------------")
 
-    data: List[Tuple[str, ...]] = []
+    data: list[tuple[str, ...]] = []
     for archiver in state.archivers:
         for rev in state.index[archiver].revisions:
             if include_message:
@@ -52,7 +51,7 @@ def index(config: WilyConfig, include_message: bool = False, wrap: bool = False)
                     )
                 )
 
-    headers: Tuple[str, ...]
+    headers: tuple[str, ...]
     if include_message:
         headers = ("Revision", "Author", "Message", "Date")
     else:

@@ -1,17 +1,15 @@
 """Raw statistics operator built on top of the Rust parser backend."""
 
-from typing import Any, Dict, Iterable, List, Tuple, TypedDict
-
-from wily._rust import iter_filenames
+from collections.abc import Iterable
+from typing import Any, TypedDict
 
 from wily import (
     logger,
 )
+from wily._rust import harvest_raw_metrics, iter_filenames
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
-
-from wily._rust import harvest_raw_metrics
 
 
 class RawCounts(TypedDict):
@@ -65,7 +63,7 @@ class RawMetricsOperator(BaseOperator):
         self._exclude = self.defaults.get("exclude") or None
         self._ignore = self.defaults.get("ignore") or None
 
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -76,10 +74,10 @@ class RawMetricsOperator(BaseOperator):
         logger.debug("Running raw harvester via Wily")
 
         sources, errors = self._collect_sources()
-        results: Dict[Any, Any] = {}
+        results: dict[Any, Any] = {}
 
         if sources:
-            raw_counts: Iterable[Tuple[str, RawCounts]] = harvest_raw_metrics(sources)
+            raw_counts: Iterable[tuple[str, RawCounts]] = harvest_raw_metrics(sources)
             for filename, metrics in raw_counts:
                 results[filename] = {"total": metrics}
 
@@ -88,9 +86,9 @@ class RawMetricsOperator(BaseOperator):
 
         return results
 
-    def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
-        sources: List[Tuple[str, str]] = []
-        errors: Dict[str, Dict[str, str]] = {}
+    def _collect_sources(self) -> tuple[list[tuple[str, str]], dict[str, dict[str, str]]]:
+        sources: list[tuple[str, str]] = []
+        errors: dict[str, dict[str, str]] = {}
         for name in iter_filenames(self._targets, self._exclude, self._ignore):
             try:
                 with open(name, encoding="utf-8") as fobj:

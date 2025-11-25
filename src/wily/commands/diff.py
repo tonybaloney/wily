@@ -7,11 +7,11 @@ Compares metrics between uncommitted files and indexed files.
 import multiprocessing
 import os
 from pathlib import Path
-from typing import List, Optional
 
 import tabulate
 
 from wily import format_date, format_revision, logger
+from wily._rust import iter_filenames
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
 from wily.config import DEFAULT_PATH
@@ -26,16 +26,15 @@ from wily.operators import (
     resolve_operator,
 )
 from wily.state import State
-from wily._rust import iter_filenames
 
 
 def diff(
     config: WilyConfig,
-    files: List[str],
-    metrics: List[str],
+    files: list[str],
+    metrics: list[str],
     changes_only: bool = True,
     detail: bool = True,
-    revision: Optional[str] = None,
+    revision: str | None = None,
     wrap: bool = False,
 ) -> None:
     """

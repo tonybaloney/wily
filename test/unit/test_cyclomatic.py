@@ -31,7 +31,7 @@ def test_cyclomatic_empty_results(mock_harvest, mock_iter):
 
 
 @mock.patch("wily.operators.cyclomatic.iter_filenames", return_value=["test.py"])
-@mock.patch("builtins.open", side_effect=IOError("file not found"))
+@mock.patch("builtins.open", side_effect=OSError("file not found"))
 def test_cyclomatic_file_read_error(mock_open, mock_iter):
     """Test handling of file read errors."""
     op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG, ["."])

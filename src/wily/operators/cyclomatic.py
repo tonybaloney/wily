@@ -5,12 +5,11 @@ Uses the Rust parser backend for performance.
 """
 
 import statistics
-from typing import Any, Dict, Iterable, List, Tuple
-
-from wily._rust import iter_filenames
+from collections.abc import Iterable
+from typing import Any
 
 from wily import logger
-from wily._rust import harvest_cyclomatic_metrics
+from wily._rust import harvest_cyclomatic_metrics, iter_filenames
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
@@ -27,7 +26,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         "max": "F",
         "no_assert": True,
         "show_closures": False,
-        "order": lambda x: -getattr(x, "complexity"),
+        "order": lambda x: -x.complexity,
         "include_ipynb": True,
         "ipynb_cells": True,
     }
@@ -56,7 +55,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         self._exclude = self.defaults.get("exclude") or None
         self._ignore = self.defaults.get("ignore") or None
 
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -67,7 +66,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         logger.debug("Running CC harvester via Rust")
 
         sources, errors = self._collect_sources()
-        results: Dict[str, Dict[str, Any]] = {}
+        results: dict[str, dict[str, Any]] = {}
 
         if sources:
             rust_results = dict(harvest_cyclomatic_metrics(sources))
@@ -105,9 +104,9 @@ class CyclomaticComplexityOperator(BaseOperator):
 
         return results
 
-    def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
-        sources: List[Tuple[str, str]] = []
-        errors: Dict[str, Dict[str, str]] = {}
+    def _collect_sources(self) -> tuple[list[tuple[str, str]], dict[str, dict[str, str]]]:
+        sources: list[tuple[str, str]] = []
+        errors: dict[str, dict[str, str]] = {}
         for name in iter_filenames(self._targets, self._exclude, self._ignore):
             try:
                 with open(name, encoding="utf-8") as fobj:
@@ -118,7 +117,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         return sources, errors
 
     @staticmethod
-    def _dict_from_function(f: Dict[str, Any]) -> Dict[str, Any]:
+    def _dict_from_function(f: dict[str, Any]) -> dict[str, Any]:
         return {
             "name": f["name"],
             "is_method": f["is_method"],
@@ -132,7 +131,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         }
 
     @staticmethod
-    def _dict_from_class(c: Dict[str, Any]) -> Dict[str, Any]:
+    def _dict_from_class(c: dict[str, Any]) -> dict[str, Any]:
         return {
             "name": c["name"],
             "inner_classes": c.get("inner_classes", []),

@@ -5,15 +5,16 @@ import logging
 import pathlib
 import shutil
 import sys
+from collections.abc import Sized
 from functools import lru_cache
-from typing import Optional, Sized, Union
+from typing import Optional, Union
 
 from wily.defaults import DEFAULT_GRID_STYLE
 
 logger = logging.getLogger(__name__)
 
 
-def get_maxcolwidth(headers: Sized, wrap=True) -> Optional[int]:
+def get_maxcolwidth(headers: Sized, wrap=True) -> int | None:
     """Calculate the maximum column width for a given terminal width."""
     if not wrap:
         return None
@@ -40,7 +41,7 @@ def get_style(style: str = DEFAULT_GRID_STYLE) -> str:
 
 
 @lru_cache(maxsize=128)
-def generate_cache_path(path: Union[pathlib.Path, str]) -> str:
+def generate_cache_path(path: pathlib.Path | str) -> str:
     """
     Generate a reusable path to cache results.
 
