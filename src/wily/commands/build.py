@@ -34,7 +34,7 @@ def run_operators_parallel(
     config: WilyConfig,
 ) -> dict[str, dict[str, Any]]:
     """
-    Run all operators in parallel.
+    Run all operators in parallel using Rust/rayon.
 
     :param operators: List of operators to run
     :param targets: List of file paths to analyze
@@ -58,6 +58,7 @@ def run_operators_parallel(
         operator_names,
     )
 
+    # Run all operators in parallel on all files using Rust/rayon
     parallel_results = analyze_files_parallel(file_paths, operator_names, multi=True)
 
     # Transform results into the expected format per operator

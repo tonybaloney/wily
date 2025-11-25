@@ -4,77 +4,14 @@
 //! replacing Python's multiprocessing.Pool with Rust's rayon thread pool.
 
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use rayon::prelude::*;
-use std::collections::HashMap;
 use std::fs;
 
 use crate::cyclomatic;
 use crate::halstead;
 use crate::maintainability;
 use crate::raw;
-
-/// Result of analyzing a single file with all operators.
-#[derive(Debug)]
-struct FileAnalysis {
-    path: String,
-    raw: Option<HashMap<String, i64>>,
-    cyclomatic: Option<Vec<(String, i64)>>,
-    halstead: Option<Vec<(String, HashMap<String, f64>)>>,
-    maintainability: Option<(f64, String)>,
-    error: Option<String>,
-}
-
-/// Analyze a single file with all requested operators.
-fn analyze_file(
-    path: &str,
-    include_raw: bool,
-    include_cyclomatic: bool,
-    include_halstead: bool,
-    include_maintainability: bool,
-    multi: bool,
-) -> FileAnalysis {
-    let source = match fs::read_to_string(path) {
-        Ok(s) => s,
-        Err(e) => {
-            return FileAnalysis {
-                path: path.to_string(),
-                raw: None,
-                cyclomatic: None,
-                halstead: None,
-                maintainability: None,
-                error: Some(format!("Failed to read file: {}", e)),
-            };
-        }
-    };
-
-    let mut result = FileAnalysis {
-        path: path.to_string(),
-        raw: None,
-        cyclomatic: None,
-        halstead: None,
-        maintainability: None,
-        error: None,
-    };
-
-    if include_raw {
-        result.raw = Some(raw::analyze_source_raw(&source));
-    }
-
-    if include_cyclomatic {
-        result.cyclomatic = Some(cyclomatic::analyze_source_cc(&source));
-    }
-
-    if include_halstead {
-        result.halstead = Some(halstead::analyze_source_halstead(&source));
-    }
-
-    if include_maintainability {
-        result.maintainability = Some(maintainability::analyze_source_mi(&source, multi));
-    }
-
-    result
-}
 
 /// Analyze multiple files in parallel using rayon.
 ///
@@ -90,7 +27,6 @@ fn analyze_file(
 /// A dictionary mapping file paths to their analysis results.
 #[pyfunction]
 #[pyo3(signature = (paths, operators, multi=true))]
-#[allow(deprecated)]
 pub fn analyze_files_parallel<'py>(
     py: Python<'py>,
     paths: Vec<String>,
@@ -102,19 +38,14 @@ pub fn analyze_files_parallel<'py>(
     let include_halstead = operators.iter().any(|o| o == "halstead");
     let include_maintainability = operators.iter().any(|o| o == "maintainability");
 
-    // Release the GIL during parallel processing
-    let results: Vec<FileAnalysis> = py.allow_threads(|| {
+    // Read all files and release GIL during parallel processing
+    let file_contents: Vec<(String, Result<String, String>)> = py.allow_threads(|| {
         paths
             .par_iter()
             .map(|path| {
-                analyze_file(
-                    path,
-                    include_raw,
-                    include_cyclomatic,
-                    include_halstead,
-                    include_maintainability,
-                    multi,
-                )
+                let content = fs::read_to_string(path)
+                    .map_err(|e| format!("Failed to read file: {}", e));
+                (path.clone(), content)
             })
             .collect()
     });
@@ -122,17 +53,21 @@ pub fn analyze_files_parallel<'py>(
     // Convert results to Python dict
     let output = PyDict::new(py);
 
-    for analysis in results {
+    for (path, content_result) in file_contents {
         let file_dict = PyDict::new(py);
 
-        if let Some(error) = analysis.error {
-            file_dict.set_item("error", error)?;
-            output.set_item(&analysis.path, file_dict)?;
-            continue;
-        }
+        let source = match content_result {
+            Ok(s) => s,
+            Err(e) => {
+                file_dict.set_item("error", e)?;
+                output.set_item(&path, file_dict)?;
+                continue;
+            }
+        };
 
         // Raw metrics
-        if let Some(raw_metrics) = analysis.raw {
+        if include_raw {
+            let raw_metrics = raw::analyze_source_raw(&source);
             let raw_dict = PyDict::new(py);
             let total_dict = PyDict::new(py);
             for (key, value) in raw_metrics {
@@ -142,67 +77,147 @@ pub fn analyze_files_parallel<'py>(
             file_dict.set_item("raw", raw_dict)?;
         }
 
-        // Cyclomatic complexity
-        if let Some(cc_results) = analysis.cyclomatic {
+        // Cyclomatic complexity - use harvest function format
+        if include_cyclomatic {
+            let cc_result = cyclomatic::analyze_source_full(&source);
             let cc_dict = PyDict::new(py);
-            let total_dict = PyDict::new(py);
-            let mut total_complexity: i64 = 0;
+            
+            match cc_result {
+                Ok((functions, classes, line_index)) => {
+                    let detailed_dict = PyDict::new(py);
+                    let mut total_complexity: i64 = 0;
 
-            for (name, complexity) in &cc_results {
-                let func_dict = PyDict::new(py);
-                func_dict.set_item("complexity", *complexity)?;
-                cc_dict.set_item(name.as_str(), func_dict)?;
-                total_complexity += complexity;
+                    // Process functions (includes methods from classes)
+                    for func in &functions {
+                        let func_dict = PyDict::new(py);
+                        let lineno = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.start_offset));
+                        let endline = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.end_offset));
+                        let lineno_val = lineno.to_zero_indexed() + 1;
+                        let endline_val = endline.to_zero_indexed() + 1;
+                        
+                        func_dict.set_item("name", &func.name)?;
+                        func_dict.set_item("is_method", func.is_method)?;
+                        func_dict.set_item("classname", func.classname.as_deref())?;
+                        func_dict.set_item("complexity", func.complexity)?;
+                        func_dict.set_item("lineno", lineno_val)?;
+                        func_dict.set_item("endline", endline_val)?;
+                        func_dict.set_item("loc", endline_val as i64 - lineno_val as i64)?;
+                        
+                        let closures_list = PyList::empty(py);
+                        func_dict.set_item("closures", closures_list)?;
+                        
+                        let fullname = func.fullname();
+                        detailed_dict.set_item(fullname.as_str(), func_dict)?;
+                        total_complexity += func.complexity as i64;
+                    }
+
+                    // Process classes
+                    for cls in &classes {
+                        let cls_dict = PyDict::new(py);
+                        let lineno = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(cls.start_offset));
+                        let endline = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(cls.end_offset));
+                        let lineno_val = lineno.to_zero_indexed() + 1;
+                        let endline_val = endline.to_zero_indexed() + 1;
+                        
+                        cls_dict.set_item("name", &cls.name)?;
+                        cls_dict.set_item("complexity", cls.complexity())?;
+                        cls_dict.set_item("real_complexity", cls.real_complexity)?;
+                        cls_dict.set_item("lineno", lineno_val)?;
+                        cls_dict.set_item("endline", endline_val)?;
+                        cls_dict.set_item("loc", endline_val as i64 - lineno_val as i64)?;
+                        
+                        let inner_classes_list = PyList::empty(py);
+                        cls_dict.set_item("inner_classes", inner_classes_list)?;
+                        
+                        detailed_dict.set_item(cls.name.as_str(), cls_dict)?;
+                        total_complexity += cls.complexity() as i64;
+                    }
+
+                    let total_dict = PyDict::new(py);
+                    total_dict.set_item("complexity", total_complexity)?;
+                    cc_dict.set_item("detailed", detailed_dict)?;
+                    cc_dict.set_item("total", total_dict)?;
+                }
+                Err(_) => {
+                    let detailed_dict = PyDict::new(py);
+                    let total_dict = PyDict::new(py);
+                    total_dict.set_item("complexity", 0)?;
+                    cc_dict.set_item("detailed", detailed_dict)?;
+                    cc_dict.set_item("total", total_dict)?;
+                }
             }
-
-            total_dict.set_item("complexity", total_complexity)?;
-            cc_dict.set_item("total", total_dict)?;
             file_dict.set_item("cyclomatic", cc_dict)?;
         }
 
         // Halstead metrics
-        if let Some(hal_results) = analysis.halstead {
+        if include_halstead {
+            let hal_result = halstead::analyze_source_full(&source);
             let hal_dict = PyDict::new(py);
-            let mut total_h1: i64 = 0;
-            let mut total_h2: i64 = 0;
-            let mut total_n1: i64 = 0;
-            let mut total_n2: i64 = 0;
-            let mut total_volume: f64 = 0.0;
-            let mut total_difficulty: f64 = 0.0;
-            let mut total_effort: f64 = 0.0;
-
-            for (name, metrics) in &hal_results {
-                let func_dict = PyDict::new(py);
-                for (key, value) in metrics {
-                    func_dict.set_item(key.as_str(), *value)?;
-                    match key.as_str() {
-                        "h1" => total_h1 += *value as i64,
-                        "h2" => total_h2 += *value as i64,
-                        "N1" => total_n1 += *value as i64,
-                        "N2" => total_n2 += *value as i64,
-                        "volume" => total_volume += *value,
-                        "difficulty" => total_difficulty += *value,
-                        "effort" => total_effort += *value,
-                        _ => {}
+            
+            match hal_result {
+                Ok((functions, total, line_index)) => {
+                    let detailed_dict = PyDict::new(py);
+                    
+                    for func in &functions {
+                        let func_dict = PyDict::new(py);
+                        let lineno = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.start_offset));
+                        let endline = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.end_offset));
+                        
+                        func_dict.set_item("h1", func.metrics.h1())?;
+                        func_dict.set_item("h2", func.metrics.h2())?;
+                        func_dict.set_item("N1", func.metrics.n1())?;
+                        func_dict.set_item("N2", func.metrics.n2())?;
+                        func_dict.set_item("vocabulary", func.metrics.vocabulary())?;
+                        func_dict.set_item("length", func.metrics.length())?;
+                        func_dict.set_item("volume", func.metrics.volume())?;
+                        func_dict.set_item("difficulty", func.metrics.difficulty())?;
+                        func_dict.set_item("effort", func.metrics.effort())?;
+                        func_dict.set_item("lineno", lineno.to_zero_indexed() + 1)?;
+                        func_dict.set_item("endline", endline.to_zero_indexed() + 1)?;
+                        
+                        detailed_dict.set_item(func.name.as_str(), func_dict)?;
                     }
+                    
+                    let total_dict = PyDict::new(py);
+                    total_dict.set_item("h1", total.h1())?;
+                    total_dict.set_item("h2", total.h2())?;
+                    total_dict.set_item("N1", total.n1())?;
+                    total_dict.set_item("N2", total.n2())?;
+                    total_dict.set_item("vocabulary", total.vocabulary())?;
+                    total_dict.set_item("length", total.length())?;
+                    total_dict.set_item("volume", total.volume())?;
+                    total_dict.set_item("difficulty", total.difficulty())?;
+                    total_dict.set_item("effort", total.effort())?;
+                    total_dict.set_item("lineno", py.None())?;
+                    total_dict.set_item("endline", py.None())?;
+                    
+                    hal_dict.set_item("detailed", detailed_dict)?;
+                    hal_dict.set_item("total", total_dict)?;
                 }
-                hal_dict.set_item(name.as_str(), func_dict)?;
+                Err(_) => {
+                    let detailed_dict = PyDict::new(py);
+                    let total_dict = PyDict::new(py);
+                    total_dict.set_item("h1", 0)?;
+                    total_dict.set_item("h2", 0)?;
+                    total_dict.set_item("N1", 0)?;
+                    total_dict.set_item("N2", 0)?;
+                    total_dict.set_item("vocabulary", 0)?;
+                    total_dict.set_item("length", 0)?;
+                    total_dict.set_item("volume", 0.0)?;
+                    total_dict.set_item("difficulty", 0.0)?;
+                    total_dict.set_item("effort", 0.0)?;
+                    total_dict.set_item("lineno", py.None())?;
+                    total_dict.set_item("endline", py.None())?;
+                    hal_dict.set_item("detailed", detailed_dict)?;
+                    hal_dict.set_item("total", total_dict)?;
+                }
             }
-
-            let total_dict = PyDict::new(py);
-            total_dict.set_item("h1", total_h1)?;
-            total_dict.set_item("h2", total_h2)?;
-            total_dict.set_item("N1", total_n1)?;
-            total_dict.set_item("N2", total_n2)?;
-            total_dict.set_item("volume", total_volume)?;
-            total_dict.set_item("difficulty", total_difficulty)?;
-            total_dict.set_item("effort", total_effort)?;
-            hal_dict.set_item("total", total_dict)?;
             file_dict.set_item("halstead", hal_dict)?;
         }
 
         // Maintainability Index
-        if let Some((mi, rank)) = analysis.maintainability {
+        if include_maintainability {
+            let (mi, rank) = maintainability::analyze_source_mi(&source, multi);
             let mi_dict = PyDict::new(py);
             let total_dict = PyDict::new(py);
             total_dict.set_item("mi", mi)?;
@@ -211,7 +226,7 @@ pub fn analyze_files_parallel<'py>(
             file_dict.set_item("maintainability", mi_dict)?;
         }
 
-        output.set_item(&analysis.path, file_dict)?;
+        output.set_item(&path, file_dict)?;
     }
 
     Ok(output)

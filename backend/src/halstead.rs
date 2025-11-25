@@ -28,7 +28,7 @@ use std::collections::HashSet;
 
 /// Halstead metrics for a code block
 #[derive(Debug, Clone, Default)]
-struct HalsteadMetrics {
+pub struct HalsteadMetrics {
     /// Set of unique operators seen
     operators_seen: HashSet<String>,
     /// Set of unique operands seen (context, operand_repr)
@@ -41,34 +41,34 @@ struct HalsteadMetrics {
 
 impl HalsteadMetrics {
     /// h1 = distinct operators (η₁)
-    fn h1(&self) -> u32 {
+    pub fn h1(&self) -> u32 {
         self.operators_seen.len() as u32
     }
 
     /// h2 = distinct operands (η₂)
-    fn h2(&self) -> u32 {
+    pub fn h2(&self) -> u32 {
         self.operands_seen.len() as u32
     }
 
     /// N1 = total operators
-    fn n1(&self) -> u32 {
+    pub fn n1(&self) -> u32 {
         self.operators
     }
 
     /// N2 = total operands
-    fn n2(&self) -> u32 {
+    pub fn n2(&self) -> u32 {
         self.operands
     }
 
-    fn vocabulary(&self) -> u32 {
+    pub fn vocabulary(&self) -> u32 {
         self.h1() + self.h2()
     }
 
-    fn length(&self) -> u32 {
+    pub fn length(&self) -> u32 {
         self.n1() + self.n2()
     }
 
-    fn volume(&self) -> f64 {
+    pub fn volume(&self) -> f64 {
         let vocab = self.vocabulary();
         if vocab == 0 {
             return 0.0;
@@ -76,7 +76,7 @@ impl HalsteadMetrics {
         self.length() as f64 * (vocab as f64).log2()
     }
 
-    fn difficulty(&self) -> f64 {
+    pub fn difficulty(&self) -> f64 {
         // Radon's formula: (h1 * N2) / (2 * h2)
         // where h1 = distinct operators, h2 = distinct operands, N2 = total operands
         let h1 = self.h1();
@@ -90,7 +90,7 @@ impl HalsteadMetrics {
         (h1 as f64 * n2 as f64) / (2.0 * h2 as f64)
     }
 
-    fn effort(&self) -> f64 {
+    pub fn effort(&self) -> f64 {
         self.difficulty() * self.volume()
     }
 
@@ -118,11 +118,11 @@ impl HalsteadMetrics {
 
 /// Result for a function/method with line info
 #[derive(Debug, Clone)]
-struct FunctionHalstead {
-    name: String,
-    start_offset: u32,
-    end_offset: u32,
-    metrics: HalsteadMetrics,
+pub struct FunctionHalstead {
+    pub name: String,
+    pub start_offset: u32,
+    pub end_offset: u32,
+    pub metrics: HalsteadMetrics,
 }
 
 impl FunctionHalstead {
@@ -144,6 +144,8 @@ struct HalsteadVisitor<'src> {
     source: &'src str,
     /// Current function context (for tracking unique operands per context)
     context: Option<String>,
+    /// Current class name (for prefixing method names)
+    classname: Option<String>,
     /// Metrics for current scope
     metrics: HalsteadMetrics,
     /// Collected function metrics
@@ -155,6 +157,7 @@ impl<'src> HalsteadVisitor<'src> {
         Self {
             source,
             context,
+            classname: None,
             metrics: HalsteadMetrics::default(),
             functions: Vec::new(),
         }
@@ -260,8 +263,11 @@ impl<'src> HalsteadVisitor<'src> {
 
     /// Visit a function definition
     fn visit_function(&mut self, node: &ast::StmtFunctionDef) {
-        // Radon doesn't prefix method names with class name
-        let func_name = node.name.to_string();
+        // Prefix method names with class name
+        let func_name = match &self.classname {
+            Some(cls) => format!("{}.{}", cls, node.name),
+            None => node.name.to_string(),
+        };
 
         let mut func_visitor = HalsteadVisitor::new(self.source, Some(func_name.clone()));
 
@@ -270,8 +276,8 @@ impl<'src> HalsteadVisitor<'src> {
             func_visitor.visit_stmt(stmt);
         }
 
-        // Merge function metrics into total
-        self.metrics.merge(&func_visitor.metrics);
+        // NOTE: Don't merge function metrics into total!
+        // Total should only contain module-level code metrics.
 
         // Store function metrics
         self.functions.push(FunctionHalstead {
@@ -284,10 +290,17 @@ impl<'src> HalsteadVisitor<'src> {
 
     /// Visit a class definition
     fn visit_class(&mut self, node: &ast::StmtClassDef) {
-        // Just visit the body, methods will be visited as functions
+        let classname = node.name.to_string();
+        // Set classname context for methods
+        let old_classname = self.classname.take();
+        self.classname = Some(classname);
+        
+        // Visit the body, methods will be visited as functions with class prefix
         for stmt in &node.body {
             self.visit_stmt(stmt);
         }
+        
+        self.classname = old_classname;
     }
 }
 
@@ -299,6 +312,38 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
             }
             Stmt::ClassDef(node) => {
                 self.visit_class(node);
+            }
+            Stmt::Import(node) => {
+                // Import statement: 1 operator, module name + bound name as operands
+                // For "import abc", we count abc twice (module and bound name)
+                self.add_operator("Import");
+                for alias in &node.names {
+                    self.add_operand(&alias.name.to_string());
+                    // Also count the asname or the original name as bound name
+                    let bound_name = alias.asname.as_ref()
+                        .map(|n| n.to_string())
+                        .unwrap_or_else(|| alias.name.to_string());
+                    self.add_operand(&bound_name);
+                }
+            }
+            Stmt::ImportFrom(node) => {
+                // From import: 1 operator, module + names as operands
+                self.add_operator("ImportFrom");
+                if let Some(module) = &node.module {
+                    self.add_operand(&module.to_string());
+                }
+                for alias in &node.names {
+                    self.add_operand(&alias.name.to_string());
+                }
+            }
+            Stmt::Assign(node) => {
+                // Assignment: 1 operator per target, targets and value as operands
+                for target in &node.targets {
+                    self.add_operator("Assign");
+                    self.add_operand(&Self::expr_to_operand(target));
+                }
+                self.add_operand(&Self::expr_to_operand(&node.value));
+                visitor::walk_stmt(self, stmt);
             }
             Stmt::AugAssign(node) => {
                 // Augmented assignment: 1 operator, 2 operands (target, value)
@@ -367,6 +412,11 @@ fn analyze_source(source: &str) -> Result<(HalsteadMetrics, Vec<FunctionHalstead
     }
 
     Ok((visitor.metrics, visitor.functions, line_index))
+}
+
+/// Public API for parallel module - returns full analysis results.
+pub fn analyze_source_full(source: &str) -> Result<(Vec<FunctionHalstead>, HalsteadMetrics, LineIndex), String> {
+    analyze_source(source).map(|(total, functions, line_index)| (functions, total, line_index))
 }
 
 /// Public API for parallel module - returns Halstead metrics as Vec of (name, metrics_dict).

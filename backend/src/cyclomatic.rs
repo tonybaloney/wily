@@ -16,18 +16,18 @@ use ruff_text_size::{Ranged, TextSize};
 
 /// Result for a single function/method (storing byte offsets)
 #[derive(Debug, Clone)]
-struct FunctionComplexity {
-    name: String,
-    start_offset: u32,  // byte offset
-    end_offset: u32,    // byte offset
-    is_method: bool,
-    classname: Option<String>,
-    complexity: u32,
-    closures: Vec<FunctionComplexity>,
+pub struct FunctionComplexity {
+    pub name: String,
+    pub start_offset: u32,  // byte offset
+    pub end_offset: u32,    // byte offset
+    pub is_method: bool,
+    pub classname: Option<String>,
+    pub complexity: u32,
+    pub closures: Vec<FunctionComplexity>,
 }
 
 impl FunctionComplexity {
-    fn fullname(&self) -> String {
+    pub fn fullname(&self) -> String {
         match &self.classname {
             Some(cls) => format!("{}.{}", cls, self.name),
             None => self.name.clone(),
@@ -60,18 +60,18 @@ impl FunctionComplexity {
 
 /// Result for a class (storing byte offsets)
 #[derive(Debug, Clone)]
-struct ClassComplexity {
-    name: String,
-    start_offset: u32,  // byte offset
-    end_offset: u32,    // byte offset
-    methods: Vec<FunctionComplexity>,
-    inner_classes: Vec<ClassComplexity>,
-    real_complexity: u32,
+pub struct ClassComplexity {
+    pub name: String,
+    pub start_offset: u32,  // byte offset
+    pub end_offset: u32,    // byte offset
+    pub methods: Vec<FunctionComplexity>,
+    pub inner_classes: Vec<ClassComplexity>,
+    pub real_complexity: u32,
 }
 
 impl ClassComplexity {
     /// Average complexity of methods + 1 (if multiple methods)
-    fn complexity(&self) -> u32 {
+    pub fn complexity(&self) -> u32 {
         if self.methods.is_empty() {
             self.real_complexity
         } else {
@@ -344,6 +344,11 @@ fn analyze_source(source: &str) -> Result<(Vec<FunctionComplexity>, Vec<ClassCom
     }
     
     Ok((all_functions, visitor.classes, line_index))
+}
+
+/// Public API for parallel module - returns full analysis results.
+pub fn analyze_source_full(source: &str) -> Result<(Vec<FunctionComplexity>, Vec<ClassComplexity>, LineIndex), String> {
+    analyze_source(source)
 }
 
 /// Public API for parallel module - returns cyclomatic complexity as Vec of (name, complexity).
