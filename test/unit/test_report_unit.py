@@ -100,9 +100,7 @@ def test_report_no_message_wrapped(capsys):
     mock_get_terminal_size = mock.Mock(return_value=(50, 24))
     mock_shutil = mock.Mock(get_terminal_size=mock_get_terminal_size)
 
-    with mock.patch("wily.commands.report.State", mock_State), mock.patch(
-        "wily.helper.shutil", mock_shutil
-    ):
+    with mock.patch("wily.commands.report.State", mock_State), mock.patch("wily.helper.shutil", mock_shutil):
         report(
             config=mock_config,
             path=path,
@@ -384,9 +382,7 @@ def test_report_html():
 
     mock_State, mock_config = get_mock_state_and_config(3, with_keyerror=True)
 
-    with mock.patch("wily.commands.report.State", mock_State), mock.patch(
-        "wily.commands.report.copytree"
-    ):
+    with mock.patch("wily.commands.report.State", mock_State), mock.patch("wily.commands.report.copytree"):
         report(
             config=mock_config,
             path=path,
@@ -408,7 +404,5 @@ def get_outputs():
     enter = mock.MagicMock(return_value=output)
     writer = mock.MagicMock(__enter__=enter)
     opener = mock.MagicMock(return_value=writer)
-    mock_output = mock.MagicMock(
-        is_file=True, suffix=".html", parents=[mock.MagicMock()], open=opener
-    )
+    mock_output = mock.MagicMock(is_file=True, suffix=".html", parents=[mock.MagicMock()], open=opener)
     return mock_output, output

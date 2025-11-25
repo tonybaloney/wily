@@ -49,9 +49,7 @@ def test_handle_no_cache():
             runner.invoke(main.cli, ["setup"])
             assert mock_input.called
             assert build_command.called
-            build_command.assert_called_with(
-                max_revisions=11, targets=["."], operators=None
-            )
+            build_command.assert_called_with(max_revisions=11, targets=["."], operators=None)
 
 
 def test_build():
@@ -71,9 +69,7 @@ def test_build_with_opts():
     """
     with patch("wily.commands.build.build") as build:
         runner = CliRunner()
-        result = runner.invoke(
-            main.cli, ["build", "wily", "-n 1", "-o raw,maintainability"]
-        )
+        result = runner.invoke(main.cli, ["build", "wily", "-n 1", "-o raw,maintainability"])
         assert result.exit_code == 0
         assert build.called
         assert build.call_args[1]["config"].max_revisions == 1
@@ -149,9 +145,7 @@ def test_report_with_opts():
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.commands.report.report") as report:
             runner = CliRunner()
-            result = runner.invoke(
-                main.cli, ["report", "foo.py", "example_metric", "-n 101", "--message"]
-            )
+            result = runner.invoke(main.cli, ["report", "foo.py", "example_metric", "-n 101", "--message"])
             assert result.exit_code == 0, result.stdout
             assert report.called
             assert check_cache.called
@@ -268,9 +262,7 @@ def test_report_html_format_with_output():
             assert report.call_args[1]["include_message"]
             assert report.call_args[1]["n"] == 101
             assert report.call_args[1]["format"] == ReportFormat.HTML
-            assert report.call_args[1]["output"] == Path().cwd() / Path(
-                "reports/out.html"
-            )
+            assert report.call_args[1]["output"] == Path().cwd() / Path("reports/out.html")
 
 
 def test_graph():
@@ -280,9 +272,7 @@ def test_graph():
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.commands.graph.graph") as graph:
             runner = CliRunner()
-            result = runner.invoke(
-                main.cli, ["graph", "foo.py", "-m", "example_metric"]
-            )
+            result = runner.invoke(main.cli, ["graph", "foo.py", "-m", "example_metric"])
             assert result.exit_code == 0
             assert graph.called
             assert check_cache.called
@@ -315,9 +305,7 @@ def test_graph_multiple_metrics():
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.commands.graph.graph") as graph:
             runner = CliRunner()
-            result = runner.invoke(
-                main.cli, ["graph", "foo.py", "-m", "example_metric,another_metric"]
-            )
+            result = runner.invoke(main.cli, ["graph", "foo.py", "-m", "example_metric,another_metric"])
             assert result.exit_code == 0
             assert graph.called
             assert check_cache.called
@@ -332,9 +320,7 @@ def test_graph_with_output():
     with patch("wily.__main__.exists", return_value=True) as check_cache:
         with patch("wily.commands.graph.graph") as graph:
             runner = CliRunner()
-            result = runner.invoke(
-                main.cli, ["graph", "foo.py", "-m", "example_metric", "-o", "foo.html"]
-            )
+            result = runner.invoke(main.cli, ["graph", "foo.py", "-m", "example_metric", "-o", "foo.html"])
             assert result.exit_code == 0
             assert graph.called
             assert check_cache.called

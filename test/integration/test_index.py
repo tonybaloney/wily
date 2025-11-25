@@ -41,9 +41,7 @@ def test_index_with_messages_wrapped(builddir):
     Test that index works with a build with git commit messages and wrapping
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "index", "--message", "--wrap"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "index", "--message", "--wrap"])
     assert result.stdout.count("An author") == 3
     assert "basic test" in result.stdout
     assert "add line" in result.stdout

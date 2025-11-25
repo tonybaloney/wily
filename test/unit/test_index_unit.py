@@ -74,9 +74,7 @@ def test_index_without_message_wrapped(capsys):
     mock_get_terminal_size = mock.Mock(return_value=(30, 24))
     mock_shutil = mock.Mock(get_terminal_size=mock_get_terminal_size)
 
-    with mock.patch("wily.helper.shutil", mock_shutil), mock.patch(
-        "wily.commands.index.State", mock_State
-    ):
+    with mock.patch("wily.helper.shutil", mock_shutil), mock.patch("wily.commands.index.State", mock_State):
         index(mock_config, include_message=False, wrap=True)
 
     captured = capsys.readouterr()
@@ -133,9 +131,7 @@ def test_index_with_message_wrapped(capsys):
     mock_get_terminal_size = mock.Mock(return_value=(45, 24))
     mock_shutil = mock.Mock(get_terminal_size=mock_get_terminal_size)
 
-    with mock.patch("wily.helper.shutil", mock_shutil), mock.patch(
-        "wily.commands.index.State", mock_State
-    ):
+    with mock.patch("wily.helper.shutil", mock_shutil), mock.patch("wily.commands.index.State", mock_State):
         index(mock_config, include_message=True, wrap=True)
 
     captured = capsys.readouterr()

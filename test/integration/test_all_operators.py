@@ -3,6 +3,7 @@ Parameterised tests for each operator (and some combinations).
 
 Build them and test out some of the metrics/commands work correctly.
 """
+
 import pathlib
 import sys
 from textwrap import dedent
@@ -37,9 +38,7 @@ def test_operator(operator, gitdir):
     )
     assert result.exit_code == 0, result.stdout
 
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "report", _path], catch_exceptions=False
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", gitdir, "report", _path], catch_exceptions=False)
     assert result.exit_code == 0, result.stdout
 
     result = runner.invoke(

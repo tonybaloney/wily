@@ -22,9 +22,7 @@ def test_rank_single_file_default_metric(builddir):
 def test_rank_single_file_default_metric_wrapped(builddir):
     """Test the rank feature with default metric and wrapping"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "--wrap", "src/test.py"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "--wrap", "src/test.py"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -83,18 +81,14 @@ def test_rank_directory_default_unindexed_revision(builddir):
 def test_rank_single_file_informational(builddir):
     """Test the rank feature with Informational metric"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "src/test.py", "raw.loc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/test.py", "raw.loc"])
     assert result.exit_code == 0, result.stdout
 
 
 def test_rank_directory_custom_metric(builddir):
     """Test the rank feature with AimHigh metric"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "src/", "raw.comments"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/", "raw.comments"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -108,36 +102,28 @@ def test_rank_directory_no_path_target(builddir):
 def test_rank_directory_limit(builddir):
     """Test the rank feature with limit"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "-l 2"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "-l 2"])
     assert result.exit_code == 0, result.stdout
 
 
 def test_rank_directory_desc(builddir):
     """Test the rank feature descending order"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "--desc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "--desc"])
     assert result.exit_code == 0, result.stdout
 
 
 def test_rank_directory_invalid_key(builddir):
     """Test the rank feature descending order with an invalid key"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "invalid/", "raw.comments", "--desc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "invalid/", "raw.comments", "--desc"])
     assert result.exit_code == 0, result.stdout
 
 
 def test_rank_directory_asc(builddir):
     """Test the rank feature ascending order"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "--asc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "--asc"])
     assert result.exit_code == 0, result.stdout
 
 

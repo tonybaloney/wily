@@ -6,6 +6,7 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
+
 import pathlib
 import sys
 from unittest.mock import patch
@@ -27,9 +28,7 @@ def test_build_not_git_repo(tmpdir, cache_path):
     Test that build defaults to filesystem in a non-git directory
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"]
-    )
+    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"])
     assert result.exit_code == 0, result.stdout
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
@@ -42,9 +41,7 @@ def test_build_custom_cache(tmpdir):
     Test that build defaults to filesystem in a non-git directory with custom cache path.
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"]
-    )
+    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"])
     assert result.exit_code == 0, result.stdout
     cache_path = tmpdir / ".wily"
     assert cache_path.exists()
@@ -84,9 +81,7 @@ def test_build_crash(tmpdir):
 
     import wily.commands.build
 
-    with patch.object(
-        wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")
-    ) as bar_finish:
+    with patch.object(wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")) as bar_finish:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert bar_finish.called
@@ -244,9 +239,7 @@ def test_build_no_commits(tmpdir):
     repo.close()
 
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", tmpdir, "--skip-ignore-check"]
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir, "--skip-ignore-check"])
     assert result.exit_code == 1, result.stdout
 
 

@@ -1,6 +1,7 @@
 """
 Tests for the cyclomatic complexity operator's ability to handle bad data.
 """
+
 from unittest import mock
 
 import wily.operators.cyclomatic
@@ -43,19 +44,26 @@ def test_cyclomatic_file_read_error(mock_open, mock_iter):
 @mock.patch("wily.operators.cyclomatic.harvest_cyclomatic_metrics")
 def test_cyclomatic_function_result(mock_harvest, mock_iter):
     """Test processing of function results from Rust backend."""
-    mock_harvest.return_value = [("test.py", {
-        "functions": [{
-            "name": "foo",
-            "fullname": "foo",
-            "lineno": 1,
-            "endline": 4,
-            "complexity": 2,
-            "is_method": False,
-            "classname": None,
-            "closures": [],
-        }],
-        "classes": []
-    })]
+    mock_harvest.return_value = [
+        (
+            "test.py",
+            {
+                "functions": [
+                    {
+                        "name": "foo",
+                        "fullname": "foo",
+                        "lineno": 1,
+                        "endline": 4,
+                        "complexity": 2,
+                        "is_method": False,
+                        "classname": None,
+                        "closures": [],
+                    }
+                ],
+                "classes": [],
+            },
+        )
+    ]
     op = wily.operators.cyclomatic.CyclomaticComplexityOperator(DEFAULT_CONFIG, ["."])
     results = op.run("test.py", {})
     assert results["test.py"]["total"]["complexity"] == 2

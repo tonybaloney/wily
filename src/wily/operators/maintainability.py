@@ -69,7 +69,7 @@ class MaintainabilityIndexOperator(BaseOperator):
         if sources:
             multi = self.defaults.get("multi", True)
             rust_results = dict(harvest_maintainability_metrics(sources, multi=multi))
-            
+
             for filename, metrics in rust_results.items():
                 if "error" in metrics:
                     logger.debug(
