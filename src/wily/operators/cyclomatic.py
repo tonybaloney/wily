@@ -1,18 +1,17 @@
 """
 Cyclomatic complexity metric for each function/method.
 
-Provided by the radon library.
+Uses the Rust parser backend for performance.
 """
 
 import statistics
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, List, Tuple
 
-import radon.cli.harvest as harvesters
 from radon.cli import Config
-from radon.complexity import SCORE
-from radon.visitors import Class, Function
+from radon.cli.tools import iter_filenames
 
 from wily import logger
+from wily._rust import harvest_cyclomatic_metrics
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
@@ -29,7 +28,7 @@ class CyclomaticComplexityOperator(BaseOperator):
         "max": "F",
         "no_assert": True,
         "show_closures": False,
-        "order": SCORE,
+        "order": lambda x: -getattr(x, "complexity"),
         "include_ipynb": True,
         "ipynb_cells": True,
     }
@@ -53,10 +52,9 @@ class CyclomaticComplexityOperator(BaseOperator):
         :param config: The wily configuration.
         :param targets: An iterable of paths from which to harvest metrics.
         """
-        # TODO: Import config for harvester from .wily.cfg
         logger.debug("Using %s with %s for CC metrics", targets, self.defaults)
-
-        self.harvester = harvesters.CCHarvester(targets, config=Config(**self.defaults))
+        self._targets = tuple(targets)
+        self._radon_config = Config(**self.defaults)
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -66,60 +64,82 @@ class CyclomaticComplexityOperator(BaseOperator):
         :param options: Any runtime options.
         :return: The operator results.
         """
-        logger.debug("Running CC harvester")
+        logger.debug("Running CC harvester via Rust")
+
+        sources, errors = self._collect_sources()
         results: Dict[str, Dict[str, Any]] = {}
-        for filename, details in dict(self.harvester.results).items():
-            results[filename] = {"detailed": {}, "total": {}}
-            total = 0  # running CC total
-            for instance in details:
-                if isinstance(instance, Class):
-                    i = self._dict_from_class(instance)
-                elif isinstance(instance, Function):
-                    i = self._dict_from_function(instance)
-                else:
-                    if isinstance(instance, str) and instance == "error":
-                        logger.debug(
-                            "Failed to run CC harvester on %s : %s",
-                            filename,
-                            details["error"],
-                        )
-                        continue
-                    else:
-                        logger.warning(
-                            "Unexpected result from Radon : %s of %s. Please report on Github.",
-                            instance,
-                            type(instance),
-                        )
-                        continue
-                results[filename]["detailed"][i["fullname"]] = i
-                del i["fullname"]
-                total += i["complexity"]
-            results[filename]["total"]["complexity"] = total
+
+        if sources:
+            rust_results = dict(harvest_cyclomatic_metrics(sources))
+            for filename, details in rust_results.items():
+                if "error" in details:
+                    logger.debug(
+                        "Failed to run CC harvester on %s : %s",
+                        filename,
+                        details["error"],
+                    )
+                    results[filename] = {"detailed": {}, "total": {"complexity": 0}}
+                    continue
+
+                results[filename] = {"detailed": {}, "total": {}}
+                total = 0  # running CC total
+
+                # Process functions (includes methods from classes)
+                for func in details.get("functions", []):
+                    i = self._dict_from_function(func)
+                    results[filename]["detailed"][i["fullname"]] = i
+                    del i["fullname"]
+                    total += i["complexity"]
+
+                # Process classes
+                for cls in details.get("classes", []):
+                    i = self._dict_from_class(cls)
+                    results[filename]["detailed"][i["fullname"]] = i
+                    del i["fullname"]
+                    total += i["complexity"]
+
+                results[filename]["total"]["complexity"] = total
+
+        for filename, error_payload in errors.items():
+            results[filename] = {"detailed": {}, "total": error_payload}
+
         return results
 
+    def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
+        sources: List[Tuple[str, str]] = []
+        errors: Dict[str, Dict[str, str]] = {}
+        for name in iter_filenames(self._targets, self._radon_config.exclude, self._radon_config.ignore):
+            try:
+                with open(name, encoding="utf-8") as fobj:
+                    sources.append((name, fobj.read()))
+            except Exception as exc:  # pragma: no cover - depends on filesystem state
+                errors[name] = {"error": str(exc)}
+
+        return sources, errors
+
     @staticmethod
-    def _dict_from_function(l: Function) -> Dict[str, Any]:
+    def _dict_from_function(f: Dict[str, Any]) -> Dict[str, Any]:
         return {
-            "name": l.name,
-            "is_method": l.is_method,
-            "classname": l.classname,
-            "closures": l.closures,
-            "complexity": l.complexity,
-            "fullname": l.fullname,
-            "loc": l.endline - l.lineno,
-            "lineno": l.lineno,
-            "endline": l.endline,
+            "name": f["name"],
+            "is_method": f["is_method"],
+            "classname": f["classname"],
+            "closures": f.get("closures", []),
+            "complexity": f["complexity"],
+            "fullname": f["fullname"],
+            "loc": f["endline"] - f["lineno"],
+            "lineno": f["lineno"],
+            "endline": f["endline"],
         }
 
     @staticmethod
-    def _dict_from_class(l: Class) -> Dict[str, Any]:
+    def _dict_from_class(c: Dict[str, Any]) -> Dict[str, Any]:
         return {
-            "name": l.name,
-            "inner_classes": l.inner_classes,
-            "real_complexity": l.real_complexity,
-            "complexity": l.complexity,
-            "fullname": l.fullname,
-            "loc": l.endline - l.lineno,
-            "lineno": l.lineno,
-            "endline": l.endline,
+            "name": c["name"],
+            "inner_classes": c.get("inner_classes", []),
+            "real_complexity": c["real_complexity"],
+            "complexity": c["complexity"],
+            "fullname": c["fullname"],
+            "loc": c["endline"] - c["lineno"],
+            "lineno": c["lineno"],
+            "endline": c["endline"],
         }
