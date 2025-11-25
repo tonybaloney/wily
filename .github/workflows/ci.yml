@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v2
-      - run: uv tool run ruff --format=github .
+      - run: uv tool run ruff check .
 
   pyright:
     runs-on: ubuntu-latest
