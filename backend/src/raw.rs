@@ -184,6 +184,20 @@ fn count_lines(source: &str) -> u32 {
     source.lines().count() as u32
 }
 
+/// Public API for parallel module - returns raw metrics as a HashMap.
+pub fn analyze_source_raw(source: &str) -> std::collections::HashMap<String, i64> {
+    let counts = analyze_source(source);
+    let mut map = std::collections::HashMap::new();
+    map.insert("loc".to_string(), counts.loc as i64);
+    map.insert("lloc".to_string(), counts.lloc as i64);
+    map.insert("sloc".to_string(), counts.sloc as i64);
+    map.insert("comments".to_string(), counts.comments as i64);
+    map.insert("blank".to_string(), counts.blank as i64);
+    map.insert("multi".to_string(), counts.multi as i64);
+    map.insert("single_comments".to_string(), counts.single_comments as i64);
+    map
+}
+
 /// Count logical lines of code using token stream.
 /// A logical line ends at Newline tokens (not NonLogicalNewline).
 /// Each logical line can contain multiple statements separated by semicolons.

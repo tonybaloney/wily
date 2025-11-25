@@ -204,7 +204,7 @@ def test_radon_cyclomatic_baseline() -> None:
 
 def test_rust_cyclomatic_matches_radon() -> None:
     """The Rust harvester should match Radon's cyclomatic complexity metrics."""
-    from wily._rust import harvest_cyclomatic_metrics
+    from wily.backend import harvest_cyclomatic_metrics
 
     filename = "sample.py"
     rust_results = dict(harvest_cyclomatic_metrics([(filename, SAMPLE_PROGRAM)]))[filename]

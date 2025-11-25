@@ -41,7 +41,7 @@ test = [
 dev = [
     "maturin>=1.10,<2.0",
     "codespell[toml]",
-    "ruff~=0.0.277",
+    "ruff~=0.14",
     "safety~=2.3.4",
 ]
 doc = [
@@ -50,27 +50,6 @@ doc = [
     "urllib3>=2.5.0",
 ]
 
-[dependency-groups]
-lint = [
-    "codespell[toml]",
-    "ruff~=0.0.277",
-    "safety~=2.3.4",
-]
-test = [
-    "pytest~=7.2",
-    "pytest-cov~=4.1.0",
-]
-docs = [
-    "sphinx>=7.0,<9.0",
-    "sphinx-click>=5.1,<6.0",
-    "urllib3>=2.5.0",
-]
-dev = [
-    "maturin>=1.5,<2.0",
-    { include-group = "lint" },
-    { include-group = "test" },
-    { include-group = "docs" },
-]
 
 [project.urls]
 Homepage = "https://github.com/tonybaloney/wily"
@@ -81,24 +60,17 @@ wily = "wily.__main__:cli"
 
 [tool.maturin]
 bindings = "pyo3"
-manifest-path = "rust/Cargo.toml"
-module-name = "wily._rust"
+manifest-path = "backend/Cargo.toml"
+module-name = "wily.backend"
 python-source = "src"
 
 [tool.uv]
 package = true
-default-groups = ["dev"]
 
 [tool.codespell]
 check-filenames = "True"
 ignore-words-list = "fo,wil,someon"
 skip = "./.*,*.json,*.po,*.svg"
-
-[tool.mypy]
-ignore_missing_imports = true
-show_error_codes = true
-warn_unused_configs = true
-warn_unused_ignores = true
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "tests_*.py", "test_*.py"]

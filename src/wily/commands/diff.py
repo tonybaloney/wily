@@ -11,7 +11,7 @@ from pathlib import Path
 import tabulate
 
 from wily import format_date, format_revision, logger
-from wily._rust import iter_filenames
+from wily.backend import iter_filenames
 from wily.archivers import resolve_archiver
 from wily.commands.build import run_operator
 from wily.config import DEFAULT_PATH

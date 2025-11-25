@@ -65,7 +65,7 @@ def test_radon_mi_baseline() -> None:
 
 def test_rust_mi_matches_radon() -> None:
     """The Rust harvester should produce similar MI to Radon."""
-    from wily._rust import harvest_maintainability_metrics
+    from wily.backend import harvest_maintainability_metrics
 
     # Get Radon results
     radon_mi = mi_visit(SAMPLE_PROGRAM, multi=True)

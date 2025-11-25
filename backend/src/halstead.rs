@@ -369,6 +369,46 @@ fn analyze_source(source: &str) -> Result<(HalsteadMetrics, Vec<FunctionHalstead
     Ok((visitor.metrics, visitor.functions, line_index))
 }
 
+/// Public API for parallel module - returns Halstead metrics as Vec of (name, metrics_dict).
+pub fn analyze_source_halstead(source: &str) -> Vec<(String, std::collections::HashMap<String, f64>)> {
+    match analyze_source(source) {
+        Ok((total_metrics, functions, _line_index)) => {
+            let mut results = Vec::new();
+            
+            // Add function metrics
+            for func in functions {
+                let mut map = std::collections::HashMap::new();
+                map.insert("h1".to_string(), func.metrics.h1() as f64);
+                map.insert("h2".to_string(), func.metrics.h2() as f64);
+                map.insert("N1".to_string(), func.metrics.n1() as f64);
+                map.insert("N2".to_string(), func.metrics.n2() as f64);
+                map.insert("vocabulary".to_string(), func.metrics.vocabulary() as f64);
+                map.insert("length".to_string(), func.metrics.length() as f64);
+                map.insert("volume".to_string(), func.metrics.volume());
+                map.insert("difficulty".to_string(), func.metrics.difficulty());
+                map.insert("effort".to_string(), func.metrics.effort());
+                results.push((func.name, map));
+            }
+            
+            // Add total metrics
+            let mut total_map = std::collections::HashMap::new();
+            total_map.insert("h1".to_string(), total_metrics.h1() as f64);
+            total_map.insert("h2".to_string(), total_metrics.h2() as f64);
+            total_map.insert("N1".to_string(), total_metrics.n1() as f64);
+            total_map.insert("N2".to_string(), total_metrics.n2() as f64);
+            total_map.insert("vocabulary".to_string(), total_metrics.vocabulary() as f64);
+            total_map.insert("length".to_string(), total_metrics.length() as f64);
+            total_map.insert("volume".to_string(), total_metrics.volume());
+            total_map.insert("difficulty".to_string(), total_metrics.difficulty());
+            total_map.insert("effort".to_string(), total_metrics.effort());
+            results.push(("total".to_string(), total_map));
+            
+            results
+        }
+        Err(_) => Vec::new(),
+    }
+}
+
 #[pyfunction]
 pub fn harvest_halstead_metrics(
     py: Python<'_>,

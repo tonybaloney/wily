@@ -10,7 +10,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from wily import logger
-from wily._rust import harvest_halstead_metrics
+from wily.backend import harvest_halstead_metrics
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType

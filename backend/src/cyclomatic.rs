@@ -346,6 +346,19 @@ fn analyze_source(source: &str) -> Result<(Vec<FunctionComplexity>, Vec<ClassCom
     Ok((all_functions, visitor.classes, line_index))
 }
 
+/// Public API for parallel module - returns cyclomatic complexity as Vec of (name, complexity).
+pub fn analyze_source_cc(source: &str) -> Vec<(String, i64)> {
+    match analyze_source(source) {
+        Ok((functions, _classes, _line_index)) => {
+            functions
+                .iter()
+                .map(|f| (f.name.clone(), f.complexity as i64))
+                .collect()
+        }
+        Err(_) => Vec::new(),
+    }
+}
+
 #[pyfunction]
 pub fn harvest_cyclomatic_metrics(
     py: Python<'_>,

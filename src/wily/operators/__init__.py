@@ -11,7 +11,7 @@ from typing import (
 
 from wily.config.types import WilyConfig
 from wily.lang import _
-from wily._rust import iter_filenames
+from wily.backend import iter_filenames
 
 
 class MetricType(Enum):

@@ -1,10 +1,10 @@
 [package]
-name = "wily_rust"
+name = "wily_backend"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "wily_rust"
+name = "wily_backend"
 crate-type = ["cdylib"]
 
 [dependencies]
@@ -17,3 +17,4 @@ ruff_source_file = { git = "https://github.com/astral-sh/ruff", package = "ruff_
 walkdir = "2"
 glob = "0.3"
 regex = "1"
+rayon = "1.10"
