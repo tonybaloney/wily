@@ -12,13 +12,11 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
 ]
 dependencies = [
@@ -31,7 +29,7 @@ dependencies = [
     "rich>=13,<14",
     "dataclasses; python_version == '3.6'",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic=["version", "description"]
 
 [project.optional-dependencies]
@@ -42,9 +40,7 @@ test = [
 ]
 dev = [
     "maturin>=1.10,<2.0",
-    "black~=22.6.0",
     "codespell[toml]",
-    "mypy~=0.961",
     "ruff~=0.0.277",
     "safety~=2.3.4",
 ]
@@ -56,9 +52,7 @@ doc = [
 
 [dependency-groups]
 lint = [
-    "black~=22.6.0",
     "codespell[toml]",
-    "mypy~=0.961",
     "ruff~=0.0.277",
     "safety~=2.3.4",
 ]
