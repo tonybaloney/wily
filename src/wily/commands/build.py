@@ -11,7 +11,14 @@ import pathlib
 from sys import exit
 from typing import Any, Dict, List, Tuple
 
-from progress.bar import Bar
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
 
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
@@ -86,102 +93,104 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info("Running operators - %s", _op_desc)
 
-    bar = Bar("Processing", max=len(revisions) * len(operators))
+    total_steps = len(revisions) * len(operators)
     state.operators = operators
+    progress_columns = (
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+    )
 
     # Index all files the first time, only scan changes afterward
     seed = True
     try:
-        with multiprocessing.Pool(processes=len(operators)) as pool:
-            prev_stats: Dict[str, Dict] = {}
-            for revision in revisions:
-                # Checkout target revision
-                archiver_instance.checkout(revision, config.checkout_options)
-                stats: Dict[str, Dict] = {"operator_data": {}}
+        with Progress(*progress_columns) as progress:
+            task_id = progress.add_task("Processing", total=total_steps)
+            with multiprocessing.Pool(processes=len(operators)) as pool:
+                prev_stats: Dict[str, Dict] = {}
+                for revision in revisions:
+                    # Checkout target revision
+                    archiver_instance.checkout(revision, config.checkout_options)
+                    stats: Dict[str, Dict] = {"operator_data": {}}
 
-                # TODO : Check that changed files are children of the targets
-                targets = [
-                    str(pathlib.Path(config.path) / pathlib.Path(file))
-                    for file in revision.added_files + revision.modified_files
-                    # if any([True for target in config.targets if
-                    #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
-                ]
+                    # TODO : Check that changed files are children of the targets
+                    targets = [
+                        str(pathlib.Path(config.path) / pathlib.Path(file))
+                        for file in revision.added_files + revision.modified_files
+                        # if any([True for target in config.targets if
+                        #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
+                    ]
 
-                # Run each operator as a separate process
-                data = pool.starmap(
-                    run_operator,
-                    [(operator, revision, config, targets) for operator in operators],
-                )
-                # data is a list of tuples, where for each operator, it is a tuple of length 2,
-                operator_data_len = 2
-                # second element in the tuple, i.e data[i][1]) has the collected data
-                for i in range(0, len(operators)):
-                    if i < len(data) and len(data[i]) >= operator_data_len and len(data[i][1]) == 0:
-                        logger.warning(
-                            "In revision %s, for operator %s: No data collected",
-                            revision.key,
-                            operators[i].name,
-                        )
+                    # Run each operator as a separate process
+                    data = pool.starmap(
+                        run_operator,
+                        [(operator, revision, config, targets) for operator in operators],
+                    )
+                    # data is a list of tuples, where for each operator, it is a tuple of length 2,
+                    operator_data_len = 2
+                    # second element in the tuple, i.e data[i][1]) has the collected data
+                    for i in range(0, len(operators)):
+                        if i < len(data) and len(data[i]) >= operator_data_len and len(data[i][1]) == 0:
+                            logger.warning(
+                                "In revision %s, for operator %s: No data collected",
+                                revision.key,
+                                operators[i].name,
+                            )
 
-                # Map the data back into a dictionary
-                for operator_name, result in data:
-                    # find all unique directories in the results
-                    indices = set(result.keys())
+                    # Map the data back into a dictionary
+                    for operator_name, result in data:
+                        # find all unique directories in the results
+                        indices = set(result.keys())
+                        # Copy the ir from any unchanged files from the prev revision
+                        if not seed:
+                            # File names in result are platform dependent, so we convert
+                            # to Path and back to str.
+                            files = {str(pathlib.Path(f)) for f in revision.tracked_files}
+                            missing_indices = files - indices
+                            # TODO: Check existence of file path.
+                            for missing in missing_indices:
+                                # Don't copy aggregate keys as their values may have changed
+                                if missing in revision.tracked_dirs:
+                                    continue
+                                # previous index may not have that operator
+                                if operator_name not in prev_stats["operator_data"]:
+                                    continue
+                                # previous index may not have file either
+                                if missing not in prev_stats["operator_data"][operator_name]:
+                                    continue
+                                result[missing] = prev_stats["operator_data"][operator_name][missing]
+                            for deleted in revision.deleted_files:
+                                result.pop(deleted, None)
 
-                    # For a seed run, there is no previous change set, so use current
-                    if seed:
-                        prev_indices = indices
-
-                    # Copy the ir from any unchanged files from the prev revision
-                    if not seed:
-                        # File names in result are platform dependent, so we convert
+                        # Add empty path for storing total aggregates
+                        dirs = [""]
+                        # Directory names in result are platform dependent, so we convert
                         # to Path and back to str.
-                        files = {str(pathlib.Path(f)) for f in revision.tracked_files}
-                        missing_indices = files - indices
-                        # TODO: Check existence of file path.
-                        for missing in missing_indices:
-                            # Don't copy aggregate keys as their values may have changed
-                            if missing in revision.tracked_dirs:
-                                continue
-                            # previous index may not have that operator
-                            if operator_name not in prev_stats["operator_data"]:
-                                continue
-                            # previous index may not have file either
-                            if missing not in prev_stats["operator_data"][operator_name]:
-                                continue
-                            result[missing] = prev_stats["operator_data"][operator_name][missing]
-                        for deleted in revision.deleted_files:
-                            result.pop(deleted, None)
+                        dirs += [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
+                        # Aggregate metrics across all root paths using the aggregate function in the metric
+                        # Note assumption is that nested dirs are listed after parent, hence sorting.
+                        for root in sorted(dirs):
+                            # find all matching entries recursively
+                            aggregates = [path for path in result.keys() if path.startswith(root)]
 
-                    # Add empty path for storing total aggregates
-                    dirs = [""]
-                    # Directory names in result are platform dependent, so we convert
-                    # to Path and back to str.
-                    dirs += [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
-                    # Aggregate metrics across all root paths using the aggregate function in the metric
-                    # Note assumption is that nested dirs are listed after parent, hence sorting.
-                    for root in sorted(dirs):
-                        # find all matching entries recursively
-                        aggregates = [path for path in result.keys() if path.startswith(root)]
+                            result[str(root)] = {"total": {}}
+                            # aggregate values
+                            for metric in resolve_operator(operator_name).operator_cls.metrics:
+                                func = metric.aggregate
+                                values = [result[aggregate]["total"][metric.name] for aggregate in aggregates if aggregate in result and metric.name in result[aggregate]["total"]]
+                                if len(values) > 0:
+                                    result[str(root)]["total"][metric.name] = func(values)
 
-                        result[str(root)] = {"total": {}}
-                        # aggregate values
-                        for metric in resolve_operator(operator_name).operator_cls.metrics:
-                            func = metric.aggregate
-                            values = [result[aggregate]["total"][metric.name] for aggregate in aggregates if aggregate in result and metric.name in result[aggregate]["total"]]
-                            if len(values) > 0:
-                                result[str(root)]["total"][metric.name] = func(values)
+                        stats["operator_data"][operator_name] = result
+                        progress.advance(task_id)
 
-                    prev_indices = set(result.keys())
-                    stats["operator_data"][operator_name] = result
-                    bar.next()
-
-                prev_stats = stats
-                seed = False
-                ir = index.add(revision, operators=operators)
-                ir.store(config, archiver_instance.name, stats)
-        index.save()
-        bar.finish()
+                    prev_stats = stats
+                    seed = False
+                    ir = index.add(revision, operators=operators)
+                    ir.store(config, archiver_instance.name, stats)
+            index.save()
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)
         raise e

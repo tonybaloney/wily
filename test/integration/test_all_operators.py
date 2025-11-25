@@ -27,7 +27,6 @@ operators = (
 )
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.parametrize("operator", operators)
 def test_operator(operator, gitdir):
     runner = CliRunner()
