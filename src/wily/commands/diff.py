@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
-import radon.cli.harvest
 import tabulate
 
 from wily import format_date, format_revision, logger
@@ -27,6 +26,7 @@ from wily.operators import (
     resolve_operator,
 )
 from wily.state import State
+from wily._rust import iter_filenames
 
 
 def diff(
@@ -60,7 +60,7 @@ def diff(
         targets = files
 
     # Expand directories to paths
-    files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+    files = [os.path.relpath(fn, config.path) for fn in iter_filenames(targets)]
     logger.debug("Targeting - %s", files)
 
     if not revision:

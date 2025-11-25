@@ -8,8 +8,7 @@ Uses the Rust parser backend for performance.
 
 from typing import Any, Dict, Iterable, List, Tuple
 
-from radon.cli import Config
-from radon.cli.tools import iter_filenames
+from wily._rust import iter_filenames
 
 from wily import logger
 from wily._rust import harvest_halstead_metrics
@@ -58,7 +57,8 @@ class HalsteadOperator(BaseOperator):
         """
         logger.debug("Using %s with %s for Halstead metrics", targets, self.defaults)
         self._targets = tuple(targets)
-        self._radon_config = Config(**self.defaults)
+        self._exclude = self.defaults.get("exclude") or None
+        self._ignore = self.defaults.get("ignore") or None
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -105,7 +105,7 @@ class HalsteadOperator(BaseOperator):
         """Collect source files and their contents."""
         sources: List[Tuple[str, str]] = []
         errors: Dict[str, Dict[str, str]] = {}
-        for name in iter_filenames(self._targets, self._radon_config.exclude, self._radon_config.ignore):
+        for name in iter_filenames(self._targets, self._exclude, self._ignore):
             try:
                 with open(name, encoding="utf-8") as fobj:
                     sources.append((name, fobj.read()))

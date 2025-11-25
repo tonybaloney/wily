@@ -2,8 +2,7 @@
 
 from typing import Any, Dict, Iterable, List, Tuple, TypedDict
 
-from radon.cli import Config
-from radon.cli.tools import iter_filenames
+from wily._rust import iter_filenames
 
 from wily import (
     logger,
@@ -63,7 +62,8 @@ class RawMetricsOperator(BaseOperator):
         # TODO: Use config from wily.cfg for harvester
         logger.debug("Using %s with %s for Raw metrics", targets, self.defaults)
         self._targets = tuple(targets)
-        self._radon_config = Config(**self.defaults)
+        self._exclude = self.defaults.get("exclude") or None
+        self._ignore = self.defaults.get("ignore") or None
 
     def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
         """
@@ -91,9 +91,9 @@ class RawMetricsOperator(BaseOperator):
     def _collect_sources(self) -> Tuple[List[Tuple[str, str]], Dict[str, Dict[str, str]]]:
         sources: List[Tuple[str, str]] = []
         errors: Dict[str, Dict[str, str]] = {}
-        for name in iter_filenames(self._targets, self._radon_config.exclude, self._radon_config.ignore):
+        for name in iter_filenames(self._targets, self._exclude, self._ignore):
             try:
-                with open(name) as fobj:
+                with open(name, encoding="utf-8") as fobj:
                     sources.append((name, fobj.read()))
             except Exception as exc:  # pragma: no cover - depends on filesystem state
                 errors[name] = {"error": str(exc)}

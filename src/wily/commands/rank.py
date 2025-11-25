@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import radon.cli.harvest
+from wily._rust import iter_filenames
 import tabulate
 
 from wily import format_date, format_revision, logger
@@ -90,7 +90,7 @@ def rank(
             targets = [path]
 
         # Expand directories to paths
-        files = [os.path.relpath(fn, config.path) for fn in radon.cli.harvest.iter_filenames(targets)]
+        files = [os.path.relpath(fn, config.path) for fn in iter_filenames(targets)]
         logger.debug("Targeting - %s", files)
 
     for item in files:
