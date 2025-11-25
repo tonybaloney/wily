@@ -81,10 +81,10 @@ def test_build_crash(tmpdir):
 
     import wily.commands.build
 
-    with patch.object(wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")) as bar_finish:
+    # Simulate a crash by patching run_operators_parallel to raise an error
+    with patch.object(wily.commands.build, "run_operators_parallel", side_effect=RuntimeError("arggh")):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
-        assert bar_finish.called
         assert result.exit_code == 1, result.stdout
 
 
