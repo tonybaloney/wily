@@ -7,7 +7,6 @@ Compares metrics between uncommitted files and indexed files.
 import multiprocessing
 import os
 from pathlib import Path
-from sys import exit
 from typing import List, Optional
 
 import radon.cli.harvest
