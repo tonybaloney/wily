@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from wily import logger
-from wily._rust import harvest_cyclomatic_metrics, iter_filenames
+from wily._rust import harvest_cyclomatic_metrics
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
@@ -103,18 +103,6 @@ class CyclomaticComplexityOperator(BaseOperator):
             results[filename] = {"detailed": {}, "total": error_payload}
 
         return results
-
-    def _collect_sources(self) -> tuple[list[tuple[str, str]], dict[str, dict[str, str]]]:
-        sources: list[tuple[str, str]] = []
-        errors: dict[str, dict[str, str]] = {}
-        for name in iter_filenames(self._targets, self._exclude, self._ignore):
-            try:
-                with open(name, encoding="utf-8") as fobj:
-                    sources.append((name, fobj.read()))
-            except Exception as exc:  # pragma: no cover - depends on filesystem state
-                errors[name] = {"error": str(exc)}
-
-        return sources, errors
 
     @staticmethod
     def _dict_from_function(f: dict[str, Any]) -> dict[str, Any]:

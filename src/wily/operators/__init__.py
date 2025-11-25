@@ -5,19 +5,13 @@ from enum import Enum
 from functools import lru_cache
 from typing import (
     Any,
-    Dict,
     Generic,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
 )
 
 from wily.config.types import WilyConfig
 from wily.lang import _
+from wily._rust import iter_filenames
 
 
 class MetricType(Enum):
@@ -107,6 +101,18 @@ class BaseOperator:
         :return: The operator results.
         """
         raise NotImplementedError
+
+    def _collect_sources(self) -> tuple[list[tuple[str, str]], dict[str, dict[str, str]]]:
+        sources: list[tuple[str, str]] = []
+        errors: dict[str, dict[str, str]] = {}
+        for name in iter_filenames(self._targets, self._exclude, self._ignore):
+            try:
+                with open(name, encoding="utf-8") as fobj:
+                    sources.append((name, fobj.read()))
+            except Exception as exc:  # pragma: no cover - depends on filesystem state
+                errors[name] = {"error": str(exc)}
+
+        return sources, errors
 
 
 from wily.operators.cyclomatic import CyclomaticComplexityOperator
