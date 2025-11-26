@@ -39,7 +39,7 @@ pub fn analyze_files_parallel<'py>(
     let include_maintainability = operators.iter().any(|o| o == "maintainability");
 
     // Read all files and release GIL during parallel processing
-    let file_contents: Vec<(String, Result<String, String>)> = py.allow_threads(|| {
+    let file_contents: Vec<(String, Result<String, String>)> = py.detach(|| {
         paths
             .par_iter()
             .map(|path| {
