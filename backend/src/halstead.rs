@@ -181,55 +181,22 @@ impl<'src> HalsteadVisitor<'src> {
 
     /// Get the operator name from a binary operator
     fn binop_name(op: &ast::Operator) -> &'static str {
-        match op {
-            ast::Operator::Add => "Add",
-            ast::Operator::Sub => "Sub",
-            ast::Operator::Mult => "Mult",
-            ast::Operator::MatMult => "MatMult",
-            ast::Operator::Div => "Div",
-            ast::Operator::Mod => "Mod",
-            ast::Operator::Pow => "Pow",
-            ast::Operator::LShift => "LShift",
-            ast::Operator::RShift => "RShift",
-            ast::Operator::BitOr => "BitOr",
-            ast::Operator::BitXor => "BitXor",
-            ast::Operator::BitAnd => "BitAnd",
-            ast::Operator::FloorDiv => "FloorDiv",
-        }
+        op.dunder()
     }
 
     /// Get the operator name from a unary operator
     fn unaryop_name(op: &ast::UnaryOp) -> &'static str {
-        match op {
-            ast::UnaryOp::Invert => "Invert",
-            ast::UnaryOp::Not => "Not",
-            ast::UnaryOp::UAdd => "UAdd",
-            ast::UnaryOp::USub => "USub",
-        }
+        op.as_str()
     }
 
     /// Get the operator name from a boolean operator
     fn boolop_name(op: &ast::BoolOp) -> &'static str {
-        match op {
-            ast::BoolOp::And => "And",
-            ast::BoolOp::Or => "Or",
-        }
+        op.as_str()
     }
 
     /// Get the operator name from a comparison operator
     fn cmpop_name(op: &ast::CmpOp) -> &'static str {
-        match op {
-            ast::CmpOp::Eq => "Eq",
-            ast::CmpOp::NotEq => "NotEq",
-            ast::CmpOp::Lt => "Lt",
-            ast::CmpOp::LtE => "LtE",
-            ast::CmpOp::Gt => "Gt",
-            ast::CmpOp::GtE => "GtE",
-            ast::CmpOp::Is => "Is",
-            ast::CmpOp::IsNot => "IsNot",
-            ast::CmpOp::In => "In",
-            ast::CmpOp::NotIn => "NotIn",
-        }
+        op.as_str()
     }
 
     /// Extract operand string from an expression - radon uses simple values
