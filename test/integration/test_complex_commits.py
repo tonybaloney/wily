@@ -209,21 +209,21 @@ def test_metric_entries(tmpdir, cache_path):
     }
     assert detailed_cyclomatic["Class1.method"] == expected_cyclomatic_method
 
-    expected_halstead_total = {
-        "h1": 2,
-        "h2": 3,
-        "N1": 2,
-        "N2": 4,
-        "vocabulary": 5,
-        "volume": 13.931568569324174,
-        "length": 6,
-        "effort": 18.575424759098897,
-        "difficulty": 1.3333333333333333,
-        "lineno": None,
-        "endline": None,
-    }
+    # Halstead total now includes function body metrics for radon compatibility.
+    # This includes the metrics from function1 (h1=2, h2=3, N1=2, N2=4)
+    # and method (h1=2, h2=6, N1=4, N2=8), merged together.
     total_halstead = data["operator_data"]["halstead"][_path1]["total"]
-    assert total_halstead == expected_halstead_total
+    assert total_halstead["h1"] == 2
+    assert total_halstead["h2"] == 9
+    assert total_halstead["N1"] == 6
+    assert total_halstead["N2"] == 12
+    assert total_halstead["vocabulary"] == 11
+    assert total_halstead["length"] == 18
+    assert abs(total_halstead["volume"] - 62.2697691354714) < 0.0001
+    assert abs(total_halstead["difficulty"] - 1.3333333333333333) < 0.0001
+    assert abs(total_halstead["effort"] - 83.02635884729514) < 0.0001
+    assert total_halstead["lineno"] is None
+    assert total_halstead["endline"] is None
 
     detailed_halstead = data["operator_data"]["halstead"][_path1]["detailed"]
     assert "function1" in detailed_halstead
@@ -234,11 +234,12 @@ def test_metric_entries(tmpdir, cache_path):
 
     assert "Class1" not in detailed_halstead
 
-    assert "Class1.method" in detailed_halstead
-    assert "lineno" in detailed_halstead["Class1.method"]
-    assert detailed_halstead["Class1.method"]["lineno"] is not None
-    assert "endline" in detailed_halstead["Class1.method"]
-    assert detailed_halstead["Class1.method"]["endline"] is not None
+    # Halstead uses just the method name (radon compatibility), unlike cyclomatic which uses Class1.method
+    assert "method" in detailed_halstead
+    assert "lineno" in detailed_halstead["method"]
+    assert detailed_halstead["method"]["lineno"] is not None
+    assert "endline" in detailed_halstead["method"]
+    assert detailed_halstead["method"]["endline"] is not None
 
     expected_raw_total = {
         "loc": 14,
