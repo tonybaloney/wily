@@ -25,10 +25,12 @@ struct RawMetrics {
 }
 
 /// Halstead metrics needed for MI calculation
+/// Note: operands_seen tracks (context, operand) pairs like radon does
 #[derive(Debug, Clone, Default)]
 struct HalsteadMetrics {
     operators_seen: HashSet<String>,
-    operands_seen: HashSet<String>,
+    /// Operands are tracked as (context, operand) pairs where context is the function name
+    operands_seen: HashSet<(Option<String>, String)>,
     operators: u32,
     operands: u32,
 }
@@ -57,20 +59,97 @@ impl HalsteadMetrics {
         }
         self.length() as f64 * (vocab as f64).log2()
     }
+
+    fn merge(&mut self, other: &HalsteadMetrics) {
+        self.operators_seen.extend(other.operators_seen.iter().cloned());
+        self.operands_seen.extend(other.operands_seen.iter().cloned());
+        self.operators += other.operators;
+        self.operands += other.operands;
+    }
 }
 
-/// Cyclomatic complexity counter
+/// Cyclomatic complexity counter that matches radon's total_complexity calculation
+/// 
+/// Radon's total_complexity = base(1) + functions_complexity + classes_complexity
+/// where functions_complexity = sum(func.complexity) - len(functions)
+/// and classes_complexity = sum(class.real_complexity) - len(classes)
 struct ComplexityVisitor {
+    /// Module-level complexity (branches outside functions/classes)
     complexity: u32,
+    /// Sum of all function complexities
+    functions_complexity_sum: u32,
+    /// Number of functions
+    function_count: u32,
+    /// Sum of all class real_complexities
+    classes_complexity_sum: u32,
+    /// Number of classes
+    class_count: u32,
 }
 
 impl ComplexityVisitor {
+    fn new() -> Self {
+        Self {
+            complexity: 0,
+            functions_complexity_sum: 0,
+            function_count: 0,
+            classes_complexity_sum: 0,
+            class_count: 0,
+        }
+    }
+
+    /// Calculate total_complexity matching radon's formula
+    fn total_complexity(&self) -> u32 {
+        // base (1) + functions_complexity + classes_complexity
+        // functions_complexity = sum - count
+        // classes_complexity = sum - count
+        let base = 1;
+        let functions_complexity = self.functions_complexity_sum.saturating_sub(self.function_count);
+        let classes_complexity = self.classes_complexity_sum.saturating_sub(self.class_count);
+        base + self.complexity + functions_complexity + classes_complexity
+    }
+
+    /// Visit a function body and return its complexity
+    fn visit_function_body(&mut self, body: &[Stmt]) -> u32 {
+        let mut func_complexity = 1; // Base complexity for function
+        let mut body_visitor = ComplexityVisitorInner::new();
+        for stmt in body {
+            body_visitor.visit_stmt(stmt);
+        }
+        func_complexity += body_visitor.complexity;
+        func_complexity
+    }
+
+    /// Visit a class body and return its real_complexity
+    fn visit_class_body(&mut self, body: &[Stmt]) -> u32 {
+        let mut class_complexity = 1; // Base complexity for class
+        for stmt in body {
+            if let Stmt::FunctionDef(func) = stmt {
+                // Method: add its complexity and count it
+                let method_complexity = self.visit_function_body(&func.body);
+                class_complexity += method_complexity;
+            } else {
+                // Non-method statements in class
+                let mut body_visitor = ComplexityVisitorInner::new();
+                body_visitor.visit_stmt(stmt);
+                class_complexity += body_visitor.complexity;
+            }
+        }
+        class_complexity
+    }
+}
+
+/// Inner complexity visitor that just counts branches (no tracking of functions/classes)
+struct ComplexityVisitorInner {
+    complexity: u32,
+}
+
+impl ComplexityVisitorInner {
     fn new() -> Self {
         Self { complexity: 0 }
     }
 }
 
-impl<'a> Visitor<'a> for ComplexityVisitor {
+impl<'a> Visitor<'a> for ComplexityVisitorInner {
     fn visit_stmt(&mut self, stmt: &'a Stmt) {
         match stmt {
             Stmt::If(node) => {
@@ -138,15 +217,108 @@ impl<'a> Visitor<'a> for ComplexityVisitor {
     }
 }
 
+impl<'a> Visitor<'a> for ComplexityVisitor {
+    fn visit_stmt(&mut self, stmt: &'a Stmt) {
+        match stmt {
+            Stmt::FunctionDef(func) => {
+                let func_complexity = self.visit_function_body(&func.body);
+                self.functions_complexity_sum += func_complexity;
+                self.function_count += 1;
+            }
+            Stmt::ClassDef(cls) => {
+                let class_complexity = self.visit_class_body(&cls.body);
+                self.classes_complexity_sum += class_complexity;
+                self.class_count += 1;
+            }
+            Stmt::If(node) => {
+                self.complexity += 1;
+                for clause in &node.elif_else_clauses {
+                    if clause.test.is_some() {
+                        self.complexity += 1;
+                    }
+                }
+                visitor::walk_stmt(self, stmt);
+            }
+            Stmt::For(_) | Stmt::While(_) => {
+                self.complexity += 1;
+                visitor::walk_stmt(self, stmt);
+            }
+            Stmt::Try(node) => {
+                self.complexity += node.handlers.len() as u32;
+                visitor::walk_stmt(self, stmt);
+            }
+            Stmt::With(node) => {
+                self.complexity += node.items.len() as u32;
+                visitor::walk_stmt(self, stmt);
+            }
+            _ => {
+                visitor::walk_stmt(self, stmt);
+            }
+        }
+    }
+
+    fn visit_expr(&mut self, expr: &'a ast::Expr) {
+        match expr {
+            ast::Expr::BoolOp(node) => {
+                self.complexity += (node.values.len() - 1) as u32;
+            }
+            ast::Expr::If(_) => {
+                self.complexity += 1;
+            }
+            ast::Expr::ListComp(node) => {
+                for gen in &node.generators {
+                    self.complexity += 1;
+                    self.complexity += gen.ifs.len() as u32;
+                }
+            }
+            ast::Expr::SetComp(node) => {
+                for gen in &node.generators {
+                    self.complexity += 1;
+                    self.complexity += gen.ifs.len() as u32;
+                }
+            }
+            ast::Expr::DictComp(node) => {
+                for gen in &node.generators {
+                    self.complexity += 1;
+                    self.complexity += gen.ifs.len() as u32;
+                }
+            }
+            ast::Expr::Generator(node) => {
+                for gen in &node.generators {
+                    self.complexity += 1;
+                    self.complexity += gen.ifs.len() as u32;
+                }
+            }
+            _ => {}
+        }
+        visitor::walk_expr(self, expr);
+    }
+}
+
 /// Halstead visitor that counts operators and operands
+/// Matches radon's HalsteadVisitor behavior by tracking function context
 struct HalsteadVisitor {
     metrics: HalsteadMetrics,
+    /// Current function context (None for module level)
+    context: Option<String>,
+    /// Function visitors for per-function metrics
+    function_visitors: Vec<HalsteadVisitor>,
 }
 
 impl HalsteadVisitor {
     fn new() -> Self {
         Self {
             metrics: HalsteadMetrics::default(),
+            context: None,
+            function_visitors: Vec::new(),
+        }
+    }
+
+    fn new_with_context(context: String) -> Self {
+        Self {
+            metrics: HalsteadMetrics::default(),
+            context: Some(context),
+            function_visitors: Vec::new(),
         }
     }
 
@@ -157,7 +329,7 @@ impl HalsteadVisitor {
 
     fn add_operand(&mut self, operand: &str) {
         self.metrics.operands += 1;
-        self.metrics.operands_seen.insert(operand.to_string());
+        self.metrics.operands_seen.insert((self.context.clone(), operand.to_string()));
     }
 
     fn binop_name(op: &ast::Operator) -> &'static str {
@@ -230,12 +402,36 @@ impl HalsteadVisitor {
 
 impl<'a> Visitor<'a> for HalsteadVisitor {
     fn visit_stmt(&mut self, stmt: &'a Stmt) {
-        if let Stmt::AugAssign(node) = stmt {
-            self.add_operator(Self::binop_name(&node.op));
-            self.add_operand(&Self::expr_to_operand(&node.target));
-            self.add_operand(&Self::expr_to_operand(&node.value));
+        match stmt {
+            Stmt::FunctionDef(node) => {
+                // Like radon, create a new visitor for the function body
+                // and merge its metrics into our total
+                let func_name = node.name.to_string();
+                let mut func_visitor = HalsteadVisitor::new_with_context(func_name.clone());
+                
+                for child in &node.body {
+                    let mut child_visitor = HalsteadVisitor::new_with_context(func_name.clone());
+                    child_visitor.visit_stmt(child);
+                    
+                    // Merge into our total metrics
+                    self.metrics.merge(&child_visitor.metrics);
+                    
+                    // Also merge into function visitor
+                    func_visitor.metrics.merge(&child_visitor.metrics);
+                }
+                
+                self.function_visitors.push(func_visitor);
+            }
+            Stmt::AugAssign(node) => {
+                self.add_operator(Self::binop_name(&node.op));
+                self.add_operand(&Self::expr_to_operand(&node.target));
+                self.add_operand(&Self::expr_to_operand(&node.value));
+                visitor::walk_stmt(self, stmt);
+            }
+            _ => {
+                visitor::walk_stmt(self, stmt);
+            }
         }
-        visitor::walk_stmt(self, stmt);
     }
 
     fn visit_expr(&mut self, expr: &'a ast::Expr) {
@@ -392,8 +588,8 @@ fn analyze_source(source: &str, multi: bool) -> Result<(f64, char), String> {
     for stmt in parsed.suite() {
         complexity.visit_stmt(stmt);
     }
-    // Base complexity is 1
-    let total_complexity = complexity.complexity + 1;
+    // Use radon-compatible total_complexity calculation
+    let total_complexity = complexity.total_complexity();
 
     // Compute MI
     let mi = mi_compute(volume, total_complexity, raw.lloc, comments_percent);
