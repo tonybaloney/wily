@@ -18,8 +18,9 @@
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyModule};
 use ruff_python_ast::{
-    self as ast, Expr, Stmt,
+    self as ast,
     visitor::{self, Visitor},
+    Expr, Stmt,
 };
 use ruff_python_parser::parse_module;
 use ruff_source_file::LineIndex;
@@ -82,11 +83,11 @@ impl HalsteadMetrics {
         let h1 = self.h1();
         let h2 = self.h2();
         let n2 = self.n2();
-        
+
         if h2 == 0 {
             return 0.0;
         }
-        
+
         (h1 as f64 * n2 as f64) / (2.0 * h2 as f64)
     }
 
@@ -95,8 +96,10 @@ impl HalsteadMetrics {
     }
 
     fn merge(&mut self, other: &HalsteadMetrics) {
-        self.operators_seen.extend(other.operators_seen.iter().cloned());
-        self.operands_seen.extend(other.operands_seen.iter().cloned());
+        self.operators_seen
+            .extend(other.operators_seen.iter().cloned());
+        self.operands_seen
+            .extend(other.operands_seen.iter().cloned());
         self.operators += other.operators;
         self.operands += other.operands;
     }
@@ -126,14 +129,18 @@ pub struct FunctionHalstead {
 }
 
 impl FunctionHalstead {
-    fn to_pydict<'py>(&self, py: Python<'py>, line_index: &LineIndex) -> PyResult<pyo3::Bound<'py, PyDict>> {
+    fn to_pydict<'py>(
+        &self,
+        py: Python<'py>,
+        line_index: &LineIndex,
+    ) -> PyResult<pyo3::Bound<'py, PyDict>> {
         let dict = self.metrics.to_pydict(py)?;
-        
+
         let lineno = line_index.line_index(TextSize::new(self.start_offset));
         let endline = line_index.line_index(TextSize::new(self.end_offset));
         dict.set_item("lineno", lineno.to_zero_indexed() + 1)?;
         dict.set_item("endline", endline.to_zero_indexed() + 1)?;
-        
+
         Ok(dict)
     }
 }
@@ -167,7 +174,9 @@ impl<'src> HalsteadVisitor<'src> {
 
     fn add_operand(&mut self, operand: &str) {
         self.metrics.operands += 1;
-        self.metrics.operands_seen.insert((self.context.clone(), operand.to_string()));
+        self.metrics
+            .operands_seen
+            .insert((self.context.clone(), operand.to_string()));
     }
 
     /// Get the operator name from a binary operator
@@ -360,7 +369,9 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
 }
 
 /// Analyze source code and return Halstead metrics
-fn analyze_source(source: &str) -> Result<(HalsteadMetrics, Vec<FunctionHalstead>, LineIndex), String> {
+fn analyze_source(
+    source: &str,
+) -> Result<(HalsteadMetrics, Vec<FunctionHalstead>, LineIndex), String> {
     let parsed = parse_module(source).map_err(|e| e.to_string())?;
     let line_index = LineIndex::from_source_text(source);
 
@@ -374,7 +385,9 @@ fn analyze_source(source: &str) -> Result<(HalsteadMetrics, Vec<FunctionHalstead
 }
 
 /// Public API for parallel module - returns full analysis results.
-pub fn analyze_source_full(source: &str) -> Result<(Vec<FunctionHalstead>, HalsteadMetrics, LineIndex), String> {
+pub fn analyze_source_full(
+    source: &str,
+) -> Result<(Vec<FunctionHalstead>, HalsteadMetrics, LineIndex), String> {
     analyze_source(source).map(|(total, functions, line_index)| (functions, total, line_index))
 }
 

@@ -11,7 +11,11 @@
 
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyModule};
-use ruff_python_ast::{self as ast, Stmt, visitor::{self, Visitor}};
+use ruff_python_ast::{
+    self as ast,
+    visitor::{self, Visitor},
+    Stmt,
+};
 use ruff_python_parser::parse_module;
 use std::collections::HashSet;
 
@@ -61,15 +65,17 @@ impl HalsteadMetrics {
     }
 
     fn merge(&mut self, other: &HalsteadMetrics) {
-        self.operators_seen.extend(other.operators_seen.iter().cloned());
-        self.operands_seen.extend(other.operands_seen.iter().cloned());
+        self.operators_seen
+            .extend(other.operators_seen.iter().cloned());
+        self.operands_seen
+            .extend(other.operands_seen.iter().cloned());
         self.operators += other.operators;
         self.operands += other.operands;
     }
 }
 
 /// Cyclomatic complexity counter that matches radon's total_complexity calculation
-/// 
+///
 /// Radon's total_complexity = base(1) + functions_complexity + classes_complexity
 /// where functions_complexity = sum(func.complexity) - len(functions)
 /// and classes_complexity = sum(class.real_complexity) - len(classes)
@@ -103,7 +109,9 @@ impl ComplexityVisitor {
         // functions_complexity = sum - count
         // classes_complexity = sum - count
         let base = 1;
-        let functions_complexity = self.functions_complexity_sum.saturating_sub(self.function_count);
+        let functions_complexity = self
+            .functions_complexity_sum
+            .saturating_sub(self.function_count);
         let classes_complexity = self.classes_complexity_sum.saturating_sub(self.class_count);
         base + self.complexity + functions_complexity + classes_complexity
     }
@@ -329,7 +337,9 @@ impl HalsteadVisitor {
 
     fn add_operand(&mut self, operand: &str) {
         self.metrics.operands += 1;
-        self.metrics.operands_seen.insert((self.context.clone(), operand.to_string()));
+        self.metrics
+            .operands_seen
+            .insert((self.context.clone(), operand.to_string()));
     }
 
     fn binop_name(op: &ast::Operator) -> &'static str {
@@ -384,13 +394,11 @@ impl HalsteadVisitor {
     fn expr_to_operand(expr: &ast::Expr) -> String {
         match expr {
             ast::Expr::Name(n) => n.id.to_string(),
-            ast::Expr::NumberLiteral(n) => {
-                match &n.value {
-                    ast::Number::Int(i) => i.to_string(),
-                    ast::Number::Float(f) => f.to_string(),
-                    ast::Number::Complex { real, imag } => format!("{}+{}j", real, imag),
-                }
-            }
+            ast::Expr::NumberLiteral(n) => match &n.value {
+                ast::Number::Int(i) => i.to_string(),
+                ast::Number::Float(f) => f.to_string(),
+                ast::Number::Complex { real, imag } => format!("{}+{}j", real, imag),
+            },
             ast::Expr::StringLiteral(s) => format!("{:?}", s.value.to_str()),
             ast::Expr::BooleanLiteral(b) => b.value.to_string(),
             ast::Expr::NoneLiteral(_) => "None".to_string(),
@@ -408,18 +416,18 @@ impl<'a> Visitor<'a> for HalsteadVisitor {
                 // and merge its metrics into our total
                 let func_name = node.name.to_string();
                 let mut func_visitor = HalsteadVisitor::new_with_context(func_name.clone());
-                
+
                 for child in &node.body {
                     let mut child_visitor = HalsteadVisitor::new_with_context(func_name.clone());
                     child_visitor.visit_stmt(child);
-                    
+
                     // Merge into our total metrics
                     self.metrics.merge(&child_visitor.metrics);
-                    
+
                     // Also merge into function visitor
                     func_visitor.metrics.merge(&child_visitor.metrics);
                 }
-                
+
                 self.function_visitors.push(func_visitor);
             }
             Stmt::AugAssign(node) => {
@@ -495,7 +503,11 @@ fn calculate_raw_metrics(source: &str) -> RawMetrics {
 
         // Check for start of multiline string
         if trimmed.starts_with("\"\"\"") || trimmed.starts_with("'''") {
-            let quote = if trimmed.starts_with("\"\"\"") { "\"\"\"" } else { "'''" };
+            let quote = if trimmed.starts_with("\"\"\"") {
+                "\"\"\""
+            } else {
+                "'''"
+            };
             // Check if it ends on the same line
             if trimmed.len() > 3 && trimmed[3..].contains(quote) {
                 metrics.multi += 1;
@@ -540,10 +552,7 @@ fn mi_compute(halstead_volume: f64, complexity: u32, lloc: u32, comments_percent
     let comments_scale = (2.46 * comments_percent.to_radians()).sqrt();
 
     // Non-normalized MI
-    let nn_mi = 171.0
-        - 5.2 * volume_scale
-        - 0.23 * complexity_f
-        - 16.2 * sloc_scale
+    let nn_mi = 171.0 - 5.2 * volume_scale - 0.23 * complexity_f - 16.2 * sloc_scale
         + 50.0 * comments_scale.sin();
 
     // Normalize to 0-100

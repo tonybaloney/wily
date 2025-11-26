@@ -35,10 +35,11 @@ fn is_python_file(path: &Path, include_ipynb: bool) -> bool {
     if let Ok(file) = File::open(path) {
         let mut reader = BufReader::new(file);
         let mut first_line = String::new();
-        if reader.read_line(&mut first_line).is_ok() {
-            if first_line.starts_with("#!") && first_line.contains("python") {
-                return true;
-            }
+        if reader.read_line(&mut first_line).is_ok()
+            && first_line.starts_with("#!")
+            && first_line.contains("python")
+        {
+            return true;
         }
     }
 

@@ -43,8 +43,8 @@ pub fn analyze_files_parallel<'py>(
         paths
             .par_iter()
             .map(|path| {
-                let content = fs::read_to_string(path)
-                    .map_err(|e| format!("Failed to read file: {}", e));
+                let content =
+                    fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e));
                 (path.clone(), content)
             })
             .collect()
@@ -81,7 +81,7 @@ pub fn analyze_files_parallel<'py>(
         if include_cyclomatic {
             let cc_result = cyclomatic::analyze_source_full(&source);
             let cc_dict = PyDict::new(py);
-            
+
             match cc_result {
                 Ok((functions, classes, line_index)) => {
                     let detailed_dict = PyDict::new(py);
@@ -90,11 +90,17 @@ pub fn analyze_files_parallel<'py>(
                     // Process functions (includes methods from classes)
                     for func in &functions {
                         let func_dict = PyDict::new(py);
-                        let lineno = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.start_offset));
-                        let endline = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.end_offset));
+                        let lineno = ruff_source_file::LineIndex::line_index(
+                            &line_index,
+                            ruff_text_size::TextSize::new(func.start_offset),
+                        );
+                        let endline = ruff_source_file::LineIndex::line_index(
+                            &line_index,
+                            ruff_text_size::TextSize::new(func.end_offset),
+                        );
                         let lineno_val = lineno.to_zero_indexed() + 1;
                         let endline_val = endline.to_zero_indexed() + 1;
-                        
+
                         func_dict.set_item("name", &func.name)?;
                         func_dict.set_item("is_method", func.is_method)?;
                         func_dict.set_item("classname", func.classname.as_deref())?;
@@ -102,10 +108,10 @@ pub fn analyze_files_parallel<'py>(
                         func_dict.set_item("lineno", lineno_val)?;
                         func_dict.set_item("endline", endline_val)?;
                         func_dict.set_item("loc", endline_val as i64 - lineno_val as i64)?;
-                        
+
                         let closures_list = PyList::empty(py);
                         func_dict.set_item("closures", closures_list)?;
-                        
+
                         let fullname = func.fullname();
                         detailed_dict.set_item(fullname.as_str(), func_dict)?;
                         total_complexity += func.complexity as i64;
@@ -114,21 +120,27 @@ pub fn analyze_files_parallel<'py>(
                     // Process classes
                     for cls in &classes {
                         let cls_dict = PyDict::new(py);
-                        let lineno = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(cls.start_offset));
-                        let endline = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(cls.end_offset));
+                        let lineno = ruff_source_file::LineIndex::line_index(
+                            &line_index,
+                            ruff_text_size::TextSize::new(cls.start_offset),
+                        );
+                        let endline = ruff_source_file::LineIndex::line_index(
+                            &line_index,
+                            ruff_text_size::TextSize::new(cls.end_offset),
+                        );
                         let lineno_val = lineno.to_zero_indexed() + 1;
                         let endline_val = endline.to_zero_indexed() + 1;
-                        
+
                         cls_dict.set_item("name", &cls.name)?;
                         cls_dict.set_item("complexity", cls.complexity())?;
                         cls_dict.set_item("real_complexity", cls.real_complexity)?;
                         cls_dict.set_item("lineno", lineno_val)?;
                         cls_dict.set_item("endline", endline_val)?;
                         cls_dict.set_item("loc", endline_val as i64 - lineno_val as i64)?;
-                        
+
                         let inner_classes_list = PyList::empty(py);
                         cls_dict.set_item("inner_classes", inner_classes_list)?;
-                        
+
                         detailed_dict.set_item(cls.name.as_str(), cls_dict)?;
                         total_complexity += cls.complexity() as i64;
                     }
@@ -153,16 +165,22 @@ pub fn analyze_files_parallel<'py>(
         if include_halstead {
             let hal_result = halstead::analyze_source_full(&source);
             let hal_dict = PyDict::new(py);
-            
+
             match hal_result {
                 Ok((functions, total, line_index)) => {
                     let detailed_dict = PyDict::new(py);
-                    
+
                     for func in &functions {
                         let func_dict = PyDict::new(py);
-                        let lineno = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.start_offset));
-                        let endline = ruff_source_file::LineIndex::line_index(&line_index, ruff_text_size::TextSize::new(func.end_offset));
-                        
+                        let lineno = ruff_source_file::LineIndex::line_index(
+                            &line_index,
+                            ruff_text_size::TextSize::new(func.start_offset),
+                        );
+                        let endline = ruff_source_file::LineIndex::line_index(
+                            &line_index,
+                            ruff_text_size::TextSize::new(func.end_offset),
+                        );
+
                         func_dict.set_item("h1", func.metrics.h1())?;
                         func_dict.set_item("h2", func.metrics.h2())?;
                         func_dict.set_item("N1", func.metrics.n1())?;
@@ -174,10 +192,10 @@ pub fn analyze_files_parallel<'py>(
                         func_dict.set_item("effort", func.metrics.effort())?;
                         func_dict.set_item("lineno", lineno.to_zero_indexed() + 1)?;
                         func_dict.set_item("endline", endline.to_zero_indexed() + 1)?;
-                        
+
                         detailed_dict.set_item(func.name.as_str(), func_dict)?;
                     }
-                    
+
                     let total_dict = PyDict::new(py);
                     total_dict.set_item("h1", total.h1())?;
                     total_dict.set_item("h2", total.h2())?;
@@ -190,7 +208,7 @@ pub fn analyze_files_parallel<'py>(
                     total_dict.set_item("effort", total.effort())?;
                     total_dict.set_item("lineno", py.None())?;
                     total_dict.set_item("endline", py.None())?;
-                    
+
                     hal_dict.set_item("detailed", detailed_dict)?;
                     hal_dict.set_item("total", total_dict)?;
                 }

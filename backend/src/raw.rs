@@ -60,42 +60,42 @@ fn analyze_source(source: &str) -> RawCounts {
 
     // Track which lines are covered by multi-line strings
     let mut multiline_string_lines = vec![false; loc as usize];
-    // Track single-line docstrings (string-only logical lines)  
+    // Track single-line docstrings (string-only logical lines)
     let mut single_line_docstring_lines = vec![false; loc as usize];
-    
+
     // Track comment count
     let comments = comment_ranges.len() as u32;
-    
+
     // Process tokens to find strings and identify single-line docstrings
     // Group tokens by logical line (ending at Newline/EOF)
     let mut current_line_tokens: Vec<(TokenKind, usize, usize)> = Vec::new();
-    
+
     for token in tokens.iter() {
         let kind = token.kind();
         let range = token.range();
         let start_line = line_index.line_index(range.start()).to_zero_indexed();
         let end_line = line_index.line_index(range.end()).to_zero_indexed();
-        
+
         // Track multi-line strings
         if kind == TokenKind::String && end_line > start_line {
-            for line in start_line..=end_line {
-                if line < loc as usize {
-                    multiline_string_lines[line] = true;
-                }
+            for line in multiline_string_lines
+                .iter_mut()
+                .take(end_line + 1)
+                .skip(start_line)
+            {
+                *line = true;
             }
         }
-        
+
         current_line_tokens.push((kind, start_line, end_line));
-        
+
         if matches!(kind, TokenKind::Newline | TokenKind::EndOfFile) {
             // Check if this logical line is a single-line docstring
             if is_single_line_docstring(&current_line_tokens) {
                 // Find the line with the string
                 for &(k, start, end) in &current_line_tokens {
-                    if k == TokenKind::String && start == end {
-                        if start < loc as usize {
-                            single_line_docstring_lines[start] = true;
-                        }
+                    if k == TokenKind::String && start == end && start < loc as usize {
+                        single_line_docstring_lines[start] = true;
                     }
                 }
             }
@@ -166,12 +166,12 @@ fn is_single_line_docstring(tokens: &[(TokenKind, usize, usize)]) -> bool {
             )
         })
         .collect();
-    
+
     // Must be exactly one token, and it must be a single-line string
     if significant.len() != 1 {
         return false;
     }
-    
+
     let (kind, start_line, end_line) = significant[0];
     *kind == TokenKind::String && start_line == end_line
 }
