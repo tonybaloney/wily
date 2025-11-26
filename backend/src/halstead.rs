@@ -144,8 +144,6 @@ struct HalsteadVisitor<'src> {
     source: &'src str,
     /// Current function context (for tracking unique operands per context)
     context: Option<String>,
-    /// Current class name (for prefixing method names)
-    classname: Option<String>,
     /// Metrics for current scope
     metrics: HalsteadMetrics,
     /// Collected function metrics
@@ -157,7 +155,6 @@ impl<'src> HalsteadVisitor<'src> {
         Self {
             source,
             context,
-            classname: None,
             metrics: HalsteadMetrics::default(),
             functions: Vec::new(),
         }
@@ -263,11 +260,8 @@ impl<'src> HalsteadVisitor<'src> {
 
     /// Visit a function definition
     fn visit_function(&mut self, node: &ast::StmtFunctionDef) {
-        // Prefix method names with class name
-        let func_name = match &self.classname {
-            Some(cls) => format!("{}.{}", cls, node.name),
-            None => node.name.to_string(),
-        };
+        // Radon does NOT prefix method names with class name - just use the function name
+        let func_name = node.name.to_string();
 
         let mut func_visitor = HalsteadVisitor::new(self.source, Some(func_name.clone()));
 
@@ -276,31 +270,26 @@ impl<'src> HalsteadVisitor<'src> {
             func_visitor.visit_stmt(stmt);
         }
 
-        // NOTE: Don't merge function metrics into total!
-        // Total should only contain module-level code metrics.
-
-        // Store function metrics
+        // Store function metrics (before merging so we keep per-function metrics separate)
+        let func_metrics = func_visitor.metrics.clone();
         self.functions.push(FunctionHalstead {
             name: func_name,
             start_offset: node.range().start().to_u32(),
             end_offset: node.range().end().to_u32(),
-            metrics: func_visitor.metrics,
+            metrics: func_metrics,
         });
+
+        // Merge function metrics into parent for total (radon compatibility)
+        // The total includes all code in the file, not just module-level code
+        self.metrics.merge(&func_visitor.metrics);
     }
 
     /// Visit a class definition
     fn visit_class(&mut self, node: &ast::StmtClassDef) {
-        let classname = node.name.to_string();
-        // Set classname context for methods
-        let old_classname = self.classname.take();
-        self.classname = Some(classname);
-        
-        // Visit the body, methods will be visited as functions with class prefix
+        // Visit the body, methods will be visited as functions
         for stmt in &node.body {
             self.visit_stmt(stmt);
         }
-        
-        self.classname = old_classname;
     }
 }
 
@@ -313,38 +302,8 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
             Stmt::ClassDef(node) => {
                 self.visit_class(node);
             }
-            Stmt::Import(node) => {
-                // Import statement: 1 operator, module name + bound name as operands
-                // For "import abc", we count abc twice (module and bound name)
-                self.add_operator("Import");
-                for alias in &node.names {
-                    self.add_operand(&alias.name.to_string());
-                    // Also count the asname or the original name as bound name
-                    let bound_name = alias.asname.as_ref()
-                        .map(|n| n.to_string())
-                        .unwrap_or_else(|| alias.name.to_string());
-                    self.add_operand(&bound_name);
-                }
-            }
-            Stmt::ImportFrom(node) => {
-                // From import: 1 operator, module + names as operands
-                self.add_operator("ImportFrom");
-                if let Some(module) = &node.module {
-                    self.add_operand(&module.to_string());
-                }
-                for alias in &node.names {
-                    self.add_operand(&alias.name.to_string());
-                }
-            }
-            Stmt::Assign(node) => {
-                // Assignment: 1 operator per target, targets and value as operands
-                for target in &node.targets {
-                    self.add_operator("Assign");
-                    self.add_operand(&Self::expr_to_operand(target));
-                }
-                self.add_operand(&Self::expr_to_operand(&node.value));
-                visitor::walk_stmt(self, stmt);
-            }
+            // Note: Radon does NOT count Import, ImportFrom, or Assign statements
+            // as operators. Only AugAssign is counted (using its underlying op).
             Stmt::AugAssign(node) => {
                 // Augmented assignment: 1 operator, 2 operands (target, value)
                 self.add_operator(Self::binop_name(&node.op));
