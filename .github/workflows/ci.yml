@@ -143,9 +143,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+          architecture: ${{ matrix.python-architecture || 'x64' }}
 
       - name: Install twine
         run: pip install -U twine
@@ -170,18 +171,6 @@ jobs:
         with:
           name: pypi_files_${{ matrix.os }}_${{ matrix.target }}
           path: dist
-
-  # Verify that all builds succeeded
-  check:
-    if: always()
-    needs: [test, ruff, clippy, rustfmt, build-sdist, build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@release/v1
-        with:
-          allowed-skips: build
-          jobs: ${{ toJSON(needs) }}
 
   # Publish to PyPI on tagged releases
   # release:
