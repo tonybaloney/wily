@@ -2,12 +2,19 @@
 name: CI
 on:
   push:
-     branches:
+    branches:
       - master
+      - v2
+    tags:
+      - "**"
   pull_request:
     branches:
       - master
+      - v2
   workflow_dispatch: {}
+
+env:
+  COLUMNS: 150
 
 jobs:
   test:
@@ -30,6 +37,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
       - name: Install uv
         uses: astral-sh/setup-uv@v2
       - name: Sync project environment
@@ -43,6 +52,7 @@ jobs:
           token: 48f9ff3a-6358-4607-aa5d-9cb7cada539c
           files: .tests-reports/coverage.xml
           fail_ci_if_error: true
+
   ruff:
     runs-on: ubuntu-latest
     steps:
@@ -50,14 +60,142 @@ jobs:
       - uses: astral-sh/setup-uv@v2
       - run: uv tool run ruff check .
 
-  pyright:
+  # Build source distribution
+  build-sdist:
+    name: build sdist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: astral-sh/setup-uv@v2
-      - name: Sync project environment
-        run: uv sync --all-groups --python 3.11
-      - uses: jakebailey/pyright-action@v1
+      - uses: actions/setup-python@v5
         with:
-          working-directory: .
+          python-version: "3.13"
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+          rust-toolchain: stable
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi_files_sdist
+          path: dist
+
+  # Build wheels for all supported platforms
+  build:
+    name: build on ${{ matrix.os }} (${{ matrix.target }})
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/v2' || contains(github.event.pull_request.labels.*.name, 'Full Build')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux x86_64
+          - os: linux
+            target: x86_64
+            runs-on: ubuntu-latest
+            manylinux: auto
+          # Linux aarch64
+          - os: linux
+            target: aarch64
+            runs-on: ubuntu-latest
+            manylinux: auto
+          # macOS x86_64
+          - os: macos
+            target: x86_64
+            runs-on: macos-13
+          # macOS aarch64 (Apple Silicon)
+          - os: macos
+            target: aarch64
+            runs-on: macos-latest
+          # Windows x86_64
+          - os: windows
+            target: x86_64
+            runs-on: windows-latest
+          # Windows aarch64
+          - os: windows
+            target: aarch64
+            runs-on: windows-11-arm
+
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install twine
+        run: pip install -U twine
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux || 'auto' }}
+          args: --release --out dist --interpreter 3.10 3.11 3.12 3.13 3.14
+          rust-toolchain: stable
+          docker-options: -e CI
+
+      - name: List dist files
+        run: ls -lh dist/
+        shell: bash
+
+      - name: Check wheels
+        run: twine check --strict dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi_files_${{ matrix.os }}_${{ matrix.target }}
+          path: dist
+
+  # Verify that all builds succeeded
+  check:
+    if: always()
+    needs: [test, ruff, build-sdist, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          allowed-skips: build
+          jobs: ${{ toJSON(needs) }}
+
+  # Publish to PyPI on tagged releases
+  # release:
+  #   needs: [check, build-sdist, build]
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: release
+  #   permissions:
+  #     id-token: write
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Get dist artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         pattern: pypi_files_*
+  #         merge-multiple: true
+  #         path: dist
+
+  #     - name: List dist files
+  #       run: |
+  #         ls -lh dist/
+  #         echo "Total files: $(ls dist | wc -l)"
+
+  #     - name: Test wheels integrity
+  #       run: for whl in dist/*.whl; do unzip -qt "$whl"; done
+
+  #     - name: Install uv
+  #       uses: astral-sh/setup-uv@v2
+
+  #     - name: Publish to PyPI
+  #       run: uv publish --trusted-publishing always
+
+  #     - name: Upload to GitHub Release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         files: |
+  #           dist/*
+  #         prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
