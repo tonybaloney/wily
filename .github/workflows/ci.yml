@@ -136,6 +136,7 @@ jobs:
           # Windows aarch64
           - os: windows
             target: aarch64
+            python-architecture: arm64
             runs-on: windows-11-arm
 
     runs-on: ${{ matrix.runs-on }}
