@@ -29,16 +29,16 @@ def test_rank(capsys):
         )
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "File" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify data is present
     assert "file1" in captured.out
     assert "file2" in captured.out
     assert "Total" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -65,14 +65,14 @@ def test_rank_wrapped(capsys):
         )
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "File" in captured.out
-    
+
     # Verify data is present
     assert "file1" in captured.out
     assert "file2" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -99,15 +99,15 @@ def test_rank_descending(capsys):
         )
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "File" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify data is present
     assert "file1" in captured.out
     assert "file2" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -134,15 +134,15 @@ def test_rank_limit(capsys):
         )
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "File" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify only limited data is present
     assert "file1" in captured.out
     assert "Total" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -197,15 +197,15 @@ def test_rank_path_output(capsys):
         )
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "File" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify data is present
     assert "file1" in captured.out
     assert "file2" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -267,10 +267,10 @@ def test_threshold(capsys):
             raised = True
     assert raised, "rank didn't raise SystemExit."
     captured = capsys.readouterr()
-    
+
     # Verify table output is present
     assert "File" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()

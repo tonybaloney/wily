@@ -32,13 +32,13 @@ def test_report_no_message(capsys):
             changes_only=False,
         )
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Date" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify data is present
     assert "abcdef0" in captured.out
     assert "Author 0" in captured.out
@@ -46,7 +46,7 @@ def test_report_no_message(capsys):
     assert "abcdef2" in captured.out
     assert "abcdeff" in captured.out
     assert "Author Someone" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -71,17 +71,17 @@ def test_report_no_message_wrapped(capsys):
             wrap=True,
         )
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Date" in captured.out
-    
+
     # Verify data is present
     assert "abcdef0" in captured.out
     assert "abcdef1" in captured.out
     assert "abcdef2" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -105,15 +105,15 @@ def test_report_no_message_changes_only(capsys):
             changes_only=True,
         )
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify data without changes is filtered (rows with 0 delta should be excluded)
     assert "abcdef0" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -137,15 +137,15 @@ def test_report_with_message(capsys):
             changes_only=False,
         )
     captured = capsys.readouterr()
-    
+
     # Verify table headers include Message
     assert "Revision" in captured.out
     assert "Message" in captured.out
     assert "Author" in captured.out
-    
+
     # Verify message data is present
     assert "Message 0" in captured.out or "Message here" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -217,14 +217,14 @@ def test_report_with_keyerror(capsys):
             changes_only=False,
         )
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     # Verify "Not found" message is present for missing file
     assert "Not found" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -248,11 +248,11 @@ def test_report_with_keyerror_changes_only(capsys):
             changes_only=True,
         )
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Lines of Code" in captured.out
-    
+
     mock_State.assert_called_once_with(mock_config)
 
 

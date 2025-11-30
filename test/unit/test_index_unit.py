@@ -2,7 +2,6 @@
 
 from unittest import mock
 
-from wily import format_date as fd
 from wily.commands.index import index
 
 
@@ -34,12 +33,12 @@ def test_index_without_message(capsys):
         index(mock_config, include_message=False)
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Date" in captured.out
-    
+
     # Verify data is present
     assert "abcdef0" in captured.out
     assert "Author 0" in captured.out
@@ -47,7 +46,7 @@ def test_index_without_message(capsys):
     assert "Author 1" in captured.out
     assert "abcdef2" in captured.out
     assert "Author 2" in captured.out
-    
+
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -59,17 +58,17 @@ def test_index_without_message_wrapped(capsys):
         index(mock_config, include_message=False, wrap=True)
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Date" in captured.out
-    
+
     # Verify data is present
     assert "abcdef0" in captured.out
     assert "abcdef1" in captured.out
     assert "abcdef2" in captured.out
-    
+
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -81,18 +80,18 @@ def test_index_with_message(capsys):
         index(mock_config, include_message=True)
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers include Message
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Message" in captured.out
     assert "Date" in captured.out
-    
+
     # Verify message data is present
     assert "Message 0" in captured.out
     assert "Message 1" in captured.out
     assert "Message 2" in captured.out
-    
+
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -104,15 +103,15 @@ def test_index_with_message_wrapped(capsys):
         index(mock_config, include_message=True, wrap=True)
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Message" in captured.out
-    
+
     # Verify data is present
     assert "abcdef0" in captured.out
-    
+
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -124,12 +123,12 @@ def test_empty_index_without_message(capsys):
         index(mock_config, include_message=False)
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present (empty table still has headers)
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Date" in captured.out
-    
+
     mock_State.assert_called_once_with(config=mock_config)
 
 
@@ -141,11 +140,11 @@ def test_empty_index_with_message(capsys):
         index(mock_config, include_message=True)
 
     captured = capsys.readouterr()
-    
+
     # Verify table headers are present (empty table still has headers)
     assert "Revision" in captured.out
     assert "Author" in captured.out
     assert "Message" in captured.out
     assert "Date" in captured.out
-    
+
     mock_State.assert_called_once_with(config=mock_config)

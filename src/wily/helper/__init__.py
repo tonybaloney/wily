@@ -3,8 +3,7 @@
 import hashlib
 import logging
 import pathlib
-import shutil
-from collections.abc import Iterable, Sized
+from collections.abc import Iterable
 from functools import lru_cache
 
 from rich import box
@@ -41,7 +40,8 @@ BOX_STYLES = {
 
 
 def get_box_style(style: str = DEFAULT_TABLE_STYLE) -> box.Box:
-    """Get a Rich box style by name.
+    """
+    Get a Rich box style by name.
 
     :param style: Name of the box style (case-insensitive)
     :return: A Rich Box object
@@ -50,7 +50,8 @@ def get_box_style(style: str = DEFAULT_TABLE_STYLE) -> box.Box:
 
 
 def styled_text(text: str, style: str) -> Text:
-    """Create a Rich Text object with the given style.
+    """
+    Create a Rich Text object with the given style.
 
     :param text: The text content
     :param style: The Rich style name (e.g., 'red', 'green', 'yellow')
@@ -65,7 +66,8 @@ def print_table(
     wrap: bool = True,
     table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
-    """Print a table using Rich.
+    """
+    Print a table using Rich.
 
     :param headers: Column headers
     :param data: Table data rows (can contain strings or Rich Text objects)

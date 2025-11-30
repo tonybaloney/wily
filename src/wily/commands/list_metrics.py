@@ -10,8 +10,9 @@ from wily.operators import ALL_OPERATORS
 
 
 def list_metrics(wrap: bool, table_style: str = DEFAULT_TABLE_STYLE) -> None:
-    """List metrics available.
-    
+    """
+    List metrics available.
+
     :param wrap: Wrap output
     :param table_style: Table box style
     """
