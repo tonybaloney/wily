@@ -1,10 +1,9 @@
 """Unit tests for the helper module."""
 
 from rich import box
-from rich.text import Text
 
 from wily.defaults import DEFAULT_TABLE_STYLE
-from wily.helper import generate_cache_path, get_box_style, print_table, styled_text
+from wily.helper import generate_cache_path, get_box_style, print_table
 
 
 def test_get_box_style_default():
@@ -35,27 +34,6 @@ def test_get_box_style_invalid_returns_rounded():
     assert style == box.ROUNDED
 
 
-def test_styled_text():
-    """Test styled_text creates a Text object with correct style."""
-    result = styled_text("hello", "red")
-    assert isinstance(result, Text)
-    assert str(result) == "hello"
-
-
-def test_styled_text_green():
-    """Test styled_text with green style."""
-    result = styled_text("success", "green")
-    assert isinstance(result, Text)
-    assert str(result) == "success"
-
-
-def test_styled_text_yellow():
-    """Test styled_text with yellow style."""
-    result = styled_text("warning", "yellow")
-    assert isinstance(result, Text)
-    assert str(result) == "warning"
-
-
 def test_print_table(capsys):
     """Test print_table outputs a table."""
     headers = ["Col1", "Col2"]
@@ -70,25 +48,6 @@ def test_print_table(capsys):
     assert "b" in captured.out
     assert "c" in captured.out
     assert "d" in captured.out
-
-
-def test_print_table_with_text_objects(capsys):
-    """Test print_table handles Rich Text objects."""
-    headers = ["Name", "Status"]
-    data = [
-        ["test1", styled_text("pass", "green")],
-        ["test2", styled_text("fail", "red")],
-    ]
-
-    print_table(headers, data, wrap=True)
-
-    captured = capsys.readouterr()
-    assert "Name" in captured.out
-    assert "Status" in captured.out
-    assert "test1" in captured.out
-    assert "test2" in captured.out
-    assert "pass" in captured.out
-    assert "fail" in captured.out
 
 
 def test_print_table_with_style(capsys):
