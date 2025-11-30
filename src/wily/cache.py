@@ -6,11 +6,12 @@ The API in this module is for archivers and commands to work with the local cach
 
 """
 
-import ujson as json
 import os.path
 import pathlib
 import shutil
 from typing import Any
+
+import ujson as json
 
 from wily import __version__, logger
 from wily.archivers import ALL_ARCHIVERS, Archiver, Revision
