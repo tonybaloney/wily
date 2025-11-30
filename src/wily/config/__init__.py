@@ -68,6 +68,7 @@ def load(config_path: str = DEFAULT_CONFIG_PATH) -> WilyConfig:
     )
     include_ipynb = config.getboolean(section=DEFAULT_CONFIG_SECTION, option="include_ipynb", fallback=True)
     ipynb_cells = config.getboolean(section=DEFAULT_CONFIG_SECTION, option="ipynb_cells", fallback=True)
+    include_shebang = config.getboolean(section=DEFAULT_CONFIG_SECTION, option="include_shebang", fallback=False)
 
     return WilyConfig(
         operators=operators,
@@ -77,4 +78,5 @@ def load(config_path: str = DEFAULT_CONFIG_PATH) -> WilyConfig:
         max_revisions=max_revisions,
         include_ipynb=include_ipynb,
         ipynb_cells=ipynb_cells,
+        include_shebang=include_shebang,
     )

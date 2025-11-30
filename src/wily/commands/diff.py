@@ -8,7 +8,7 @@ import os
 import sys
 from pathlib import Path
 
-import tabulate
+from rich.text import Text
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
@@ -16,10 +16,11 @@ from wily.backend import iter_filenames
 from wily.commands.build import run_operators_parallel
 from wily.config import DEFAULT_PATH
 from wily.config.types import WilyConfig
-from wily.helper import get_maxcolwidth, get_style
+from wily.defaults import DEFAULT_TABLE_STYLE
+from wily.helper import print_table
 from wily.operators import (
-    BAD_COLORS,
-    GOOD_COLORS,
+    BAD_STYLES,
+    GOOD_STYLES,
     OperatorLevel,
     get_metric,
     resolve_metric,
@@ -36,6 +37,7 @@ def diff(
     detail: bool = True,
     revision: str | None = None,
     wrap: bool = False,
+    table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
     """
     Show the differences in metrics for each of the files.
@@ -47,6 +49,7 @@ def diff(
     :param detail: Show details (function-level)
     :param revision: Compare with specific revision
     :param wrap: Wrap output
+    :param table_style: Table box style
     """
     config.targets = files
     files = list(files)
@@ -105,7 +108,7 @@ def diff(
     files.extend(extra)
     logger.debug(files)
     for file in files:
-        metrics_data = []
+        metrics_data: list[str | Text] = []
         has_changes = False
         for operator, metric in resolved_metrics:
             try:
@@ -119,12 +122,14 @@ def diff(
             if new != current:
                 has_changes = True
             if metric.metric_type in (int, float) and new != "-" and current != "-":
+                cell = Text(f"{current:n} -> ")
                 if current > new:  # type: ignore
-                    metrics_data.append(f"{current:n} -> \u001b[{BAD_COLORS[metric.measure]}m{new:n}\u001b[0m")
+                    cell.append(f"{new:n}", style=BAD_STYLES[metric.measure])
                 elif current < new:  # type: ignore
-                    metrics_data.append(f"{current:n} -> \u001b[{GOOD_COLORS[metric.measure]}m{new:n}\u001b[0m")
+                    cell.append(f"{new:n}", style=GOOD_STYLES[metric.measure])
                 else:
-                    metrics_data.append(f"{current:n} -> {new:n}")
+                    cell.append(f"{new:n}")
+                metrics_data.append(cell)
             else:
                 if current == "-" and new == "-":
                     metrics_data.append("-")
@@ -138,15 +143,4 @@ def diff(
     descriptions = [metric.description for _, metric in resolved_metrics]
     headers = ("File", *descriptions)
     if len(results) > 0:
-        maxcolwidth = get_maxcolwidth(headers, wrap)
-        style = get_style()
-        print(
-            # But it still makes more sense to show the newest at the top, so reverse again
-            tabulate.tabulate(
-                headers=headers,
-                tabular_data=results,
-                tablefmt=style,
-                maxcolwidths=maxcolwidth,
-                maxheadercolwidths=maxcolwidth,
-            )
-        )
+        print_table(headers=headers, data=results, wrap=wrap, table_style=table_style)

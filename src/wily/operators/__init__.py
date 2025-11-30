@@ -50,16 +50,16 @@ class Metric(Generic[TValue]):
         self.aggregate = aggregate
 
 
-GOOD_COLORS = {
-    MetricType.AimHigh: 32,
-    MetricType.AimLow: 31,
-    MetricType.Informational: 33,
+GOOD_STYLES = {
+    MetricType.AimHigh: "green",
+    MetricType.AimLow: "red",
+    MetricType.Informational: "yellow",
 }
 
-BAD_COLORS = {
-    MetricType.AimHigh: 31,
-    MetricType.AimLow: 32,
-    MetricType.Informational: 33,
+BAD_STYLES = {
+    MetricType.AimHigh: "red",
+    MetricType.AimLow: "green",
+    MetricType.Informational: "yellow",
 }
 
 

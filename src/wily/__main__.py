@@ -10,8 +10,7 @@ from wily import WILY_LOG_NAME, __version__, logger
 from wily.archivers import resolve_archiver
 from wily.cache import exists, get_default_metrics
 from wily.config import load as load_config
-from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
-from wily.helper import get_style
+from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_TABLE_STYLE
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import resolve_operators
@@ -154,7 +153,12 @@ def build(ctx, max_revisions, targets, operators, archiver):
     default=True,
     help=_("Wrap index text to fit in terminal"),
 )
-def index(ctx, message, wrap):
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table border style (e.g., ROUNDED, ASCII, SIMPLE, MINIMAL, MARKDOWN)"),
+)
+def index(ctx, message, wrap, table_style):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
@@ -163,7 +167,7 @@ def index(ctx, message, wrap):
 
     from wily.commands.index import index  # noqa: PLC0415
 
-    index(config=config, include_message=message, wrap=wrap)
+    index(config=config, include_message=message, wrap=wrap, table_style=table_style)
 
 
 @cli.command(
@@ -208,8 +212,13 @@ def index(ctx, message, wrap):
     default=True,
     help=_("Wrap rank text to fit in terminal"),
 )
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table border style (e.g., ROUNDED, ASCII, SIMPLE, MINIMAL, MARKDOWN)"),
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
+def rank(ctx, path, metric, revision, limit, desc, threshold, wrap, table_style):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
@@ -228,6 +237,7 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
         threshold=threshold,
         descending=desc,
         wrap=wrap,
+        table_style=table_style,
     )
 
 
@@ -244,11 +254,6 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     type=click.Choice(ReportFormat.get_all()),
 )
 @click.option(
-    "--console-format",
-    default=DEFAULT_GRID_STYLE,
-    help=_("Style for the console grid, see Tabulate Documentation for a list of styles."),
-)
-@click.option(
     "-o",
     "--output",
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
@@ -263,10 +268,15 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     "-w",
     "--wrap/--no-wrap",
     default=True,
-    help=_("Wrap report text to fit in terminal"),
+    help=_("Wrap output text to fit in terminal"),
+)
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
 )
 @click.pass_context
-def report(ctx, file, metrics, number, message, format, console_format, output, changes, wrap):
+def report(ctx, file, metrics, number, message, format, output, changes, wrap, table_style):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
@@ -283,8 +293,6 @@ def report(ctx, file, metrics, number, message, format, console_format, output, 
     else:
         new_output = new_output / "wily_report" / "index.html"
 
-    style = get_style(console_format)
-
     from wily.commands.report import report  # noqa: PLC0415
 
     logger.debug("Running report on %s for metric %s", file, metrics)
@@ -298,9 +306,9 @@ def report(ctx, file, metrics, number, message, format, console_format, output, 
         output=new_output,
         include_message=message,
         format=ReportFormat[format],
-        console_format=style,
         changes_only=changes,
         wrap=wrap,
+        table_style=table_style,
     )
 
 
@@ -328,10 +336,15 @@ def report(ctx, file, metrics, number, message, format, console_format, output, 
     "-w",
     "--wrap/--no-wrap",
     default=True,
-    help=_("Wrap diff text to fit in terminal"),
+    help=_("Wrap output text to fit in terminal"),
+)
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
 )
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision, wrap):
+def diff(ctx, files, metrics, all, detail, revision, wrap, table_style):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -356,6 +369,7 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
         detail=detail,
         revision=revision,
         wrap=wrap,
+        table_style=table_style,
     )
 
 
@@ -475,8 +489,13 @@ def clean(ctx, yes):
     default=True,
     help=_("Wrap metrics text to fit in terminal"),
 )
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
+)
 @click.pass_context
-def list_metrics(ctx, wrap):
+def list_metrics(ctx, wrap, table_style):
     """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
@@ -485,7 +504,7 @@ def list_metrics(ctx, wrap):
 
     from wily.commands.list_metrics import list_metrics  # noqa: PLC0415
 
-    list_metrics(wrap)
+    list_metrics(wrap=wrap, table_style=table_style)
 
 
 @cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))

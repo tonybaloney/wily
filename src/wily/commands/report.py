@@ -10,19 +10,21 @@ from pathlib import Path
 from shutil import copytree
 from string import Template
 
-import tabulate
+from rich.text import Text
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.config.types import WilyConfig
-from wily.helper import get_maxcolwidth
+from wily.defaults import DEFAULT_TABLE_STYLE
+from wily.helper import print_table
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import MetricType, resolve_metric_as_tuple
 from wily.state import State
 
-ANSI_RED = 31
-ANSI_GREEN = 32
-ANSI_YELLOW = 33
+# Rich style names for metric changes
+STYLE_RED = "red"
+STYLE_GREEN = "green"
+STYLE_YELLOW = "yellow"
 
 
 def report(
@@ -31,11 +33,11 @@ def report(
     metrics: Iterable[str],
     n: int,
     output: Path,
-    console_format: str,
     include_message: bool = False,
     format: ReportFormat = ReportFormat.CONSOLE,
     changes_only: bool = False,
     wrap: bool = False,
+    table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
     """
     Show metrics for a given file.
@@ -47,38 +49,38 @@ def report(
     :param output: Output path
     :param include_message: Include revision messages
     :param format: Output format
-    :param console_format: Grid format style for tabulate
     :param changes_only: Only report revisions where delta != 0
     :param wrap: Wrap output
+    :param table_style: Table box style
     """
     metrics = sorted(metrics)
     logger.debug("Running report command")
     logger.info("-----------History for %s------------", metrics)
 
-    data: list[tuple[str, ...]] = []
+    data: list[tuple[str | Text, ...]] = []
     metric_metas = []
 
     for metric_name in metrics:
         operator, metric = resolve_metric_as_tuple(metric_name)
         key = metric.name
-        # Set the delta colors depending on the metric type
+        # Set the delta styles depending on the metric type
         if metric.measure == MetricType.AimHigh:
-            increase_color = ANSI_GREEN
-            decrease_color = ANSI_RED
+            increase_style = STYLE_GREEN
+            decrease_style = STYLE_RED
         elif metric.measure == MetricType.AimLow:
-            increase_color = ANSI_RED
-            decrease_color = ANSI_GREEN
+            increase_style = STYLE_RED
+            decrease_style = STYLE_GREEN
         elif metric.measure == MetricType.Informational:
-            increase_color = ANSI_YELLOW
-            decrease_color = ANSI_YELLOW
+            increase_style = STYLE_YELLOW
+            decrease_style = STYLE_YELLOW
         else:
-            increase_color = ANSI_YELLOW
-            decrease_color = ANSI_YELLOW
+            increase_style = STYLE_YELLOW
+            decrease_style = STYLE_YELLOW
         metric_meta = {
             "key": key,
             "operator": operator.name,
-            "increase_color": increase_color,
-            "decrease_color": decrease_color,
+            "increase_style": increase_style,
+            "decrease_style": decrease_style,
             "title": metric.description,
             "type": metric.metric_type,
         }
@@ -90,7 +92,7 @@ def report(
         last: dict = {}
         for rev in history:
             deltas = []
-            vals = []
+            vals: list[str | Text] = []
             for meta in metric_metas:
                 try:
                     logger.debug(
@@ -113,15 +115,17 @@ def report(
                         # TODO : Measure ranking increases/decreases for str types?
                         delta = 0
 
-                    if delta == 0:
-                        delta_col = delta
-                    elif delta < 0:
-                        delta_col = f"\u001b[{meta['decrease_color']}m{delta:n}\u001b[0m"
-                    else:
-                        delta_col = f"\u001b[{meta['increase_color']}m+{delta:n}\u001b[0m"
-
                     if meta["type"] in (int, float):
-                        k = f"{val:n} ({delta_col})"
+                        # Build a Rich Text object with styled delta
+                        cell = Text(f"{val:n} (")
+                        if delta == 0:
+                            cell.append(str(delta))
+                        elif delta < 0:
+                            cell.append(f"{delta:n}", style=meta["decrease_style"])
+                        else:
+                            cell.append(f"+{delta:n}", style=meta["increase_style"])
+                        cell.append(")")
+                        k: str | Text = cell
                     else:
                         k = f"{val}"
                 except KeyError as e:
@@ -172,16 +176,51 @@ def report(
         templates_dir = (Path(__file__).parents[1] / "templates").resolve()
         report_template = Template((templates_dir / "report_template.html").read_text())
 
+        # Style to HTML class mapping
+        style_to_html = {
+            "green": "green-color",
+            "red": "red-color",
+            "yellow": "orange-color",
+        }
+
+        def text_to_html(text_obj: Text) -> str:
+            """Convert a Rich Text object to HTML."""
+            result = ""
+            plain = text_obj.plain
+            # If no styles, just return plain text
+            if not text_obj._spans:  # noqa: SLF001
+                return plain
+            # Build HTML from spans
+            last_end = 0
+            for start, end, style in text_obj._spans:  # noqa: SLF001
+                # Add unstyled text before this span
+                if start > last_end:
+                    result += plain[last_end:start]
+                # Add styled text
+                span_text = plain[start:end]
+                if style:
+                    html_class = style_to_html.get(str(style), "")
+                    if html_class:
+                        result += f"<span class='{html_class}'>{span_text}</span>"
+                    else:
+                        result += span_text
+                else:
+                    result += span_text
+                last_end = end
+            # Add any remaining unstyled text
+            if last_end < len(plain):
+                result += plain[last_end:]
+            return result
+
         table_headers = "".join([f"<th>{header}</th>" for header in headers])
         table_content = ""
         for line in data[::-1]:
             table_content += "<tr>"
             for element in line:
-                element = element.replace("\u001b[32m", "<span class='green-color'>")
-                element = element.replace("\u001b[31m", "<span class='red-color'>")
-                element = element.replace("\u001b[33m", "<span class='orange-color'>")
-                element = element.replace("\u001b[0m", "</span>")
-                table_content += f"<td>{element}</td>"
+                if isinstance(element, Text):
+                    table_content += f"<td>{text_to_html(element)}</td>"
+                else:
+                    table_content += f"<td>{element}</td>"
             table_content += "</tr>"
 
         rendered_report = report_template.safe_substitute(headers=table_headers, content=table_content)
@@ -196,13 +235,4 @@ def report(
 
         logger.info("wily report was saved to %s", report_path)
     else:
-        maxcolwidth = get_maxcolwidth(headers, wrap)
-        print(
-            tabulate.tabulate(
-                headers=headers,
-                tabular_data=data[::-1],
-                tablefmt=console_format,
-                maxcolwidths=maxcolwidth,
-                maxheadercolwidths=maxcolwidth,
-            )
-        )
+        print_table(headers=headers, data=data[::-1], wrap=wrap, table_style=table_style)

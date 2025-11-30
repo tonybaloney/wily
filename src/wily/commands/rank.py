@@ -13,13 +13,12 @@ import os
 import sys
 from pathlib import Path
 
-import tabulate
-
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
 from wily.backend import iter_filenames
 from wily.config import DEFAULT_PATH, WilyConfig
-from wily.helper import get_maxcolwidth, get_style
+from wily.defaults import DEFAULT_TABLE_STYLE
+from wily.helper import print_table
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
@@ -33,6 +32,7 @@ def rank(
     threshold: int,
     descending: bool,
     wrap: bool,
+    table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
     """
     Rank command ordering files, methods or functions using metrics.
@@ -45,6 +45,7 @@ def rank(
     :param threshold: For total values beneath the threshold return a non-zero exit code.
     :param descending: Rank in descending order
     :param wrap: Wrap output
+    :param table_style: Table box style
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -122,17 +123,7 @@ def rank(
     data.append(("Total", total))
 
     headers = ("File", resolved_metric.description)
-    maxcolwidth = get_maxcolwidth(headers, wrap)
-    style = get_style()
-    print(
-        tabulate.tabulate(
-            headers=headers,
-            tabular_data=data,
-            tablefmt=style,
-            maxcolwidths=maxcolwidth,
-            maxheadercolwidths=maxcolwidth,
-        )
-    )
+    print_table(headers=headers, data=data, wrap=wrap, table_style=table_style)
 
     if threshold and total < threshold:
         logger.error("Total value below the specified threshold: %s < %s", total, threshold)
