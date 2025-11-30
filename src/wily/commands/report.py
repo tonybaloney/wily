@@ -27,7 +27,7 @@ STYLE_GREEN = "green"
 STYLE_YELLOW = "yellow"
 
 
-def report(
+def report(  # noqa: C901, PLR0915
     config: WilyConfig,
     path: str,
     metrics: Iterable[str],

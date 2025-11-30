@@ -177,7 +177,7 @@ pub fn iter_filenames(
                         }
 
                         // Check if it's a Python file
-                        if !is_python_file(entry_path, include_ipynb,include_shebang) {
+                        if !is_python_file(entry_path, include_ipynb, include_shebang) {
                             continue;
                         }
 
