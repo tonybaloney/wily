@@ -93,9 +93,7 @@ def builddir(gitdir):
     """
     tmppath = pathlib.Path(gitdir)
     runner = CliRunner()
-    result1 = runner.invoke(
-        main.cli, ["--debug", "--path", gitdir, "build", str(tmppath / "src")]
-    )
+    result1 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "build", str(tmppath / "src")])
     assert result1.exit_code == 0, result1.stdout
 
     result2 = runner.invoke(main.cli, ["--debug", "--path", gitdir, "index"])
@@ -255,9 +253,7 @@ def ipynbbuilddir(ipynbgitdir):
         config_f.write(config)
 
     runner = CliRunner()
-    result1 = runner.invoke(
-        main.cli, ["--debug", "--path", ipynbgitdir, "build", str(tmppath / "src")]
-    )
+    result1 = runner.invoke(main.cli, ["--debug", "--path", ipynbgitdir, "build", str(tmppath / "src")])
     assert result1.exit_code == 0, result1.stdout
 
     result2 = runner.invoke(main.cli, ["--debug", "--path", ipynbgitdir, "index"])

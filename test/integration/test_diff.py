@@ -11,9 +11,7 @@ _path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
 
 def test_diff_no_cache(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "diff", _path], catch_exceptions=False
-    )
+    result = runner.invoke(main.cli, ["--path", tmpdir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 1, result.stdout
 
 
@@ -26,9 +24,7 @@ def test_diff_no_path(tmpdir):
 def test_diff_output(builddir):
     """Test the diff feature with no changes"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", _path], catch_exceptions=False
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
 
@@ -164,7 +160,7 @@ def test_diff_output_loc(builddir):
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
-    assert "10 -> \x1b[33m1\x1b[0m" in result.stdout  # 10 -> 1 (in green)
+    assert "10 -> 1" in result.stdout  # Lines of code went from 10 to 1
 
 
 def test_diff_output_loc_and_revision(builddir):
@@ -193,7 +189,7 @@ def test_diff_output_loc_and_revision(builddir):
     )
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
-    assert "9 -> \x1b[33m1\x1b[0m" in result.stdout  # 10 -> 1 (in green)
+    assert "9 -> 1" in result.stdout  # Lines of code went from 9 to 1
 
 
 def test_diff_output_rank(builddir):

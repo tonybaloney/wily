@@ -1,17 +1,27 @@
-"""
-Raw statistics operator.
+"""Raw statistics operator built on top of the Rust parser backend."""
 
-Includes insights like lines-of-code, number of comments. Does not measure complexity.
-"""
-from typing import Any, Dict, Iterable
+from collections.abc import Iterable
+from typing import Any, TypedDict
 
-import radon.cli.harvest as harvesters
-from radon.cli import Config
-
-from wily import logger
+from wily import (
+    logger,
+)
+from wily.backend import harvest_raw_metrics
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
+
+
+class RawCounts(TypedDict):
+    """Raw metrics."""
+
+    loc: int
+    lloc: int
+    sloc: int
+    comments: int
+    multi: int
+    blank: int
+    single_comments: int
 
 
 class RawMetricsOperator(BaseOperator):
@@ -51,11 +61,11 @@ class RawMetricsOperator(BaseOperator):
         """
         # TODO: Use config from wily.cfg for harvester
         logger.debug("Using %s with %s for Raw metrics", targets, self.defaults)
-        self.harvester = harvesters.RawHarvester(
-            targets, config=Config(**self.defaults)
-        )
+        self._targets = tuple(targets)
+        self._exclude = self.defaults.get("exclude") or None
+        self._ignore = self.defaults.get("ignore") or None
 
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -63,8 +73,17 @@ class RawMetricsOperator(BaseOperator):
         :param options: Any runtime options.
         :return: The operator results.
         """
-        logger.debug("Running raw harvester")
-        results = {}
-        for filename, metrics in dict(self.harvester.results).items():
-            results[filename] = {"total": metrics}
+        logger.debug("Running raw harvester via Wily")
+
+        sources, errors = self._collect_sources()
+        results: dict[Any, Any] = {}
+
+        if sources:
+            raw_counts: Iterable[tuple[str, RawCounts]] = harvest_raw_metrics(sources)
+            for filename, metrics in raw_counts:
+                results[filename] = {"total": metrics}
+
+        for filename, error_payload in errors.items():
+            results[filename] = {"total": error_payload}
+
         return results

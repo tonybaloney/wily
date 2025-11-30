@@ -3,18 +3,19 @@ Index command.
 
 Print information about the wily cache and what is in the index.
 """
-from typing import List, Tuple
-
-import tabulate
 
 from wily import MAX_MESSAGE_WIDTH, format_date, format_revision, logger
 from wily.config.types import WilyConfig
-from wily.helper import get_maxcolwidth, get_style
+from wily.defaults import DEFAULT_TABLE_STYLE
+from wily.helper import print_table
 from wily.state import State
 
 
 def index(
-    config: WilyConfig, include_message: bool = False, wrap: bool = False
+    config: WilyConfig,
+    include_message: bool = False,
+    wrap: bool = False,
+    table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
     """
     Show information about the cache and runtime.
@@ -22,6 +23,7 @@ def index(
     :param config: The wily configuration
     :param include_message: Include revision messages
     :param wrap: Wrap long lines
+    :param table_style: Table box style
     """
     state = State(config=config)
     logger.debug("Running show command")
@@ -32,7 +34,7 @@ def index(
     logger.info("")
     logger.info("-----------History------------")
 
-    data: List[Tuple[str, ...]] = []
+    data: list[tuple[str, ...]] = []
     for archiver in state.archivers:
         for rev in state.index[archiver].revisions:
             if include_message:
@@ -53,19 +55,10 @@ def index(
                     )
                 )
 
-    headers: Tuple[str, ...]
+    headers: tuple[str, ...]
     if include_message:
         headers = ("Revision", "Author", "Message", "Date")
     else:
         headers = ("Revision", "Author", "Date")
-    maxcolwidth = get_maxcolwidth(headers, wrap)
-    style = get_style()
-    print(
-        tabulate.tabulate(
-            headers=headers,
-            tabular_data=data,
-            tablefmt=style,
-            maxcolwidths=maxcolwidth,
-            maxheadercolwidths=maxcolwidth,
-        )
-    )
+
+    print_table(headers=headers, data=data, wrap=wrap, table_style=table_style)

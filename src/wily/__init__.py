@@ -36,13 +36,14 @@ A Python application for tracking, reporting on timing and complexity in tests a
       %%$%$&&S#&$$@@@@@@@@@$$@&&&@$@@@@@@@@@@@@@@@@$$%%$$
                .%%$$$$%%%$%%%%***%%%%%$%%$$$$$%%$%*&
 """
+
 import datetime
 import logging
 import tempfile
 
 import colorlog
 
-__version__ = "1.25.0"
+__version__ = "2.0.0a1"
 
 _, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 

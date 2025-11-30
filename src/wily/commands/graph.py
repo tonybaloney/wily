@@ -5,7 +5,6 @@ Draw graph in HTML for a specific metric.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple, Union
 
 import plotly.graph_objs as go
 import plotly.offline
@@ -31,14 +30,14 @@ def path_startswith(filename: str, path: str) -> bool:
 
 def graph(
     config: WilyConfig,
-    path: Tuple[str, ...],
+    path: tuple[str, ...],
     metrics: str,
-    output: Optional[str] = None,
-    x_axis: Optional[str] = None,
+    output: str | None = None,
+    x_axis: str | None = None,
     changes: bool = True,
     text: bool = False,
     aggregate: bool = False,
-    plotlyjs: Union[bool, str] = True,
+    plotlyjs: bool | str = True,
 ) -> None:
     """
     Graph information about the cache and runtime.
@@ -72,23 +71,13 @@ def graph(
         tracked_files = set()
         for rev in state.index[state.default_archiver].revisions:
             tracked_files.update(rev.revision.tracked_files)
-        paths = (
-            tuple(
-                tracked_file
-                for tracked_file in tracked_files
-                if any(path_startswith(tracked_file, p) for p in path)
-            )
-            or path
-        )
+        paths = tuple(tracked_file for tracked_file in tracked_files if any(path_startswith(tracked_file, p) for p in path)) or path
     else:
         paths = path
 
-    title = (
-        f"{x_axis.capitalize()} of {y_metric.description}"
-        f"{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
-    )
+    title = f"{x_axis.capitalize()} of {y_metric.description}{(' for ' + paths[0]) if len(paths) == 1 else ''}{' aggregated' if aggregate else ''}"
     operator, key = metric_parts(metrics_list[0])
-    z_axis: Union[Metric, str]
+    z_axis: Metric | str
     if len(metrics_list) == 1:  # only y-axis
         z_axis = z_operator = z_key = ""
     else:
@@ -103,9 +92,7 @@ def graph(
         last_y = None
         for rev in state.index[state.default_archiver].revisions:
             try:
-                val = rev.get(
-                    config, state.default_archiver, operator, current_path, key
-                )
+                val = rev.get(config, state.default_archiver, operator, current_path, key)
                 if val != last_y or not changes:
                     y.append(val)
                     if z_axis:
@@ -130,9 +117,7 @@ def graph(
                                 x_key,
                             )
                         )
-                    labels.append(
-                        f"{rev.revision.author_name} <br>{rev.revision.message}"
-                    )
+                    labels.append(f"{rev.revision.author_name} <br>{rev.revision.message}")
                 last_y = val
             except KeyError:
                 # missing data

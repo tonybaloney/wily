@@ -7,32 +7,32 @@ Will compare the values between files and return a sorted table.
 
 TODO: Layer on Click invocation in operators section, __main__.py file
 """
+
 import operator as op
 import os
+import sys
 from pathlib import Path
-from sys import exit
-from typing import Optional
-
-import radon.cli.harvest
-import tabulate
 
 from wily import format_date, format_revision, logger
 from wily.archivers import resolve_archiver
+from wily.backend import iter_filenames
 from wily.config import DEFAULT_PATH, WilyConfig
-from wily.helper import get_maxcolwidth, get_style
+from wily.defaults import DEFAULT_TABLE_STYLE
+from wily.helper import print_table
 from wily.operators import resolve_metric_as_tuple
 from wily.state import State
 
 
 def rank(
     config: WilyConfig,
-    path: Optional[str],
+    path: str | None,
     metric: str,
     revision_index: str,
     limit: int,
     threshold: int,
     descending: bool,
     wrap: bool,
+    table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
     """
     Rank command ordering files, methods or functions using metrics.
@@ -45,6 +45,7 @@ def rank(
     :param threshold: For total values beneath the threshold return a non-zero exit code.
     :param descending: Rank in descending order
     :param wrap: Wrap output
+    :param table_style: Table box style
 
     :return: Sorted table of all files in path, sorted in order of metric.
     """
@@ -60,11 +61,7 @@ def rank(
     if not revision_index:
         target_revision = state.index[state.default_archiver].last_revision
     else:
-        rev = (
-            resolve_archiver(state.default_archiver)
-            .archiver_cls(config)
-            .find(revision_index)
-        )
+        rev = resolve_archiver(state.default_archiver).archiver_cls(config).find(revision_index)
         logger.debug("Resolved %s to %s (%s)", revision_index, rev.key, rev.message)
         try:
             target_revision = state.index[state.default_archiver][rev.key]
@@ -73,7 +70,7 @@ def rank(
                 "Revision %s is not in the cache, make sure you have run wily build.",
                 revision_index,
             )
-            exit(1)
+            sys.exit(1)
 
     logger.info(
         "-----------Rank for %s for %s by %s on %s.------------",
@@ -94,10 +91,7 @@ def rank(
             targets = [path]
 
         # Expand directories to paths
-        files = [
-            os.path.relpath(fn, config.path)
-            for fn in radon.cli.harvest.iter_filenames(targets)
-        ]
+        files = [os.path.relpath(fn, config.path) for fn in iter_filenames(targets)]
         logger.debug("Targeting - %s", files)
 
     for item in files:
@@ -109,9 +103,7 @@ def rank(
                     operator,
                     str(item),
                 )
-                val = target_revision.get(
-                    config, archiver, operator, str(item), resolved_metric.name
-                )
+                val = target_revision.get(config, archiver, operator, str(item), resolved_metric.name)
                 value = val
                 data.append((item, value))
             except KeyError:
@@ -131,20 +123,8 @@ def rank(
     data.append(("Total", total))
 
     headers = ("File", resolved_metric.description)
-    maxcolwidth = get_maxcolwidth(headers, wrap)
-    style = get_style()
-    print(
-        tabulate.tabulate(
-            headers=headers,
-            tabular_data=data,
-            tablefmt=style,
-            maxcolwidths=maxcolwidth,
-            maxheadercolwidths=maxcolwidth,
-        )
-    )
+    print_table(headers=headers, data=data, wrap=wrap, table_style=table_style)
 
     if threshold and total < threshold:
-        logger.error(
-            "Total value below the specified threshold: %s < %s", total, threshold
-        )
-        exit(1)
+        logger.error("Total value below the specified threshold: %s < %s", total, threshold)
+        sys.exit(1)

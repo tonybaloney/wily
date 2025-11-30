@@ -3,10 +3,11 @@ For managing the state of the wily process.
 
 Contains a lazy revision, index and process state model.
 """
+
 from collections import OrderedDict
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from wily import cache, logger
 from wily.archivers import Archiver, BaseArchiver, Revision, resolve_archiver
@@ -19,11 +20,11 @@ class IndexedRevision:
     """Union of revision and the operators executed."""
 
     revision: Revision
-    operators: List
+    operators: list
     _data = None
 
     @staticmethod
-    def fromdict(d: Dict[str, Any]) -> "IndexedRevision":
+    def fromdict(d: dict[str, Any]) -> "IndexedRevision":
         """Instantiate from a dictionary."""
         rev = Revision(
             key=d["key"],
@@ -40,15 +41,13 @@ class IndexedRevision:
         operators = d["operators"]
         return IndexedRevision(revision=rev, operators=operators)
 
-    def asdict(self) -> Dict[str, Any]:
+    def asdict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = asdict(self.revision)
         d["operators"] = self.operators
         return d
 
-    def get(
-        self, config: WilyConfig, archiver: str, operator: str, path: str, key: str
-    ) -> Any:
+    def get(self, config: WilyConfig, archiver: str, operator: str, path: str, key: str) -> Any:
         """
         Get the metric data for this indexed revision.
 
@@ -59,13 +58,11 @@ class IndexedRevision:
         :param key: The metric key
         """
         if not self._data:
-            self._data = cache.get(
-                config=config, archiver=archiver, revision=self.revision.key
-            )["operator_data"]
+            self._data = cache.get(config=config, archiver=archiver, revision=self.revision.key)["operator_data"]
         logger.debug("Fetching metric %s - %s for operator %s", path, key, operator)
         return get_metric(self._data, operator, path, key)
 
-    def get_paths(self, config: WilyConfig, archiver: str, operator: str) -> List[str]:
+    def get_paths(self, config: WilyConfig, archiver: str, operator: str) -> list[str]:
         """
         Get the indexed paths for this indexed revision.
 
@@ -76,15 +73,11 @@ class IndexedRevision:
         :return: A list of paths
         """
         if not self._data:
-            self._data = cache.get(
-                config=config, archiver=archiver, revision=self.revision.key
-            )["operator_data"]
+            self._data = cache.get(config=config, archiver=archiver, revision=self.revision.key)["operator_data"]
         logger.debug("Fetching keys")
         return list(self._data[operator].keys())
 
-    def store(
-        self, config: WilyConfig, archiver: Union[Archiver, str], stats: Dict[str, Any]
-    ) -> Path:
+    def store(self, config: WilyConfig, archiver: Archiver | str, stats: dict[str, Any]) -> Path:
         """
         Store the stats for this indexed revision.
 
@@ -102,7 +95,7 @@ class Index:
     archiver: Archiver
     config: WilyConfig
     operators = None
-    data: List[Any]
+    data: list[Any]
 
     def __init__(self, config: WilyConfig, archiver: Archiver):
         """
@@ -113,15 +106,9 @@ class Index:
         """
         self.config = config
         self.archiver = archiver
-        self.data = (
-            cache.get_archiver_index(config, archiver.name)
-            if cache.has_archiver_index(config, archiver.name)
-            else []
-        )
+        self.data = cache.get_archiver_index(config, archiver.name) if cache.has_archiver_index(config, archiver.name) else []
 
-        self._revisions = OrderedDict(
-            {d["key"]: IndexedRevision.fromdict(d) for d in self.data}
-        )
+        self._revisions = OrderedDict({d["key"]: IndexedRevision.fromdict(d) for d in self.data})
 
     def __len__(self):
         """Use length of revisions as len."""
@@ -133,16 +120,16 @@ class Index:
         return next(iter(self._revisions.values()))
 
     @property
-    def revisions(self) -> List[IndexedRevision]:
+    def revisions(self) -> list[IndexedRevision]:
         """List of all the revisions."""
         return list(self._revisions.values())
 
     @property
-    def revision_keys(self) -> List[str]:
+    def revision_keys(self) -> list[str]:
         """List of all the revision indexes."""
         return list(self._revisions.keys())
 
-    def __contains__(self, item: Union[str, Revision]) -> bool:
+    def __contains__(self, item: str | Revision) -> bool:
         """Check if index contains `item`."""
         if isinstance(item, Revision):
             return item.key in self._revisions
@@ -155,16 +142,14 @@ class Index:
         """Get the revision for a specific index."""
         return self._revisions[index]
 
-    def add(self, revision: Revision, operators: List[Operator]) -> IndexedRevision:
+    def add(self, revision: Revision, operators: list[Operator]) -> IndexedRevision:
         """
         Add a revision to the index.
 
         :param revision: The revision.
         :param operators: Operators for the revision.
         """
-        ir = IndexedRevision(
-            revision=revision, operators=[operator.name for operator in operators]
-        )
+        ir = IndexedRevision(revision=revision, operators=[operator.name for operator in operators])
         self._revisions[revision.key] = ir
         return ir
 
@@ -182,16 +167,16 @@ class State:
     Includes indexes for each archiver.
     """
 
-    archivers: List[str]
+    archivers: list[str]
     config: WilyConfig
-    index: Dict[str, Index]
+    index: dict[str, Index]
     default_archiver: str
-    operators: Optional[List[Operator]] = None
+    operators: list[Operator] | None = None
 
     def __init__(
         self,
         config: WilyConfig,
-        archiver: Optional[Union[Archiver, BaseArchiver]] = None,
+        archiver: Archiver | BaseArchiver | None = None,
     ):
         """
         Instantiate a new process state.

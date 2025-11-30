@@ -1,30 +1,20 @@
 """
 Maintainability operator.
 
-Measures the "maintainability" using the Halstead index.
-"""
-import statistics
-from collections import Counter
-from typing import Any, Dict, Iterable
+Measures the "maintainability" using the Maintainability Index.
 
-import radon.cli.harvest as harvesters
-from radon.cli import Config
+Uses the Rust parser backend for performance.
+"""
+
+import statistics
+from collections.abc import Iterable
+from typing import Any
 
 from wily import logger
+from wily.backend import harvest_maintainability_metrics
 from wily.config.types import WilyConfig
 from wily.lang import _
 from wily.operators import BaseOperator, Metric, MetricType
-
-
-def mode(data):
-    """
-    Return the modal value of an iterable with discrete values.
-
-    If there is more than 1 modal value, arbitrarily return the first top n.
-    """
-    c = Counter(data)
-    mode, freq = c.most_common(1)[0]
-    return mode
 
 
 class MaintainabilityIndexOperator(BaseOperator):
@@ -44,12 +34,8 @@ class MaintainabilityIndexOperator(BaseOperator):
     }
 
     metrics = (
-        Metric(
-            "rank", _("Maintainability Ranking"), str, MetricType.Informational, mode
-        ),
-        Metric(
-            "mi", _("Maintainability Index"), float, MetricType.AimHigh, statistics.mean
-        ),
+        Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational, statistics.mode),
+        Metric("mi", _("Maintainability Index"), float, MetricType.AimHigh, statistics.mean),
     )
 
     default_metric_index = 1  # MI
@@ -61,12 +47,12 @@ class MaintainabilityIndexOperator(BaseOperator):
         :param config: The wily configuration.
         :param targets: An iterable of paths from which to harvest metrics.
         """
-        # TODO : Import config from wily.cfg
         logger.debug("Using %s with %s for MI metrics", targets, self.defaults)
+        self._targets = tuple(targets)
+        self._exclude = self.defaults.get("exclude") or None
+        self._ignore = self.defaults.get("ignore") or None
 
-        self.harvester = harvesters.MIHarvester(targets, config=Config(**self.defaults))
-
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
+    def run(self, module: str, options: dict[str, Any]) -> dict[Any, Any]:
         """
         Run the operator.
 
@@ -74,8 +60,33 @@ class MaintainabilityIndexOperator(BaseOperator):
         :param options: Any runtime options.
         :return: The operator results.
         """
-        logger.debug("Running maintainability harvester")
-        results = {}
-        for filename, metrics in dict(self.harvester.results).items():
-            results[filename] = {"total": metrics}
+        logger.debug("Running maintainability harvester via Rust")
+
+        sources, errors = self._collect_sources()
+        results: dict[str, dict[str, Any]] = {}
+
+        if sources:
+            multi = self.defaults.get("multi", True)
+            rust_results = dict(harvest_maintainability_metrics(sources, multi=multi))
+
+            for filename, metrics in rust_results.items():
+                if "error" in metrics:
+                    logger.debug(
+                        "Failed to run MI harvester on %s : %s",
+                        filename,
+                        metrics["error"],
+                    )
+                    results[filename] = {"total": {"mi": 0.0, "rank": "C"}}
+                    continue
+
+                results[filename] = {
+                    "total": {
+                        "mi": metrics["mi"],
+                        "rank": metrics["rank"],
+                    }
+                }
+
+        for filename, error_payload in errors.items():
+            results[filename] = {"total": error_payload}
+
         return results

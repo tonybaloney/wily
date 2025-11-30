@@ -41,9 +41,7 @@ def test_graph():
     mock_go.Scatter = mock_Scatter
     mock.seal(mock_go)
 
-    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch(
-        "wily.commands.graph.go", mock_go
-    ), mock.patch("wily.commands.graph.State", mock_State):
+    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch("wily.commands.graph.go", mock_go), mock.patch("wily.commands.graph.State", mock_State):
         graph(
             config=mock_config,
             path=path,
@@ -88,9 +86,7 @@ def test_graph_with_keyerror():
     metrics = "raw.loc"
     path = ("test.py",)
     output = ""
-    mock_State, mock_config = get_mock_state_and_config(
-        3, ascending=True, with_keyerror=True
-    )
+    mock_State, mock_config = get_mock_state_and_config(3, ascending=True, with_keyerror=True)
     mock_offline = mock.MagicMock()
     mock_layout = mock.MagicMock()
     mock_Layout = mock.MagicMock(return_value=mock_layout)
@@ -101,9 +97,7 @@ def test_graph_with_keyerror():
     mock_go.Scatter = mock_Scatter
     mock.seal(mock_go)
 
-    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch(
-        "wily.commands.graph.go", mock_go
-    ), mock.patch("wily.commands.graph.State", mock_State):
+    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch("wily.commands.graph.go", mock_go), mock.patch("wily.commands.graph.State", mock_State):
         graph(
             config=mock_config,
             path=path,
@@ -173,9 +167,7 @@ def test_graph_with_changes():
     mock_go.Scatter = mock_Scatter
     mock.seal(mock_go)
 
-    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch(
-        "wily.commands.graph.go", mock_go
-    ), mock.patch("wily.commands.graph.State", mock_State):
+    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch("wily.commands.graph.go", mock_go), mock.patch("wily.commands.graph.State", mock_State):
         graph(
             config=mock_config,
             path=path,
@@ -247,9 +239,7 @@ def test_graph_all():
     mock_go.Scatter = mock_Scatter
     mock.seal(mock_go)
 
-    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch(
-        "wily.commands.graph.go", mock_go
-    ), mock.patch("wily.commands.graph.State", mock_State):
+    with mock.patch("wily.commands.graph.plotly.offline", mock_offline), mock.patch("wily.commands.graph.go", mock_go), mock.patch("wily.commands.graph.State", mock_State):
         graph(
             config=mock_config,
             path=path,

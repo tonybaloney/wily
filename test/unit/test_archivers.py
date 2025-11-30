@@ -57,8 +57,7 @@ class MockRepo:
 
 
 class MockGit:
-    def checkout(self, *args):
-        ...
+    def checkout(self, *args): ...
 
     def execute(self, command, *args, **kwargs):
         if command[1] == "ls-tree":

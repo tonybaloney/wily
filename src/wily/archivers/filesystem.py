@@ -3,10 +3,11 @@ Filesystem Archiver.
 
 Implementation of the archiver API for a standard directory (no revisions)
 """
+
 import hashlib
 import logging
 import os.path
-from typing import Any, Dict, List
+from typing import Any
 
 from wily.archivers import BaseArchiver, Revision
 from wily.config.types import WilyConfig
@@ -27,7 +28,7 @@ class FilesystemArchiver(BaseArchiver):
         """
         self.config = config
 
-    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
+    def revisions(self, path: str, max_revisions: int) -> list[Revision]:
         """
         Get the list of revisions.
 
@@ -52,7 +53,7 @@ class FilesystemArchiver(BaseArchiver):
             )
         ]
 
-    def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
+    def checkout(self, revision: Revision, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 

@@ -43,18 +43,12 @@ def test_git_end_to_end(tmpdir):
     assert revisions[0].message == "commit2"
     assert revisions[0].author_email == "author@example.com"
     assert revisions[0].author_name == "An author"
-    assert (
-        revisions[0].key in commit2.name_rev
-        and revisions[0].key not in commit1.name_rev
-    )
+    assert revisions[0].key in commit2.name_rev and revisions[0].key not in commit1.name_rev
 
     assert revisions[1].message == "commit1"
     assert revisions[1].author_email == "author@example.com"
     assert revisions[1].author_name == "An author"
-    assert (
-        revisions[1].key in commit1.name_rev
-        and revisions[1].key not in commit2.name_rev
-    )
+    assert revisions[1].key in commit1.name_rev and revisions[1].key not in commit2.name_rev
 
     checkout = archiver.checkout(revisions[1], {})
 

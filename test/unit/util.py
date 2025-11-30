@@ -1,4 +1,5 @@
 """Utils for unit testing wily."""
+
 from unittest import mock
 
 
@@ -30,12 +31,8 @@ def get_mock_state_and_config(revs, empty=False, with_keyerror=False, ascending=
     else:
         mock__get_item__ = mock.Mock(side_effect=KeyError)
 
-    mock_revisions = mock.MagicMock(
-        revisions=revisions, __getitem__=mock__get_item__, revision_keys=("abcdeff",)
-    )
-    mock_state = mock.Mock(
-        index={"git": mock_revisions}, archivers=("git",), default_archiver="git"
-    )
+    mock_revisions = mock.MagicMock(revisions=revisions, __getitem__=mock__get_item__, revision_keys=("abcdeff",))
+    mock_state = mock.Mock(index={"git": mock_revisions}, archivers=("git",), default_archiver="git")
     mock.seal(mock_state)
     mock_State = mock.Mock(return_value=mock_state)
     mock_config = mock.Mock(path="", archiver="", operator="")

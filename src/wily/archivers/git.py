@@ -3,8 +3,9 @@ Git Archiver.
 
 Implementation of the archiver API for the gitpython module.
 """
+
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import git.exc
 from git.objects import Commit
@@ -25,7 +26,7 @@ class InvalidGitRepositoryError(Exception):
 class DirtyGitRepositoryError(Exception):
     """Error for a dirty git repository (untracked files)."""
 
-    def __init__(self, untracked_files: List[str]):
+    def __init__(self, untracked_files: list[str]):
         """
         Raise error for untracked files.
 
@@ -36,7 +37,7 @@ class DirtyGitRepositoryError(Exception):
         self.message = "Dirty repository, make sure you commit/stash files first"
 
 
-def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[str]]:
+def get_tracked_files_dirs(repo: Repo, commit: Commit) -> tuple[list[str], list[str]]:
     """Get tracked files in a repo for a commit hash using ls-tree."""
     paths = repo.git.execute(
         ["git", "ls-tree", "--name-only", "--full-tree", "-r", commit.hexsha],
@@ -53,9 +54,7 @@ def get_tracked_files_dirs(repo: Repo, commit: Commit) -> Tuple[List[str], List[
     return paths, dirs
 
 
-def whatchanged(
-    commit_a: Commit, commit_b: Commit
-) -> Tuple[List[str], List[str], List[str]]:
+def whatchanged(commit_a: Commit, commit_b: Commit) -> tuple[list[str], list[str], list[str]]:
     """Get files added, modified and deleted between commits."""
     diffs = commit_b.diff(commit_a)
     added_files = []
@@ -97,7 +96,7 @@ class GitArchiver(BaseArchiver):
             self.current_branch = self.repo.active_branch
         assert not self.repo.bare, "Not a Git repository"
 
-    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
+    def revisions(self, path: str, max_revisions: int) -> list[Revision]:
         """
         Get the list of revisions.
 
@@ -109,19 +108,15 @@ class GitArchiver(BaseArchiver):
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
-        revisions: List[Revision] = []
-        for commit in self.repo.iter_commits(
-            self.current_branch, max_count=max_revisions, reverse=True
-        ):
+        revisions: list[Revision] = []
+        for commit in self.repo.iter_commits(self.current_branch, max_count=max_revisions, reverse=True):
             tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
             if not commit.parents or not revisions:
                 added_files = tracked_files
-                modified_files: List[str] = []
-                deleted_files: List[str] = []
+                modified_files: list[str] = []
+                deleted_files: list[str] = []
             else:
-                added_files, modified_files, deleted_files = whatchanged(
-                    commit, self.repo.commit(commit.hexsha + "~1")
-                )
+                added_files, modified_files, deleted_files = whatchanged(commit, self.repo.commit(commit.hexsha + "~1"))
 
             logger.debug("For revision %s found:", commit.name_rev.split(" ")[0])
             logger.debug("Tracked files: %s", tracked_files)
@@ -145,7 +140,7 @@ class GitArchiver(BaseArchiver):
             revisions.append(rev)
         return revisions[::-1]
 
-    def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
+    def checkout(self, revision: Revision, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
@@ -176,12 +171,10 @@ class GitArchiver(BaseArchiver):
         tracked_files, tracked_dirs = get_tracked_files_dirs(self.repo, commit)
         if not commit.parents:
             added_files = tracked_files
-            modified_files: List[str] = []
-            deleted_files: List[str] = []
+            modified_files: list[str] = []
+            deleted_files: list[str] = []
         else:
-            added_files, modified_files, deleted_files = whatchanged(
-                commit, self.repo.commit(commit.hexsha + "~1")
-            )
+            added_files, modified_files, deleted_files = whatchanged(commit, self.repo.commit(commit.hexsha + "~1"))
 
         return Revision(
             key=commit.name_rev.split(" ")[0],
