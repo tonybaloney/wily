@@ -49,17 +49,6 @@ def get_box_style(style: str = DEFAULT_TABLE_STYLE) -> box.Box:
     return BOX_STYLES.get(style.upper(), box.ROUNDED)
 
 
-def styled_text(text: str, style: str) -> Text:
-    """
-    Create a Rich Text object with the given style.
-
-    :param text: The text content
-    :param style: The Rich style name (e.g., 'red', 'green', 'yellow')
-    :return: A Rich Text object
-    """
-    return Text(text, style=style)
-
-
 def print_table(
     headers: Iterable[str],
     data: Iterable[Iterable[str | Text]],
