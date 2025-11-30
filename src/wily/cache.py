@@ -6,7 +6,7 @@ The API in this module is for archivers and commands to work with the local cach
 
 """
 
-import json
+import ujson as json
 import os.path
 import pathlib
 import shutil
