@@ -14,13 +14,14 @@ from rich.progress import (
     BarColumn,
     Progress,
     SpinnerColumn,
+    MofNCompleteColumn,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
 )
 
 from wily import logger
-from wily.archivers import Archiver, FilesystemArchiver
+from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
 from wily.backend import analyze_files_parallel, iter_filenames
 from wily.config.types import WilyConfig
@@ -79,13 +80,14 @@ def run_operators_parallel(
     return results
 
 
-def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> None:
+def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], diff: bool = True) -> None:
     """
     Build the history given an archiver and collection of operators.
 
     :param config: The wily configuration
     :param archiver: The archiver to use
     :param operators: The list of operators to execute
+    :param diff: Only store diffs in revisions (default True)
     """
     try:
         logger.debug("Using %s archiver module", archiver.name)
@@ -121,17 +123,21 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
-        TaskProgressColumn(),
+        MofNCompleteColumn(),
+        TaskProgressColumn(show_speed=True),
         TimeElapsedColumn(),
     )
 
-    seed = True
+    seed: Revision | None = None
     try:
         with Progress(*progress_columns) as progress:
             task_id = progress.add_task("Processing", total=len(revisions))
             prev_stats: dict[str, dict] = {}
 
             for revision in revisions:
+                if not seed:
+                    seed = revision
+
                 archiver_instance.checkout(revision, config.checkout_options)
                 stats: dict[str, dict] = {"operator_data": {}}
 
@@ -147,7 +153,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
                     indices = set(result.keys())
 
                     # Copy data from unchanged files from previous revision
-                    if not seed:
+                    if not diff and seed is revision:
                         files = {str(pathlib.Path(f)) for f in revision.tracked_files}
                         missing_indices = files - indices
                         for missing in missing_indices:
@@ -178,11 +184,11 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
                     stats["operator_data"][operator_name] = result
 
                 prev_stats = stats
-                seed = False
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver_instance.name, stats)
                 progress.advance(task_id)
-
+            if seed:
+                index.set_seed(seed)
             index.save()
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)

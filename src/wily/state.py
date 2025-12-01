@@ -159,6 +159,10 @@ class Index:
         logger.debug("Saving data")
         cache.store_archiver_index(self.config, self.archiver, data)
 
+    def set_seed(self, revision: Revision) -> None:
+        # TODO: Store the seed index id in the cache.
+        logger.info("Setting seed revision to %s", revision.key)
+
 
 class State:
     """
