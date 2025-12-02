@@ -15,7 +15,6 @@ from rich.progress import (
     Progress,
     SpinnerColumn,
     MofNCompleteColumn,
-    TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
 )
@@ -124,14 +123,14 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
-        TextColumn("{task.speed:.1f} commits/sec"),
+        TextColumn("{task.speed:.1f} commits/sec", justify="right", style="progress.data.speed"),
         TimeElapsedColumn(),
     )
 
     seed: Revision | None = None
     try:
         with Progress(*progress_columns) as progress:
-            task_id = progress.add_task("Processing", total=len(revisions))
+            task_id = progress.add_task("Processing", total=len(revisions), speed=0.0)
             prev_stats: dict[str, dict] = {}
 
             for revision in revisions:
