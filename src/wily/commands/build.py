@@ -209,7 +209,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
             progress.stop_task(seed_task)
             if any(op.name == "raw" for op in operators):
                 loc = stats.get("operator_data", {}).get("raw", {}).get("", {}).get("total", {}).get("loc", 0)
-                logger.info("Seed revision has %d lines of code.", loc)
+                logger.info(f"Seed revision has {loc:,} lines of code.")
             logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
 
             # Handle the rest
