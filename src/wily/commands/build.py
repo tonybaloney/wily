@@ -102,15 +102,56 @@ def run_operators_parallel(
 
     return results
 
+def aggregate_values(tracked_dirs: list[str], operator_name: str, result: dict[str, dict[str, Any]]) -> None:
+    # Aggregate metrics across directories
+    dirs = [""] + [str(pathlib.Path(d)) for d in tracked_dirs if d]
 
-def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], diff: bool = True) -> None:
+    for root in sorted(dirs):
+        aggregates = [p for p in result.keys() if p.startswith(root)]
+
+        # IF nothing changed in this aggregate, don't index it.
+        if not aggregates:
+            continue
+        result[str(root)] = {"total": {}}
+        for metric in resolve_operator(operator_name).operator_cls.metrics:
+            values = [
+                result[agg]["total"][metric.name]
+                for agg in aggregates
+                if agg in result and metric.name in result[agg].get("total", {})
+            ]
+            if values:
+                result[str(root)]["total"][metric.name] = metric.aggregate(values)
+
+def revision_to_stats(revision: Revision, archiver_instance: FilesystemArchiver, config: WilyConfig, operators: list[Operator]) -> dict[str, dict]:
+    targets = [
+        str(pathlib.Path(config.path) / pathlib.Path(file))
+        for file in revision.added_files + revision.modified_files
+    ]
+    stats: dict[str, dict] = {"operator_data": {}}
+
+    # if none of the targets are Python source files, skip analysis
+    # TODO: revisit for ipynb notebooks
+    if any(target.endswith(".py") for target in targets):
+        archiver_instance.checkout(revision, config.checkout_options)
+
+        # Run all operators in parallel via Rust/rayon
+        results = run_operators_parallel(operators, targets, config)
+
+        for operator_name, result in results.items():
+            aggregate_values(revision.tracked_dirs, operator_name, result)
+            stats["operator_data"][operator_name] = result
+    else:
+        logger.debug("Skipping analysis for revision %s, no Python files changed.", revision.key)
+    return stats
+
+
+def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> None:
     """
     Build the history given an archiver and collection of operators.
 
     :param config: The wily configuration
     :param archiver: The archiver to use
     :param operators: The list of operators to execute
-    :param diff: Only store diffs in revisions (default True)
     """
     try:
         logger.debug("Using %s archiver module", archiver.name)
@@ -138,6 +179,11 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
         config.path,
     )
 
+    if not revisions:
+        archiver_instance.finish()
+        logger.debug("No new revisions to index, exiting.")
+        return
+
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info("Running operators - %s", _op_desc)
 
@@ -150,79 +196,31 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
         TimeElapsedColumn(),
     )
 
-    seed: Revision | None = None
     try:
         with Progress(*progress_columns) as progress:
-            task_id = progress.add_task("Processing", total=len(revisions))
-            prev_stats: dict[str, dict] = {}
+            # Handle the seed revision
+            seed_task = progress.add_task("Analyzing seed", total=1)
+            progress.start_task(seed_task)
+            stats = revision_to_stats(revisions[0], archiver_instance, config, operators)
+            ir = index.add(revisions[0], operators=operators)
+            ir.store(config, archiver_instance.name, stats)
+            index.set_seed(revisions[0])
+            progress.stop_task(seed_task)
+            if any(op.name == "raw" for op in operators):
+                loc = stats.get("operator_data", {}).get("raw", {}).get("", {}).get("total", {}).get("loc", 0)
+                logger.info("Seed revision has %d lines of code.", loc)
+            logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
 
-            for revision in revisions:
-                if not seed:
-                    seed = revision
+            # Handle the rest
+            task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
+            for revision in revisions[1:]:
+                stats = revision_to_stats(revision, archiver_instance, config, operators)
 
-                targets = [
-                    str(pathlib.Path(config.path) / pathlib.Path(file))
-                    for file in revision.added_files + revision.modified_files
-                ]
-                logger.debug("Checking out revision %s", revision.key)
-                stats: dict[str, dict] = {"operator_data": {}}
-
-                # if none of the targets are Python source files, skip analysis
-                # TODO: revisit for ipynb notebooks
-                if any(target.endswith(".py") for target in targets):
-                    archiver_instance.checkout(revision, config.checkout_options)
-
-                    # Run all operators in parallel via Rust/rayon
-                    results = run_operators_parallel(operators, targets, config)
-
-                    for operator_name, result in results.items():
-                        indices = set(result.keys())
-
-                        # Copy data from unchanged files from previous revision
-                        if not diff and seed is revision:
-                            files = {str(pathlib.Path(f)) for f in revision.tracked_files}
-                            missing_indices = files - indices
-                            for missing in missing_indices:
-                                if missing in revision.tracked_dirs:
-                                    continue
-                                if operator_name not in prev_stats["operator_data"]:
-                                    continue
-                                if missing not in prev_stats["operator_data"][operator_name]:
-                                    continue
-                                result[missing] = prev_stats["operator_data"][operator_name][missing]
-                            for deleted in revision.deleted_files:
-                                result.pop(deleted, None)
-
-                        # Aggregate metrics across directories
-                        dirs = [""] + [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
-
-                        for root in sorted(dirs):
-                            aggregates = [p for p in result.keys() if p.startswith(root)]
-
-                            # IF nothing changed in this aggregate, don't index it.
-                            if not aggregates:
-                                continue
-                            result[str(root)] = {"total": {}}
-                            for metric in resolve_operator(operator_name).operator_cls.metrics:
-                                values = [
-                                    result[agg]["total"][metric.name]
-                                    for agg in aggregates
-                                    if agg in result and metric.name in result[agg].get("total", {})
-                                ]
-                                if values:
-                                    result[str(root)]["total"][metric.name] = metric.aggregate(values)
-
-                        stats["operator_data"][operator_name] = result
-
-                    prev_stats = stats
-                else:
-                    logger.debug("Skipping analysis for revision %s, no Python files changed.", revision.key)
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver_instance.name, stats)
                 progress.advance(task_id)
-            if seed:
-                index.set_seed(seed)
-            index.save()
+
+        index.save()
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)
         raise e

@@ -162,7 +162,6 @@ class Index:
     def set_seed(self, revision: Revision) -> None:
         """Set the seed revision for this index."""
         # TODO: Store the seed index id in the cache.
-        logger.info("Setting seed revision to %s", revision.key)
 
 
 class State:

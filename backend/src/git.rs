@@ -249,10 +249,8 @@ pub fn get_revisions<'py>(
         revisions.push(rev);
     }
 
-    // Reverse to get newest first (matching Python behavior)
     revisions.reverse();
 
-    // Convert to Python list of dicts
     let result = PyList::empty(py);
 
     for rev in revisions {
@@ -284,44 +282,6 @@ pub fn get_revisions<'py>(
     Ok(result)
 }
 
-/// Check if a repository is dirty (has uncommitted changes)
-#[pyfunction]
-pub fn is_repo_dirty(repo_path: &str) -> PyResult<bool> {
-    let repo = Repository::open(repo_path).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Failed to open repository: {}", e))
-    })?;
-
-    let statuses = repo.statuses(None).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Failed to get status: {}", e))
-    })?;
-
-    // Check if there are any changes
-    Ok(!statuses.is_empty())
-}
-
-/// Get the current branch name or HEAD commit for detached HEAD
-#[pyfunction]
-pub fn get_current_branch(repo_path: &str) -> PyResult<String> {
-    let repo = Repository::open(repo_path).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Failed to open repository: {}", e))
-    })?;
-
-    let head = repo.head().map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Failed to get HEAD: {}", e))
-    })?;
-
-    if head.is_branch() {
-        Ok(head.shorthand().unwrap_or("HEAD").to_string())
-    } else {
-        // Detached HEAD - return the commit SHA
-        Ok(head
-            .target()
-            .map(|oid| oid.to_string())
-            .unwrap_or_else(|| "HEAD".to_string()))
-    }
-}
-
-/// Checkout a specific revision
 #[pyfunction]
 pub fn checkout_revision(repo_path: &str, revision: &str) -> PyResult<()> {
     let repo = Repository::open(repo_path).map_err(|e| {
@@ -346,7 +306,6 @@ pub fn checkout_revision(repo_path: &str, revision: &str) -> PyResult<()> {
     Ok(())
 }
 
-/// Checkout a branch by name
 #[pyfunction]
 pub fn checkout_branch(repo_path: &str, branch: &str) -> PyResult<()> {
     let repo = Repository::open(repo_path).map_err(|e| {
@@ -464,8 +423,6 @@ pub fn find_revision<'py>(
 pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
     parent_module.add_function(wrap_pyfunction!(get_revisions, parent_module)?)?;
     parent_module.add_function(wrap_pyfunction!(find_revision, parent_module)?)?;
-    parent_module.add_function(wrap_pyfunction!(is_repo_dirty, parent_module)?)?;
-    parent_module.add_function(wrap_pyfunction!(get_current_branch, parent_module)?)?;
     parent_module.add_function(wrap_pyfunction!(checkout_revision, parent_module)?)?;
     parent_module.add_function(wrap_pyfunction!(checkout_branch, parent_module)?)?;
     Ok(())
