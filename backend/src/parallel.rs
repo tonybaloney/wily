@@ -22,10 +22,33 @@ use crate::raw;
 
 // ============================================================================
 // Thread-safe Rust structures to hold analysis results
+// These implement IntoPyObject for automatic Python dict conversion
 // ============================================================================
 
 /// Raw metrics result (already a HashMap from raw module)
 type RawMetricsResult = HashMap<String, i64>;
+
+/// Wrapper for raw metrics that converts to Python dict with "total" key
+#[derive(Debug, Clone)]
+struct RawResult {
+    metrics: RawMetricsResult,
+}
+
+impl<'py> IntoPyObject<'py> for RawResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        let total = PyDict::new(py);
+        for (key, value) in self.metrics {
+            total.set_item(key, value)?;
+        }
+        dict.set_item("total", total)?;
+        Ok(dict)
+    }
+}
 
 /// Cyclomatic complexity results stored without LineIndex
 #[derive(Debug, Clone)]
@@ -39,6 +62,25 @@ struct CyclomaticFunctionResult {
     endline: u32,
 }
 
+impl<'py> IntoPyObject<'py> for CyclomaticFunctionResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        dict.set_item("name", self.name)?;
+        dict.set_item("is_method", self.is_method)?;
+        dict.set_item("classname", self.classname)?;
+        dict.set_item("complexity", self.complexity)?;
+        dict.set_item("lineno", self.lineno)?;
+        dict.set_item("endline", self.endline)?;
+        dict.set_item("loc", self.endline as i64 - self.lineno as i64)?;
+        dict.set_item("closures", PyList::empty(py))?;
+        Ok(dict)
+    }
+}
+
 #[derive(Debug, Clone)]
 struct CyclomaticClassResult {
     name: String,
@@ -48,11 +90,56 @@ struct CyclomaticClassResult {
     endline: u32,
 }
 
+impl<'py> IntoPyObject<'py> for CyclomaticClassResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        dict.set_item("name", &self.name)?;
+        dict.set_item("complexity", self.complexity)?;
+        dict.set_item("real_complexity", self.real_complexity)?;
+        dict.set_item("lineno", self.lineno)?;
+        dict.set_item("endline", self.endline)?;
+        dict.set_item("loc", self.endline as i64 - self.lineno as i64)?;
+        dict.set_item("inner_classes", PyList::empty(py))?;
+        Ok(dict)
+    }
+}
+
 #[derive(Debug, Clone)]
 struct CyclomaticResult {
     functions: Vec<CyclomaticFunctionResult>,
     classes: Vec<CyclomaticClassResult>,
     total_complexity: i64,
+}
+
+impl<'py> IntoPyObject<'py> for CyclomaticResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        let detailed = PyDict::new(py);
+
+        for func in self.functions {
+            let fullname = func.fullname.clone();
+            detailed.set_item(fullname, func.into_pyobject(py)?)?;
+        }
+        for cls in self.classes {
+            let name = cls.name.clone();
+            detailed.set_item(name, cls.into_pyobject(py)?)?;
+        }
+
+        let total = PyDict::new(py);
+        total.set_item("complexity", self.total_complexity)?;
+
+        dict.set_item("detailed", detailed)?;
+        dict.set_item("total", total)?;
+        Ok(dict)
+    }
 }
 
 /// Halstead metrics results stored without LineIndex
@@ -72,6 +159,28 @@ struct HalsteadFunctionResult {
     endline: u32,
 }
 
+impl<'py> IntoPyObject<'py> for HalsteadFunctionResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        dict.set_item("h1", self.h1)?;
+        dict.set_item("h2", self.h2)?;
+        dict.set_item("N1", self.n1)?;
+        dict.set_item("N2", self.n2)?;
+        dict.set_item("vocabulary", self.vocabulary)?;
+        dict.set_item("length", self.length)?;
+        dict.set_item("volume", self.volume)?;
+        dict.set_item("difficulty", self.difficulty)?;
+        dict.set_item("effort", self.effort)?;
+        dict.set_item("lineno", self.lineno)?;
+        dict.set_item("endline", self.endline)?;
+        Ok(dict)
+    }
+}
+
 #[derive(Debug, Clone)]
 struct HalsteadTotalResult {
     h1: u32,
@@ -85,10 +194,52 @@ struct HalsteadTotalResult {
     effort: f64,
 }
 
+impl<'py> IntoPyObject<'py> for HalsteadTotalResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        dict.set_item("h1", self.h1)?;
+        dict.set_item("h2", self.h2)?;
+        dict.set_item("N1", self.n1)?;
+        dict.set_item("N2", self.n2)?;
+        dict.set_item("vocabulary", self.vocabulary)?;
+        dict.set_item("length", self.length)?;
+        dict.set_item("volume", self.volume)?;
+        dict.set_item("difficulty", self.difficulty)?;
+        dict.set_item("effort", self.effort)?;
+        dict.set_item("lineno", py.None())?;
+        dict.set_item("endline", py.None())?;
+        Ok(dict)
+    }
+}
+
 #[derive(Debug, Clone)]
 struct HalsteadResult {
     functions: Vec<HalsteadFunctionResult>,
     total: HalsteadTotalResult,
+}
+
+impl<'py> IntoPyObject<'py> for HalsteadResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        let detailed = PyDict::new(py);
+
+        for func in self.functions {
+            let name = func.name.clone();
+            detailed.set_item(name, func.into_pyobject(py)?)?;
+        }
+
+        dict.set_item("detailed", detailed)?;
+        dict.set_item("total", self.total.into_pyobject(py)?)?;
+        Ok(dict)
+    }
 }
 
 /// Maintainability index result
@@ -98,11 +249,26 @@ struct MaintainabilityResult {
     rank: String,
 }
 
+impl<'py> IntoPyObject<'py> for MaintainabilityResult {
+    type Target = PyDict;
+    type Output = Bound<'py, PyDict>;
+    type Error = PyErr;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        let dict = PyDict::new(py);
+        let total = PyDict::new(py);
+        total.set_item("mi", self.mi)?;
+        total.set_item("rank", self.rank)?;
+        dict.set_item("total", total)?;
+        Ok(dict)
+    }
+}
+
 /// Complete analysis result for a single file
 #[derive(Debug, Clone)]
 enum FileAnalysisResult {
     Success {
-        raw: Option<RawMetricsResult>,
+        raw: Option<RawResult>,
         cyclomatic: Option<CyclomaticResult>,
         halstead: Option<HalsteadResult>,
         maintainability: Option<MaintainabilityResult>,
@@ -236,7 +402,9 @@ fn analyze_file(
     multi: bool,
 ) -> FileAnalysisResult {
     let raw = if include_raw {
-        Some(raw::analyze_source_raw(source))
+        Some(RawResult {
+            metrics: raw::analyze_source_raw(source),
+        })
     } else {
         None
     };
@@ -293,121 +461,6 @@ fn analyze_file(
         halstead,
         maintainability,
     }
-}
-
-// ============================================================================
-// Python conversion functions
-// ============================================================================
-
-fn cyclomatic_to_pydict<'py>(
-    py: Python<'py>,
-    result: &CyclomaticResult,
-) -> PyResult<Bound<'py, PyDict>> {
-    let cc_dict = PyDict::new(py);
-    let detailed_dict = PyDict::new(py);
-
-    for func in &result.functions {
-        let func_dict = PyDict::new(py);
-        func_dict.set_item("name", &func.name)?;
-        func_dict.set_item("is_method", func.is_method)?;
-        func_dict.set_item("classname", func.classname.as_deref())?;
-        func_dict.set_item("complexity", func.complexity)?;
-        func_dict.set_item("lineno", func.lineno)?;
-        func_dict.set_item("endline", func.endline)?;
-        func_dict.set_item("loc", func.endline as i64 - func.lineno as i64)?;
-
-        let closures_list = PyList::empty(py);
-        func_dict.set_item("closures", closures_list)?;
-
-        detailed_dict.set_item(func.fullname.as_str(), func_dict)?;
-    }
-
-    for cls in &result.classes {
-        let cls_dict = PyDict::new(py);
-        cls_dict.set_item("name", &cls.name)?;
-        cls_dict.set_item("complexity", cls.complexity)?;
-        cls_dict.set_item("real_complexity", cls.real_complexity)?;
-        cls_dict.set_item("lineno", cls.lineno)?;
-        cls_dict.set_item("endline", cls.endline)?;
-        cls_dict.set_item("loc", cls.endline as i64 - cls.lineno as i64)?;
-
-        let inner_classes_list = PyList::empty(py);
-        cls_dict.set_item("inner_classes", inner_classes_list)?;
-
-        detailed_dict.set_item(cls.name.as_str(), cls_dict)?;
-    }
-
-    let total_dict = PyDict::new(py);
-    total_dict.set_item("complexity", result.total_complexity)?;
-    cc_dict.set_item("detailed", detailed_dict)?;
-    cc_dict.set_item("total", total_dict)?;
-
-    Ok(cc_dict)
-}
-
-fn halstead_to_pydict<'py>(
-    py: Python<'py>,
-    result: &HalsteadResult,
-) -> PyResult<Bound<'py, PyDict>> {
-    let hal_dict = PyDict::new(py);
-    let detailed_dict = PyDict::new(py);
-
-    for func in &result.functions {
-        let func_dict = PyDict::new(py);
-        func_dict.set_item("h1", func.h1)?;
-        func_dict.set_item("h2", func.h2)?;
-        func_dict.set_item("N1", func.n1)?;
-        func_dict.set_item("N2", func.n2)?;
-        func_dict.set_item("vocabulary", func.vocabulary)?;
-        func_dict.set_item("length", func.length)?;
-        func_dict.set_item("volume", func.volume)?;
-        func_dict.set_item("difficulty", func.difficulty)?;
-        func_dict.set_item("effort", func.effort)?;
-        func_dict.set_item("lineno", func.lineno)?;
-        func_dict.set_item("endline", func.endline)?;
-
-        detailed_dict.set_item(func.name.as_str(), func_dict)?;
-    }
-
-    let total_dict = PyDict::new(py);
-    total_dict.set_item("h1", result.total.h1)?;
-    total_dict.set_item("h2", result.total.h2)?;
-    total_dict.set_item("N1", result.total.n1)?;
-    total_dict.set_item("N2", result.total.n2)?;
-    total_dict.set_item("vocabulary", result.total.vocabulary)?;
-    total_dict.set_item("length", result.total.length)?;
-    total_dict.set_item("volume", result.total.volume)?;
-    total_dict.set_item("difficulty", result.total.difficulty)?;
-    total_dict.set_item("effort", result.total.effort)?;
-    total_dict.set_item("lineno", py.None())?;
-    total_dict.set_item("endline", py.None())?;
-
-    hal_dict.set_item("detailed", detailed_dict)?;
-    hal_dict.set_item("total", total_dict)?;
-
-    Ok(hal_dict)
-}
-
-fn raw_to_pydict<'py>(py: Python<'py>, metrics: &RawMetricsResult) -> PyResult<Bound<'py, PyDict>> {
-    let raw_dict = PyDict::new(py);
-    let total_dict = PyDict::new(py);
-    for (key, value) in metrics {
-        total_dict.set_item(key.as_str(), *value)?;
-    }
-    raw_dict.set_item("total", total_dict)?;
-    Ok(raw_dict)
-}
-
-fn maintainability_to_pydict<'py>(
-    py: Python<'py>,
-    result: &MaintainabilityResult,
-) -> PyResult<Bound<'py, PyDict>> {
-    let mi_dict = PyDict::new(py);
-    let total_dict = PyDict::new(py);
-    total_dict.set_item("mi", result.mi)?;
-    total_dict.set_item("rank", result.rank.as_str())?;
-    mi_dict.set_item("total", total_dict)?;
-    Ok(mi_dict)
 }
 
 // ============================================================================
@@ -483,7 +536,7 @@ pub fn analyze_files_parallel<'py>(
     // ========================================================================
     // PHASE 2: Convert Rust results to Python dicts (GIL held)
     // ========================================================================
-    // This is a simple data transformation, no heavy computation.
+    // This is a simple data transformation using IntoPyObject trait.
     let output = PyDict::new(py);
 
     for (path, result) in analysis_results {
@@ -499,18 +552,17 @@ pub fn analyze_files_parallel<'py>(
                 halstead,
                 maintainability,
             } => {
-                if let Some(ref raw_metrics) = raw {
-                    file_dict.set_item("raw", raw_to_pydict(py, raw_metrics)?)?;
+                if let Some(raw_result) = raw {
+                    file_dict.set_item("raw", raw_result.into_pyobject(py)?)?;
                 }
-                if let Some(ref cc_result) = cyclomatic {
-                    file_dict.set_item("cyclomatic", cyclomatic_to_pydict(py, cc_result)?)?;
+                if let Some(cc_result) = cyclomatic {
+                    file_dict.set_item("cyclomatic", cc_result.into_pyobject(py)?)?;
                 }
-                if let Some(ref hal_result) = halstead {
-                    file_dict.set_item("halstead", halstead_to_pydict(py, hal_result)?)?;
+                if let Some(hal_result) = halstead {
+                    file_dict.set_item("halstead", hal_result.into_pyobject(py)?)?;
                 }
-                if let Some(ref mi_result) = maintainability {
-                    file_dict
-                        .set_item("maintainability", maintainability_to_pydict(py, mi_result)?)?;
+                if let Some(mi_result) = maintainability {
+                    file_dict.set_item("maintainability", mi_result.into_pyobject(py)?)?;
                 }
             }
         }
