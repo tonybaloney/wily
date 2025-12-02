@@ -103,7 +103,7 @@ def run_operators_parallel(
     return results
 
 def aggregate_values(tracked_dirs: list[str], operator_name: str, result: dict[str, dict[str, Any]]) -> None:
-    # Aggregate metrics across directories
+    """Aggregate metrics across directories."""
     dirs = [""] + [str(pathlib.Path(d)) for d in tracked_dirs if d]
 
     for root in sorted(dirs):
@@ -123,6 +123,7 @@ def aggregate_values(tracked_dirs: list[str], operator_name: str, result: dict[s
                 result[str(root)]["total"][metric.name] = metric.aggregate(values)
 
 def revision_to_stats(revision: Revision, archiver_instance: FilesystemArchiver, config: WilyConfig, operators: list[Operator]) -> dict[str, dict]:
+    """Convert a revision to stats by running all operators."""
     targets = [
         str(pathlib.Path(config.path) / pathlib.Path(file))
         for file in revision.added_files + revision.modified_files
