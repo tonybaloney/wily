@@ -124,7 +124,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
-        TaskProgressColumn(show_speed=True),
+        TextColumn("{task.speed:.1f} commits/sec"),
         TimeElapsedColumn(),
     )
 
