@@ -24,7 +24,8 @@ def test_diff_no_path(tmpdir):
 def test_diff_output(builddir):
     """Test the diff feature with no changes"""
     runner = CliRunner()
-    result = runner.invoke(main.cli, ["--debug", "--path", builddir, "diff", _path], catch_exceptions=False)
+    # Don't use --debug since debug logs now contain the filename
+    result = runner.invoke(main.cli, ["--path", builddir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
 

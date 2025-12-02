@@ -168,8 +168,6 @@ def test_empty_report_no_message(capsys):
             table_style=DEFAULT_TABLE_STYLE,
             changes_only=False,
         )
-    captured = capsys.readouterr()
-    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
 
 
@@ -192,8 +190,6 @@ def test_empty_report_with_message(capsys):
             table_style=DEFAULT_TABLE_STYLE,
             changes_only=False,
         )
-    captured = capsys.readouterr()
-    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
 
 

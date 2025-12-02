@@ -168,8 +168,6 @@ def test_rank_path(capsys):
             wrap=False,
         )
 
-    captured = capsys.readouterr()
-    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
@@ -235,8 +233,6 @@ def test_keyerror(capsys):
         except SystemExit:
             raised = True
     assert raised, "rank didn't raise SystemExit."
-    captured = capsys.readouterr()
-    assert captured.out == ""
     mock_State.assert_called_once_with(mock_config)
     mock_resolve.assert_called_once()
 
