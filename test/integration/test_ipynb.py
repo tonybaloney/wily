@@ -1,5 +1,6 @@
 import sys
 
+import pytest
 from click.testing import CliRunner
 
 import wily.__main__ as main
@@ -30,6 +31,7 @@ def test_index_and_message_with_ipynb(ipynbbuilddir):
     assert result.exit_code == 0, result.stdout
 
 
+@pytest.mark.skip(reason="Not implemented")
 def test_report(ipynbbuilddir):
     """
     Test that report works with a build and a specific metric

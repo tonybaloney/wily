@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 mod cyclomatic;
 mod files;
+mod git;
 mod halstead;
 mod maintainability;
 mod parallel;
@@ -15,5 +16,6 @@ fn backend(_py: Python<'_>, module: &Bound<'_, PyModule>) -> PyResult<()> {
     maintainability::register(module)?;
     files::register(module)?;
     parallel::register(module)?;
+    git::register(module)?;
     Ok(())
 }

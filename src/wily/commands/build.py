@@ -146,7 +146,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
-        SpeedColumn("commits/sec"),
+        SpeedColumn(),
         TimeElapsedColumn(),
     )
 
@@ -160,52 +160,63 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
                 if not seed:
                     seed = revision
 
-                archiver_instance.checkout(revision, config.checkout_options)
-                stats: dict[str, dict] = {"operator_data": {}}
-
                 targets = [
                     str(pathlib.Path(config.path) / pathlib.Path(file))
                     for file in revision.added_files + revision.modified_files
                 ]
+                logger.debug("Checking out revision %s", revision.key)
+                stats: dict[str, dict] = {"operator_data": {}}
 
-                # Run all operators in parallel via Rust/rayon
-                results = run_operators_parallel(operators, targets, config)
+                # if none of the targets are Python source files, skip analysis
+                # TODO: revisit for ipynb notebooks
+                if any(target.endswith(".py") for target in targets):
+                    archiver_instance.checkout(revision, config.checkout_options)
 
-                for operator_name, result in results.items():
-                    indices = set(result.keys())
+                    # Run all operators in parallel via Rust/rayon
+                    results = run_operators_parallel(operators, targets, config)
 
-                    # Copy data from unchanged files from previous revision
-                    if not diff and seed is revision:
-                        files = {str(pathlib.Path(f)) for f in revision.tracked_files}
-                        missing_indices = files - indices
-                        for missing in missing_indices:
-                            if missing in revision.tracked_dirs:
+                    for operator_name, result in results.items():
+                        indices = set(result.keys())
+
+                        # Copy data from unchanged files from previous revision
+                        if not diff and seed is revision:
+                            files = {str(pathlib.Path(f)) for f in revision.tracked_files}
+                            missing_indices = files - indices
+                            for missing in missing_indices:
+                                if missing in revision.tracked_dirs:
+                                    continue
+                                if operator_name not in prev_stats["operator_data"]:
+                                    continue
+                                if missing not in prev_stats["operator_data"][operator_name]:
+                                    continue
+                                result[missing] = prev_stats["operator_data"][operator_name][missing]
+                            for deleted in revision.deleted_files:
+                                result.pop(deleted, None)
+
+                        # Aggregate metrics across directories
+                        dirs = [""] + [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
+
+                        for root in sorted(dirs):
+                            aggregates = [p for p in result.keys() if p.startswith(root)]
+
+                            # IF nothing changed in this aggregate, don't index it.
+                            if not aggregates:
                                 continue
-                            if operator_name not in prev_stats["operator_data"]:
-                                continue
-                            if missing not in prev_stats["operator_data"][operator_name]:
-                                continue
-                            result[missing] = prev_stats["operator_data"][operator_name][missing]
-                        for deleted in revision.deleted_files:
-                            result.pop(deleted, None)
+                            result[str(root)] = {"total": {}}
+                            for metric in resolve_operator(operator_name).operator_cls.metrics:
+                                values = [
+                                    result[agg]["total"][metric.name]
+                                    for agg in aggregates
+                                    if agg in result and metric.name in result[agg].get("total", {})
+                                ]
+                                if values:
+                                    result[str(root)]["total"][metric.name] = metric.aggregate(values)
 
-                    # Aggregate metrics across directories
-                    dirs = [""] + [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
-                    for root in sorted(dirs):
-                        aggregates = [p for p in result.keys() if p.startswith(root)]
-                        result[str(root)] = {"total": {}}
-                        for metric in resolve_operator(operator_name).operator_cls.metrics:
-                            values = [
-                                result[agg]["total"][metric.name]
-                                for agg in aggregates
-                                if agg in result and metric.name in result[agg].get("total", {})
-                            ]
-                            if values:
-                                result[str(root)]["total"][metric.name] = metric.aggregate(values)
+                        stats["operator_data"][operator_name] = result
 
-                    stats["operator_data"][operator_name] = result
-
-                prev_stats = stats
+                    prev_stats = stats
+                else:
+                    logger.debug("Skipping analysis for revision %s, no Python files changed.", revision.key)
                 ir = index.add(revision, operators=operators)
                 ir.store(config, archiver_instance.name, stats)
                 progress.advance(task_id)
