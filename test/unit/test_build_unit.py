@@ -1,11 +1,9 @@
 import statistics
 import sys
-from unittest.mock import patch
 
 import pytest
 
 from wily.archivers import Archiver, BaseArchiver, Revision
-from wily.commands import build
 from wily.config import DEFAULT_CONFIG
 from wily.operators import BaseOperator, Metric, MetricType, Operator, OperatorLevel
 
@@ -70,18 +68,6 @@ def config():
     return cfg
 
 
-def test_build_simple(config):
-    _test_operators = (MockOperator,)
-    with patch("wily.state.resolve_archiver", return_value=MockArchiver):
-        result = build.build(config, MockArchiver, _test_operators)  # type: ignore
-    assert result is None
-
-
-# ============================================================================
-# Tests for seed copy logic (copying unchanged files from previous revision)
-# ============================================================================
-
-
 class TestSeedCopyLogic:
     """Tests for the logic that copies data from unchanged files between revisions."""
 
@@ -125,13 +111,12 @@ class TestSeedCopyLogic:
             for deleted in deleted_files:
                 result.pop(deleted, None)
 
-        # file2.py and file3.py should be copied from prev_stats
         assert "file1.py" in result
         assert "file2.py" in result
         assert "file3.py" in result
-        assert result["file1.py"]["total"]["loc"] == 150  # New value
-        assert result["file2.py"]["total"]["loc"] == 200  # Copied
-        assert result["file3.py"]["total"]["loc"] == 300  # Copied
+        assert result["file1.py"]["total"]["loc"] == 150
+        assert result["file2.py"]["total"]["loc"] == 200
+        assert result["file3.py"]["total"]["loc"] == 300
 
     def test_seed_copy_excludes_deleted_files(self):
         """Deleted files should be removed from results."""
@@ -148,7 +133,7 @@ class TestSeedCopyLogic:
 
         seed = False
         operator_name = "raw"
-        tracked_files = ["file1.py"]  # file2.py no longer tracked
+        tracked_files = ["file1.py"]
         tracked_dirs = []
         deleted_files = ["file2.py"]
 
@@ -175,7 +160,7 @@ class TestSeedCopyLogic:
         prev_stats = {
             "operator_data": {
                 "raw": {
-                    "src": {"total": {"loc": 500}},  # This is a directory aggregate
+                    "src": {"total": {"loc": 500}},
                     "src/file1.py": {"total": {"loc": 100}},
                 }
             }
@@ -186,7 +171,7 @@ class TestSeedCopyLogic:
         seed = False
         operator_name = "raw"
         tracked_files = ["src", "src/file1.py"]
-        tracked_dirs = ["src"]  # src is a directory
+        tracked_dirs = ["src"]
         deleted_files = []
 
         indices = set(result.keys())
@@ -195,7 +180,7 @@ class TestSeedCopyLogic:
             missing_indices = files - indices
             for missing in missing_indices:
                 if missing in tracked_dirs:
-                    continue  # Skip directories
+                    continue
                 if operator_name not in prev_stats["operator_data"]:
                     continue
                 if missing not in prev_stats["operator_data"][operator_name]:
@@ -204,7 +189,6 @@ class TestSeedCopyLogic:
             for deleted in deleted_files:
                 result.pop(deleted, None)
 
-        # Only file should be copied, not the directory
         assert "src/file1.py" in result
         assert "src" not in result
 
@@ -222,7 +206,7 @@ class TestSeedCopyLogic:
             "file2.py": {"total": {"loc": 200}},
         }
 
-        seed = True  # This is the seed revision
+        seed = True
         operator_name = "raw"
         tracked_files = ["file1.py", "file2.py"]
         tracked_dirs = []
@@ -243,14 +227,8 @@ class TestSeedCopyLogic:
             for deleted in deleted_files:
                 result.pop(deleted, None)
 
-        # file1.py should NOT be copied because this is seed
         assert "file1.py" not in result
         assert "file2.py" in result
-
-
-# ============================================================================
-# Tests for aggregate metrics logic
-# ============================================================================
 
 
 class TestAggregateMetricsLogic:

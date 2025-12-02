@@ -8,19 +8,19 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import os
 import pathlib
 import sys
-from typing import Any, Optional
+from typing import Any
 
 from rich.progress import (
     BarColumn,
     Progress,
-    SpinnerColumn,
     ProgressColumn,
+    SpinnerColumn,
+    Task,
     TextColumn,
     TimeElapsedColumn,
-    Task,
 )
-from rich.text import Text
 from rich.table import Column
+from rich.text import Text
 
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
@@ -34,7 +34,8 @@ from wily.state import State
 class SpeedColumn(ProgressColumn):
     """Renders completed count/total and speed, e.g. '  10/1000 (5.00/sec)'."""
 
-    def __init__(self, separator: str = "/", table_column: Optional[Column] = None):
+    def __init__(self, separator: str = "/", table_column: Column | None = None):
+        """Initialize SpeedColumn."""
         self.separator = separator
         super().__init__(table_column=table_column)
 

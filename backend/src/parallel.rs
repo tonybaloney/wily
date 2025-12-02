@@ -388,10 +388,7 @@ fn halstead_to_pydict<'py>(
     Ok(hal_dict)
 }
 
-fn raw_to_pydict<'py>(
-    py: Python<'py>,
-    metrics: &RawMetricsResult,
-) -> PyResult<Bound<'py, PyDict>> {
+fn raw_to_pydict<'py>(py: Python<'py>, metrics: &RawMetricsResult) -> PyResult<Bound<'py, PyDict>> {
     let raw_dict = PyDict::new(py);
     let total_dict = PyDict::new(py);
     for (key, value) in metrics {
@@ -512,7 +509,8 @@ pub fn analyze_files_parallel<'py>(
                     file_dict.set_item("halstead", halstead_to_pydict(py, hal_result)?)?;
                 }
                 if let Some(ref mi_result) = maintainability {
-                    file_dict.set_item("maintainability", maintainability_to_pydict(py, mi_result)?)?;
+                    file_dict
+                        .set_item("maintainability", maintainability_to_pydict(py, mi_result)?)?;
                 }
             }
         }
