@@ -10,14 +10,14 @@
 //! - single_comments: Lines containing only comments
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyModule};
+use pyo3::types::PyModule;
 use ruff_python_ast::PySourceType;
 use ruff_python_parser::{parse_unchecked_source, TokenKind};
 use ruff_python_trivia::CommentRanges;
 use ruff_source_file::{LineIndex, OneIndexed};
 use ruff_text_size::{Ranged, TextRange};
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, IntoPyObject)]
 struct RawCounts {
     loc: u32,
     lloc: u32,
@@ -26,20 +26,6 @@ struct RawCounts {
     blank: u32,
     multi: u32,
     single_comments: u32,
-}
-
-impl RawCounts {
-    fn to_pydict<'py>(self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
-        let dict = PyDict::new(py);
-        dict.set_item("loc", self.loc)?;
-        dict.set_item("lloc", self.lloc)?;
-        dict.set_item("sloc", self.sloc)?;
-        dict.set_item("comments", self.comments)?;
-        dict.set_item("blank", self.blank)?;
-        dict.set_item("multi", self.multi)?;
-        dict.set_item("single_comments", self.single_comments)?;
-        Ok(dict)
-    }
 }
 
 fn analyze_source(source: &str) -> RawCounts {
@@ -275,13 +261,13 @@ fn count_logical_segment(tokens: &[TokenKind]) -> u32 {
 pub fn harvest_raw_metrics(
     py: Python<'_>,
     entries: Vec<(String, String)>,
-) -> PyResult<Vec<(String, Py<PyDict>)>> {
+) -> PyResult<Vec<(String, Py<PyAny>)>> {
     let mut results = Vec::with_capacity(entries.len());
 
     for (name, source) in entries {
         let metrics = analyze_source(&source);
-        let dict = metrics.to_pydict(py)?;
-        results.push((name, dict.unbind()));
+        let obj = metrics.into_pyobject(py)?.into_any().unbind();
+        results.push((name, obj));
     }
 
     Ok(results)
