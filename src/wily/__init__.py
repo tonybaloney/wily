@@ -41,20 +41,17 @@ import datetime
 import logging
 import tempfile
 
-import colorlog
+from rich.logging import RichHandler
 
 __version__ = "2.0.0a1"
 
 _, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 
-_handler = colorlog.StreamHandler()
-_handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s%(message)s"))
-
 _filehandler = logging.FileHandler(WILY_LOG_NAME, mode="w+")
 _filehandler.setLevel(logging.DEBUG)
 
-logger = colorlog.getLogger(__name__)
-logger.addHandler(_handler)
+logger = logging.getLogger(__name__)
+logger.addHandler(RichHandler())
 logger.addHandler(_filehandler)
 
 """ Max number of characters of the Git commit to print """
