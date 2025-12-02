@@ -8,16 +8,19 @@ TODO : Convert .gitignore to radon ignore patterns to make the build more effici
 import os
 import pathlib
 import sys
-from typing import Any
+from typing import Any, Optional
 
 from rich.progress import (
     BarColumn,
     Progress,
     SpinnerColumn,
-    MofNCompleteColumn,
+    ProgressColumn,
     TextColumn,
     TimeElapsedColumn,
+    Task,
 )
+from rich.text import Text
+from rich.table import Column
 
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
@@ -26,6 +29,26 @@ from wily.backend import analyze_files_parallel, iter_filenames
 from wily.config.types import WilyConfig
 from wily.operators import Operator, resolve_operator
 from wily.state import State
+
+
+class SpeedColumn(ProgressColumn):
+    """Renders completed count/total and speed, e.g. '  10/1000 (5.00/sec)'."""
+
+    def __init__(self, separator: str = "/", table_column: Optional[Column] = None):
+        self.separator = separator
+        super().__init__(table_column=table_column)
+
+    def render(self, task: "Task") -> Text:
+        """Show completed/total."""
+        completed = int(task.completed)
+        total = int(task.total) if task.total is not None else "?"
+        total_width = len(str(total))
+
+        speed = task.speed or 0.0
+        return Text(
+            f"{completed:{total_width}d}{self.separator}{total} ({speed:.2f}/sec)",
+            style="progress.download",
+        )
 
 
 def run_operators_parallel(
@@ -122,15 +145,14 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator], dif
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
-        MofNCompleteColumn(),
-        TextColumn("{task.speed:.1f} commits/sec", justify="right", style="progress.data.speed"),
+        SpeedColumn("commits/sec"),
         TimeElapsedColumn(),
     )
 
     seed: Revision | None = None
     try:
         with Progress(*progress_columns) as progress:
-            task_id = progress.add_task("Processing", total=len(revisions), speed=0.0)
+            task_id = progress.add_task("Processing", total=len(revisions))
             prev_stats: dict[str, dict] = {}
 
             for revision in revisions:
