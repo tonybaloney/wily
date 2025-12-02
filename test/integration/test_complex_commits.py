@@ -19,7 +19,10 @@ _path2 = "src\\test2.py" if sys.platform == "win32" else "src/test2.py"
 
 def test_skip_files(tmpdir, cache_path):
     """
-    Test that files which were not changed are still added to each index
+    Test that only changed files are indexed in each commit.
+    
+    With the optimized build process, each revision only contains metrics
+    for files that were added or modified in that specific commit.
     """
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir) / "src"
@@ -78,15 +81,15 @@ def test_skip_files(tmpdir, cache_path):
 
     assert len(index) == 3
 
-    # Look at the first commit
+    # Look at the first commit - both files were added
     with open(rev_path) as rev_file:
         data = json.load(rev_file)
 
     assert "raw" in data["operator_data"]
-    assert _path1 in data["operator_data"]["raw"]
-    assert _path2 in data["operator_data"]["raw"]
+    assert _path1 in data["operator_data"]["raw"], "First commit should have test1.py (was added)"
+    assert _path2 in data["operator_data"]["raw"], "First commit should have test2.py (was added)"
 
-    # Look at the second commit
+    # Look at the second commit - only test2.py was modified
     rev2_path = cache_path / "git" / (commit2.name_rev.split(" ")[0] + ".json")
     assert rev2_path.exists()
 
@@ -94,10 +97,10 @@ def test_skip_files(tmpdir, cache_path):
         data2 = json.load(rev2_file)
 
     assert "raw" in data2["operator_data"]
-    assert _path1 in data2["operator_data"]["raw"]
-    assert _path2 in data2["operator_data"]["raw"]
+    assert _path1 not in data2["operator_data"]["raw"], "Second commit should NOT have test1.py (unchanged)"
+    assert _path2 in data2["operator_data"]["raw"], "Second commit should have test2.py (was modified)"
 
-    # Look at the third commit
+    # Look at the third commit - only test1.py was modified
     rev3_path = cache_path / "git" / (commit3.name_rev.split(" ")[0] + ".json")
     assert rev3_path.exists()
 
@@ -105,8 +108,8 @@ def test_skip_files(tmpdir, cache_path):
         data3 = json.load(rev3_file)
 
     assert "raw" in data3["operator_data"]
-    assert _path1 in data3["operator_data"]["raw"]
-    assert _path2 in data3["operator_data"]["raw"]
+    assert _path1 in data3["operator_data"]["raw"], "Third commit should have test1.py (was modified)"
+    assert _path2 not in data3["operator_data"]["raw"], "Third commit should NOT have test2.py (unchanged)"
 
 
 complex_test = """
