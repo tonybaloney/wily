@@ -1,14 +1,3 @@
-//! Parallel file analysis using rayon.
-//!
-//! This module provides efficient parallel processing of Python files,
-//! replacing Python's multiprocessing.Pool with Rust's rayon thread pool.
-//!
-//! The key design principle is to maximize work done outside the GIL:
-//! 1. Read all files in parallel (no GIL needed)
-//! 2. Analyze all files in parallel (no GIL needed)  
-//! 3. Store results in thread-safe Rust structures
-//! 4. Convert to Python dicts only after parallel work is complete
-
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use rayon::prelude::*;
@@ -19,11 +8,6 @@ use crate::cyclomatic::{self, ClassComplexity, FunctionComplexity};
 use crate::halstead::{self, FunctionHalstead, HalsteadMetrics};
 use crate::maintainability;
 use crate::raw;
-
-// ============================================================================
-// Thread-safe Rust structures matching Python dict output format exactly.
-// Using #[derive(IntoPyObject)] with #[pyo3(item = "...")] for field renaming.
-// ============================================================================
 
 /// Raw metrics - wraps HashMap in {"total": {...}} structure
 #[derive(Debug, Clone, IntoPyObject)]
@@ -41,7 +25,7 @@ struct CyclomaticFunctionResult {
     lineno: u32,
     endline: u32,
     loc: i64,
-    closures: Vec<String>, // Always empty, but needed for Python compatibility
+    closures: Vec<String>, // Always empty, but needed for wily1 compatibility
 }
 
 /// Cyclomatic class result - leaf struct with derive
@@ -53,7 +37,7 @@ struct CyclomaticClassResult {
     lineno: u32,
     endline: u32,
     loc: i64,
-    inner_classes: Vec<String>, // Always empty, but needed for Python compatibility
+    inner_classes: Vec<String>, // Always empty, but needed for wily1 compatibility
 }
 
 /// Cyclomatic total - just complexity
@@ -423,11 +407,6 @@ pub fn analyze_files_parallel<'py>(
     let include_halstead = operators.iter().any(|o| o == "halstead");
     let include_maintainability = operators.iter().any(|o| o == "maintainability");
 
-    // ========================================================================
-    // PHASE 1: Parallel file reading and analysis (GIL released)
-    // ========================================================================
-    // All heavy computation happens here, outside the GIL.
-    // Results are stored in thread-safe Rust structures.
     let analysis_results: Vec<(String, FileAnalysisResult)> = py.detach(|| {
         paths
             .par_iter()
@@ -458,10 +437,6 @@ pub fn analyze_files_parallel<'py>(
             .collect()
     });
 
-    // ========================================================================
-    // PHASE 2: Convert Rust results to Python dicts (GIL held)
-    // ========================================================================
-    // This is a simple data transformation using IntoPyObject trait.
     let output = PyDict::new(py);
 
     for (path, result) in analysis_results {
@@ -498,7 +473,6 @@ pub fn analyze_files_parallel<'py>(
     Ok(output)
 }
 
-/// Register the parallel module with the Python module.
 pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
     parent_module.add_function(wrap_pyfunction!(analyze_files_parallel, parent_module)?)?;
     Ok(())
