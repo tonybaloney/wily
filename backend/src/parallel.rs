@@ -10,7 +10,7 @@
 //! 4. Convert to Python dicts only after parallel work is complete
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::PyDict;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::fs;
@@ -21,97 +21,52 @@ use crate::maintainability;
 use crate::raw;
 
 // ============================================================================
-// Thread-safe Rust structures to hold analysis results
-// These implement IntoPyObject for automatic Python dict conversion
+// Thread-safe Rust structures matching Python dict output format exactly.
+// Using #[derive(IntoPyObject)] with #[pyo3(item = "...")] for field renaming.
 // ============================================================================
 
-/// Raw metrics result (already a HashMap from raw module)
-type RawMetricsResult = HashMap<String, i64>;
-
-/// Wrapper for raw metrics that converts to Python dict with "total" key
-#[derive(Debug, Clone)]
+/// Raw metrics - wraps HashMap in {"total": {...}} structure
+#[derive(Debug, Clone, IntoPyObject)]
 struct RawResult {
-    metrics: RawMetricsResult,
+    total: HashMap<String, i64>,
 }
 
-impl<'py> IntoPyObject<'py> for RawResult {
-    type Target = PyDict;
-    type Output = Bound<'py, PyDict>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let dict = PyDict::new(py);
-        let total = PyDict::new(py);
-        for (key, value) in self.metrics {
-            total.set_item(key, value)?;
-        }
-        dict.set_item("total", total)?;
-        Ok(dict)
-    }
-}
-
-/// Cyclomatic complexity results stored without LineIndex
-#[derive(Debug, Clone)]
+/// Cyclomatic function result - leaf struct with derive
+#[derive(Debug, Clone, IntoPyObject)]
 struct CyclomaticFunctionResult {
     name: String,
-    fullname: String,
     is_method: bool,
     classname: Option<String>,
     complexity: u32,
     lineno: u32,
     endline: u32,
+    loc: i64,
+    closures: Vec<String>, // Always empty, but needed for Python compatibility
 }
 
-impl<'py> IntoPyObject<'py> for CyclomaticFunctionResult {
-    type Target = PyDict;
-    type Output = Bound<'py, PyDict>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let dict = PyDict::new(py);
-        dict.set_item("name", self.name)?;
-        dict.set_item("is_method", self.is_method)?;
-        dict.set_item("classname", self.classname)?;
-        dict.set_item("complexity", self.complexity)?;
-        dict.set_item("lineno", self.lineno)?;
-        dict.set_item("endline", self.endline)?;
-        dict.set_item("loc", self.endline as i64 - self.lineno as i64)?;
-        dict.set_item("closures", PyList::empty(py))?;
-        Ok(dict)
-    }
-}
-
-#[derive(Debug, Clone)]
+/// Cyclomatic class result - leaf struct with derive
+#[derive(Debug, Clone, IntoPyObject)]
 struct CyclomaticClassResult {
     name: String,
     complexity: u32,
     real_complexity: u32,
     lineno: u32,
     endline: u32,
+    loc: i64,
+    inner_classes: Vec<String>, // Always empty, but needed for Python compatibility
 }
 
-impl<'py> IntoPyObject<'py> for CyclomaticClassResult {
-    type Target = PyDict;
-    type Output = Bound<'py, PyDict>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let dict = PyDict::new(py);
-        dict.set_item("name", &self.name)?;
-        dict.set_item("complexity", self.complexity)?;
-        dict.set_item("real_complexity", self.real_complexity)?;
-        dict.set_item("lineno", self.lineno)?;
-        dict.set_item("endline", self.endline)?;
-        dict.set_item("loc", self.endline as i64 - self.lineno as i64)?;
-        dict.set_item("inner_classes", PyList::empty(py))?;
-        Ok(dict)
-    }
+/// Cyclomatic total - just complexity
+#[derive(Debug, Clone, IntoPyObject)]
+struct CyclomaticTotal {
+    complexity: i64,
 }
 
+/// Full cyclomatic result with detailed dict keyed by function/class name
 #[derive(Debug, Clone)]
 struct CyclomaticResult {
-    functions: Vec<CyclomaticFunctionResult>,
-    classes: Vec<CyclomaticClassResult>,
+    functions: Vec<(String, CyclomaticFunctionResult)>, // (fullname, result)
+    classes: Vec<(String, CyclomaticClassResult)>,      // (name, result)
     total_complexity: i64,
 }
 
@@ -124,31 +79,28 @@ impl<'py> IntoPyObject<'py> for CyclomaticResult {
         let dict = PyDict::new(py);
         let detailed = PyDict::new(py);
 
-        for func in self.functions {
-            let fullname = func.fullname.clone();
+        for (fullname, func) in self.functions {
             detailed.set_item(fullname, func.into_pyobject(py)?)?;
         }
-        for cls in self.classes {
-            let name = cls.name.clone();
+        for (name, cls) in self.classes {
             detailed.set_item(name, cls.into_pyobject(py)?)?;
         }
 
-        let total = PyDict::new(py);
-        total.set_item("complexity", self.total_complexity)?;
-
+        let total = CyclomaticTotal { complexity: self.total_complexity };
         dict.set_item("detailed", detailed)?;
-        dict.set_item("total", total)?;
+        dict.set_item("total", total.into_pyobject(py)?)?;
         Ok(dict)
     }
 }
 
-/// Halstead metrics results stored without LineIndex
-#[derive(Debug, Clone)]
+/// Halstead function result - uses #[pyo3(item)] for N1/N2 naming
+#[derive(Debug, Clone, IntoPyObject)]
 struct HalsteadFunctionResult {
-    name: String,
     h1: u32,
     h2: u32,
+    #[pyo3(item("N1"))]
     n1: u32,
+    #[pyo3(item("N2"))]
     n2: u32,
     vocabulary: u32,
     length: u32,
@@ -159,66 +111,28 @@ struct HalsteadFunctionResult {
     endline: u32,
 }
 
-impl<'py> IntoPyObject<'py> for HalsteadFunctionResult {
-    type Target = PyDict;
-    type Output = Bound<'py, PyDict>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let dict = PyDict::new(py);
-        dict.set_item("h1", self.h1)?;
-        dict.set_item("h2", self.h2)?;
-        dict.set_item("N1", self.n1)?;
-        dict.set_item("N2", self.n2)?;
-        dict.set_item("vocabulary", self.vocabulary)?;
-        dict.set_item("length", self.length)?;
-        dict.set_item("volume", self.volume)?;
-        dict.set_item("difficulty", self.difficulty)?;
-        dict.set_item("effort", self.effort)?;
-        dict.set_item("lineno", self.lineno)?;
-        dict.set_item("endline", self.endline)?;
-        Ok(dict)
-    }
-}
-
-#[derive(Debug, Clone)]
+/// Halstead total result - includes None for lineno/endline
+#[derive(Debug, Clone, IntoPyObject)]
 struct HalsteadTotalResult {
     h1: u32,
     h2: u32,
+    #[pyo3(item("N1"))]
     n1: u32,
+    #[pyo3(item("N2"))]
     n2: u32,
     vocabulary: u32,
     length: u32,
     volume: f64,
     difficulty: f64,
     effort: f64,
+    lineno: Option<u32>,  // Always None
+    endline: Option<u32>, // Always None
 }
 
-impl<'py> IntoPyObject<'py> for HalsteadTotalResult {
-    type Target = PyDict;
-    type Output = Bound<'py, PyDict>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let dict = PyDict::new(py);
-        dict.set_item("h1", self.h1)?;
-        dict.set_item("h2", self.h2)?;
-        dict.set_item("N1", self.n1)?;
-        dict.set_item("N2", self.n2)?;
-        dict.set_item("vocabulary", self.vocabulary)?;
-        dict.set_item("length", self.length)?;
-        dict.set_item("volume", self.volume)?;
-        dict.set_item("difficulty", self.difficulty)?;
-        dict.set_item("effort", self.effort)?;
-        dict.set_item("lineno", py.None())?;
-        dict.set_item("endline", py.None())?;
-        Ok(dict)
-    }
-}
-
+/// Full halstead result with detailed dict keyed by function name
 #[derive(Debug, Clone)]
 struct HalsteadResult {
-    functions: Vec<HalsteadFunctionResult>,
+    functions: Vec<(String, HalsteadFunctionResult)>, // (name, result)
     total: HalsteadTotalResult,
 }
 
@@ -231,8 +145,7 @@ impl<'py> IntoPyObject<'py> for HalsteadResult {
         let dict = PyDict::new(py);
         let detailed = PyDict::new(py);
 
-        for func in self.functions {
-            let name = func.name.clone();
+        for (name, func) in self.functions {
             detailed.set_item(name, func.into_pyobject(py)?)?;
         }
 
@@ -242,26 +155,17 @@ impl<'py> IntoPyObject<'py> for HalsteadResult {
     }
 }
 
-/// Maintainability index result
-#[derive(Debug, Clone)]
-struct MaintainabilityResult {
+/// Maintainability total
+#[derive(Debug, Clone, IntoPyObject)]
+struct MaintainabilityTotal {
     mi: f64,
     rank: String,
 }
 
-impl<'py> IntoPyObject<'py> for MaintainabilityResult {
-    type Target = PyDict;
-    type Output = Bound<'py, PyDict>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        let dict = PyDict::new(py);
-        let total = PyDict::new(py);
-        total.set_item("mi", self.mi)?;
-        total.set_item("rank", self.rank)?;
-        dict.set_item("total", total)?;
-        Ok(dict)
-    }
+/// Maintainability result - wraps in {"total": {...}}
+#[derive(Debug, Clone, IntoPyObject)]
+struct MaintainabilityResult {
+    total: MaintainabilityTotal,
 }
 
 /// Complete analysis result for a single file
@@ -287,7 +191,7 @@ fn convert_cyclomatic(
 ) -> CyclomaticResult {
     let mut total_complexity: i64 = 0;
 
-    let func_results: Vec<CyclomaticFunctionResult> = functions
+    let func_results: Vec<(String, CyclomaticFunctionResult)> = functions
         .iter()
         .map(|func| {
             let lineno = ruff_source_file::LineIndex::line_index(
@@ -299,20 +203,26 @@ fn convert_cyclomatic(
                 ruff_text_size::TextSize::new(func.end_offset),
             );
             total_complexity += func.complexity as i64;
+            let lineno_val = (lineno.to_zero_indexed() + 1) as u32;
+            let endline_val = (endline.to_zero_indexed() + 1) as u32;
 
-            CyclomaticFunctionResult {
-                name: func.name.clone(),
-                fullname: func.fullname(),
-                is_method: func.is_method,
-                classname: func.classname.clone(),
-                complexity: func.complexity,
-                lineno: (lineno.to_zero_indexed() + 1) as u32,
-                endline: (endline.to_zero_indexed() + 1) as u32,
-            }
+            (
+                func.fullname(),
+                CyclomaticFunctionResult {
+                    name: func.name.clone(),
+                    is_method: func.is_method,
+                    classname: func.classname.clone(),
+                    complexity: func.complexity,
+                    lineno: lineno_val,
+                    endline: endline_val,
+                    loc: endline_val as i64 - lineno_val as i64,
+                    closures: Vec::new(),
+                },
+            )
         })
         .collect();
 
-    let class_results: Vec<CyclomaticClassResult> = classes
+    let class_results: Vec<(String, CyclomaticClassResult)> = classes
         .iter()
         .map(|cls| {
             let lineno = ruff_source_file::LineIndex::line_index(
@@ -324,14 +234,21 @@ fn convert_cyclomatic(
                 ruff_text_size::TextSize::new(cls.end_offset),
             );
             total_complexity += cls.complexity() as i64;
+            let lineno_val = (lineno.to_zero_indexed() + 1) as u32;
+            let endline_val = (endline.to_zero_indexed() + 1) as u32;
 
-            CyclomaticClassResult {
-                name: cls.name.clone(),
-                complexity: cls.complexity(),
-                real_complexity: cls.real_complexity,
-                lineno: (lineno.to_zero_indexed() + 1) as u32,
-                endline: (endline.to_zero_indexed() + 1) as u32,
-            }
+            (
+                cls.name.clone(),
+                CyclomaticClassResult {
+                    name: cls.name.clone(),
+                    complexity: cls.complexity(),
+                    real_complexity: cls.real_complexity,
+                    lineno: lineno_val,
+                    endline: endline_val,
+                    loc: endline_val as i64 - lineno_val as i64,
+                    inner_classes: Vec::new(),
+                },
+            )
         })
         .collect();
 
@@ -347,7 +264,7 @@ fn convert_halstead(
     total: HalsteadMetrics,
     line_index: &ruff_source_file::LineIndex,
 ) -> HalsteadResult {
-    let func_results: Vec<HalsteadFunctionResult> = functions
+    let func_results: Vec<(String, HalsteadFunctionResult)> = functions
         .iter()
         .map(|func| {
             let lineno = ruff_source_file::LineIndex::line_index(
@@ -359,20 +276,22 @@ fn convert_halstead(
                 ruff_text_size::TextSize::new(func.end_offset),
             );
 
-            HalsteadFunctionResult {
-                name: func.name.clone(),
-                h1: func.metrics.h1(),
-                h2: func.metrics.h2(),
-                n1: func.metrics.n1(),
-                n2: func.metrics.n2(),
-                vocabulary: func.metrics.vocabulary(),
-                length: func.metrics.length(),
-                volume: func.metrics.volume(),
-                difficulty: func.metrics.difficulty(),
-                effort: func.metrics.effort(),
-                lineno: (lineno.to_zero_indexed() + 1) as u32,
-                endline: (endline.to_zero_indexed() + 1) as u32,
-            }
+            (
+                func.name.clone(),
+                HalsteadFunctionResult {
+                    h1: func.metrics.h1(),
+                    h2: func.metrics.h2(),
+                    n1: func.metrics.n1(),
+                    n2: func.metrics.n2(),
+                    vocabulary: func.metrics.vocabulary(),
+                    length: func.metrics.length(),
+                    volume: func.metrics.volume(),
+                    difficulty: func.metrics.difficulty(),
+                    effort: func.metrics.effort(),
+                    lineno: (lineno.to_zero_indexed() + 1) as u32,
+                    endline: (endline.to_zero_indexed() + 1) as u32,
+                },
+            )
         })
         .collect();
 
@@ -388,6 +307,8 @@ fn convert_halstead(
             volume: total.volume(),
             difficulty: total.difficulty(),
             effort: total.effort(),
+            lineno: None,
+            endline: None,
         },
     }
 }
@@ -403,7 +324,7 @@ fn analyze_file(
 ) -> FileAnalysisResult {
     let raw = if include_raw {
         Some(RawResult {
-            metrics: raw::analyze_source_raw(source),
+            total: raw::analyze_source_raw(source),
         })
     } else {
         None
@@ -441,6 +362,8 @@ fn analyze_file(
                     volume: 0.0,
                     difficulty: 0.0,
                     effort: 0.0,
+                    lineno: None,
+                    endline: None,
                 },
             }),
         }
@@ -450,7 +373,9 @@ fn analyze_file(
 
     let maintainability = if include_maintainability {
         let (mi, rank) = maintainability::analyze_source_mi(source, multi);
-        Some(MaintainabilityResult { mi, rank })
+        Some(MaintainabilityResult {
+            total: MaintainabilityTotal { mi, rank },
+        })
     } else {
         None
     };
