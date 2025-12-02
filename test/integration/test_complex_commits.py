@@ -7,7 +7,6 @@ import json
 import pathlib
 import sys
 
-import pytest
 from click.testing import CliRunner
 from git.repo.base import Repo
 from git.util import Actor
@@ -18,7 +17,6 @@ _path1 = "src\\test1.py" if sys.platform == "win32" else "src/test1.py"
 _path2 = "src\\test2.py" if sys.platform == "win32" else "src/test2.py"
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
 def test_skip_files(tmpdir, cache_path):
     """
     Test that files which were not changed are still added to each index

@@ -121,7 +121,6 @@ def test_store_basic(tmpdir):
         assert result == _TEST_STATS
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_store_twice(tmpdir):
     """Test that you can't write the same revision twice"""
     config = DEFAULT_CONFIG

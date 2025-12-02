@@ -163,18 +163,6 @@ wheels = [
 ]
 
 [[package]]
-name = "colorlog"
-version = "4.8.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/75/32/cdfba08674d72fe7895a8ec7be8f171e8502274999cae9497e4545404873/colorlog-4.8.0.tar.gz", hash = "sha256:59b53160c60902c405cdec28d38356e09d40686659048893e026ecbd589516b1", size = 28770, upload-time = "2021-03-22T11:26:32.319Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/62/61449c6bb74c2a3953c415b2cdb488e4f0518ac67b35e2b03a6d543035ca/colorlog-4.8.0-py2.py3-none-any.whl", hash = "sha256:3dd15cb27e8119a24c1a7b5c93f9f3b455855e0f73993b1c25921b2f646f1dcd", size = 10023, upload-time = "2021-03-22T11:26:31.281Z" },
-]
-
-[[package]]
 name = "coverage"
 version = "7.12.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1275,7 +1263,6 @@ name = "wily"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "colorlog" },
     { name = "gitpython" },
     { name = "nbformat" },
     { name = "plotly" },
@@ -1304,7 +1291,6 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=7.0,<9.0" },
-    { name = "colorlog", specifier = ">=4.0.0,<5.0.0" },
     { name = "gitpython", specifier = ">=3.1.32,<4.0.0" },
     { name = "nbformat", specifier = ">=5.1.3,<6.0.0" },
     { name = "plotly", specifier = ">=4.0.0,<6.0.0" },

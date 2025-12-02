@@ -123,7 +123,6 @@ def test_build(tmpdir, cache_path):
     assert rev_path.exists()
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_build_with_config(tmpdir, cache_path):
     """
     Test that build works in a basic repository and a configuration file.
