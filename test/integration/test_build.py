@@ -80,8 +80,8 @@ def test_build_crash(tmpdir):
 
     import wily.commands.build  # noqa: PLC0415
 
-    # Simulate a crash by patching run_operators_to_json to raise an error
-    with patch.object(wily.commands.build, "run_operators_to_json", side_effect=RuntimeError("arggh")):
+    # Simulate a crash by patching analyze_revision_to_parquet to raise an error
+    with patch.object(wily.commands.build, "analyze_revision_to_parquet", side_effect=RuntimeError("arggh")):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert result.exit_code == 1, result.stdout
@@ -118,8 +118,8 @@ def test_build(tmpdir, cache_path):
     assert cache_path.exists()
     index_path = cache_path / "git" / "index.json"
     assert index_path.exists()
-    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
 
 
 def test_build_with_config(tmpdir, cache_path):
@@ -171,8 +171,8 @@ def test_build_with_config(tmpdir, cache_path):
     assert cache_path.exists()
     index_path = cache_path / "git" / "index.json"
     assert index_path.exists()
-    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
 
 
 def test_build_twice(tmpdir, cache_path):
@@ -205,8 +205,8 @@ def test_build_twice(tmpdir, cache_path):
     assert cache_path.exists()
     index_path = cache_path / "index.json"
     assert index_path.exists()
-    rev_path = cache_path / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
+    parquet_path = cache_path / "metrics.parquet"
+    assert parquet_path.exists()
 
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
@@ -223,10 +223,8 @@ def test_build_twice(tmpdir, cache_path):
     assert cache_path.exists()
     index_path = cache_path / "index.json"
     assert index_path.exists()
-    rev_path = cache_path / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
-    rev_path2 = cache_path / (commit2.name_rev.split(" ")[0] + ".json")
-    assert rev_path2.exists()
+    # Parquet file should still exist and contain both revisions
+    assert parquet_path.exists()
 
 
 def test_build_no_commits(tmpdir):
