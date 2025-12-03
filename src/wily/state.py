@@ -154,27 +154,6 @@ class Index:
         """Get the revision for a specific index."""
         return self._revisions[index]
 
-    def add(self, revision: Revision, operators: list[Operator]) -> IndexedRevision:
-        """
-        Add a revision to the index.
-
-        :param revision: The revision.
-        :param operators: Operators for the revision.
-        """
-        ir = IndexedRevision(revision=revision, operators=[operator.name for operator in operators])
-        self._revisions[revision.key] = ir
-        return ir
-
-    def save(self):
-        """Save the index data back to the wily cache."""
-        data = [i.asdict() for i in self._revisions.values()]
-        logger.debug("Saving data")
-        cache.store_archiver_index(self.config, self.archiver, data)
-
-    def set_seed(self, revision: Revision) -> None:
-        """Set the seed revision for this index."""
-        # TODO: Store the seed index id in the cache.
-
 
 class State:
     """

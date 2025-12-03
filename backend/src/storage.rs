@@ -12,7 +12,7 @@ use parquet::basic::Compression;
 use parquet::file::properties::WriterProperties;
 use pyo3::prelude::*;
 use std::fs::File;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 /// Get all parent directory paths from a file path (Unix-style).
 /// e.g., "src/foo/bar.py" -> ["", "src", "src/foo"]
@@ -119,6 +119,8 @@ pub struct MetricsBuilder {
     endline: UInt32Builder,
     is_method: arrow::array::BooleanBuilder,
     classname: StringBuilder,
+    // Row counter for is_empty check
+    row_count: usize,
 }
 
 impl MetricsBuilder {
@@ -154,6 +156,7 @@ impl MetricsBuilder {
             endline: UInt32Builder::new(),
             is_method: arrow::array::BooleanBuilder::new(),
             classname: StringBuilder::new(),
+            row_count: 0,
         }
     }
 
@@ -226,6 +229,8 @@ impl MetricsBuilder {
         self.endline.append_null();
         self.is_method.append_null();
         self.classname.append_null();
+
+        self.row_count += 1;
     }
 
     /// Add a row for a function.
@@ -289,6 +294,8 @@ impl MetricsBuilder {
         self.endline.append_value(endline);
         self.is_method.append_value(is_method);
         self.classname.append_option(classname);
+
+        self.row_count += 1;
     }
 
     /// Add a row for a class.
@@ -342,6 +349,8 @@ impl MetricsBuilder {
         self.endline.append_value(endline);
         self.is_method.append_null();
         self.classname.append_null();
+
+        self.row_count += 1;
     }
 
     /// Build a RecordBatch from the accumulated rows.
@@ -382,6 +391,487 @@ impl MetricsBuilder {
         ];
 
         RecordBatch::try_new(schema, columns).expect("Failed to create RecordBatch")
+    }
+
+    /// Check if the builder has any rows.
+    pub fn is_empty(&self) -> bool {
+        self.row_count == 0
+    }
+}
+
+/// Python context manager for efficient multi-revision parquet writes.
+///
+/// Usage:
+/// ```python
+/// with WilyIndex(path, operators) as index:
+///     index.analyze_revision(paths, base_path, revision_key, ...)
+///     index.analyze_revision(paths, base_path, revision_key, ...)
+/// # File is written on exit
+/// ```
+#[pyclass]
+pub struct WilyIndex {
+    output_path: String,
+    builder: Mutex<MetricsBuilder>,
+    operators: Vec<String>,
+}
+
+#[pymethods]
+impl WilyIndex {
+    #[new]
+    #[pyo3(signature = (output_path, operators))]
+    fn new(output_path: String, operators: Vec<String>) -> Self {
+        Self {
+            output_path,
+            builder: Mutex::new(MetricsBuilder::new()),
+            operators,
+        }
+    }
+
+    fn __enter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    #[pyo3(signature = (_exc_type=None, _exc_val=None, _exc_tb=None))]
+    fn __exit__(
+        &self,
+        _exc_type: Option<Bound<'_, pyo3::types::PyAny>>,
+        _exc_val: Option<Bound<'_, pyo3::types::PyAny>>,
+        _exc_tb: Option<Bound<'_, pyo3::types::PyAny>>,
+    ) -> PyResult<bool> {
+        // Write accumulated data to parquet
+        let mut builder = self.builder.lock().map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+        })?;
+        
+        if builder.is_empty() {
+            // Nothing to write
+            return Ok(false);
+        }
+
+        let batch = builder.finish();
+        append_parquet(&self.output_path, batch)
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e))?;
+
+        Ok(false) // Don't suppress exceptions
+    }
+
+    /// Analyze a revision and accumulate results.
+    ///
+    /// # Arguments
+    /// * `paths` - List of absolute file paths to analyze
+    /// * `base_path` - Base path for computing relative paths
+    /// * `revision_key` - Commit hash or revision identifier
+    /// * `revision_date` - Unix timestamp of the revision
+    /// * `revision_author` - Author name (optional)
+    /// * `revision_message` - Commit message (optional)
+    ///
+    /// # Returns
+    /// Root LOC for this revision
+    #[pyo3(signature = (paths, base_path, revision_key, revision_date, revision_author, revision_message))]
+    fn analyze_revision(
+        &self,
+        py: Python<'_>,
+        paths: Vec<String>,
+        base_path: String,
+        revision_key: String,
+        revision_date: i64,
+        revision_author: Option<String>,
+        revision_message: Option<String>,
+    ) -> PyResult<i64> {
+        use crate::cyclomatic;
+        use crate::halstead;
+        use crate::maintainability;
+        use crate::raw;
+        use rayon::prelude::*;
+        use std::collections::{HashMap, HashSet};
+        use std::fs;
+
+        let operators = &self.operators;
+        let include_raw = operators.iter().any(|o| o == "raw");
+        let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
+        let include_halstead = operators.iter().any(|o| o == "halstead");
+        let include_maintainability = operators.iter().any(|o| o == "maintainability");
+
+        // Normalize base path
+        let base_path_normalized = base_path.replace('\\', "/");
+
+        // Compute relative paths
+        let relative_paths: Vec<String> = paths
+            .iter()
+            .map(|p| {
+                let normalized = p.replace('\\', "/");
+                if normalized.starts_with(&base_path_normalized) {
+                    let rel = normalized[base_path_normalized.len()..]
+                        .trim_start_matches('/');
+                    rel.to_string()
+                } else {
+                    normalized
+                }
+            })
+            .collect();
+
+        // Collect all directory paths for aggregation
+        let directories: HashSet<String> = relative_paths
+            .iter()
+            .flat_map(|p| get_parent_paths(p))
+            .collect();
+
+        // Analysis result for a single file
+        struct FileResult {
+            rel_path: String,
+            raw: Option<HashMap<String, i64>>,
+            cyclomatic_total: Option<i64>,
+            cyclomatic_functions: Vec<(String, u32, u32, u32, bool, Option<String>)>,
+            cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>,
+            halstead_total: Option<(u32, u32, u32, u32, u32, u32, f64, f64, f64)>,
+            halstead_functions: Vec<(String, u32, u32, u32, u32, u32, u32, f64, f64, f64, u32, u32)>,
+            mi: Option<(f64, String)>,
+        }
+
+        // Phase 1: Parallel file analysis
+        let file_results: Vec<FileResult> = py.detach(|| {
+            paths
+                .par_iter()
+                .zip(relative_paths.par_iter())
+                .filter_map(|(abs_path, rel_path)| {
+                    let content = fs::read_to_string(abs_path).ok()?;
+
+                    let raw = if include_raw {
+                        Some(raw::analyze_source_raw(&content))
+                    } else {
+                        None
+                    };
+
+                    let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) = if include_cyclomatic {
+                        match cyclomatic::analyze_source_full(&content) {
+                            Ok((functions, classes, line_index)) => {
+                                let mut total: i64 = 0;
+                                let funcs: Vec<_> = functions
+                                    .iter()
+                                    .map(|f| {
+                                        let lineno = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(f.start_offset),
+                                        );
+                                        let endline = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(f.end_offset),
+                                        );
+                                        total += f.complexity as i64;
+                                        (
+                                            f.fullname(),
+                                            f.complexity,
+                                            (lineno.to_zero_indexed() + 1) as u32,
+                                            (endline.to_zero_indexed() + 1) as u32,
+                                            f.is_method,
+                                            f.classname.clone(),
+                                        )
+                                    })
+                                    .collect();
+                                let cls: Vec<_> = classes
+                                    .iter()
+                                    .map(|c| {
+                                        let lineno = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(c.start_offset),
+                                        );
+                                        let endline = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(c.end_offset),
+                                        );
+                                        total += c.complexity() as i64;
+                                        (
+                                            c.name.clone(),
+                                            c.complexity(),
+                                            c.real_complexity,
+                                            (lineno.to_zero_indexed() + 1) as u32,
+                                            (endline.to_zero_indexed() + 1) as u32,
+                                        )
+                                    })
+                                    .collect();
+                                (Some(total), funcs, cls)
+                            }
+                            Err(_) => (Some(0), Vec::new(), Vec::new()),
+                        }
+                    } else {
+                        (None, Vec::new(), Vec::new())
+                    };
+
+                    let (halstead_total, halstead_functions) = if include_halstead {
+                        match halstead::analyze_source_full(&content) {
+                            Ok((functions, total, line_index)) => {
+                                let total_metrics = (
+                                    total.h1(),
+                                    total.h2(),
+                                    total.n1(),
+                                    total.n2(),
+                                    total.vocabulary(),
+                                    total.length(),
+                                    total.volume(),
+                                    total.difficulty(),
+                                    total.effort(),
+                                );
+                                let funcs: Vec<_> = functions
+                                    .iter()
+                                    .map(|f| {
+                                        let lineno = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(f.start_offset),
+                                        );
+                                        let endline = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(f.end_offset),
+                                        );
+                                        (
+                                            f.name.clone(),
+                                            f.metrics.h1(),
+                                            f.metrics.h2(),
+                                            f.metrics.n1(),
+                                            f.metrics.n2(),
+                                            f.metrics.vocabulary(),
+                                            f.metrics.length(),
+                                            f.metrics.volume(),
+                                            f.metrics.difficulty(),
+                                            f.metrics.effort(),
+                                            (lineno.to_zero_indexed() + 1) as u32,
+                                            (endline.to_zero_indexed() + 1) as u32,
+                                        )
+                                    })
+                                    .collect();
+                                (Some(total_metrics), funcs)
+                            }
+                            Err(_) => (Some((0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0)), Vec::new()),
+                        }
+                    } else {
+                        (None, Vec::new())
+                    };
+
+                    let mi = if include_maintainability {
+                        let (mi_val, rank) = maintainability::analyze_source_mi(&content, true);
+                        Some((mi_val, rank))
+                    } else {
+                        None
+                    };
+
+                    Some(FileResult {
+                        rel_path: rel_path.clone(),
+                        raw,
+                        cyclomatic_total,
+                        cyclomatic_functions,
+                        cyclomatic_classes,
+                        halstead_total,
+                        halstead_functions,
+                        mi,
+                    })
+                })
+                .collect()
+        });
+
+        // Phase 2: Build parquet rows (single-threaded, with lock)
+        let mut builder = self.builder.lock().map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+        })?;
+        let rev_author = revision_author.as_deref();
+        let rev_message = revision_message.as_deref();
+
+        // Aggregate metrics by directory
+        let mut dir_raw: std::collections::HashMap<String, std::collections::HashMap<String, i64>> = std::collections::HashMap::new();
+        let mut dir_complexity: std::collections::HashMap<String, Vec<i64>> = std::collections::HashMap::new();
+        let mut dir_halstead: std::collections::HashMap<String, Vec<(u32, u32, u32, u32, u32, u32, f64, f64, f64)>> =
+            std::collections::HashMap::new();
+        let mut dir_mi: std::collections::HashMap<String, Vec<(f64, String)>> = std::collections::HashMap::new();
+
+            // Add file rows and collect for aggregation
+            for result in &file_results {
+                // Add file-level row
+                let raw_metrics = result.raw.as_ref();
+                builder.add_aggregate_row(
+                    &revision_key,
+                    revision_date,
+                    rev_author,
+                    rev_message,
+                    &result.rel_path,
+                    "file",
+                    raw_metrics.and_then(|r| r.get("loc").copied()),
+                    raw_metrics.and_then(|r| r.get("sloc").copied()),
+                    raw_metrics.and_then(|r| r.get("lloc").copied()),
+                    raw_metrics.and_then(|r| r.get("comments").copied()),
+                    raw_metrics.and_then(|r| r.get("multi").copied()),
+                    raw_metrics.and_then(|r| r.get("blank").copied()),
+                    raw_metrics.and_then(|r| r.get("single_comments").copied()),
+                    result.cyclomatic_total.map(|c| c as f64),
+                    result.halstead_total.map(|h| h.0 as i64),
+                    result.halstead_total.map(|h| h.1 as i64),
+                    result.halstead_total.map(|h| h.2 as i64),
+                    result.halstead_total.map(|h| h.3 as i64),
+                    result.halstead_total.map(|h| h.4 as i64),
+                    result.halstead_total.map(|h| h.5 as i64),
+                    result.halstead_total.map(|h| h.6),
+                    result.halstead_total.map(|h| h.7),
+                    result.halstead_total.map(|h| h.8),
+                    result.mi.as_ref().map(|(mi, _)| *mi),
+                    result.mi.as_ref().map(|(_, r)| r.as_str()),
+                );
+
+                // Add function rows
+                for (name, complexity, lineno, endline, is_method, classname) in &result.cyclomatic_functions {
+                    let func_path = format!("{}:{}", result.rel_path, name);
+                    // Find matching halstead data if available
+                    let hal = result
+                        .halstead_functions
+                        .iter()
+                        .find(|(n, ..)| n == name);
+                    builder.add_function_row(
+                        &revision_key,
+                        revision_date,
+                        rev_author,
+                        rev_message,
+                        &func_path,
+                        *complexity,
+                        *lineno,
+                        *endline,
+                        *is_method,
+                        classname.as_deref(),
+                        hal.map(|h| h.1),
+                        hal.map(|h| h.2),
+                        hal.map(|h| h.3),
+                        hal.map(|h| h.4),
+                        hal.map(|h| h.5),
+                        hal.map(|h| h.6),
+                        hal.map(|h| h.7),
+                        hal.map(|h| h.8),
+                        hal.map(|h| h.9),
+                    );
+                }
+
+                // Add class rows
+                for (name, complexity, real_complexity, lineno, endline) in &result.cyclomatic_classes {
+                    let class_path = format!("{}:{}", result.rel_path, name);
+                    builder.add_class_row(
+                        &revision_key,
+                        revision_date,
+                        rev_author,
+                        rev_message,
+                        &class_path,
+                        *complexity,
+                        *real_complexity,
+                        *lineno,
+                        *endline,
+                    );
+                }
+
+                // Collect for directory aggregation
+                for dir in get_parent_paths(&result.rel_path) {
+                    if let Some(raw) = &result.raw {
+                        let entry = dir_raw.entry(dir.clone()).or_default();
+                        for (k, v) in raw {
+                            *entry.entry(k.clone()).or_insert(0) += v;
+                        }
+                    }
+                    if let Some(cc) = result.cyclomatic_total {
+                        dir_complexity.entry(dir.clone()).or_default().push(cc);
+                    }
+                    if let Some(hal) = result.halstead_total {
+                        dir_halstead.entry(dir.clone()).or_default().push(hal);
+                    }
+                    if let Some(mi) = &result.mi {
+                        dir_mi.entry(dir.clone()).or_default().push(mi.clone());
+                    }
+                }
+            }
+
+            // Add directory aggregate rows
+            for dir in &directories {
+                let path_type = if dir.is_empty() { "root" } else { "directory" };
+                let raw = dir_raw.get(dir);
+                let complexities = dir_complexity.get(dir);
+                let halsteads = dir_halstead.get(dir);
+                let mis = dir_mi.get(dir);
+
+                // Compute aggregates
+                let mean_complexity = complexities.map(|v| {
+                    if v.is_empty() {
+                        0.0
+                    } else {
+                        v.iter().sum::<i64>() as f64 / v.len() as f64
+                    }
+                });
+
+                let sum_halstead = halsteads.map(|v| {
+                    v.iter().fold(
+                        (0i64, 0i64, 0i64, 0i64, 0i64, 0i64, 0.0, 0.0, 0.0),
+                        |acc, h| {
+                            (
+                                acc.0 + h.0 as i64,
+                                acc.1 + h.1 as i64,
+                                acc.2 + h.2 as i64,
+                                acc.3 + h.3 as i64,
+                                acc.4 + h.4 as i64,
+                                acc.5 + h.5 as i64,
+                                acc.6 + h.6,
+                                acc.7 + h.7,
+                                acc.8 + h.8,
+                            )
+                        },
+                    )
+                });
+
+                let (mean_mi, mode_rank) = if let Some(v) = mis {
+                    if v.is_empty() {
+                        (None, None)
+                    } else {
+                        let mean = v.iter().map(|(mi, _)| mi).sum::<f64>() / v.len() as f64;
+                        // Mode of ranks
+                        let mut rank_counts: HashMap<&str, usize> = HashMap::new();
+                        for (_, r) in v {
+                            *rank_counts.entry(r.as_str()).or_insert(0) += 1;
+                        }
+                        let mode = rank_counts
+                            .into_iter()
+                            .max_by_key(|(_, c)| *c)
+                            .map(|(r, _)| r.to_string());
+                        (Some(mean), mode)
+                    }
+                } else {
+                    (None, None)
+                };
+
+                builder.add_aggregate_row(
+                    &revision_key,
+                    revision_date,
+                    rev_author,
+                    rev_message,
+                    dir,
+                    path_type,
+                    raw.and_then(|r| r.get("loc").copied()),
+                    raw.and_then(|r| r.get("sloc").copied()),
+                    raw.and_then(|r| r.get("lloc").copied()),
+                    raw.and_then(|r| r.get("comments").copied()),
+                    raw.and_then(|r| r.get("multi").copied()),
+                    raw.and_then(|r| r.get("blank").copied()),
+                    raw.and_then(|r| r.get("single_comments").copied()),
+                    mean_complexity,
+                    sum_halstead.map(|h| h.0),
+                    sum_halstead.map(|h| h.1),
+                    sum_halstead.map(|h| h.2),
+                    sum_halstead.map(|h| h.3),
+                    sum_halstead.map(|h| h.4),
+                    sum_halstead.map(|h| h.5),
+                    sum_halstead.map(|h| h.6),
+                    sum_halstead.map(|h| h.7),
+                    sum_halstead.map(|h| h.8),
+                    mean_mi,
+                    mode_rank.as_deref(),
+                );
+            }
+
+            // Get root LOC
+            let root_loc = dir_raw
+                .get("")
+                .and_then(|r| r.get("loc").copied())
+                .unwrap_or(0);
+
+        Ok(root_loc)
     }
 }
 
@@ -453,447 +943,8 @@ pub fn get_metrics_schema() -> Vec<(String, String)> {
         .collect()
 }
 
-/// Revision info passed from Python
-#[derive(Clone)]
-pub struct RevisionInfo {
-    pub key: String,
-    pub date: i64,
-    pub author: Option<String>,
-    pub message: Option<String>,
-}
-
-/// Analyze files and write results to parquet.
-///
-/// This is the main entry point for the build command.
-///
-/// # Arguments
-/// * `paths` - List of absolute file paths to analyze
-/// * `base_path` - Base path for computing relative paths
-/// * `output_path` - Path to the parquet file
-/// * `revision_key` - Commit hash or revision identifier
-/// * `revision_date` - Unix timestamp of the revision
-/// * `revision_author` - Author name (optional)
-/// * `revision_message` - Commit message (optional)
-/// * `operators` - List of operator names to run
-///
-/// # Returns
-/// Tuple of (output_path, root_loc)
-#[pyfunction]
-#[pyo3(signature = (paths, base_path, output_path, revision_key, revision_date, revision_author, revision_message, operators))]
-pub fn analyze_to_parquet(
-    py: Python<'_>,
-    paths: Vec<String>,
-    base_path: String,
-    output_path: String,
-    revision_key: String,
-    revision_date: i64,
-    revision_author: Option<String>,
-    revision_message: Option<String>,
-    operators: Vec<String>,
-) -> PyResult<(String, i64)> {
-    use crate::cyclomatic;
-    use crate::halstead;
-    use crate::maintainability;
-    use crate::raw;
-    use rayon::prelude::*;
-    use std::collections::{HashMap, HashSet};
-    use std::fs;
-
-    let include_raw = operators.iter().any(|o| o == "raw");
-    let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
-    let include_halstead = operators.iter().any(|o| o == "halstead");
-    let include_maintainability = operators.iter().any(|o| o == "maintainability");
-
-    // Normalize base path
-    let base_path_normalized = base_path.replace('\\', "/");
-
-    // Compute relative paths
-    let relative_paths: Vec<String> = paths
-        .iter()
-        .map(|p| {
-            let normalized = p.replace('\\', "/");
-            if normalized.starts_with(&base_path_normalized) {
-                let rel = normalized[base_path_normalized.len()..]
-                    .trim_start_matches('/');
-                rel.to_string()
-            } else {
-                normalized
-            }
-        })
-        .collect();
-
-    // Collect all directory paths for aggregation
-    let directories: HashSet<String> = relative_paths
-        .iter()
-        .flat_map(|p| get_parent_paths(p))
-        .collect();
-
-    // Analysis result for a single file
-    struct FileResult {
-        rel_path: String,
-        raw: Option<HashMap<String, i64>>,
-        cyclomatic_total: Option<i64>,
-        cyclomatic_functions: Vec<(String, u32, u32, u32, bool, Option<String>)>, // (name, complexity, lineno, endline, is_method, classname)
-        cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>, // (name, complexity, real_complexity, lineno, endline)
-        halstead_total: Option<(u32, u32, u32, u32, u32, u32, f64, f64, f64)>,
-        halstead_functions: Vec<(String, u32, u32, u32, u32, u32, u32, f64, f64, f64, u32, u32)>,
-        mi: Option<(f64, String)>,
-    }
-
-    // Phase 1: Parallel file analysis
-    let file_results: Vec<FileResult> = py.detach(|| {
-        paths
-            .par_iter()
-            .zip(relative_paths.par_iter())
-            .filter_map(|(abs_path, rel_path)| {
-                let content = fs::read_to_string(abs_path).ok()?;
-
-                let raw = if include_raw {
-                    Some(raw::analyze_source_raw(&content))
-                } else {
-                    None
-                };
-
-                let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) = if include_cyclomatic {
-                    match cyclomatic::analyze_source_full(&content) {
-                        Ok((functions, classes, line_index)) => {
-                            let mut total: i64 = 0;
-                            let funcs: Vec<_> = functions
-                                .iter()
-                                .map(|f| {
-                                    let lineno = ruff_source_file::LineIndex::line_index(
-                                        &line_index,
-                                        ruff_text_size::TextSize::new(f.start_offset),
-                                    );
-                                    let endline = ruff_source_file::LineIndex::line_index(
-                                        &line_index,
-                                        ruff_text_size::TextSize::new(f.end_offset),
-                                    );
-                                    total += f.complexity as i64;
-                                    (
-                                        f.fullname(),
-                                        f.complexity,
-                                        (lineno.to_zero_indexed() + 1) as u32,
-                                        (endline.to_zero_indexed() + 1) as u32,
-                                        f.is_method,
-                                        f.classname.clone(),
-                                    )
-                                })
-                                .collect();
-                            let cls: Vec<_> = classes
-                                .iter()
-                                .map(|c| {
-                                    let lineno = ruff_source_file::LineIndex::line_index(
-                                        &line_index,
-                                        ruff_text_size::TextSize::new(c.start_offset),
-                                    );
-                                    let endline = ruff_source_file::LineIndex::line_index(
-                                        &line_index,
-                                        ruff_text_size::TextSize::new(c.end_offset),
-                                    );
-                                    total += c.complexity() as i64;
-                                    (
-                                        c.name.clone(),
-                                        c.complexity(),
-                                        c.real_complexity,
-                                        (lineno.to_zero_indexed() + 1) as u32,
-                                        (endline.to_zero_indexed() + 1) as u32,
-                                    )
-                                })
-                                .collect();
-                            (Some(total), funcs, cls)
-                        }
-                        Err(_) => (Some(0), Vec::new(), Vec::new()),
-                    }
-                } else {
-                    (None, Vec::new(), Vec::new())
-                };
-
-                let (halstead_total, halstead_functions) = if include_halstead {
-                    match halstead::analyze_source_full(&content) {
-                        Ok((functions, total, line_index)) => {
-                            let total_metrics = (
-                                total.h1(),
-                                total.h2(),
-                                total.n1(),
-                                total.n2(),
-                                total.vocabulary(),
-                                total.length(),
-                                total.volume(),
-                                total.difficulty(),
-                                total.effort(),
-                            );
-                            let funcs: Vec<_> = functions
-                                .iter()
-                                .map(|f| {
-                                    let lineno = ruff_source_file::LineIndex::line_index(
-                                        &line_index,
-                                        ruff_text_size::TextSize::new(f.start_offset),
-                                    );
-                                    let endline = ruff_source_file::LineIndex::line_index(
-                                        &line_index,
-                                        ruff_text_size::TextSize::new(f.end_offset),
-                                    );
-                                    (
-                                        f.name.clone(),
-                                        f.metrics.h1(),
-                                        f.metrics.h2(),
-                                        f.metrics.n1(),
-                                        f.metrics.n2(),
-                                        f.metrics.vocabulary(),
-                                        f.metrics.length(),
-                                        f.metrics.volume(),
-                                        f.metrics.difficulty(),
-                                        f.metrics.effort(),
-                                        (lineno.to_zero_indexed() + 1) as u32,
-                                        (endline.to_zero_indexed() + 1) as u32,
-                                    )
-                                })
-                                .collect();
-                            (Some(total_metrics), funcs)
-                        }
-                        Err(_) => (Some((0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0)), Vec::new()),
-                    }
-                } else {
-                    (None, Vec::new())
-                };
-
-                let mi = if include_maintainability {
-                    let (mi_val, rank) = maintainability::analyze_source_mi(&content, true);
-                    Some((mi_val, rank))
-                } else {
-                    None
-                };
-
-                Some(FileResult {
-                    rel_path: rel_path.clone(),
-                    raw,
-                    cyclomatic_total,
-                    cyclomatic_functions,
-                    cyclomatic_classes,
-                    halstead_total,
-                    halstead_functions,
-                    mi,
-                })
-            })
-            .collect()
-    });
-
-    // Phase 2: Build parquet rows
-    let (batch, root_loc) = py.detach(|| {
-        let mut builder = MetricsBuilder::new();
-        let rev_author = revision_author.as_deref();
-        let rev_message = revision_message.as_deref();
-
-        // Aggregate metrics by directory
-        let mut dir_raw: HashMap<String, HashMap<String, i64>> = HashMap::new();
-        let mut dir_complexity: HashMap<String, Vec<i64>> = HashMap::new();
-        let mut dir_halstead: HashMap<String, Vec<(u32, u32, u32, u32, u32, u32, f64, f64, f64)>> =
-            HashMap::new();
-        let mut dir_mi: HashMap<String, Vec<(f64, String)>> = HashMap::new();
-
-        // Add file rows and collect for aggregation
-        for result in &file_results {
-            // Add file-level row
-            let raw_metrics = result.raw.as_ref();
-            builder.add_aggregate_row(
-                &revision_key,
-                revision_date,
-                rev_author,
-                rev_message,
-                &result.rel_path,
-                "file",
-                raw_metrics.and_then(|r| r.get("loc").copied()),
-                raw_metrics.and_then(|r| r.get("sloc").copied()),
-                raw_metrics.and_then(|r| r.get("lloc").copied()),
-                raw_metrics.and_then(|r| r.get("comments").copied()),
-                raw_metrics.and_then(|r| r.get("multi").copied()),
-                raw_metrics.and_then(|r| r.get("blank").copied()),
-                raw_metrics.and_then(|r| r.get("single_comments").copied()),
-                result.cyclomatic_total.map(|c| c as f64),
-                result.halstead_total.map(|h| h.0 as i64),
-                result.halstead_total.map(|h| h.1 as i64),
-                result.halstead_total.map(|h| h.2 as i64),
-                result.halstead_total.map(|h| h.3 as i64),
-                result.halstead_total.map(|h| h.4 as i64),
-                result.halstead_total.map(|h| h.5 as i64),
-                result.halstead_total.map(|h| h.6),
-                result.halstead_total.map(|h| h.7),
-                result.halstead_total.map(|h| h.8),
-                result.mi.as_ref().map(|(mi, _)| *mi),
-                result.mi.as_ref().map(|(_, r)| r.as_str()),
-            );
-
-            // Add function rows
-            for (name, complexity, lineno, endline, is_method, classname) in &result.cyclomatic_functions {
-                let func_path = format!("{}:{}", result.rel_path, name);
-                // Find matching halstead data if available
-                let hal = result
-                    .halstead_functions
-                    .iter()
-                    .find(|(n, ..)| n == name);
-                builder.add_function_row(
-                    &revision_key,
-                    revision_date,
-                    rev_author,
-                    rev_message,
-                    &func_path,
-                    *complexity,
-                    *lineno,
-                    *endline,
-                    *is_method,
-                    classname.as_deref(),
-                    hal.map(|h| h.1),
-                    hal.map(|h| h.2),
-                    hal.map(|h| h.3),
-                    hal.map(|h| h.4),
-                    hal.map(|h| h.5),
-                    hal.map(|h| h.6),
-                    hal.map(|h| h.7),
-                    hal.map(|h| h.8),
-                    hal.map(|h| h.9),
-                );
-            }
-
-            // Add class rows
-            for (name, complexity, real_complexity, lineno, endline) in &result.cyclomatic_classes {
-                let class_path = format!("{}:{}", result.rel_path, name);
-                builder.add_class_row(
-                    &revision_key,
-                    revision_date,
-                    rev_author,
-                    rev_message,
-                    &class_path,
-                    *complexity,
-                    *real_complexity,
-                    *lineno,
-                    *endline,
-                );
-            }
-
-            // Collect for directory aggregation
-            for dir in get_parent_paths(&result.rel_path) {
-                if let Some(raw) = &result.raw {
-                    let entry = dir_raw.entry(dir.clone()).or_default();
-                    for (k, v) in raw {
-                        *entry.entry(k.clone()).or_insert(0) += v;
-                    }
-                }
-                if let Some(cc) = result.cyclomatic_total {
-                    dir_complexity.entry(dir.clone()).or_default().push(cc);
-                }
-                if let Some(hal) = result.halstead_total {
-                    dir_halstead.entry(dir.clone()).or_default().push(hal);
-                }
-                if let Some(mi) = &result.mi {
-                    dir_mi.entry(dir.clone()).or_default().push(mi.clone());
-                }
-            }
-        }
-
-        // Add directory aggregate rows
-        for dir in &directories {
-            let path_type = if dir.is_empty() { "root" } else { "directory" };
-            let raw = dir_raw.get(dir);
-            let complexities = dir_complexity.get(dir);
-            let halsteads = dir_halstead.get(dir);
-            let mis = dir_mi.get(dir);
-
-            // Compute aggregates
-            let mean_complexity = complexities.map(|v| {
-                if v.is_empty() {
-                    0.0
-                } else {
-                    v.iter().sum::<i64>() as f64 / v.len() as f64
-                }
-            });
-
-            let sum_halstead = halsteads.map(|v| {
-                v.iter().fold(
-                    (0i64, 0i64, 0i64, 0i64, 0i64, 0i64, 0.0, 0.0, 0.0),
-                    |acc, h| {
-                        (
-                            acc.0 + h.0 as i64,
-                            acc.1 + h.1 as i64,
-                            acc.2 + h.2 as i64,
-                            acc.3 + h.3 as i64,
-                            acc.4 + h.4 as i64,
-                            acc.5 + h.5 as i64,
-                            acc.6 + h.6,
-                            acc.7 + h.7,
-                            acc.8 + h.8,
-                        )
-                    },
-                )
-            });
-
-            let (mean_mi, mode_rank) = if let Some(v) = mis {
-                if v.is_empty() {
-                    (None, None)
-                } else {
-                    let mean = v.iter().map(|(mi, _)| mi).sum::<f64>() / v.len() as f64;
-                    // Mode of ranks
-                    let mut rank_counts: HashMap<&str, usize> = HashMap::new();
-                    for (_, r) in v {
-                        *rank_counts.entry(r.as_str()).or_insert(0) += 1;
-                    }
-                    let mode = rank_counts
-                        .into_iter()
-                        .max_by_key(|(_, c)| *c)
-                        .map(|(r, _)| r.to_string());
-                    (Some(mean), mode)
-                }
-            } else {
-                (None, None)
-            };
-
-            builder.add_aggregate_row(
-                &revision_key,
-                revision_date,
-                rev_author,
-                rev_message,
-                dir,
-                path_type,
-                raw.and_then(|r| r.get("loc").copied()),
-                raw.and_then(|r| r.get("sloc").copied()),
-                raw.and_then(|r| r.get("lloc").copied()),
-                raw.and_then(|r| r.get("comments").copied()),
-                raw.and_then(|r| r.get("multi").copied()),
-                raw.and_then(|r| r.get("blank").copied()),
-                raw.and_then(|r| r.get("single_comments").copied()),
-                mean_complexity,
-                sum_halstead.map(|h| h.0),
-                sum_halstead.map(|h| h.1),
-                sum_halstead.map(|h| h.2),
-                sum_halstead.map(|h| h.3),
-                sum_halstead.map(|h| h.4),
-                sum_halstead.map(|h| h.5),
-                sum_halstead.map(|h| h.6),
-                sum_halstead.map(|h| h.7),
-                sum_halstead.map(|h| h.8),
-                mean_mi,
-                mode_rank.as_deref(),
-            );
-        }
-
-        // Get root LOC
-        let root_loc = dir_raw
-            .get("")
-            .and_then(|r| r.get("loc").copied())
-            .unwrap_or(0);
-
-        (builder.finish(), root_loc)
-    });
-
-    // Phase 3: Write to parquet
-    append_parquet(&output_path, batch)
-        .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e))?;
-
-    Ok((output_path, root_loc))
-}
-
 pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
     parent_module.add_function(wrap_pyfunction!(get_metrics_schema, parent_module)?)?;
-    parent_module.add_function(wrap_pyfunction!(analyze_to_parquet, parent_module)?)?;
+    parent_module.add_class::<WilyIndex>()?;
     Ok(())
 }

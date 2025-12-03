@@ -25,7 +25,7 @@ from rich.text import Text
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.backend import analyze_files_parallel, analyze_to_parquet, iter_filenames
+from wily.backend import WilyIndex, analyze_files_parallel, iter_filenames
 from wily.config.types import WilyConfig
 from wily.operators import Operator
 from wily.state import State
@@ -110,21 +110,19 @@ def run_operators_parallel(
     return results
 
 
-def analyze_revision_to_parquet(
+def analyze_revision_with_index(
+    index: "WilyIndex",
     revision: Revision,
     archiver_instance: FilesystemArchiver,
     config: WilyConfig,
-    operators: list[Operator],
-    parquet_path: str,
 ) -> int:
     """
-    Analyze a revision and append results to parquet file.
+    Analyze a revision and append results to the index.
 
+    :param index: The WilyIndex context manager
     :param revision: The revision to analyze
     :param archiver_instance: The archiver instance
     :param config: The wily configuration
-    :param operators: List of operators to run
-    :param parquet_path: Path to the parquet file
     :return: Total lines of code in the revision (root aggregate)
     """
     targets = [
@@ -145,25 +143,20 @@ def analyze_revision_to_parquet(
     if not file_paths:
         return 0
 
-    operator_names = [op.name for op in operators]
-
     logger.debug(
-        "Analyzing revision %s: %d files with operators: %s",
+        "Analyzing revision %s: %d files",
         revision.key[:8],
         len(file_paths),
-        operator_names,
     )
 
-    # Analyze and append to parquet
-    _, root_loc = analyze_to_parquet(
+    # Analyze and accumulate in index
+    root_loc = index.analyze_revision(
         paths=file_paths,
         base_path=config.path,
-        output_path=parquet_path,
         revision_key=revision.key,
         revision_date=revision.date,
         revision_author=revision.author_name,
         revision_message=revision.message,
-        operators=operator_names,
     )
 
     return root_loc
@@ -224,29 +217,32 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
     cache_dir = pathlib.Path(config.cache_path) / archiver_instance.name
     cache_dir.mkdir(parents=True, exist_ok=True)
     parquet_path = str(cache_dir / "metrics.parquet")
+    operator_names = [op.name for op in operators]
 
     try:
         with Progress(*progress_columns) as progress:
-            # Handle the seed revision
-            seed_task = progress.add_task("Analyzing seed", total=1)
-            progress.start_task(seed_task)
+            # Use WilyIndex context manager - all data written on exit
+            with WilyIndex(parquet_path, operator_names) as index:
+                # Handle the seed revision
+                seed_task = progress.add_task("Analyzing seed", total=1)
+                progress.start_task(seed_task)
 
-            seed_loc = analyze_revision_to_parquet(
-                revisions[0], archiver_instance, config, operators, parquet_path
-            )
-
-            progress.stop_task(seed_task)
-            if any(op.name == "raw" for op in operators):
-                logger.info(f"Seed revision has {seed_loc:,} lines of code.")
-            logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
-
-            # Handle the rest
-            task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
-            for revision in revisions[1:]:
-                analyze_revision_to_parquet(
-                    revision, archiver_instance, config, operators, parquet_path
+                seed_loc = analyze_revision_with_index(
+                    index, revisions[0], archiver_instance, config
                 )
-                progress.advance(task_id)
+
+                progress.stop_task(seed_task)
+                if any(op.name == "raw" for op in operators):
+                    logger.info(f"Seed revision has {seed_loc:,} lines of code.")
+                logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
+
+                # Handle the rest
+                task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
+                for revision in revisions[1:]:
+                    analyze_revision_with_index(
+                        index, revision, archiver_instance, config
+                    )
+                    progress.advance(task_id)
 
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)

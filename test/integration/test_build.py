@@ -80,8 +80,8 @@ def test_build_crash(tmpdir):
 
     import wily.commands.build  # noqa: PLC0415
 
-    # Simulate a crash by patching analyze_revision_to_parquet to raise an error
-    with patch.object(wily.commands.build, "analyze_revision_to_parquet", side_effect=RuntimeError("arggh")):
+    # Simulate a crash by patching analyze_revision_with_index to raise an error
+    with patch.object(wily.commands.build, "analyze_revision_with_index", side_effect=RuntimeError("arggh")):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert result.exit_code == 1, result.stdout
