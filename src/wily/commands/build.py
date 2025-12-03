@@ -28,8 +28,7 @@ from wily.archivers.git import InvalidGitRepositoryError
 from wily.backend import WilyIndex, analyze_files_parallel, iter_filenames
 from wily.config.types import WilyConfig
 from wily.operators import Operator
-from wily.state import State
-
+from wily.cache import create as create_cache
 
 class SpeedColumn(ProgressColumn):
     """Renders completed count/total and speed, e.g. '  10/1000 (5.00/sec)'."""
@@ -183,11 +182,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
         logger.error("Failed to setup archiver: '%s'", message)
         sys.exit(1)
 
-    state = State(config, archiver=archiver_instance)
-    state.ensure_exists()
-
-    index = state.index[archiver_instance.name]
-    revisions = [revision for revision in revisions if revision not in index][::-1]
+    create_cache(config)  # Ensure cache directory exists
 
     logger.info(
         "Found %s revisions from '%s' archiver in '%s'.",
@@ -204,7 +199,6 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
     _op_desc = ",".join([operator.name for operator in operators])
     logger.info("Running operators - %s", _op_desc)
 
-    state.operators = operators
     progress_columns = (
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
