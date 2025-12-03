@@ -31,7 +31,7 @@ def test_build_not_git_repo(tmpdir, cache_path):
     assert result.exit_code == 0, result.stdout
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    index_path = cache_path / "filesystem" / "index.json"
+    index_path = cache_path / "filesystem" / "metrics.parquet"
     assert index_path.exists()
 
 
@@ -116,8 +116,6 @@ def test_build(tmpdir, cache_path):
 
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    index_path = cache_path / "git" / "index.json"
-    assert index_path.exists()
     parquet_path = cache_path / "git" / "metrics.parquet"
     assert parquet_path.exists()
 
@@ -169,8 +167,6 @@ def test_build_with_config(tmpdir, cache_path):
 
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    index_path = cache_path / "git" / "index.json"
-    assert index_path.exists()
     parquet_path = cache_path / "git" / "metrics.parquet"
     assert parquet_path.exists()
 
@@ -203,8 +199,6 @@ def test_build_twice(tmpdir, cache_path):
 
     cache_path = pathlib.Path(cache_path) / "git"
     assert cache_path.exists()
-    index_path = cache_path / "index.json"
-    assert index_path.exists()
     parquet_path = cache_path / "metrics.parquet"
     assert parquet_path.exists()
 
@@ -221,9 +215,6 @@ def test_build_twice(tmpdir, cache_path):
     assert result.exit_code == 0, result.stdout
 
     assert cache_path.exists()
-    index_path = cache_path / "index.json"
-    assert index_path.exists()
-    # Parquet file should still exist and contain both revisions
     assert parquet_path.exists()
 
 
@@ -279,5 +270,3 @@ def test_build_archiver(gitdir, archiver, cache_path):
         assert result.exit_code == 0, result.stdout
         cache_path = pathlib.Path(cache_path)
         assert cache_path.exists()
-        index_path = cache_path / archiver / "index.json"
-        assert index_path.exists()
