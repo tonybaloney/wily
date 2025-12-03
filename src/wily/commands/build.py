@@ -27,7 +27,7 @@ from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
 from wily.backend import analyze_files_parallel, iter_filenames
 from wily.config.types import WilyConfig
-from wily.operators import Operator, resolve_operator
+from wily.operators import Operator
 from wily.state import State
 
 
@@ -83,13 +83,18 @@ def run_operators_parallel(
     )
 
     # Run all operators in parallel on all files using Rust/rayon
+    # This also computes directory-level aggregates
     parallel_results = analyze_files_parallel(file_paths, operator_names, multi=True)
 
     # Transform results into the expected format per operator
     results: dict[str, dict[str, Any]] = {name: {} for name in operator_names}
 
     for file_path, file_data in parallel_results.items():
-        rel_path = os.path.relpath(file_path, config.path).replace("\\", "/")
+        # Convert absolute paths to relative, but leave directory paths as-is
+        if os.path.isabs(file_path):
+            rel_path = os.path.relpath(file_path, config.path).replace("\\", "/")
+        else:
+            rel_path = file_path  # Already a relative/directory path from aggregation
 
         if "error" in file_data:
             for op_name in operator_names:
@@ -102,25 +107,6 @@ def run_operators_parallel(
 
     return results
 
-def aggregate_values(tracked_dirs: list[str], operator_name: str, result: dict[str, dict[str, Any]]) -> None:
-    """Aggregate metrics across directories."""
-    dirs = [""] + [str(pathlib.Path(d)) for d in tracked_dirs if d]
-
-    for root in sorted(dirs):
-        aggregates = [p for p in result.keys() if p.startswith(root)]
-
-        # IF nothing changed in this aggregate, don't index it.
-        if not aggregates:
-            continue
-        result[str(root)] = {"total": {}}
-        for metric in resolve_operator(operator_name).operator_cls.metrics:
-            values = [
-                result[agg]["total"][metric.name]
-                for agg in aggregates
-                if agg in result and metric.name in result[agg].get("total", {})
-            ]
-            if values:
-                result[str(root)]["total"][metric.name] = metric.aggregate(values)
 
 def revision_to_stats(revision: Revision, archiver_instance: FilesystemArchiver, config: WilyConfig, operators: list[Operator]) -> dict[str, dict]:
     """Convert a revision to stats by running all operators."""
@@ -135,11 +121,10 @@ def revision_to_stats(revision: Revision, archiver_instance: FilesystemArchiver,
     if any(target.endswith(".py") for target in targets):
         archiver_instance.checkout(revision, config.checkout_options)
 
-        # Run all operators in parallel via Rust/rayon
+        # Run all operators in parallel via Rust/rayon (includes aggregation)
         results = run_operators_parallel(operators, targets, config)
 
         for operator_name, result in results.items():
-            aggregate_values(revision.tracked_dirs, operator_name, result)
             stats["operator_data"][operator_name] = result
     else:
         logger.debug("Skipping analysis for revision %s, no Python files changed.", revision.key)
