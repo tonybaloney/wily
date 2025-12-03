@@ -390,7 +390,7 @@ pub fn write_parquet(path: &str, batch: RecordBatch) -> Result<(), String> {
     let file = File::create(path).map_err(|e| format!("Failed to create file: {}", e))?;
 
     let props = WriterProperties::builder()
-        .set_compression(Compression::ZSTD(Default::default()))
+        .set_compression(Compression::LZ4_RAW)
         .build();
 
     let mut writer = ArrowWriter::try_new(file, batch.schema(), Some(props))

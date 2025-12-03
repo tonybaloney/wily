@@ -20,4 +20,4 @@ regex = "1"
 rayon = "1.10"
 git2 = "0.20.2"
 arrow = { version = "54", default-features = false }
-parquet = { version = "54", default-features = false, features = ["arrow", "snap", "zstd"] }
+parquet = { version = "54", default-features = false, features = ["arrow", "lz4"] }
