@@ -7,6 +7,7 @@ mod halstead;
 mod maintainability;
 mod parallel;
 mod raw;
+mod storage;
 
 #[pymodule]
 fn backend(_py: Python<'_>, module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -17,5 +18,6 @@ fn backend(_py: Python<'_>, module: &Bound<'_, PyModule>) -> PyResult<()> {
     files::register(module)?;
     parallel::register(module)?;
     git::register(module)?;
+    storage::register(module)?;
     Ok(())
 }
