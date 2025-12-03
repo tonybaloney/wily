@@ -11,6 +11,7 @@ use parquet::arrow::ArrowWriter;
 use parquet::basic::Compression;
 use parquet::file::properties::WriterProperties;
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyList};
 use std::fs::File;
 use std::sync::{Arc, Mutex};
 
@@ -80,6 +81,79 @@ fn metrics_schema() -> Schema {
         Field::new("is_method", DataType::Boolean, true),
         Field::new("classname", DataType::Utf8, true),
     ])
+}
+
+/// A single row of metrics data, stored for querying.
+#[derive(Clone, Debug)]
+pub struct MetricRow {
+    pub revision: String,
+    pub revision_date: i64,
+    pub revision_author: Option<String>,
+    pub revision_message: Option<String>,
+    pub path: String,
+    pub path_type: String,
+    pub loc: Option<i64>,
+    pub sloc: Option<i64>,
+    pub lloc: Option<i64>,
+    pub comments: Option<i64>,
+    pub multi: Option<i64>,
+    pub blank: Option<i64>,
+    pub single_comments: Option<i64>,
+    pub complexity: Option<f64>,
+    pub real_complexity: Option<u32>,
+    pub h1: Option<i64>,
+    pub h2: Option<i64>,
+    pub n1: Option<i64>,
+    pub n2: Option<i64>,
+    pub vocabulary: Option<i64>,
+    pub length: Option<i64>,
+    pub volume: Option<f64>,
+    pub difficulty: Option<f64>,
+    pub effort: Option<f64>,
+    pub mi: Option<f64>,
+    pub rank: Option<String>,
+    pub lineno: Option<u32>,
+    pub endline: Option<u32>,
+    pub is_method: Option<bool>,
+    pub classname: Option<String>,
+}
+
+impl MetricRow {
+    /// Convert this row to a Python dictionary.
+    fn to_py_dict(&self, py: Python<'_>) -> PyResult<Py<PyDict>> {
+        let dict = PyDict::new(py);
+        dict.set_item("revision", &self.revision)?;
+        dict.set_item("revision_date", self.revision_date)?;
+        dict.set_item("revision_author", &self.revision_author)?;
+        dict.set_item("revision_message", &self.revision_message)?;
+        dict.set_item("path", &self.path)?;
+        dict.set_item("path_type", &self.path_type)?;
+        dict.set_item("loc", self.loc)?;
+        dict.set_item("sloc", self.sloc)?;
+        dict.set_item("lloc", self.lloc)?;
+        dict.set_item("comments", self.comments)?;
+        dict.set_item("multi", self.multi)?;
+        dict.set_item("blank", self.blank)?;
+        dict.set_item("single_comments", self.single_comments)?;
+        dict.set_item("complexity", self.complexity)?;
+        dict.set_item("real_complexity", self.real_complexity)?;
+        dict.set_item("h1", self.h1)?;
+        dict.set_item("h2", self.h2)?;
+        dict.set_item("N1", self.n1)?;
+        dict.set_item("N2", self.n2)?;
+        dict.set_item("vocabulary", self.vocabulary)?;
+        dict.set_item("length", self.length)?;
+        dict.set_item("volume", self.volume)?;
+        dict.set_item("difficulty", self.difficulty)?;
+        dict.set_item("effort", self.effort)?;
+        dict.set_item("mi", self.mi)?;
+        dict.set_item("rank", &self.rank)?;
+        dict.set_item("lineno", self.lineno)?;
+        dict.set_item("endline", self.endline)?;
+        dict.set_item("is_method", self.is_method)?;
+        dict.set_item("classname", &self.classname)?;
+        Ok(dict.into())
+    }
 }
 
 /// Builder for accumulating metric rows before writing to parquet.
@@ -397,38 +471,329 @@ impl MetricsBuilder {
     pub fn is_empty(&self) -> bool {
         self.row_count == 0
     }
+
+    /// Add an aggregate row and return it as a MetricRow for state tracking.
+    #[allow(clippy::too_many_arguments)]
+    pub fn add_aggregate_row_tracked(
+        &mut self,
+        revision: &str,
+        revision_date: i64,
+        revision_author: Option<&str>,
+        revision_message: Option<&str>,
+        path: &str,
+        path_type: &str,
+        loc: Option<i64>,
+        sloc: Option<i64>,
+        lloc: Option<i64>,
+        comments: Option<i64>,
+        multi: Option<i64>,
+        blank: Option<i64>,
+        single_comments: Option<i64>,
+        complexity: Option<f64>,
+        h1: Option<i64>,
+        h2: Option<i64>,
+        n1: Option<i64>,
+        n2: Option<i64>,
+        vocabulary: Option<i64>,
+        length: Option<i64>,
+        volume: Option<f64>,
+        difficulty: Option<f64>,
+        effort: Option<f64>,
+        mi: Option<f64>,
+        rank: Option<&str>,
+    ) -> MetricRow {
+        self.add_aggregate_row(
+            revision, revision_date, revision_author, revision_message, path, path_type,
+            loc, sloc, lloc, comments, multi, blank, single_comments, complexity,
+            h1, h2, n1, n2, vocabulary, length, volume, difficulty, effort, mi, rank,
+        );
+        MetricRow {
+            revision: revision.to_string(),
+            revision_date,
+            revision_author: revision_author.map(|s| s.to_string()),
+            revision_message: revision_message.map(|s| s.to_string()),
+            path: path.to_string(),
+            path_type: path_type.to_string(),
+            loc, sloc, lloc, comments, multi, blank, single_comments,
+            complexity, real_complexity: None,
+            h1, h2, n1, n2, vocabulary, length, volume, difficulty, effort,
+            mi, rank: rank.map(|s| s.to_string()),
+            lineno: None, endline: None, is_method: None, classname: None,
+        }
+    }
+
+    /// Add a function row and return it as a MetricRow for state tracking.
+    #[allow(clippy::too_many_arguments)]
+    pub fn add_function_row_tracked(
+        &mut self,
+        revision: &str,
+        revision_date: i64,
+        revision_author: Option<&str>,
+        revision_message: Option<&str>,
+        path: &str,
+        complexity: u32,
+        lineno: u32,
+        endline: u32,
+        is_method: bool,
+        classname: Option<&str>,
+        h1: Option<u32>,
+        h2: Option<u32>,
+        n1: Option<u32>,
+        n2: Option<u32>,
+        vocabulary: Option<u32>,
+        length: Option<u32>,
+        volume: Option<f64>,
+        difficulty: Option<f64>,
+        effort: Option<f64>,
+    ) -> MetricRow {
+        self.add_function_row(
+            revision, revision_date, revision_author, revision_message, path,
+            complexity, lineno, endline, is_method, classname,
+            h1, h2, n1, n2, vocabulary, length, volume, difficulty, effort,
+        );
+        MetricRow {
+            revision: revision.to_string(),
+            revision_date,
+            revision_author: revision_author.map(|s| s.to_string()),
+            revision_message: revision_message.map(|s| s.to_string()),
+            path: path.to_string(),
+            path_type: "function".to_string(),
+            loc: None, sloc: None, lloc: None, comments: None, multi: None, blank: None, single_comments: None,
+            complexity: Some(complexity as f64),
+            real_complexity: None,
+            h1: h1.map(|v| v as i64),
+            h2: h2.map(|v| v as i64),
+            n1: n1.map(|v| v as i64),
+            n2: n2.map(|v| v as i64),
+            vocabulary: vocabulary.map(|v| v as i64),
+            length: length.map(|v| v as i64),
+            volume, difficulty, effort,
+            mi: None, rank: None,
+            lineno: Some(lineno), endline: Some(endline),
+            is_method: Some(is_method),
+            classname: classname.map(|s| s.to_string()),
+        }
+    }
+
+    /// Add a class row and return it as a MetricRow for state tracking.
+    #[allow(clippy::too_many_arguments)]
+    pub fn add_class_row_tracked(
+        &mut self,
+        revision: &str,
+        revision_date: i64,
+        revision_author: Option<&str>,
+        revision_message: Option<&str>,
+        path: &str,
+        complexity: u32,
+        real_complexity: u32,
+        lineno: u32,
+        endline: u32,
+    ) -> MetricRow {
+        self.add_class_row(
+            revision, revision_date, revision_author, revision_message, path,
+            complexity, real_complexity, lineno, endline,
+        );
+        MetricRow {
+            revision: revision.to_string(),
+            revision_date,
+            revision_author: revision_author.map(|s| s.to_string()),
+            revision_message: revision_message.map(|s| s.to_string()),
+            path: path.to_string(),
+            path_type: "class".to_string(),
+            loc: None, sloc: None, lloc: None, comments: None, multi: None, blank: None, single_comments: None,
+            complexity: Some(complexity as f64),
+            real_complexity: Some(real_complexity),
+            h1: None, h2: None, n1: None, n2: None, vocabulary: None, length: None,
+            volume: None, difficulty: None, effort: None,
+            mi: None, rank: None,
+            lineno: Some(lineno), endline: Some(endline),
+            is_method: None, classname: None,
+        }
+    }
 }
 
-/// Python context manager for efficient multi-revision parquet writes.
+/// Internal state for WilyIndex - holds loaded rows and new rows
+struct IndexState {
+    /// Rows loaded from existing parquet file
+    loaded_rows: Vec<MetricRow>,
+    /// New rows added via analyze_revision
+    new_rows: Vec<MetricRow>,
+    /// Whether we've loaded from disk yet
+    loaded: bool,
+}
+
+impl IndexState {
+    fn new() -> Self {
+        Self {
+            loaded_rows: Vec::new(),
+            new_rows: Vec::new(),
+            loaded: false,
+        }
+    }
+
+    /// Get all rows (loaded + new)
+    fn all_rows(&self) -> impl Iterator<Item = &MetricRow> {
+        self.loaded_rows.iter().chain(self.new_rows.iter())
+    }
+}
+
+/// Load rows from a parquet file into MetricRow structs
+fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
+    use arrow::array::{Array, AsArray, BooleanArray};
+    use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+    use std::path::Path;
+
+    let file_path = Path::new(path);
+    if !file_path.exists() {
+        return Ok(Vec::new());
+    }
+
+    let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let builder = ParquetRecordBatchReaderBuilder::try_new(file)
+        .map_err(|e| format!("Failed to read parquet: {}", e))?;
+    let reader = builder
+        .build()
+        .map_err(|e| format!("Failed to build reader: {}", e))?;
+
+    let mut rows = Vec::new();
+
+    for batch_result in reader {
+        let batch = batch_result.map_err(|e| format!("Failed to read batch: {}", e))?;
+
+        let revision_col = batch.column(0).as_string::<i32>();
+        let revision_date_col = batch.column(1).as_primitive::<arrow::datatypes::Int64Type>();
+        let revision_author_col = batch.column(2).as_string::<i32>();
+        let revision_message_col = batch.column(3).as_string::<i32>();
+        let path_col = batch.column(4).as_string::<i32>();
+        let path_type_col = batch.column(5).as_string::<i32>();
+        let loc_col = batch.column(6).as_primitive::<arrow::datatypes::Int64Type>();
+        let sloc_col = batch.column(7).as_primitive::<arrow::datatypes::Int64Type>();
+        let lloc_col = batch.column(8).as_primitive::<arrow::datatypes::Int64Type>();
+        let comments_col = batch.column(9).as_primitive::<arrow::datatypes::Int64Type>();
+        let multi_col = batch.column(10).as_primitive::<arrow::datatypes::Int64Type>();
+        let blank_col = batch.column(11).as_primitive::<arrow::datatypes::Int64Type>();
+        let single_comments_col = batch.column(12).as_primitive::<arrow::datatypes::Int64Type>();
+        let complexity_col = batch.column(13).as_primitive::<arrow::datatypes::Float64Type>();
+        let real_complexity_col = batch.column(14).as_primitive::<arrow::datatypes::UInt32Type>();
+        let h1_col = batch.column(15).as_primitive::<arrow::datatypes::Int64Type>();
+        let h2_col = batch.column(16).as_primitive::<arrow::datatypes::Int64Type>();
+        let n1_col = batch.column(17).as_primitive::<arrow::datatypes::Int64Type>();
+        let n2_col = batch.column(18).as_primitive::<arrow::datatypes::Int64Type>();
+        let vocabulary_col = batch.column(19).as_primitive::<arrow::datatypes::Int64Type>();
+        let length_col = batch.column(20).as_primitive::<arrow::datatypes::Int64Type>();
+        let volume_col = batch.column(21).as_primitive::<arrow::datatypes::Float64Type>();
+        let difficulty_col = batch.column(22).as_primitive::<arrow::datatypes::Float64Type>();
+        let effort_col = batch.column(23).as_primitive::<arrow::datatypes::Float64Type>();
+        let mi_col = batch.column(24).as_primitive::<arrow::datatypes::Float64Type>();
+        let rank_col = batch.column(25).as_string::<i32>();
+        let lineno_col = batch.column(26).as_primitive::<arrow::datatypes::UInt32Type>();
+        let endline_col = batch.column(27).as_primitive::<arrow::datatypes::UInt32Type>();
+        let is_method_col = batch
+            .column(28)
+            .as_any()
+            .downcast_ref::<BooleanArray>()
+            .unwrap();
+        let classname_col = batch.column(29).as_string::<i32>();
+
+        for i in 0..batch.num_rows() {
+            let row = MetricRow {
+                revision: revision_col.value(i).to_string(),
+                revision_date: revision_date_col.value(i),
+                revision_author: if revision_author_col.is_null(i) {
+                    None
+                } else {
+                    Some(revision_author_col.value(i).to_string())
+                },
+                revision_message: if revision_message_col.is_null(i) {
+                    None
+                } else {
+                    Some(revision_message_col.value(i).to_string())
+                },
+                path: path_col.value(i).to_string(),
+                path_type: path_type_col.value(i).to_string(),
+                loc: if loc_col.is_null(i) { None } else { Some(loc_col.value(i)) },
+                sloc: if sloc_col.is_null(i) { None } else { Some(sloc_col.value(i)) },
+                lloc: if lloc_col.is_null(i) { None } else { Some(lloc_col.value(i)) },
+                comments: if comments_col.is_null(i) { None } else { Some(comments_col.value(i)) },
+                multi: if multi_col.is_null(i) { None } else { Some(multi_col.value(i)) },
+                blank: if blank_col.is_null(i) { None } else { Some(blank_col.value(i)) },
+                single_comments: if single_comments_col.is_null(i) { None } else { Some(single_comments_col.value(i)) },
+                complexity: if complexity_col.is_null(i) { None } else { Some(complexity_col.value(i)) },
+                real_complexity: if real_complexity_col.is_null(i) { None } else { Some(real_complexity_col.value(i)) },
+                h1: if h1_col.is_null(i) { None } else { Some(h1_col.value(i)) },
+                h2: if h2_col.is_null(i) { None } else { Some(h2_col.value(i)) },
+                n1: if n1_col.is_null(i) { None } else { Some(n1_col.value(i)) },
+                n2: if n2_col.is_null(i) { None } else { Some(n2_col.value(i)) },
+                vocabulary: if vocabulary_col.is_null(i) { None } else { Some(vocabulary_col.value(i)) },
+                length: if length_col.is_null(i) { None } else { Some(length_col.value(i)) },
+                volume: if volume_col.is_null(i) { None } else { Some(volume_col.value(i)) },
+                difficulty: if difficulty_col.is_null(i) { None } else { Some(difficulty_col.value(i)) },
+                effort: if effort_col.is_null(i) { None } else { Some(effort_col.value(i)) },
+                mi: if mi_col.is_null(i) { None } else { Some(mi_col.value(i)) },
+                rank: if rank_col.is_null(i) { None } else { Some(rank_col.value(i).to_string()) },
+                lineno: if lineno_col.is_null(i) { None } else { Some(lineno_col.value(i)) },
+                endline: if endline_col.is_null(i) { None } else { Some(endline_col.value(i)) },
+                is_method: if is_method_col.is_null(i) { None } else { Some(is_method_col.value(i)) },
+                classname: if classname_col.is_null(i) { None } else { Some(classname_col.value(i).to_string()) },
+            };
+            rows.push(row);
+        }
+    }
+
+    Ok(rows)
+}
+
+/// Python context manager for efficient multi-revision parquet writes and reads.
 ///
-/// Usage:
+/// Usage for writing:
 /// ```python
 /// with WilyIndex(path, operators) as index:
 ///     index.analyze_revision(paths, base_path, revision_key, ...)
 ///     index.analyze_revision(paths, base_path, revision_key, ...)
 /// # File is written on exit
 /// ```
+///
+/// Usage for reading:
+/// ```python
+/// with WilyIndex(path) as index:
+///     rows = index["src/foo.py"]  # Get all rows for a path
+///     for row in index:           # Iterate all rows
+///         print(row)
+/// ```
 #[pyclass]
 pub struct WilyIndex {
     output_path: String,
     builder: Mutex<MetricsBuilder>,
+    state: Mutex<IndexState>,
     operators: Vec<String>,
 }
 
 #[pymethods]
 impl WilyIndex {
     #[new]
-    #[pyo3(signature = (output_path, operators))]
-    fn new(output_path: String, operators: Vec<String>) -> Self {
+    #[pyo3(signature = (output_path, operators=None))]
+    fn new(output_path: String, operators: Option<Vec<String>>) -> Self {
         Self {
             output_path,
             builder: Mutex::new(MetricsBuilder::new()),
-            operators,
+            state: Mutex::new(IndexState::new()),
+            operators: operators.unwrap_or_default(),
         }
     }
 
-    fn __enter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
+    fn __enter__(slf: PyRef<'_, Self>) -> PyResult<PyRef<'_, Self>> {
+        // Lazily load existing data on enter
+        {
+            let mut state = slf.state.lock().map_err(|e| {
+                PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+            })?;
+            if !state.loaded {
+                state.loaded_rows = load_rows_from_parquet(&slf.output_path)
+                    .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e))?;
+                state.loaded = true;
+            }
+        }
+        Ok(slf)
     }
 
     #[pyo3(signature = (_exc_type=None, _exc_val=None, _exc_tb=None))]
@@ -453,6 +818,47 @@ impl WilyIndex {
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e))?;
 
         Ok(false) // Don't suppress exceptions
+    }
+
+    /// Get all rows matching a path (file path or path prefix).
+    /// Returns rows where the path equals or starts with the given path.
+    fn __getitem__(&self, py: Python<'_>, path: String) -> PyResult<Py<PyList>> {
+        let state = self.state.lock().map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+        })?;
+
+        let matching_rows: Vec<_> = state
+            .all_rows()
+            .filter(|row| row.path == path || row.path.starts_with(&format!("{}:", path)))
+            .collect();
+
+        let list = PyList::empty(py);
+        for row in matching_rows {
+            list.append(row.to_py_dict(py)?)?;
+        }
+        Ok(list.into())
+    }
+
+    /// Iterate over all rows in the index.
+    fn __iter__(slf: PyRef<'_, Self>) -> PyResult<WilyIndexIterator> {
+        let state = slf.state.lock().map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+        })?;
+
+        // Collect all rows into a vec for the iterator
+        let all_rows: Vec<MetricRow> = state.all_rows().cloned().collect();
+        Ok(WilyIndexIterator {
+            rows: all_rows,
+            index: 0,
+        })
+    }
+
+    /// Get the number of rows in the index.
+    fn __len__(&self) -> PyResult<usize> {
+        let state = self.state.lock().map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+        })?;
+        Ok(state.loaded_rows.len() + state.new_rows.len())
     }
 
     /// Analyze a revision and accumulate results.
@@ -671,6 +1077,9 @@ impl WilyIndex {
         let mut builder = self.builder.lock().map_err(|e| {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
         })?;
+        let mut state = self.state.lock().map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
+        })?;
         let rev_author = revision_author.as_deref();
         let rev_message = revision_message.as_deref();
 
@@ -685,7 +1094,7 @@ impl WilyIndex {
             for result in &file_results {
                 // Add file-level row
                 let raw_metrics = result.raw.as_ref();
-                builder.add_aggregate_row(
+                let row = builder.add_aggregate_row_tracked(
                     &revision_key,
                     revision_date,
                     rev_author,
@@ -712,6 +1121,7 @@ impl WilyIndex {
                     result.mi.as_ref().map(|(mi, _)| *mi),
                     result.mi.as_ref().map(|(_, r)| r.as_str()),
                 );
+                state.new_rows.push(row);
 
                 // Add function rows
                 for (name, complexity, lineno, endline, is_method, classname) in &result.cyclomatic_functions {
@@ -721,7 +1131,7 @@ impl WilyIndex {
                         .halstead_functions
                         .iter()
                         .find(|(n, ..)| n == name);
-                    builder.add_function_row(
+                    let row = builder.add_function_row_tracked(
                         &revision_key,
                         revision_date,
                         rev_author,
@@ -742,12 +1152,13 @@ impl WilyIndex {
                         hal.map(|h| h.8),
                         hal.map(|h| h.9),
                     );
+                    state.new_rows.push(row);
                 }
 
                 // Add class rows
                 for (name, complexity, real_complexity, lineno, endline) in &result.cyclomatic_classes {
                     let class_path = format!("{}:{}", result.rel_path, name);
-                    builder.add_class_row(
+                    let row = builder.add_class_row_tracked(
                         &revision_key,
                         revision_date,
                         rev_author,
@@ -758,6 +1169,7 @@ impl WilyIndex {
                         *lineno,
                         *endline,
                     );
+                    state.new_rows.push(row);
                 }
 
                 // Collect for directory aggregation
@@ -836,7 +1248,7 @@ impl WilyIndex {
                     (None, None)
                 };
 
-                builder.add_aggregate_row(
+                let row = builder.add_aggregate_row_tracked(
                     &revision_key,
                     revision_date,
                     rev_author,
@@ -863,6 +1275,7 @@ impl WilyIndex {
                     mean_mi,
                     mode_rank.as_deref(),
                 );
+                state.new_rows.push(row);
             }
 
             // Get root LOC
@@ -943,8 +1356,33 @@ pub fn get_metrics_schema() -> Vec<(String, String)> {
         .collect()
 }
 
+/// Iterator for WilyIndex rows.
+#[pyclass]
+pub struct WilyIndexIterator {
+    rows: Vec<MetricRow>,
+    index: usize,
+}
+
+#[pymethods]
+impl WilyIndexIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&mut self, py: Python<'_>) -> PyResult<Option<Py<PyDict>>> {
+        if self.index < self.rows.len() {
+            let row = &self.rows[self.index];
+            self.index += 1;
+            Ok(Some(row.to_py_dict(py)?))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
 pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
     parent_module.add_function(wrap_pyfunction!(get_metrics_schema, parent_module)?)?;
     parent_module.add_class::<WilyIndex>()?;
+    parent_module.add_class::<WilyIndexIterator>()?;
     Ok(())
 }

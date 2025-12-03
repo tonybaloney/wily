@@ -42,11 +42,50 @@ class WilyIndex:
             index.analyze_revision(paths, base_path, revision_key, ...)
             index.analyze_revision(paths, base_path, revision_key, ...)
         # File is written on exit
+
+    Querying:
+        with WilyIndex(output_path, operators) as index:
+            # Get all rows for a specific path
+            rows = index["src/foo.py"]
+
+            # Iterate over all rows
+            for row in index:
+                print(row)
+
+            # Get total row count
+            count = len(index)
     """
 
     def __init__(self, output_path: str, operators: list[str]) -> None: ...
 
     def __enter__(self) -> "WilyIndex": ...
+
+    def __getitem__(self, path: str) -> list[dict[str, Any]]:
+        """Get all rows matching the given path.
+
+        Args:
+            path: The file path to look up
+
+        Returns:
+            List of row dicts matching the path
+        """
+        ...
+
+    def __iter__(self) -> "WilyIndexIterator":
+        """Iterate over all rows in the index.
+
+        Returns:
+            Iterator yielding row dicts
+        """
+        ...
+
+    def __len__(self) -> int:
+        """Get the total number of rows in the index.
+
+        Returns:
+            Total count of loaded + new rows
+        """
+        ...
 
     def __exit__(
         self,
@@ -95,3 +134,10 @@ def checkout_branch(path: str, branch: str) -> None:
 def find_revision(path: str, revision: str) -> dict[str, Any] | None:
     """Find a revision by hash prefix."""
     ...
+
+
+class WilyIndexIterator:
+    """Iterator for WilyIndex rows."""
+
+    def __iter__(self) -> "WilyIndexIterator": ...
+    def __next__(self) -> dict[str, Any]: ...
