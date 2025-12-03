@@ -8,7 +8,7 @@ import click
 
 from wily import WILY_LOG_NAME, __version__, logger
 from wily.archivers import resolve_archiver
-from wily.cache import exists, get_default_metrics
+from wily.cache import exists
 from wily.config import load as load_config
 from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_TABLE_STYLE
 from wily.helper.custom_enums import ReportFormat
@@ -276,16 +276,12 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap, table_style)
     help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
 )
 @click.pass_context
-def report(ctx, file, metrics, number, message, format, output, changes, wrap, table_style):
+def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, output, changes, wrap, table_style):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
-
-    if not metrics:
-        metrics = get_default_metrics(config)
-        logger.info("Using default metrics %s", metrics)
 
     new_output = Path().cwd()
     if output:
@@ -351,11 +347,9 @@ def diff(ctx, files, metrics, all, detail, revision, wrap, table_style):
     if not exists(config):
         handle_no_cache(ctx)
 
-    if not metrics:
-        metrics = get_default_metrics(config)
-        logger.info("Using default metrics %s", metrics)
-    else:
-        metrics = metrics.split(",")
+    metrics_list: list[str] | None = None
+    if metrics:
+        metrics_list = metrics.split(",")
         logger.info("Using specified metrics %s", metrics)
 
     from wily.commands.diff import diff  # noqa: PLC0415
@@ -364,7 +358,7 @@ def diff(ctx, files, metrics, all, detail, revision, wrap, table_style):
     diff(
         config=config,
         files=files,
-        metrics=metrics,
+        metrics=metrics_list,
         changes_only=not all,
         detail=detail,
         revision=revision,
@@ -531,7 +525,7 @@ def handle_no_cache(context):
 if __name__ == "__main__":  # pragma: no cover
     try:
         cli()  # type: ignore
-    except Exception as runtime:
+    except Exception:
         logger.error("Oh no, Wily crashed! See %s for information.", WILY_LOG_NAME)
         logger.info(
             "If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."

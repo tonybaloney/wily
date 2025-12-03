@@ -7,6 +7,7 @@ Compares metrics between uncommitted files and indexed files.
 import os
 import sys
 from pathlib import Path
+from typing import Iterable
 
 from rich.text import Text
 
@@ -19,8 +20,12 @@ from wily.config.types import WilyConfig
 from wily.defaults import DEFAULT_TABLE_STYLE
 from wily.helper import print_table
 from wily.operators import (
+    ALL_METRICS,
+    ALL_OPERATORS,
     BAD_STYLES,
     GOOD_STYLES,
+    Metric,
+    Operator,
     OperatorLevel,
     get_metric,
     resolve_metric,
@@ -32,7 +37,7 @@ from wily.state import State
 def diff(
     config: WilyConfig,
     files: list[str],
-    metrics: list[str],
+    metrics: list[str] | None,
     changes_only: bool = True,
     detail: bool = True,
     revision: str | None = None,
@@ -87,8 +92,14 @@ def diff(
     )
 
     # Convert the list of metrics to a list of metric instances
-    operators = {resolve_operator(metric.split(".")[0]) for metric in metrics}
-    resolved_metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    operators: list[Operator]
+    resolved_metrics: Iterable[tuple[str, Metric]]
+    if metrics:
+        operators = [resolve_operator(metric.split(".")[0]) for metric in metrics]
+        resolved_metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
+    else:
+        operators = state.operators or list(ALL_OPERATORS.values())
+        resolved_metrics = [(operator.name, metric) for operator, metric in ALL_METRICS if operator in operators]
     results = []
 
     # Build a set of operators and run them in parallel

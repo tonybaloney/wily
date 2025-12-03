@@ -18,7 +18,7 @@ from wily.defaults import DEFAULT_TABLE_STYLE
 from wily.helper import print_table
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
-from wily.operators import MetricType, resolve_metric_as_tuple
+from wily.operators import ALL_METRICS, MetricType, resolve_metric_as_tuple
 from wily.state import State
 
 # Rich style names for metric changes
@@ -30,7 +30,7 @@ STYLE_YELLOW = "yellow"
 def report(  # noqa: C901, PLR0915
     config: WilyConfig,
     path: str,
-    metrics: Iterable[str],
+    metrics: Iterable[str] | None,
     n: int,
     output: Path,
     include_message: bool = False,
@@ -53,15 +53,18 @@ def report(  # noqa: C901, PLR0915
     :param wrap: Wrap output
     :param table_style: Table box style
     """
-    metrics = sorted(metrics)
+    if metrics is None:
+        resolved_metrics = ALL_METRICS
+    else:
+        metrics = sorted(set(metrics))
+        resolved_metrics = [resolve_metric_as_tuple(metric_name) for metric_name in metrics]
+
     logger.debug("Running report command")
-    logger.info("-----------History for %s------------", metrics)
 
     data: list[tuple[str | Text, ...]] = []
     metric_metas = []
 
-    for metric_name in metrics:
-        operator, metric = resolve_metric_as_tuple(metric_name)
+    for operator, metric in resolved_metrics:
         key = metric.name
         # Set the delta styles depending on the metric type
         if metric.measure == MetricType.AimHigh:

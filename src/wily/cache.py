@@ -8,15 +8,10 @@ The API in this module is for archivers and commands to work with the local cach
 
 import pathlib
 import shutil
-from typing import Any
 
-import ujson as json
-
-from wily import __version__, logger
-from wily.archivers import ALL_ARCHIVERS, Archiver, Revision
+from wily import logger
+from wily.archivers import ALL_ARCHIVERS
 from wily.config.types import WilyConfig
-from wily.lang import _
-from wily.operators import resolve_operator
 
 
 def exists(config: WilyConfig) -> bool:
@@ -27,28 +22,8 @@ def exists(config: WilyConfig) -> bool:
 
     :return: Whether the .wily directory exists
     """
-    exists = pathlib.Path(config.cache_path).exists() and pathlib.Path(config.cache_path).is_dir()
-    if not exists:
-        return False
-    index_path = pathlib.Path(config.cache_path) / "index.json"
-    if index_path.exists():
-        with open(index_path) as out:
-            index = json.load(out)
-        if index["version"] != __version__:
-            # TODO: Inspect the versions properly.
-            logger.warning("Wily cache is old, you may incur errors until you rebuild the cache.")
-    else:
-        logger.warning("Wily cache was not versioned, you may incur errors until you rebuild the cache.")
-        create_index(config)
-    return True
+    return pathlib.Path(config.cache_path).exists() and pathlib.Path(config.cache_path).is_dir()
 
-
-def create_index(config: WilyConfig) -> None:
-    """Create the root index."""
-    filename = pathlib.Path(config.cache_path) / "index.json"
-    index = {"version": __version__}
-    with open(filename, "w") as out:
-        out.write(json.dumps(index, indent=2))
 
 
 def create(config: WilyConfig) -> str:
@@ -63,7 +38,6 @@ def create(config: WilyConfig) -> str:
         return config.cache_path
     logger.debug("Creating wily cache %s", config.cache_path)
     pathlib.Path(config.cache_path).mkdir(parents=True, exist_ok=True)
-    create_index(config)
     return config.cache_path
 
 
@@ -80,62 +54,6 @@ def clean(config: WilyConfig) -> None:
     logger.debug("Deleted wily cache")
 
 
-def store(
-    config: WilyConfig,
-    archiver: Archiver | str,
-    revision: Revision,
-    stats: dict[str, Any],
-) -> pathlib.Path:
-    """
-    Store a revision record within an archiver folder.
-
-    :param config: The configuration
-    :param archiver: The archiver to get name from (e.g. 'git')
-    :param revision: The revision
-    :param stats: The collected data
-
-    :return: The absolute path to the created file
-    """
-    root = pathlib.Path(config.cache_path) / str(archiver)
-
-    if not root.exists():
-        logger.debug("Creating wily cache")
-        root.mkdir()
-
-    logger.debug("Creating %s output", revision.key)
-    filename = root / (revision.key + ".json")
-    if filename.exists():
-        raise RuntimeError(f"File {filename} already exists, index may be corrupt.")
-    with open(filename, "w") as out:
-        out.write(json.dumps(stats, indent=2))
-    return filename
-
-
-def store_archiver_index(config: WilyConfig, archiver: Archiver | str, index: list[dict[str, Any]]) -> pathlib.Path:
-    """
-    Store an archiver's index record for faster search.
-
-    :param config: The configuration
-    :param archiver: The archiver to get name from (e.g. 'git')
-    :param index: The archiver index record
-
-    :return: The absolute path to the created file
-    """
-    root = pathlib.Path(config.cache_path) / str(archiver)
-
-    if not root.exists():
-        root.mkdir()
-        logger.debug("Created archiver directory")
-
-    index = sorted(index, key=lambda k: k["date"], reverse=True)
-
-    filename = root / "index.json"
-    with open(filename, "w") as out:
-        out.write(json.dumps(index, indent=2))
-    logger.debug("Created index output")
-    return filename
-
-
 def list_archivers(config: WilyConfig) -> list[str]:
     """
     List the names of archivers with data.
@@ -150,72 +68,3 @@ def list_archivers(config: WilyConfig) -> list[str]:
         if (root / name).exists():
             result.append(name)
     return result
-
-
-def get_default_metrics(config: WilyConfig) -> list[str]:
-    """
-    Get the default metrics for a configuration.
-
-    :param config: The configuration
-    :return: Return the list of default metrics in this index
-    """
-    archivers = list_archivers(config)
-    default_metrics = []
-
-    for archiver in archivers:
-        index = get_archiver_index(config, archiver)
-
-        if len(index) == 0:
-            logger.warning(_("No records found in the index, no metrics available"))
-            return []
-
-        operators = index[0]["operators"]
-        for operator in operators:
-            o = resolve_operator(operator)
-            if o.operator_cls.default_metric_index is not None:
-                metric = o.operator_cls.metrics[o.operator_cls.default_metric_index]
-                default_metrics.append(f"{o.operator_cls.name}.{metric.name}")
-    return default_metrics
-
-
-def has_archiver_index(config: WilyConfig, archiver: Archiver | str) -> bool:
-    """
-    Check if this archiver has an index file.
-
-    :param config: The configuration
-    :param archiver: The name of the archiver type (e.g. 'git')
-
-    :return: Whether the archiver's index exists.
-    """
-    root = pathlib.Path(config.cache_path) / str(archiver) / "index.json"
-    return root.exists()
-
-
-def get_archiver_index(config: WilyConfig, archiver: Archiver | str) -> Any:
-    """
-    Get the contents of the archiver index file.
-
-    :param config: The configuration
-    :param archiver: The name of the archiver type (e.g. 'git')
-    :return: The index data
-    """
-    root = pathlib.Path(config.cache_path) / str(archiver)
-    with (root / "index.json").open("r") as index_f:
-        index = json.load(index_f)
-    return index
-
-
-def get(config: WilyConfig, archiver: Archiver | str, revision: str) -> dict[Any, Any]:
-    """
-    Get the data for a given revision.
-
-    :param config: The configuration
-    :param archiver: The archiver to get name from (e.g. 'git')
-    :param revision: The revision ID
-    :return: The data record for that revision
-    """
-    root = pathlib.Path(config.cache_path) / str(archiver)
-    # TODO : string escaping!!!
-    with (root / f"{revision}.json").open("r") as rev_f:
-        index = json.load(rev_f)
-    return index
