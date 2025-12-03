@@ -234,9 +234,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
             seed_loc = analyze_revision_to_parquet(
                 revisions[0], archiver_instance, config, operators, parquet_path
             )
-            index.add(revisions[0], operators=operators)
 
-            index.set_seed(revisions[0])
             progress.stop_task(seed_task)
             if any(op.name == "raw" for op in operators):
                 logger.info(f"Seed revision has {seed_loc:,} lines of code.")
@@ -248,10 +246,8 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
                 analyze_revision_to_parquet(
                     revision, archiver_instance, config, operators, parquet_path
                 )
-                index.add(revision, operators=operators)
                 progress.advance(task_id)
 
-        index.save()
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)
         raise e
