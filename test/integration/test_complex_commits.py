@@ -19,7 +19,7 @@ _path2 = "src/test2.py"
 def test_skip_files(tmpdir, cache_path):
     """
     Test that only changed files are indexed in each commit.
-    
+
     With the optimized build process, each revision only contains metrics
     for files that were added or modified in that specific commit.
     """
