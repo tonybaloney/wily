@@ -25,7 +25,7 @@ from rich.text import Text
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
-from wily.backend import analyze_files_parallel, iter_filenames
+from wily.backend import analyze_files_parallel, analyze_files_to_json, iter_filenames
 from wily.config.types import WilyConfig
 from wily.operators import Operator
 from wily.state import State
@@ -108,27 +108,103 @@ def run_operators_parallel(
     return results
 
 
-def revision_to_stats(revision: Revision, archiver_instance: FilesystemArchiver, config: WilyConfig, operators: list[Operator]) -> dict[str, dict]:
-    """Convert a revision to stats by running all operators."""
+def run_operators_to_json(
+    operators: list[Operator],
+    targets: list[str],
+    config: WilyConfig,
+    output_path: str,
+) -> tuple[str, int]:
+    """
+    Run all operators in parallel using Rust/rayon and write directly to JSON.
+
+    This avoids Python dict creation overhead by having Rust serialize directly.
+
+    :param operators: List of operators to run
+    :param targets: List of file paths to analyze
+    :param config: The wily configuration
+    :param output_path: Path to write the JSON output
+    :return: Tuple of (output_path, root_loc) where root_loc is total lines of code
+    """
+    operator_names = [op.name for op in operators]
+
+    if not operator_names or not targets:
+        # Write empty stats file
+        import json
+        empty_stats = {"operator_data": {name: {} for name in operator_names}}
+        pathlib.Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w") as f:
+            f.write(json.dumps(empty_stats, indent=2))
+        return output_path, 0
+
+    # Discover all Python files from targets
+    file_paths = list(iter_filenames(targets, include_ipynb=True))
+
+    if not file_paths:
+        # Write empty stats file
+        import json
+        empty_stats = {"operator_data": {name: {} for name in operator_names}}
+        pathlib.Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w") as f:
+            f.write(json.dumps(empty_stats, indent=2))
+        return output_path, 0
+
+    logger.debug(
+        "Running Rust parallel analysis on %d files with operators: %s (direct JSON)",
+        len(file_paths),
+        operator_names,
+    )
+
+    # Run analysis and write directly to JSON file
+    return analyze_files_to_json(
+        file_paths,
+        operator_names,
+        output_path,
+        config.path,
+        multi=True,
+    )
+
+
+def revision_to_cache_file(
+    revision: Revision,
+    archiver_instance: FilesystemArchiver,
+    config: WilyConfig,
+    operators: list[Operator],
+    output_path: str,
+) -> tuple[str, int]:
+    """
+    Analyze a revision and write results directly to cache file.
+
+    This bypasses Python dict creation by having Rust serialize directly to JSON.
+
+    :param revision: The revision to analyze
+    :param archiver_instance: The archiver instance
+    :param config: The wily configuration
+    :param operators: List of operators to run
+    :param output_path: Path to write the JSON cache file
+    :return: Tuple of (output_path, root_loc) where root_loc is total lines of code
+    """
+    import json
+
     targets = [
         str(pathlib.Path(config.path) / pathlib.Path(file))
         for file in revision.added_files + revision.modified_files
     ]
-    stats: dict[str, dict] = {"operator_data": {}}
 
     # if none of the targets are Python source files, skip analysis
-    # TODO: revisit for ipynb notebooks
-    if any(target.endswith(".py") for target in targets):
-        archiver_instance.checkout(revision, config.checkout_options)
-
-        # Run all operators in parallel via Rust/rayon (includes aggregation)
-        results = run_operators_parallel(operators, targets, config)
-
-        for operator_name, result in results.items():
-            stats["operator_data"][operator_name] = result
-    else:
+    if not any(target.endswith(".py") for target in targets):
         logger.debug("Skipping analysis for revision %s, no Python files changed.", revision.key)
-    return stats
+        # Write empty stats file
+        operator_names = [op.name for op in operators]
+        empty_stats = {"operator_data": {name: {} for name in operator_names}}
+        pathlib.Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w") as f:
+            f.write(json.dumps(empty_stats, indent=2))
+        return output_path, 0
+
+    archiver_instance.checkout(revision, config.checkout_options)
+
+    # Run all operators in parallel via Rust/rayon and write directly to JSON
+    return run_operators_to_json(operators, targets, config, output_path)
 
 
 def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> None:
@@ -187,23 +263,30 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
             # Handle the seed revision
             seed_task = progress.add_task("Analyzing seed", total=1)
             progress.start_task(seed_task)
-            stats = revision_to_stats(revisions[0], archiver_instance, config, operators)
+
             ir = index.add(revisions[0], operators=operators)
-            ir.store(config, archiver_instance.name, stats)
+            # Compute output path for the cache file
+            cache_dir = pathlib.Path(config.cache_path) / archiver_instance.name
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            output_path = str(cache_dir / f"{revisions[0].key}.json")
+
+            # Run analysis and write directly to JSON (bypasses Python dict creation)
+            _, seed_loc = revision_to_cache_file(revisions[0], archiver_instance, config, operators, output_path)
+            ir.mark_stored(pathlib.Path(output_path))
+
             index.set_seed(revisions[0])
             progress.stop_task(seed_task)
             if any(op.name == "raw" for op in operators):
-                loc = stats.get("operator_data", {}).get("raw", {}).get("", {}).get("total", {}).get("loc", 0)
-                logger.info(f"Seed revision has {loc:,} lines of code.")
+                logger.info(f"Seed revision has {seed_loc:,} lines of code.")
             logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
 
             # Handle the rest
             task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
             for revision in revisions[1:]:
-                stats = revision_to_stats(revision, archiver_instance, config, operators)
-
                 ir = index.add(revision, operators=operators)
-                ir.store(config, archiver_instance.name, stats)
+                output_path = str(cache_dir / f"{revision.key}.json")
+                revision_to_cache_file(revision, archiver_instance, config, operators, output_path)
+                ir.mark_stored(pathlib.Path(output_path))
                 progress.advance(task_id)
 
         index.save()

@@ -1,8 +1,10 @@
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use rayon::prelude::*;
+use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::fs;
+use std::io::Write;
 
 use crate::cyclomatic::{self, ClassComplexity, FunctionComplexity};
 use crate::halstead::{self, FunctionHalstead, HalsteadMetrics};
@@ -49,13 +51,13 @@ fn collect_all_directories(file_paths: &[String]) -> HashSet<String> {
 }
 
 /// Raw metrics - wraps HashMap in {"total": {...}} structure
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct RawResult {
     total: HashMap<String, i64>,
 }
 
 /// Cyclomatic function result - leaf struct with derive
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct CyclomaticFunctionResult {
     name: String,
     is_method: bool,
@@ -68,7 +70,7 @@ struct CyclomaticFunctionResult {
 }
 
 /// Cyclomatic class result - leaf struct with derive
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct CyclomaticClassResult {
     name: String,
     complexity: u32,
@@ -80,13 +82,13 @@ struct CyclomaticClassResult {
 }
 
 /// Cyclomatic total - just complexity
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct CyclomaticTotal {
     complexity: i64,
 }
 
 /// Full cyclomatic result with detailed dict keyed by function/class name
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct CyclomaticResult {
     functions: Vec<(String, CyclomaticFunctionResult)>, // (fullname, result)
     classes: Vec<(String, CyclomaticClassResult)>,      // (name, result)
@@ -117,12 +119,14 @@ impl<'py> IntoPyObject<'py> for CyclomaticResult {
 }
 
 /// Halstead function result - uses #[pyo3(item)] for N1/N2 naming
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct HalsteadFunctionResult {
     h1: u32,
     h2: u32,
+    #[serde(rename = "N1")]
     #[pyo3(item("N1"))]
     n1: u32,
+    #[serde(rename = "N2")]
     #[pyo3(item("N2"))]
     n2: u32,
     vocabulary: u32,
@@ -135,12 +139,14 @@ struct HalsteadFunctionResult {
 }
 
 /// Halstead total result - includes None for lineno/endline
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct HalsteadTotalResult {
     h1: u32,
     h2: u32,
+    #[serde(rename = "N1")]
     #[pyo3(item("N1"))]
     n1: u32,
+    #[serde(rename = "N2")]
     #[pyo3(item("N2"))]
     n2: u32,
     vocabulary: u32,
@@ -153,7 +159,7 @@ struct HalsteadTotalResult {
 }
 
 /// Full halstead result with detailed dict keyed by function name
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct HalsteadResult {
     functions: Vec<(String, HalsteadFunctionResult)>, // (name, result)
     total: HalsteadTotalResult,
@@ -179,20 +185,20 @@ impl<'py> IntoPyObject<'py> for HalsteadResult {
 }
 
 /// Maintainability total
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct MaintainabilityTotal {
     mi: f64,
     rank: String,
 }
 
 /// Maintainability result - wraps in {"total": {...}}
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct MaintainabilityResult {
     total: MaintainabilityTotal,
 }
 
 /// Complete analysis result for a single file
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 enum FileAnalysisResult {
     Success {
         raw: Option<RawResult>,
@@ -208,34 +214,36 @@ enum FileAnalysisResult {
 // ============================================================================
 
 /// Aggregated raw metrics for a directory
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedRawResult {
     total: HashMap<String, i64>,
 }
 
 /// Aggregated cyclomatic metrics for a directory  
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedCyclomaticResult {
     total: AggregatedCyclomaticTotal,
 }
 
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedCyclomaticTotal {
     complexity: f64,  // Mean of complexities
 }
 
 /// Aggregated halstead metrics for a directory
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedHalsteadResult {
     total: AggregatedHalsteadTotal,
 }
 
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedHalsteadTotal {
     h1: i64,
     h2: i64,
+    #[serde(rename = "N1")]
     #[pyo3(item("N1"))]
     n1: i64,
+    #[serde(rename = "N2")]
     #[pyo3(item("N2"))]
     n2: i64,
     vocabulary: i64,
@@ -246,19 +254,19 @@ struct AggregatedHalsteadTotal {
 }
 
 /// Aggregated maintainability metrics for a directory
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedMaintainabilityResult {
     total: AggregatedMaintainabilityTotal,
 }
 
-#[derive(Debug, Clone, IntoPyObject)]
+#[derive(Debug, Clone, Serialize, IntoPyObject)]
 struct AggregatedMaintainabilityTotal {
     mi: f64,   // Mean of MI values
     rank: String,  // Mode of ranks
 }
 
 /// Aggregate results for a directory
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct DirectoryAggregate {
     raw: Option<AggregatedRawResult>,
     cyclomatic: Option<AggregatedCyclomaticResult>,
@@ -785,7 +793,327 @@ pub fn analyze_files_parallel<'py>(
     Ok(output)
 }
 
-pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
+// ============================================================================
+// JSON output structures for cache serialization
+// ============================================================================
+
+/// JSON output for a single file/directory's raw metrics
+#[derive(Debug, Serialize)]
+struct JsonRawOutput {
+    total: HashMap<String, i64>,
+}
+
+/// JSON output for cyclomatic detailed entry (function or class)
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+enum JsonCyclomaticDetailedEntry {
+    Function {
+        name: String,
+        is_method: bool,
+        classname: Option<String>,
+        complexity: u32,
+        lineno: u32,
+        endline: u32,
+        loc: i64,
+        closures: Vec<String>,
+    },
+    Class {
+        name: String,
+        complexity: u32,
+        real_complexity: u32,
+        lineno: u32,
+        endline: u32,
+        loc: i64,
+        inner_classes: Vec<String>,
+    },
+}
+
+/// JSON output for cyclomatic metrics
+#[derive(Debug, Serialize)]
+struct JsonCyclomaticOutput {
+    total: CyclomaticTotal,
+    detailed: HashMap<String, JsonCyclomaticDetailedEntry>,
+}
+
+/// JSON output for halstead metrics
+#[derive(Debug, Serialize)]
+struct JsonHalsteadOutput {
+    total: HalsteadTotalResult,
+    detailed: HashMap<String, HalsteadFunctionResult>,
+}
+
+/// JSON output for maintainability metrics
+#[derive(Debug, Serialize)]
+struct JsonMaintainabilityOutput {
+    total: MaintainabilityTotal,
+}
+
+/// JSON output for an error
+#[derive(Debug, Serialize)]
+struct JsonErrorOutput {
+    total: JsonErrorTotal,
+}
+
+#[derive(Debug, Serialize)]
+struct JsonErrorTotal {
+    error: String,
+}
+
+/// Top-level JSON output matching wily cache format
+#[derive(Debug, Serialize)]
+struct JsonCacheOutput {
+    operator_data: HashMap<String, HashMap<String, serde_json::Value>>,
+}
+
+/// Build JSON output for cyclomatic result
+fn build_cyclomatic_json(result: &CyclomaticResult) -> JsonCyclomaticOutput {
+    let mut detailed = HashMap::new();
+    
+    for (fullname, func) in &result.functions {
+        detailed.insert(
+            fullname.clone(),
+            JsonCyclomaticDetailedEntry::Function {
+                name: func.name.clone(),
+                is_method: func.is_method,
+                classname: func.classname.clone(),
+                complexity: func.complexity,
+                lineno: func.lineno,
+                endline: func.endline,
+                loc: func.loc,
+                closures: func.closures.clone(),
+            },
+        );
+    }
+    
+    for (name, cls) in &result.classes {
+        detailed.insert(
+            name.clone(),
+            JsonCyclomaticDetailedEntry::Class {
+                name: cls.name.clone(),
+                complexity: cls.complexity,
+                real_complexity: cls.real_complexity,
+                lineno: cls.lineno,
+                endline: cls.endline,
+                loc: cls.loc,
+                inner_classes: cls.inner_classes.clone(),
+            },
+        );
+    }
+    
+    JsonCyclomaticOutput {
+        total: CyclomaticTotal { complexity: result.total_complexity },
+        detailed,
+    }
+}
+
+/// Build JSON output for halstead result
+fn build_halstead_json(result: &HalsteadResult) -> JsonHalsteadOutput {
+    let mut detailed = HashMap::new();
+    
+    for (name, func) in &result.functions {
+        detailed.insert(name.clone(), func.clone());
+    }
+    
+    JsonHalsteadOutput {
+        total: result.total.clone(),
+        detailed,
+    }
+}
+
+/// Analyze files and write results directly to JSON file.
+///
+/// This function performs the same analysis as analyze_files_parallel but
+/// writes the results directly to a JSON file instead of returning Python dicts.
+/// This avoids the overhead of creating Python dict objects.
+///
+/// # Arguments
+/// * `paths` - List of file paths to analyze (absolute paths)
+/// * `operators` - List of operator names to run
+/// * `output_path` - Path to write the JSON output
+/// * `base_path` - Base path for computing relative paths
+/// * `multi` - Whether to include multi-line strings in MI calculation
+///
+/// # Returns
+/// A tuple of (output_path, root_loc) where root_loc is the total lines of code
+#[pyfunction]
+#[pyo3(signature = (paths, operators, output_path, base_path, multi=true))]
+pub fn analyze_files_to_json(
+    py: Python<'_>,
+    paths: Vec<String>,
+    operators: Vec<String>,
+    output_path: String,
+    base_path: String,
+    multi: bool,
+) -> PyResult<(String, i64)> {
+    let include_raw = operators.iter().any(|o| o == "raw");
+    let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
+    let include_halstead = operators.iter().any(|o| o == "halstead");
+    let include_maintainability = operators.iter().any(|o| o == "maintainability");
+    
+    // Normalize base path to use forward slashes
+    let base_path_normalized = base_path.replace('\\', "/");
+    
+    // Compute relative paths from absolute paths
+    let relative_paths: Vec<String> = paths.iter().map(|p| {
+        let normalized = p.replace('\\', "/");
+        if normalized.starts_with(&base_path_normalized) {
+            let rel = normalized[base_path_normalized.len()..].trim_start_matches('/');
+            rel.to_string()
+        } else {
+            normalized
+        }
+    }).collect();
+    
+    // Phase 1: Parallel file analysis (GIL released)
+    // Use absolute paths for file reading, relative paths for keys
+    let (analysis_results, directories): (HashMap<String, FileAnalysisResult>, HashSet<String>) = 
+        py.detach(|| {
+            let dirs = collect_all_directories(&relative_paths);
+            
+            let results: HashMap<String, FileAnalysisResult> = paths
+                .par_iter()
+                .zip(relative_paths.par_iter())
+                .map(|(abs_path, rel_path)| {
+                    let content = match fs::read_to_string(abs_path) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return (
+                                rel_path.clone(),
+                                FileAnalysisResult::Error(format!("Failed to read file: {}", e)),
+                            );
+                        }
+                    };
+                    
+                    let result = analyze_file(
+                        &content,
+                        include_raw,
+                        include_cyclomatic,
+                        include_halstead,
+                        include_maintainability,
+                        multi,
+                    );
+                    
+                    (rel_path.clone(), result)
+                })
+                .collect();
+            
+            (results, dirs)
+        });
+    
+    // Phase 2: Compute aggregates
+    let aggregates = compute_aggregates(&analysis_results, &directories);
+    
+    // Phase 3: Build JSON structure (still with GIL released for serialization)
+    let (json_output, root_loc): (String, i64) = py.detach(|| {
+        let mut operator_data: HashMap<String, HashMap<String, serde_json::Value>> = HashMap::new();
+        
+        // Initialize operator maps
+        for op in &operators {
+            operator_data.insert(op.clone(), HashMap::new());
+        }
+        
+        // Add file results
+        for (path, result) in &analysis_results {
+            match result {
+                FileAnalysisResult::Error(e) => {
+                    let error_output = JsonErrorOutput {
+                        total: JsonErrorTotal { error: e.clone() },
+                    };
+                    for op in &operators {
+                        if let Some(op_map) = operator_data.get_mut(op) {
+                            op_map.insert(
+                                path.clone(),
+                                serde_json::to_value(&error_output).unwrap_or_default(),
+                            );
+                        }
+                    }
+                }
+                FileAnalysisResult::Success {
+                    raw,
+                    cyclomatic,
+                    halstead,
+                    maintainability,
+                } => {
+                    if let (Some(raw_result), Some(op_map)) = (raw, operator_data.get_mut("raw")) {
+                        let output = JsonRawOutput { total: raw_result.total.clone() };
+                        op_map.insert(path.clone(), serde_json::to_value(&output).unwrap_or_default());
+                    }
+                    
+                    if let (Some(cc_result), Some(op_map)) = (cyclomatic, operator_data.get_mut("cyclomatic")) {
+                        let output = build_cyclomatic_json(cc_result);
+                        op_map.insert(path.clone(), serde_json::to_value(&output).unwrap_or_default());
+                    }
+                    
+                    if let (Some(hal_result), Some(op_map)) = (halstead, operator_data.get_mut("halstead")) {
+                        let output = build_halstead_json(hal_result);
+                        op_map.insert(path.clone(), serde_json::to_value(&output).unwrap_or_default());
+                    }
+                    
+                    if let (Some(mi_result), Some(op_map)) = (maintainability, operator_data.get_mut("maintainability")) {
+                        let output = JsonMaintainabilityOutput { total: mi_result.total.clone() };
+                        op_map.insert(path.clone(), serde_json::to_value(&output).unwrap_or_default());
+                    }
+                }
+            }
+        }
+        
+        // Add directory aggregates
+        for (dir_path, aggregate) in &aggregates {
+            if let (Some(raw_agg), Some(op_map)) = (&aggregate.raw, operator_data.get_mut("raw")) {
+                let output = JsonRawOutput { total: raw_agg.total.clone() };
+                op_map.insert(dir_path.clone(), serde_json::to_value(&output).unwrap_or_default());
+            }
+            
+            if let (Some(cc_agg), Some(op_map)) = (&aggregate.cyclomatic, operator_data.get_mut("cyclomatic")) {
+                op_map.insert(dir_path.clone(), serde_json::to_value(cc_agg).unwrap_or_default());
+            }
+            
+            if let (Some(hal_agg), Some(op_map)) = (&aggregate.halstead, operator_data.get_mut("halstead")) {
+                op_map.insert(dir_path.clone(), serde_json::to_value(hal_agg).unwrap_or_default());
+            }
+            
+                if let (Some(mi_agg), Some(op_map)) = (&aggregate.maintainability, operator_data.get_mut("maintainability")) {
+                op_map.insert(dir_path.clone(), serde_json::to_value(mi_agg).unwrap_or_default());
+            }
+        }
+        
+        // Extract root LOC for return value
+        let root_loc = aggregates.get("")
+            .and_then(|agg| agg.raw.as_ref())
+            .and_then(|raw| raw.total.get("loc").copied())
+            .unwrap_or(0);
+        
+        let cache_output = JsonCacheOutput { operator_data };
+        let json_str = serde_json::to_string_pretty(&cache_output).unwrap_or_else(|_| "{}".to_string());
+        
+        (json_str, root_loc)
+    });
+    
+    // Phase 4: Write to file
+    let parent = std::path::Path::new(&output_path).parent();
+    if let Some(parent_dir) = parent {
+        fs::create_dir_all(parent_dir).map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyIOError, _>(format!(
+                "Failed to create directory: {}", e
+            ))
+        })?;
+    }
+    
+    let mut file = fs::File::create(&output_path).map_err(|e| {
+        PyErr::new::<pyo3::exceptions::PyIOError, _>(format!(
+            "Failed to create file: {}", e
+        ))
+    })?;
+    
+    file.write_all(json_output.as_bytes()).map_err(|e| {
+        PyErr::new::<pyo3::exceptions::PyIOError, _>(format!(
+            "Failed to write file: {}", e
+        ))
+    })?;
+    
+    Ok((output_path, root_loc))
+}pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
     parent_module.add_function(wrap_pyfunction!(analyze_files_parallel, parent_module)?)?;
+    parent_module.add_function(wrap_pyfunction!(analyze_files_to_json, parent_module)?)?;
     Ok(())
 }

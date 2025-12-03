@@ -88,6 +88,18 @@ class IndexedRevision:
         self._data = stats
         return cache.store(config, archiver, self.revision, stats)
 
+    def mark_stored(self, file_path: Path) -> Path:
+        """
+        Mark this revision as stored when the file was written externally.
+
+        This is used when Rust writes the JSON cache file directly.
+        The _data cache is intentionally not set to allow lazy loading.
+
+        :param file_path: The path where the cache file was written
+        :return: The file path
+        """
+        return file_path
+
 
 class Index:
     """The index of the wily cache."""

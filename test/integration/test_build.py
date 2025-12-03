@@ -80,8 +80,8 @@ def test_build_crash(tmpdir):
 
     import wily.commands.build  # noqa: PLC0415
 
-    # Simulate a crash by patching run_operators_parallel to raise an error
-    with patch.object(wily.commands.build, "run_operators_parallel", side_effect=RuntimeError("arggh")):
+    # Simulate a crash by patching run_operators_to_json to raise an error
+    with patch.object(wily.commands.build, "run_operators_to_json", side_effect=RuntimeError("arggh")):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
         assert result.exit_code == 1, result.stdout
