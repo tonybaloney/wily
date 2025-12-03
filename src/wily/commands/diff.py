@@ -61,8 +61,8 @@ def diff(
     else:
         targets = files
 
-    # Expand directories to paths
-    files = [os.path.relpath(fn, config.path) for fn in iter_filenames(targets)]
+    # Expand directories to paths (normalize to Unix-style paths)
+    files = [os.path.relpath(fn, config.path).replace("\\", "/") for fn in iter_filenames(targets)]
     logger.debug("Targeting - %s", files)
 
     if not revision:

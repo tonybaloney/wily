@@ -1,11 +1,10 @@
-import sys
 from pathlib import Path
 
 from click.testing import CliRunner
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
 def test_report_no_cache(tmpdir, cache_path):

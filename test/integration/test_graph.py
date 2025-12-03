@@ -1,4 +1,3 @@
-import sys
 import tempfile
 from unittest.mock import patch
 
@@ -6,7 +5,7 @@ from click.testing import CliRunner
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
 PATCHED_ENV = {

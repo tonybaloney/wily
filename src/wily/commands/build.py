@@ -89,7 +89,7 @@ def run_operators_parallel(
     results: dict[str, dict[str, Any]] = {name: {} for name in operator_names}
 
     for file_path, file_data in parallel_results.items():
-        rel_path = os.path.relpath(file_path, config.path)
+        rel_path = os.path.relpath(file_path, config.path).replace("\\", "/")
 
         if "error" in file_data:
             for op_name in operator_names:

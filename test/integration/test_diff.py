@@ -1,12 +1,11 @@
 import pathlib
-import sys
 from textwrap import dedent
 
 from click.testing import CliRunner
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
 def test_diff_no_cache(tmpdir):

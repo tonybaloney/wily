@@ -5,7 +5,6 @@ Build them and test out some of the metrics/commands work correctly.
 """
 
 import pathlib
-import sys
 from textwrap import dedent
 
 import pytest
@@ -15,7 +14,7 @@ from git.util import Actor
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 operators = (
     "halstead",

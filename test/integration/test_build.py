@@ -8,7 +8,6 @@ TODO : Test build + build with extra operator
 """
 
 import pathlib
-import sys
 from unittest.mock import patch
 
 import pytest
@@ -20,7 +19,7 @@ import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
 from wily.helper import generate_cache_path
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
 def test_build_not_git_repo(tmpdir, cache_path):

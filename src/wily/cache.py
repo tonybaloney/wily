@@ -103,16 +103,16 @@ def store(
         logger.debug("Creating wily cache")
         root.mkdir()
 
-    # fix absolute path references.
+    # fix absolute path references and normalize to Unix-style paths.
     if config.path != ".":
         for operator, operator_data in list(stats["operator_data"].items()):
             if operator_data:
                 new_operator_data = operator_data.copy()
                 for k, v in list(operator_data.items()):
                     if os.path.isabs(k):
-                        new_key = os.path.relpath(str(k), str(config.path))
+                        new_key = os.path.relpath(str(k), str(config.path)).replace("\\", "/")
                     else:
-                        new_key = str(k)
+                        new_key = str(k).replace("\\", "/")
                     del new_operator_data[k]
                     new_operator_data[new_key] = v
                 del stats["operator_data"][operator]

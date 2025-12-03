@@ -140,13 +140,14 @@ pub fn iter_filenames(
                     .to_string_lossy()
                     .to_string();
 
-                // Strip \\?\ prefix on Windows
+                // Strip \\?\ prefix on Windows and normalize to Unix-style paths
                 let normalized = normalized.strip_prefix(r"\\?\").unwrap_or(&normalized);
+                let normalized = normalized.replace('\\', "/");
 
-                if !should_exclude_file(normalized, &exclude_patterns)
+                if !should_exclude_file(&normalized, &exclude_patterns)
                     && !should_exclude_file(&path_str, &exclude_patterns)
                 {
-                    results.push(normalized.to_string());
+                    results.push(normalized);
                 }
             }
         } else if path.is_dir() {
@@ -187,15 +188,16 @@ pub fn iter_filenames(
                             .to_string_lossy()
                             .to_string();
 
-                        // Strip \\?\ prefix on Windows
+                        // Strip \\?\ prefix on Windows and normalize to Unix-style paths
                         let normalized = normalized.strip_prefix(r"\\?\").unwrap_or(&normalized);
+                        let normalized = normalized.replace('\\', "/");
 
                         // Check exclude patterns against both original and normalized path
                         let entry_str = entry_path.to_string_lossy();
-                        if !should_exclude_file(normalized, &exclude_patterns)
+                        if !should_exclude_file(&normalized, &exclude_patterns)
                             && !should_exclude_file(&entry_str, &exclude_patterns)
                         {
-                            results.push(normalized.to_string());
+                            results.push(normalized);
                         }
                     }
                     Err(_) => continue,

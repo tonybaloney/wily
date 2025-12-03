@@ -1,6 +1,5 @@
 import json
 import pathlib
-import sys
 
 import pytest
 
@@ -173,10 +172,8 @@ def test_store_relative_paths(tmpdir):
     with open(fn) as cache_item:
         result = json.load(cache_item)
         assert isinstance(result, dict)
-        if sys.platform == "win32":
-            assert "foo\\bar.py" in result["operator_data"]["test"].keys()
-        else:
-            assert "foo/bar.py" in result["operator_data"]["test"].keys()
+        # All paths are now Unix-style regardless of platform
+        assert "foo/bar.py" in result["operator_data"]["test"].keys()
 
 
 def test_store_index(tmpdir):

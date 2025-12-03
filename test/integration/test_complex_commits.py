@@ -5,7 +5,6 @@ and test the skipping of unchanged files does not impact the index.
 
 import json
 import pathlib
-import sys
 
 from click.testing import CliRunner
 from git.repo.base import Repo
@@ -13,8 +12,8 @@ from git.util import Actor
 
 import wily.__main__ as main
 
-_path1 = "src\\test1.py" if sys.platform == "win32" else "src/test1.py"
-_path2 = "src\\test2.py" if sys.platform == "win32" else "src/test2.py"
+_path1 = "src/test1.py"
+_path2 = "src/test2.py"
 
 
 def test_skip_files(tmpdir, cache_path):
