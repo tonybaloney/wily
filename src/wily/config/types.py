@@ -27,7 +27,6 @@ class WilyConfig:
     ipynb_cells: bool = True
     targets: list[str] | None = None
     checkout_options: dict = field(default_factory=dict)
-    include_shebang: bool = False
     _cache_path: InitVar[str] = ""
 
     def __post_init__(self, _cache_path):

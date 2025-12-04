@@ -5,8 +5,6 @@
 
 use glob::Pattern;
 use pyo3::prelude::*;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 use std::path::Path;
 use walkdir::WalkDir;
 
@@ -15,8 +13,7 @@ use walkdir::WalkDir;
 /// A file is considered a Python file if:
 /// - It ends with `.py`
 /// - It ends with `.ipynb` (if include_ipynb is true)
-/// - It has a shebang line containing "python"
-fn is_python_file(path: &Path, include_ipynb: bool, include_shebang: bool) -> bool {
+fn is_python_file(path: &Path, include_ipynb: bool) -> bool {
     let filename = match path.file_name() {
         Some(name) => name.to_string_lossy(),
         None => return false,
@@ -29,20 +26,6 @@ fn is_python_file(path: &Path, include_ipynb: bool, include_shebang: bool) -> bo
 
     if include_ipynb && filename.ends_with(".ipynb") {
         return true;
-    }
-
-    // Check for Python shebang
-    if include_shebang {
-        if let Ok(file) = File::open(path) {
-            let mut reader = BufReader::new(file);
-            let mut first_line = String::new();
-            if reader.read_line(&mut first_line).is_ok()
-                && first_line.starts_with("#!")
-                && first_line.contains("python")
-            {
-                return true;
-            }
-        }
     }
 
     false
@@ -110,18 +93,16 @@ fn should_exclude_file(path: &str, exclude_patterns: &[Pattern]) -> bool {
 /// * `exclude` - Comma-separated glob patterns for files to exclude
 /// * `ignore` - Comma-separated directory names to ignore (hidden dirs always ignored)
 /// * `include_ipynb` - Whether to include Jupyter notebook files
-/// * `include_shebang` - Whether to include files with a Python shebang line
 ///
 /// # Returns
 /// A list of absolute paths to Python files found.
 #[pyfunction]
-#[pyo3(signature = (paths, exclude=None, ignore=None, include_ipynb=true, include_shebang=false))]
+#[pyo3(signature = (paths, exclude=None, ignore=None, include_ipynb=true))]
 pub fn iter_filenames(
     paths: Vec<String>,
     exclude: Option<&str>,
     ignore: Option<&str>,
     include_ipynb: bool,
-    include_shebang: bool,
 ) -> PyResult<Vec<String>> {
     let exclude_patterns = parse_exclude_patterns(exclude);
     let ignore_patterns = parse_ignore_patterns(ignore);
@@ -133,7 +114,7 @@ pub fn iter_filenames(
 
         if path.is_file() {
             // Single file - check if it's Python and not excluded
-            if is_python_file(path, include_ipynb, include_shebang) {
+            if is_python_file(path, include_ipynb) {
                 let normalized = path
                     .canonicalize()
                     .unwrap_or_else(|_| path.to_path_buf())
@@ -178,7 +159,7 @@ pub fn iter_filenames(
                         }
 
                         // Check if it's a Python file
-                        if !is_python_file(entry_path, include_ipynb, include_shebang) {
+                        if !is_python_file(entry_path, include_ipynb) {
                             continue;
                         }
 

@@ -20,7 +20,6 @@ def test_list_metrics_no_wrap(capsys):
     assert "Description" in captured.out
     assert "Type" in captured.out
     assert "Measure" in captured.out
-    assert "Aggregate" in captured.out
 
     # Verify some metric data is present
     assert "complexity" in captured.out

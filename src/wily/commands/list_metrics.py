@@ -6,7 +6,7 @@ TODO : Only show metrics for the operators that the cache has?
 
 from wily.defaults import DEFAULT_TABLE_STYLE
 from wily.helper import print_table
-from wily.operators import ALL_OPERATORS
+from wily.operators import OPERATOR_METRICS
 
 
 def list_metrics(wrap: bool, table_style: str = DEFAULT_TABLE_STYLE) -> None:
@@ -16,18 +16,17 @@ def list_metrics(wrap: bool, table_style: str = DEFAULT_TABLE_STYLE) -> None:
     :param wrap: Wrap output
     :param table_style: Table box style
     """
-    headers = ("Name", "Description", "Type", "Measure", "Aggregate")
-    for name, operator in ALL_OPERATORS.items():
-        print(f"{name} operator:")
-        if len(operator.operator_cls.metrics) > 0:
+    headers = ("Name", "Description", "Type", "Measure")
+    for operator, metrics in OPERATOR_METRICS.items():
+        print(f"{operator.name} operator:")
+        if len(metrics) > 0:
             data = [
                 (
                     m.name,
                     m.description,
                     m.metric_type.__name__,
                     m.measure,
-                    m.aggregate.__name__,
                 )
-                for m in operator.operator_cls.metrics
+                for m in metrics
             ]
             print_table(headers=headers, data=data, wrap=wrap, table_style=table_style)
