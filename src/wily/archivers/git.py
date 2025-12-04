@@ -75,7 +75,7 @@ class GitArchiver(BaseArchiver):
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
-        revisions = get_revisions(self.repo_path, max_revisions, self.current_branch)
+        revisions = get_revisions(self.repo_path, max_revisions)
 
         result: list[Revision] = []
         for rev_data in revisions:
