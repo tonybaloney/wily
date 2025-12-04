@@ -1,4 +1,3 @@
-import pytest
 from click.testing import CliRunner
 
 import wily.__main__ as main
@@ -6,7 +5,6 @@ import wily.__main__ as main
 _path = "src/test.ipynb"
 
 
-@pytest.mark.skip(reason="ipynb support needs Rust backend implementation")
 def test_index_with_ipynb(ipynbbuilddir):
     """
     Test that index works with a build
@@ -17,7 +15,6 @@ def test_index_with_ipynb(ipynbbuilddir):
     assert result.exit_code == 0, result.stdout
 
 
-@pytest.mark.skip(reason="ipynb support needs Rust backend implementation")
 def test_index_and_message_with_ipynb(ipynbbuilddir):
     """
     Test that index works with a build
@@ -31,7 +28,6 @@ def test_index_and_message_with_ipynb(ipynbbuilddir):
     assert result.exit_code == 0, result.stdout
 
 
-@pytest.mark.skip(reason="Not implemented")
 def test_report(ipynbbuilddir):
     """
     Test that report works with a build and a specific metric

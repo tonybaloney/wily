@@ -131,7 +131,7 @@ def analyze_revision_with_index(
     ]
 
     # if none of the targets are Python source files, skip analysis
-    if not any(target.endswith(".py") for target in targets):
+    if not any(target.endswith((".py", ".ipynb")) for target in targets):
         logger.debug("Skipping analysis for revision %s, no Python files changed.", revision.key)
         return 0
 
