@@ -17,11 +17,11 @@ use crate::raw;
 /// e.g., "src/foo/bar.py" -> ["", "src", "src/foo"]
 fn get_parent_paths(file_path: &str) -> Vec<String> {
     let mut paths = vec!["".to_string()]; // Root is always included
-    
+
     if let Some(last_slash) = file_path.rfind('/') {
         let dir_part = &file_path[..last_slash];
         let mut current = String::new();
-        
+
         for component in dir_part.split('/') {
             if !component.is_empty() {
                 if current.is_empty() {
@@ -33,7 +33,7 @@ fn get_parent_paths(file_path: &str) -> Vec<String> {
             }
         }
     }
-    
+
     paths
 }
 
@@ -109,7 +109,9 @@ impl<'py> IntoPyObject<'py> for CyclomaticResult {
             detailed.set_item(name, cls.into_pyobject(py)?)?;
         }
 
-        let total = CyclomaticTotal { complexity: self.total_complexity };
+        let total = CyclomaticTotal {
+            complexity: self.total_complexity,
+        };
         dict.set_item("detailed", detailed)?;
         dict.set_item("total", total.into_pyobject(py)?)?;
         Ok(dict)
@@ -221,7 +223,7 @@ struct AggregatedCyclomaticResult {
 
 #[derive(Debug, Clone, IntoPyObject)]
 struct AggregatedCyclomaticTotal {
-    complexity: f64,  // Mean of complexities
+    complexity: f64, // Mean of complexities
 }
 
 /// Aggregated halstead metrics for a directory
@@ -253,8 +255,8 @@ struct AggregatedMaintainabilityResult {
 
 #[derive(Debug, Clone, IntoPyObject)]
 struct AggregatedMaintainabilityTotal {
-    mi: f64,   // Mean of MI values
-    rank: String,  // Mode of ranks
+    mi: f64,      // Mean of MI values
+    rank: String, // Mode of ranks
 }
 
 /// Aggregate results for a directory
@@ -272,44 +274,48 @@ fn compute_aggregates(
     directories: &HashSet<String>,
 ) -> HashMap<String, DirectoryAggregate> {
     let mut aggregates = HashMap::new();
-    
+
     for dir in directories {
         // Collect all file paths that belong to this directory
-        let matching_files: Vec<&String> = file_results.keys()
+        let matching_files: Vec<&String> = file_results
+            .keys()
             .filter(|path| {
                 if dir.is_empty() {
                     true // Root matches all
                 } else {
-                    path.starts_with(dir) && 
-                    (path.len() == dir.len() || path.chars().nth(dir.len()) == Some('/'))
+                    path.starts_with(dir)
+                        && (path.len() == dir.len() || path.chars().nth(dir.len()) == Some('/'))
                 }
             })
             .collect();
-        
+
         if matching_files.is_empty() {
             continue;
         }
-        
+
         // Aggregate raw metrics (all use sum)
         let raw_agg = aggregate_raw_metrics(file_results, &matching_files);
-        
+
         // Aggregate cyclomatic (uses mean)
         let cyclomatic_agg = aggregate_cyclomatic_metrics(file_results, &matching_files);
-        
+
         // Aggregate halstead (all use sum)
         let halstead_agg = aggregate_halstead_metrics(file_results, &matching_files);
-        
+
         // Aggregate maintainability (mi uses mean, rank uses mode)
         let maintainability_agg = aggregate_maintainability_metrics(file_results, &matching_files);
-        
-        aggregates.insert(dir.clone(), DirectoryAggregate {
-            raw: raw_agg,
-            cyclomatic: cyclomatic_agg,
-            halstead: halstead_agg,
-            maintainability: maintainability_agg,
-        });
+
+        aggregates.insert(
+            dir.clone(),
+            DirectoryAggregate {
+                raw: raw_agg,
+                cyclomatic: cyclomatic_agg,
+                halstead: halstead_agg,
+                maintainability: maintainability_agg,
+            },
+        );
     }
-    
+
     aggregates
 }
 
@@ -319,7 +325,7 @@ fn aggregate_raw_metrics(
 ) -> Option<AggregatedRawResult> {
     let mut totals: HashMap<String, i64> = HashMap::new();
     let mut has_data = false;
-    
+
     for path in matching_files {
         if let Some(FileAnalysisResult::Success { raw: Some(raw), .. }) = file_results.get(*path) {
             has_data = true;
@@ -328,7 +334,7 @@ fn aggregate_raw_metrics(
             }
         }
     }
-    
+
     if has_data {
         Some(AggregatedRawResult { total: totals })
     } else {
@@ -341,13 +347,17 @@ fn aggregate_cyclomatic_metrics(
     matching_files: &[&String],
 ) -> Option<AggregatedCyclomaticResult> {
     let mut complexities: Vec<i64> = Vec::new();
-    
+
     for path in matching_files {
-        if let Some(FileAnalysisResult::Success { cyclomatic: Some(cc), .. }) = file_results.get(*path) {
+        if let Some(FileAnalysisResult::Success {
+            cyclomatic: Some(cc),
+            ..
+        }) = file_results.get(*path)
+        {
             complexities.push(cc.total_complexity);
         }
     }
-    
+
     if complexities.is_empty() {
         None
     } else {
@@ -372,9 +382,13 @@ fn aggregate_halstead_metrics(
     let mut difficulty_sum: f64 = 0.0;
     let mut effort_sum: f64 = 0.0;
     let mut has_data = false;
-    
+
     for path in matching_files {
-        if let Some(FileAnalysisResult::Success { halstead: Some(hal), .. }) = file_results.get(*path) {
+        if let Some(FileAnalysisResult::Success {
+            halstead: Some(hal),
+            ..
+        }) = file_results.get(*path)
+        {
             has_data = true;
             h1_sum += hal.total.h1 as i64;
             h2_sum += hal.total.h2 as i64;
@@ -387,7 +401,7 @@ fn aggregate_halstead_metrics(
             effort_sum += hal.total.effort;
         }
     }
-    
+
     if has_data {
         Some(AggregatedHalsteadResult {
             total: AggregatedHalsteadTotal {
@@ -413,14 +427,18 @@ fn aggregate_maintainability_metrics(
 ) -> Option<AggregatedMaintainabilityResult> {
     let mut mi_values: Vec<f64> = Vec::new();
     let mut rank_counts: HashMap<String, usize> = HashMap::new();
-    
+
     for path in matching_files {
-        if let Some(FileAnalysisResult::Success { maintainability: Some(mi), .. }) = file_results.get(*path) {
+        if let Some(FileAnalysisResult::Success {
+            maintainability: Some(mi),
+            ..
+        }) = file_results.get(*path)
+        {
             mi_values.push(mi.total.mi);
             *rank_counts.entry(mi.total.rank.clone()).or_insert(0) += 1;
         }
     }
-    
+
     if mi_values.is_empty() {
         None
     } else {
@@ -431,7 +449,7 @@ fn aggregate_maintainability_metrics(
             .max_by_key(|(_, count)| *count)
             .map(|(rank, _)| rank)
             .unwrap_or_else(|| "A".to_string());
-        
+
         Some(AggregatedMaintainabilityResult {
             total: AggregatedMaintainabilityTotal {
                 mi: mean_mi,
@@ -687,11 +705,11 @@ pub fn analyze_files_parallel<'py>(
     let include_maintainability = operators.iter().any(|o| o == "maintainability");
 
     // Phase 1: Parallel file analysis (GIL released)
-    let (analysis_results, directories): (HashMap<String, FileAnalysisResult>, HashSet<String>) = 
+    let (analysis_results, directories): (HashMap<String, FileAnalysisResult>, HashSet<String>) =
         py.detach(|| {
             // Collect all directory paths first
             let dirs = collect_all_directories(&paths);
-            
+
             // Analyze files in parallel
             let results: HashMap<String, FileAnalysisResult> = paths
                 .par_iter()
@@ -720,7 +738,7 @@ pub fn analyze_files_parallel<'py>(
                     (path.clone(), result)
                 })
                 .collect();
-            
+
             (results, dirs)
         });
 

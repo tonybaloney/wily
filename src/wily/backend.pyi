@@ -1,5 +1,5 @@
-from typing import Any
 from types import TracebackType
+from typing import Any
 
 def harvest_maintainability_metrics(sources: list[tuple[str, str]]) -> list[tuple[str, dict[str, Any]]]:
     """Harvest maintainability metrics from source files using Rust backend."""
@@ -35,7 +35,8 @@ def get_metrics_schema() -> list[tuple[str, str]]:
     ...
 
 class WilyIndex:
-    """Python context manager for efficient multi-revision parquet writes.
+    """
+    Python context manager for efficient multi-revision parquet writes.
 
     Usage:
         with WilyIndex(output_path, operators) as index:
@@ -58,32 +59,38 @@ class WilyIndex:
 
     def __init__(self, output_path: str, operators: list[str]) -> None: ...
 
-    def __enter__(self) -> "WilyIndex": ...
+    def __enter__(self) -> WilyIndex: ...
 
     def __getitem__(self, path: str) -> list[dict[str, Any]]:
-        """Get all rows matching the given path.
+        """
+        Get all rows matching the given path.
 
         Args:
             path: The file path to look up
 
         Returns:
             List of row dicts matching the path
+
         """
         ...
 
-    def __iter__(self) -> "WilyIndexIterator":
-        """Iterate over all rows in the index.
+    def __iter__(self) -> WilyIndexIterator:
+        """
+        Iterate over all rows in the index.
 
         Returns:
             Iterator yielding row dicts
+
         """
         ...
 
     def __len__(self) -> int:
-        """Get the total number of rows in the index.
+        """
+        Get the total number of rows in the index.
 
         Returns:
             Total count of loaded + new rows
+
         """
         ...
 
@@ -103,7 +110,8 @@ class WilyIndex:
         revision_author: str | None,
         revision_message: str | None,
     ) -> int:
-        """Analyze a revision and accumulate results.
+        """
+        Analyze a revision and accumulate results.
 
         Args:
             paths: List of absolute file paths to analyze
@@ -115,6 +123,7 @@ class WilyIndex:
 
         Returns:
             Root LOC for this revision
+
         """
         ...
 
@@ -139,5 +148,5 @@ def find_revision(path: str, revision: str) -> dict[str, Any] | None:
 class WilyIndexIterator:
     """Iterator for WilyIndex rows."""
 
-    def __iter__(self) -> "WilyIndexIterator": ...
+    def __iter__(self) -> WilyIndexIterator: ...
     def __next__(self) -> dict[str, Any]: ...

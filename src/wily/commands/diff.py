@@ -6,8 +6,8 @@ Compares metrics between uncommitted files and indexed files.
 
 import os
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from rich.text import Text
 

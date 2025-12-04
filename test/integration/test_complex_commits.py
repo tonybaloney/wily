@@ -69,31 +69,31 @@ def test_skip_files(tmpdir, cache_path):
     # Check that the cache was created
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    
+
     # Check that the parquet file was created
     parquet_path = cache_path / "git" / "metrics.parquet"
     assert parquet_path.exists()
-    
+
     # Get revision keys
     rev1_key = commit.name_rev.split(" ")[0]
     rev2_key = commit2.name_rev.split(" ")[0]
     rev3_key = commit3.name_rev.split(" ")[0]
-    
+
     # Read the parquet file using WilyIndex
     with WilyIndex(str(parquet_path), ["raw", "cyclomatic", "halstead", "maintainability"]) as idx:
         # Filter to only file entries (not directories, root, functions, etc.)
         file_rows = [row for row in idx if row["path_type"] == "file"]
-        
+
         # Look at the first commit - both files were added
         rev1_files = [row["path"] for row in file_rows if row["revision"] == rev1_key]
         assert _path1 in rev1_files, "First commit should have test1.py (was added)"
         assert _path2 in rev1_files, "First commit should have test2.py (was added)"
-        
+
         # Look at the second commit - only test2.py was modified
         rev2_files = [row["path"] for row in file_rows if row["revision"] == rev2_key]
         assert _path1 not in rev2_files, "Second commit should NOT have test1.py (unchanged)"
         assert _path2 in rev2_files, "Second commit should have test2.py (was modified)"
-        
+
         # Look at the third commit - only test1.py was modified
         rev3_files = [row["path"] for row in file_rows if row["revision"] == rev3_key]
         assert _path1 in rev3_files, "Third commit should have test1.py (was modified)"
@@ -145,16 +145,16 @@ def test_metric_entries(tmpdir, cache_path):
     cache_path = pathlib.Path(cache_path)
     parquet_path = cache_path / "git" / "metrics.parquet"
     assert parquet_path.exists()
-    
+
     # Get the revision key
     rev_key = commit.name_rev.split(" ")[0]
-    
+
     with WilyIndex(str(parquet_path), ["raw", "cyclomatic", "halstead", "maintainability"]) as idx:
         # Check the file entry exists using __getitem__
         file_rows = [row for row in idx[_path1] if row["path_type"] == "file"]
         assert len(file_rows) == 1, f"Expected one file entry for {_path1}"
         file_metrics = file_rows[0]
-        
+
         # Check raw metrics on file (file-level totals)
         assert file_metrics["loc"] == 14
         assert file_metrics["lloc"] == 13
@@ -163,14 +163,14 @@ def test_metric_entries(tmpdir, cache_path):
         assert file_metrics["multi"] == 0
         assert file_metrics["blank"] == 1
         assert file_metrics["single_comments"] == 0
-        
+
         # Check maintainability on file
         assert abs(file_metrics["mi"] - 62.3299092923013) < 0.0001
         assert file_metrics["rank"] == "A"
-        
+
         # Check complexity on file (total)
         assert file_metrics["complexity"] == 11
-        
+
         # Check function entries using path query
         func_path = f"{_path1}:function1"
         func_rows = idx[func_path]
@@ -182,7 +182,7 @@ def test_metric_entries(tmpdir, cache_path):
         assert func_metrics["endline"] == 7
         assert func_metrics["is_method"] is False
         assert func_metrics["classname"] is None
-        
+
         # Check class entries
         class_path = f"{_path1}:Class1"
         class_rows = idx[class_path]
@@ -193,7 +193,7 @@ def test_metric_entries(tmpdir, cache_path):
         assert class_metrics["real_complexity"] == 5
         assert class_metrics["lineno"] == 8
         assert class_metrics["endline"] == 14
-        
+
         # Check method entries
         method_path = f"{_path1}:Class1.method"
         method_rows = idx[method_path]
@@ -205,7 +205,7 @@ def test_metric_entries(tmpdir, cache_path):
         assert method_metrics["endline"] == 14
         assert method_metrics["is_method"] is True
         assert method_metrics["classname"] == "Class1"
-        
+
         # Check Halstead metrics on file (aggregated totals)
         assert file_metrics["h1"] == 2
         assert file_metrics["h2"] == 9

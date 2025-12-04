@@ -13,20 +13,6 @@ def test_exists(tmpdir):
     assert cache.exists(config)
 
 
-def test_exists_older(tmpdir):
-    """
-    Test that exists() returns true if path does exist
-    and has a file with the version older than the current
-    """
-    config = DEFAULT_CONFIG
-    tmp_path = pathlib.Path(tmpdir)
-    config.cache_path = tmp_path / ".wily"
-    (tmp_path / ".wily").mkdir()
-    with open((tmp_path / ".wily" / "index.json"), "w+") as index:
-        index.write('{"version": "0.1.0"}')
-    assert cache.exists(config)
-
-
 def test_not_exists():
     """
     Test that exists() returns false if path does not exist

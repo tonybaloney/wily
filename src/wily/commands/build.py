@@ -26,9 +26,10 @@ from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, Revision
 from wily.archivers.git import InvalidGitRepositoryError
 from wily.backend import WilyIndex, analyze_files_parallel, iter_filenames
+from wily.cache import create as create_cache
 from wily.config.types import WilyConfig
 from wily.operators import Operator
-from wily.cache import create as create_cache
+
 
 class SpeedColumn(ProgressColumn):
     """Renders completed count/total and speed, e.g. '  10/1000 (5.00/sec)'."""

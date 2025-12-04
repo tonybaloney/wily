@@ -15,6 +15,23 @@ use pyo3::types::{PyDict, PyList};
 use std::fs::File;
 use std::sync::{Arc, Mutex};
 
+// Type aliases for complex Halstead metric tuples to satisfy clippy
+type HalsteadTotals = (u32, u32, u32, u32, u32, u32, f64, f64, f64);
+type HalsteadFunctionMetrics = (
+    String,
+    u32,
+    u32,
+    u32,
+    u32,
+    u32,
+    u32,
+    f64,
+    f64,
+    f64,
+    u32,
+    u32,
+);
+
 /// Get all parent directory paths from a file path (Unix-style).
 /// e.g., "src/foo/bar.py" -> ["", "src", "src/foo"]
 fn get_parent_paths(file_path: &str) -> Vec<String> {
@@ -503,9 +520,31 @@ impl MetricsBuilder {
         rank: Option<&str>,
     ) -> MetricRow {
         self.add_aggregate_row(
-            revision, revision_date, revision_author, revision_message, path, path_type,
-            loc, sloc, lloc, comments, multi, blank, single_comments, complexity,
-            h1, h2, n1, n2, vocabulary, length, volume, difficulty, effort, mi, rank,
+            revision,
+            revision_date,
+            revision_author,
+            revision_message,
+            path,
+            path_type,
+            loc,
+            sloc,
+            lloc,
+            comments,
+            multi,
+            blank,
+            single_comments,
+            complexity,
+            h1,
+            h2,
+            n1,
+            n2,
+            vocabulary,
+            length,
+            volume,
+            difficulty,
+            effort,
+            mi,
+            rank,
         );
         MetricRow {
             revision: revision.to_string(),
@@ -514,11 +553,30 @@ impl MetricsBuilder {
             revision_message: revision_message.map(|s| s.to_string()),
             path: path.to_string(),
             path_type: path_type.to_string(),
-            loc, sloc, lloc, comments, multi, blank, single_comments,
-            complexity, real_complexity: None,
-            h1, h2, n1, n2, vocabulary, length, volume, difficulty, effort,
-            mi, rank: rank.map(|s| s.to_string()),
-            lineno: None, endline: None, is_method: None, classname: None,
+            loc,
+            sloc,
+            lloc,
+            comments,
+            multi,
+            blank,
+            single_comments,
+            complexity,
+            real_complexity: None,
+            h1,
+            h2,
+            n1,
+            n2,
+            vocabulary,
+            length,
+            volume,
+            difficulty,
+            effort,
+            mi,
+            rank: rank.map(|s| s.to_string()),
+            lineno: None,
+            endline: None,
+            is_method: None,
+            classname: None,
         }
     }
 
@@ -547,9 +605,25 @@ impl MetricsBuilder {
         effort: Option<f64>,
     ) -> MetricRow {
         self.add_function_row(
-            revision, revision_date, revision_author, revision_message, path,
-            complexity, lineno, endline, is_method, classname,
-            h1, h2, n1, n2, vocabulary, length, volume, difficulty, effort,
+            revision,
+            revision_date,
+            revision_author,
+            revision_message,
+            path,
+            complexity,
+            lineno,
+            endline,
+            is_method,
+            classname,
+            h1,
+            h2,
+            n1,
+            n2,
+            vocabulary,
+            length,
+            volume,
+            difficulty,
+            effort,
         );
         MetricRow {
             revision: revision.to_string(),
@@ -558,7 +632,13 @@ impl MetricsBuilder {
             revision_message: revision_message.map(|s| s.to_string()),
             path: path.to_string(),
             path_type: "function".to_string(),
-            loc: None, sloc: None, lloc: None, comments: None, multi: None, blank: None, single_comments: None,
+            loc: None,
+            sloc: None,
+            lloc: None,
+            comments: None,
+            multi: None,
+            blank: None,
+            single_comments: None,
             complexity: Some(complexity as f64),
             real_complexity: None,
             h1: h1.map(|v| v as i64),
@@ -567,9 +647,13 @@ impl MetricsBuilder {
             n2: n2.map(|v| v as i64),
             vocabulary: vocabulary.map(|v| v as i64),
             length: length.map(|v| v as i64),
-            volume, difficulty, effort,
-            mi: None, rank: None,
-            lineno: Some(lineno), endline: Some(endline),
+            volume,
+            difficulty,
+            effort,
+            mi: None,
+            rank: None,
+            lineno: Some(lineno),
+            endline: Some(endline),
             is_method: Some(is_method),
             classname: classname.map(|s| s.to_string()),
         }
@@ -590,8 +674,15 @@ impl MetricsBuilder {
         endline: u32,
     ) -> MetricRow {
         self.add_class_row(
-            revision, revision_date, revision_author, revision_message, path,
-            complexity, real_complexity, lineno, endline,
+            revision,
+            revision_date,
+            revision_author,
+            revision_message,
+            path,
+            complexity,
+            real_complexity,
+            lineno,
+            endline,
         );
         MetricRow {
             revision: revision.to_string(),
@@ -600,14 +691,30 @@ impl MetricsBuilder {
             revision_message: revision_message.map(|s| s.to_string()),
             path: path.to_string(),
             path_type: "class".to_string(),
-            loc: None, sloc: None, lloc: None, comments: None, multi: None, blank: None, single_comments: None,
+            loc: None,
+            sloc: None,
+            lloc: None,
+            comments: None,
+            multi: None,
+            blank: None,
+            single_comments: None,
             complexity: Some(complexity as f64),
             real_complexity: Some(real_complexity),
-            h1: None, h2: None, n1: None, n2: None, vocabulary: None, length: None,
-            volume: None, difficulty: None, effort: None,
-            mi: None, rank: None,
-            lineno: Some(lineno), endline: Some(endline),
-            is_method: None, classname: None,
+            h1: None,
+            h2: None,
+            n1: None,
+            n2: None,
+            vocabulary: None,
+            length: None,
+            volume: None,
+            difficulty: None,
+            effort: None,
+            mi: None,
+            rank: None,
+            lineno: Some(lineno),
+            endline: Some(endline),
+            is_method: None,
+            classname: None,
         }
     }
 }
@@ -661,33 +768,77 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
         let batch = batch_result.map_err(|e| format!("Failed to read batch: {}", e))?;
 
         let revision_col = batch.column(0).as_string::<i32>();
-        let revision_date_col = batch.column(1).as_primitive::<arrow::datatypes::Int64Type>();
+        let revision_date_col = batch
+            .column(1)
+            .as_primitive::<arrow::datatypes::Int64Type>();
         let revision_author_col = batch.column(2).as_string::<i32>();
         let revision_message_col = batch.column(3).as_string::<i32>();
         let path_col = batch.column(4).as_string::<i32>();
         let path_type_col = batch.column(5).as_string::<i32>();
-        let loc_col = batch.column(6).as_primitive::<arrow::datatypes::Int64Type>();
-        let sloc_col = batch.column(7).as_primitive::<arrow::datatypes::Int64Type>();
-        let lloc_col = batch.column(8).as_primitive::<arrow::datatypes::Int64Type>();
-        let comments_col = batch.column(9).as_primitive::<arrow::datatypes::Int64Type>();
-        let multi_col = batch.column(10).as_primitive::<arrow::datatypes::Int64Type>();
-        let blank_col = batch.column(11).as_primitive::<arrow::datatypes::Int64Type>();
-        let single_comments_col = batch.column(12).as_primitive::<arrow::datatypes::Int64Type>();
-        let complexity_col = batch.column(13).as_primitive::<arrow::datatypes::Float64Type>();
-        let real_complexity_col = batch.column(14).as_primitive::<arrow::datatypes::UInt32Type>();
-        let h1_col = batch.column(15).as_primitive::<arrow::datatypes::Int64Type>();
-        let h2_col = batch.column(16).as_primitive::<arrow::datatypes::Int64Type>();
-        let n1_col = batch.column(17).as_primitive::<arrow::datatypes::Int64Type>();
-        let n2_col = batch.column(18).as_primitive::<arrow::datatypes::Int64Type>();
-        let vocabulary_col = batch.column(19).as_primitive::<arrow::datatypes::Int64Type>();
-        let length_col = batch.column(20).as_primitive::<arrow::datatypes::Int64Type>();
-        let volume_col = batch.column(21).as_primitive::<arrow::datatypes::Float64Type>();
-        let difficulty_col = batch.column(22).as_primitive::<arrow::datatypes::Float64Type>();
-        let effort_col = batch.column(23).as_primitive::<arrow::datatypes::Float64Type>();
-        let mi_col = batch.column(24).as_primitive::<arrow::datatypes::Float64Type>();
+        let loc_col = batch
+            .column(6)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let sloc_col = batch
+            .column(7)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let lloc_col = batch
+            .column(8)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let comments_col = batch
+            .column(9)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let multi_col = batch
+            .column(10)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let blank_col = batch
+            .column(11)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let single_comments_col = batch
+            .column(12)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let complexity_col = batch
+            .column(13)
+            .as_primitive::<arrow::datatypes::Float64Type>();
+        let real_complexity_col = batch
+            .column(14)
+            .as_primitive::<arrow::datatypes::UInt32Type>();
+        let h1_col = batch
+            .column(15)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let h2_col = batch
+            .column(16)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let n1_col = batch
+            .column(17)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let n2_col = batch
+            .column(18)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let vocabulary_col = batch
+            .column(19)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let length_col = batch
+            .column(20)
+            .as_primitive::<arrow::datatypes::Int64Type>();
+        let volume_col = batch
+            .column(21)
+            .as_primitive::<arrow::datatypes::Float64Type>();
+        let difficulty_col = batch
+            .column(22)
+            .as_primitive::<arrow::datatypes::Float64Type>();
+        let effort_col = batch
+            .column(23)
+            .as_primitive::<arrow::datatypes::Float64Type>();
+        let mi_col = batch
+            .column(24)
+            .as_primitive::<arrow::datatypes::Float64Type>();
         let rank_col = batch.column(25).as_string::<i32>();
-        let lineno_col = batch.column(26).as_primitive::<arrow::datatypes::UInt32Type>();
-        let endline_col = batch.column(27).as_primitive::<arrow::datatypes::UInt32Type>();
+        let lineno_col = batch
+            .column(26)
+            .as_primitive::<arrow::datatypes::UInt32Type>();
+        let endline_col = batch
+            .column(27)
+            .as_primitive::<arrow::datatypes::UInt32Type>();
         let is_method_col = batch
             .column(28)
             .as_any()
@@ -711,30 +862,126 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
                 },
                 path: path_col.value(i).to_string(),
                 path_type: path_type_col.value(i).to_string(),
-                loc: if loc_col.is_null(i) { None } else { Some(loc_col.value(i)) },
-                sloc: if sloc_col.is_null(i) { None } else { Some(sloc_col.value(i)) },
-                lloc: if lloc_col.is_null(i) { None } else { Some(lloc_col.value(i)) },
-                comments: if comments_col.is_null(i) { None } else { Some(comments_col.value(i)) },
-                multi: if multi_col.is_null(i) { None } else { Some(multi_col.value(i)) },
-                blank: if blank_col.is_null(i) { None } else { Some(blank_col.value(i)) },
-                single_comments: if single_comments_col.is_null(i) { None } else { Some(single_comments_col.value(i)) },
-                complexity: if complexity_col.is_null(i) { None } else { Some(complexity_col.value(i)) },
-                real_complexity: if real_complexity_col.is_null(i) { None } else { Some(real_complexity_col.value(i)) },
-                h1: if h1_col.is_null(i) { None } else { Some(h1_col.value(i)) },
-                h2: if h2_col.is_null(i) { None } else { Some(h2_col.value(i)) },
-                n1: if n1_col.is_null(i) { None } else { Some(n1_col.value(i)) },
-                n2: if n2_col.is_null(i) { None } else { Some(n2_col.value(i)) },
-                vocabulary: if vocabulary_col.is_null(i) { None } else { Some(vocabulary_col.value(i)) },
-                length: if length_col.is_null(i) { None } else { Some(length_col.value(i)) },
-                volume: if volume_col.is_null(i) { None } else { Some(volume_col.value(i)) },
-                difficulty: if difficulty_col.is_null(i) { None } else { Some(difficulty_col.value(i)) },
-                effort: if effort_col.is_null(i) { None } else { Some(effort_col.value(i)) },
-                mi: if mi_col.is_null(i) { None } else { Some(mi_col.value(i)) },
-                rank: if rank_col.is_null(i) { None } else { Some(rank_col.value(i).to_string()) },
-                lineno: if lineno_col.is_null(i) { None } else { Some(lineno_col.value(i)) },
-                endline: if endline_col.is_null(i) { None } else { Some(endline_col.value(i)) },
-                is_method: if is_method_col.is_null(i) { None } else { Some(is_method_col.value(i)) },
-                classname: if classname_col.is_null(i) { None } else { Some(classname_col.value(i).to_string()) },
+                loc: if loc_col.is_null(i) {
+                    None
+                } else {
+                    Some(loc_col.value(i))
+                },
+                sloc: if sloc_col.is_null(i) {
+                    None
+                } else {
+                    Some(sloc_col.value(i))
+                },
+                lloc: if lloc_col.is_null(i) {
+                    None
+                } else {
+                    Some(lloc_col.value(i))
+                },
+                comments: if comments_col.is_null(i) {
+                    None
+                } else {
+                    Some(comments_col.value(i))
+                },
+                multi: if multi_col.is_null(i) {
+                    None
+                } else {
+                    Some(multi_col.value(i))
+                },
+                blank: if blank_col.is_null(i) {
+                    None
+                } else {
+                    Some(blank_col.value(i))
+                },
+                single_comments: if single_comments_col.is_null(i) {
+                    None
+                } else {
+                    Some(single_comments_col.value(i))
+                },
+                complexity: if complexity_col.is_null(i) {
+                    None
+                } else {
+                    Some(complexity_col.value(i))
+                },
+                real_complexity: if real_complexity_col.is_null(i) {
+                    None
+                } else {
+                    Some(real_complexity_col.value(i))
+                },
+                h1: if h1_col.is_null(i) {
+                    None
+                } else {
+                    Some(h1_col.value(i))
+                },
+                h2: if h2_col.is_null(i) {
+                    None
+                } else {
+                    Some(h2_col.value(i))
+                },
+                n1: if n1_col.is_null(i) {
+                    None
+                } else {
+                    Some(n1_col.value(i))
+                },
+                n2: if n2_col.is_null(i) {
+                    None
+                } else {
+                    Some(n2_col.value(i))
+                },
+                vocabulary: if vocabulary_col.is_null(i) {
+                    None
+                } else {
+                    Some(vocabulary_col.value(i))
+                },
+                length: if length_col.is_null(i) {
+                    None
+                } else {
+                    Some(length_col.value(i))
+                },
+                volume: if volume_col.is_null(i) {
+                    None
+                } else {
+                    Some(volume_col.value(i))
+                },
+                difficulty: if difficulty_col.is_null(i) {
+                    None
+                } else {
+                    Some(difficulty_col.value(i))
+                },
+                effort: if effort_col.is_null(i) {
+                    None
+                } else {
+                    Some(effort_col.value(i))
+                },
+                mi: if mi_col.is_null(i) {
+                    None
+                } else {
+                    Some(mi_col.value(i))
+                },
+                rank: if rank_col.is_null(i) {
+                    None
+                } else {
+                    Some(rank_col.value(i).to_string())
+                },
+                lineno: if lineno_col.is_null(i) {
+                    None
+                } else {
+                    Some(lineno_col.value(i))
+                },
+                endline: if endline_col.is_null(i) {
+                    None
+                } else {
+                    Some(endline_col.value(i))
+                },
+                is_method: if is_method_col.is_null(i) {
+                    None
+                } else {
+                    Some(is_method_col.value(i))
+                },
+                classname: if classname_col.is_null(i) {
+                    None
+                } else {
+                    Some(classname_col.value(i).to_string())
+                },
             };
             rows.push(row);
         }
@@ -789,7 +1036,7 @@ impl WilyIndex {
             })?;
             if !state.loaded {
                 state.loaded_rows = load_rows_from_parquet(&slf.output_path)
-                    .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e))?;
+                    .map_err(PyErr::new::<pyo3::exceptions::PyIOError, _>)?;
                 state.loaded = true;
             }
         }
@@ -807,7 +1054,7 @@ impl WilyIndex {
         let mut builder = self.builder.lock().map_err(|e| {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
         })?;
-        
+
         if builder.is_empty() {
             // Nothing to write
             return Ok(false);
@@ -815,7 +1062,7 @@ impl WilyIndex {
 
         let batch = builder.finish();
         append_parquet(&self.output_path, batch)
-            .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e))?;
+            .map_err(PyErr::new::<pyo3::exceptions::PyIOError, _>)?;
 
         Ok(false) // Don't suppress exceptions
     }
@@ -873,6 +1120,7 @@ impl WilyIndex {
     ///
     /// # Returns
     /// Root LOC for this revision
+    #[allow(clippy::too_many_arguments)]
     #[pyo3(signature = (paths, base_path, revision_key, revision_date, revision_author, revision_message))]
     fn analyze_revision(
         &self,
@@ -907,8 +1155,7 @@ impl WilyIndex {
             .map(|p| {
                 let normalized = p.replace('\\', "/");
                 if normalized.starts_with(&base_path_normalized) {
-                    let rel = normalized[base_path_normalized.len()..]
-                        .trim_start_matches('/');
+                    let rel = normalized[base_path_normalized.len()..].trim_start_matches('/');
                     rel.to_string()
                 } else {
                     normalized
@@ -929,8 +1176,8 @@ impl WilyIndex {
             cyclomatic_total: Option<i64>,
             cyclomatic_functions: Vec<(String, u32, u32, u32, bool, Option<String>)>,
             cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>,
-            halstead_total: Option<(u32, u32, u32, u32, u32, u32, f64, f64, f64)>,
-            halstead_functions: Vec<(String, u32, u32, u32, u32, u32, u32, f64, f64, f64, u32, u32)>,
+            halstead_total: Option<HalsteadTotals>,
+            halstead_functions: Vec<HalsteadFunctionMetrics>,
             mi: Option<(f64, String)>,
         }
 
@@ -948,60 +1195,61 @@ impl WilyIndex {
                         None
                     };
 
-                    let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) = if include_cyclomatic {
-                        match cyclomatic::analyze_source_full(&content) {
-                            Ok((functions, classes, line_index)) => {
-                                let mut total: i64 = 0;
-                                let funcs: Vec<_> = functions
-                                    .iter()
-                                    .map(|f| {
-                                        let lineno = ruff_source_file::LineIndex::line_index(
-                                            &line_index,
-                                            ruff_text_size::TextSize::new(f.start_offset),
-                                        );
-                                        let endline = ruff_source_file::LineIndex::line_index(
-                                            &line_index,
-                                            ruff_text_size::TextSize::new(f.end_offset),
-                                        );
-                                        total += f.complexity as i64;
-                                        (
-                                            f.fullname(),
-                                            f.complexity,
-                                            (lineno.to_zero_indexed() + 1) as u32,
-                                            (endline.to_zero_indexed() + 1) as u32,
-                                            f.is_method,
-                                            f.classname.clone(),
-                                        )
-                                    })
-                                    .collect();
-                                let cls: Vec<_> = classes
-                                    .iter()
-                                    .map(|c| {
-                                        let lineno = ruff_source_file::LineIndex::line_index(
-                                            &line_index,
-                                            ruff_text_size::TextSize::new(c.start_offset),
-                                        );
-                                        let endline = ruff_source_file::LineIndex::line_index(
-                                            &line_index,
-                                            ruff_text_size::TextSize::new(c.end_offset),
-                                        );
-                                        total += c.complexity() as i64;
-                                        (
-                                            c.name.clone(),
-                                            c.complexity(),
-                                            c.real_complexity,
-                                            (lineno.to_zero_indexed() + 1) as u32,
-                                            (endline.to_zero_indexed() + 1) as u32,
-                                        )
-                                    })
-                                    .collect();
-                                (Some(total), funcs, cls)
+                    let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) =
+                        if include_cyclomatic {
+                            match cyclomatic::analyze_source_full(&content) {
+                                Ok((functions, classes, line_index)) => {
+                                    let mut total: i64 = 0;
+                                    let funcs: Vec<_> = functions
+                                        .iter()
+                                        .map(|f| {
+                                            let lineno = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(f.start_offset),
+                                            );
+                                            let endline = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(f.end_offset),
+                                            );
+                                            total += f.complexity as i64;
+                                            (
+                                                f.fullname(),
+                                                f.complexity,
+                                                (lineno.to_zero_indexed() + 1) as u32,
+                                                (endline.to_zero_indexed() + 1) as u32,
+                                                f.is_method,
+                                                f.classname.clone(),
+                                            )
+                                        })
+                                        .collect();
+                                    let cls: Vec<_> = classes
+                                        .iter()
+                                        .map(|c| {
+                                            let lineno = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(c.start_offset),
+                                            );
+                                            let endline = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(c.end_offset),
+                                            );
+                                            total += c.complexity() as i64;
+                                            (
+                                                c.name.clone(),
+                                                c.complexity(),
+                                                c.real_complexity,
+                                                (lineno.to_zero_indexed() + 1) as u32,
+                                                (endline.to_zero_indexed() + 1) as u32,
+                                            )
+                                        })
+                                        .collect();
+                                    (Some(total), funcs, cls)
+                                }
+                                Err(_) => (Some(0), Vec::new(), Vec::new()),
                             }
-                            Err(_) => (Some(0), Vec::new(), Vec::new()),
-                        }
-                    } else {
-                        (None, Vec::new(), Vec::new())
-                    };
+                        } else {
+                            (None, Vec::new(), Vec::new())
+                        };
 
                     let (halstead_total, halstead_functions) = if include_halstead {
                         match halstead::analyze_source_full(&content) {
@@ -1084,205 +1332,207 @@ impl WilyIndex {
         let rev_message = revision_message.as_deref();
 
         // Aggregate metrics by directory
-        let mut dir_raw: std::collections::HashMap<String, std::collections::HashMap<String, i64>> = std::collections::HashMap::new();
-        let mut dir_complexity: std::collections::HashMap<String, Vec<i64>> = std::collections::HashMap::new();
-        let mut dir_halstead: std::collections::HashMap<String, Vec<(u32, u32, u32, u32, u32, u32, f64, f64, f64)>> =
+        let mut dir_raw: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
             std::collections::HashMap::new();
-        let mut dir_mi: std::collections::HashMap<String, Vec<(f64, String)>> = std::collections::HashMap::new();
+        let mut dir_complexity: std::collections::HashMap<String, Vec<i64>> =
+            std::collections::HashMap::new();
+        let mut dir_halstead: std::collections::HashMap<String, Vec<HalsteadTotals>> =
+            std::collections::HashMap::new();
+        let mut dir_mi: std::collections::HashMap<String, Vec<(f64, String)>> =
+            std::collections::HashMap::new();
 
-            // Add file rows and collect for aggregation
-            for result in &file_results {
-                // Add file-level row
-                let raw_metrics = result.raw.as_ref();
-                let row = builder.add_aggregate_row_tracked(
+        // Add file rows and collect for aggregation
+        for result in &file_results {
+            // Add file-level row
+            let raw_metrics = result.raw.as_ref();
+            let row = builder.add_aggregate_row_tracked(
+                &revision_key,
+                revision_date,
+                rev_author,
+                rev_message,
+                &result.rel_path,
+                "file",
+                raw_metrics.and_then(|r| r.get("loc").copied()),
+                raw_metrics.and_then(|r| r.get("sloc").copied()),
+                raw_metrics.and_then(|r| r.get("lloc").copied()),
+                raw_metrics.and_then(|r| r.get("comments").copied()),
+                raw_metrics.and_then(|r| r.get("multi").copied()),
+                raw_metrics.and_then(|r| r.get("blank").copied()),
+                raw_metrics.and_then(|r| r.get("single_comments").copied()),
+                result.cyclomatic_total.map(|c| c as f64),
+                result.halstead_total.map(|h| h.0 as i64),
+                result.halstead_total.map(|h| h.1 as i64),
+                result.halstead_total.map(|h| h.2 as i64),
+                result.halstead_total.map(|h| h.3 as i64),
+                result.halstead_total.map(|h| h.4 as i64),
+                result.halstead_total.map(|h| h.5 as i64),
+                result.halstead_total.map(|h| h.6),
+                result.halstead_total.map(|h| h.7),
+                result.halstead_total.map(|h| h.8),
+                result.mi.as_ref().map(|(mi, _)| *mi),
+                result.mi.as_ref().map(|(_, r)| r.as_str()),
+            );
+            state.new_rows.push(row);
+
+            // Add function rows
+            for (name, complexity, lineno, endline, is_method, classname) in
+                &result.cyclomatic_functions
+            {
+                let func_path = format!("{}:{}", result.rel_path, name);
+                // Find matching halstead data if available
+                let hal = result.halstead_functions.iter().find(|(n, ..)| n == name);
+                let row = builder.add_function_row_tracked(
                     &revision_key,
                     revision_date,
                     rev_author,
                     rev_message,
-                    &result.rel_path,
-                    "file",
-                    raw_metrics.and_then(|r| r.get("loc").copied()),
-                    raw_metrics.and_then(|r| r.get("sloc").copied()),
-                    raw_metrics.and_then(|r| r.get("lloc").copied()),
-                    raw_metrics.and_then(|r| r.get("comments").copied()),
-                    raw_metrics.and_then(|r| r.get("multi").copied()),
-                    raw_metrics.and_then(|r| r.get("blank").copied()),
-                    raw_metrics.and_then(|r| r.get("single_comments").copied()),
-                    result.cyclomatic_total.map(|c| c as f64),
-                    result.halstead_total.map(|h| h.0 as i64),
-                    result.halstead_total.map(|h| h.1 as i64),
-                    result.halstead_total.map(|h| h.2 as i64),
-                    result.halstead_total.map(|h| h.3 as i64),
-                    result.halstead_total.map(|h| h.4 as i64),
-                    result.halstead_total.map(|h| h.5 as i64),
-                    result.halstead_total.map(|h| h.6),
-                    result.halstead_total.map(|h| h.7),
-                    result.halstead_total.map(|h| h.8),
-                    result.mi.as_ref().map(|(mi, _)| *mi),
-                    result.mi.as_ref().map(|(_, r)| r.as_str()),
+                    &func_path,
+                    *complexity,
+                    *lineno,
+                    *endline,
+                    *is_method,
+                    classname.as_deref(),
+                    hal.map(|h| h.1),
+                    hal.map(|h| h.2),
+                    hal.map(|h| h.3),
+                    hal.map(|h| h.4),
+                    hal.map(|h| h.5),
+                    hal.map(|h| h.6),
+                    hal.map(|h| h.7),
+                    hal.map(|h| h.8),
+                    hal.map(|h| h.9),
                 );
                 state.new_rows.push(row);
-
-                // Add function rows
-                for (name, complexity, lineno, endline, is_method, classname) in &result.cyclomatic_functions {
-                    let func_path = format!("{}:{}", result.rel_path, name);
-                    // Find matching halstead data if available
-                    let hal = result
-                        .halstead_functions
-                        .iter()
-                        .find(|(n, ..)| n == name);
-                    let row = builder.add_function_row_tracked(
-                        &revision_key,
-                        revision_date,
-                        rev_author,
-                        rev_message,
-                        &func_path,
-                        *complexity,
-                        *lineno,
-                        *endline,
-                        *is_method,
-                        classname.as_deref(),
-                        hal.map(|h| h.1),
-                        hal.map(|h| h.2),
-                        hal.map(|h| h.3),
-                        hal.map(|h| h.4),
-                        hal.map(|h| h.5),
-                        hal.map(|h| h.6),
-                        hal.map(|h| h.7),
-                        hal.map(|h| h.8),
-                        hal.map(|h| h.9),
-                    );
-                    state.new_rows.push(row);
-                }
-
-                // Add class rows
-                for (name, complexity, real_complexity, lineno, endline) in &result.cyclomatic_classes {
-                    let class_path = format!("{}:{}", result.rel_path, name);
-                    let row = builder.add_class_row_tracked(
-                        &revision_key,
-                        revision_date,
-                        rev_author,
-                        rev_message,
-                        &class_path,
-                        *complexity,
-                        *real_complexity,
-                        *lineno,
-                        *endline,
-                    );
-                    state.new_rows.push(row);
-                }
-
-                // Collect for directory aggregation
-                for dir in get_parent_paths(&result.rel_path) {
-                    if let Some(raw) = &result.raw {
-                        let entry = dir_raw.entry(dir.clone()).or_default();
-                        for (k, v) in raw {
-                            *entry.entry(k.clone()).or_insert(0) += v;
-                        }
-                    }
-                    if let Some(cc) = result.cyclomatic_total {
-                        dir_complexity.entry(dir.clone()).or_default().push(cc);
-                    }
-                    if let Some(hal) = result.halstead_total {
-                        dir_halstead.entry(dir.clone()).or_default().push(hal);
-                    }
-                    if let Some(mi) = &result.mi {
-                        dir_mi.entry(dir.clone()).or_default().push(mi.clone());
-                    }
-                }
             }
 
-            // Add directory aggregate rows
-            for dir in &directories {
-                let path_type = if dir.is_empty() { "root" } else { "directory" };
-                let raw = dir_raw.get(dir);
-                let complexities = dir_complexity.get(dir);
-                let halsteads = dir_halstead.get(dir);
-                let mis = dir_mi.get(dir);
+            // Add class rows
+            for (name, complexity, real_complexity, lineno, endline) in &result.cyclomatic_classes {
+                let class_path = format!("{}:{}", result.rel_path, name);
+                let row = builder.add_class_row_tracked(
+                    &revision_key,
+                    revision_date,
+                    rev_author,
+                    rev_message,
+                    &class_path,
+                    *complexity,
+                    *real_complexity,
+                    *lineno,
+                    *endline,
+                );
+                state.new_rows.push(row);
+            }
 
-                // Compute aggregates
-                let mean_complexity = complexities.map(|v| {
-                    if v.is_empty() {
-                        0.0
-                    } else {
-                        v.iter().sum::<i64>() as f64 / v.len() as f64
+            // Collect for directory aggregation
+            for dir in get_parent_paths(&result.rel_path) {
+                if let Some(raw) = &result.raw {
+                    let entry = dir_raw.entry(dir.clone()).or_default();
+                    for (k, v) in raw {
+                        *entry.entry(k.clone()).or_insert(0) += v;
                     }
-                });
+                }
+                if let Some(cc) = result.cyclomatic_total {
+                    dir_complexity.entry(dir.clone()).or_default().push(cc);
+                }
+                if let Some(hal) = result.halstead_total {
+                    dir_halstead.entry(dir.clone()).or_default().push(hal);
+                }
+                if let Some(mi) = &result.mi {
+                    dir_mi.entry(dir.clone()).or_default().push(mi.clone());
+                }
+            }
+        }
 
-                let sum_halstead = halsteads.map(|v| {
-                    v.iter().fold(
-                        (0i64, 0i64, 0i64, 0i64, 0i64, 0i64, 0.0, 0.0, 0.0),
-                        |acc, h| {
-                            (
-                                acc.0 + h.0 as i64,
-                                acc.1 + h.1 as i64,
-                                acc.2 + h.2 as i64,
-                                acc.3 + h.3 as i64,
-                                acc.4 + h.4 as i64,
-                                acc.5 + h.5 as i64,
-                                acc.6 + h.6,
-                                acc.7 + h.7,
-                                acc.8 + h.8,
-                            )
-                        },
-                    )
-                });
+        // Add directory aggregate rows
+        for dir in &directories {
+            let path_type = if dir.is_empty() { "root" } else { "directory" };
+            let raw = dir_raw.get(dir);
+            let complexities = dir_complexity.get(dir);
+            let halsteads = dir_halstead.get(dir);
+            let mis = dir_mi.get(dir);
 
-                let (mean_mi, mode_rank) = if let Some(v) = mis {
-                    if v.is_empty() {
-                        (None, None)
-                    } else {
-                        let mean = v.iter().map(|(mi, _)| mi).sum::<f64>() / v.len() as f64;
-                        // Mode of ranks
-                        let mut rank_counts: HashMap<&str, usize> = HashMap::new();
-                        for (_, r) in v {
-                            *rank_counts.entry(r.as_str()).or_insert(0) += 1;
-                        }
-                        let mode = rank_counts
-                            .into_iter()
-                            .max_by_key(|(_, c)| *c)
-                            .map(|(r, _)| r.to_string());
-                        (Some(mean), mode)
-                    }
+            // Compute aggregates
+            let mean_complexity = complexities.map(|v| {
+                if v.is_empty() {
+                    0.0
                 } else {
+                    v.iter().sum::<i64>() as f64 / v.len() as f64
+                }
+            });
+
+            let sum_halstead = halsteads.map(|v| {
+                v.iter().fold(
+                    (0i64, 0i64, 0i64, 0i64, 0i64, 0i64, 0.0, 0.0, 0.0),
+                    |acc, h| {
+                        (
+                            acc.0 + h.0 as i64,
+                            acc.1 + h.1 as i64,
+                            acc.2 + h.2 as i64,
+                            acc.3 + h.3 as i64,
+                            acc.4 + h.4 as i64,
+                            acc.5 + h.5 as i64,
+                            acc.6 + h.6,
+                            acc.7 + h.7,
+                            acc.8 + h.8,
+                        )
+                    },
+                )
+            });
+
+            let (mean_mi, mode_rank) = if let Some(v) = mis {
+                if v.is_empty() {
                     (None, None)
-                };
+                } else {
+                    let mean = v.iter().map(|(mi, _)| mi).sum::<f64>() / v.len() as f64;
+                    // Mode of ranks
+                    let mut rank_counts: HashMap<&str, usize> = HashMap::new();
+                    for (_, r) in v {
+                        *rank_counts.entry(r.as_str()).or_insert(0) += 1;
+                    }
+                    let mode = rank_counts
+                        .into_iter()
+                        .max_by_key(|(_, c)| *c)
+                        .map(|(r, _)| r.to_string());
+                    (Some(mean), mode)
+                }
+            } else {
+                (None, None)
+            };
 
-                let row = builder.add_aggregate_row_tracked(
-                    &revision_key,
-                    revision_date,
-                    rev_author,
-                    rev_message,
-                    dir,
-                    path_type,
-                    raw.and_then(|r| r.get("loc").copied()),
-                    raw.and_then(|r| r.get("sloc").copied()),
-                    raw.and_then(|r| r.get("lloc").copied()),
-                    raw.and_then(|r| r.get("comments").copied()),
-                    raw.and_then(|r| r.get("multi").copied()),
-                    raw.and_then(|r| r.get("blank").copied()),
-                    raw.and_then(|r| r.get("single_comments").copied()),
-                    mean_complexity,
-                    sum_halstead.map(|h| h.0),
-                    sum_halstead.map(|h| h.1),
-                    sum_halstead.map(|h| h.2),
-                    sum_halstead.map(|h| h.3),
-                    sum_halstead.map(|h| h.4),
-                    sum_halstead.map(|h| h.5),
-                    sum_halstead.map(|h| h.6),
-                    sum_halstead.map(|h| h.7),
-                    sum_halstead.map(|h| h.8),
-                    mean_mi,
-                    mode_rank.as_deref(),
-                );
-                state.new_rows.push(row);
-            }
+            let row = builder.add_aggregate_row_tracked(
+                &revision_key,
+                revision_date,
+                rev_author,
+                rev_message,
+                dir,
+                path_type,
+                raw.and_then(|r| r.get("loc").copied()),
+                raw.and_then(|r| r.get("sloc").copied()),
+                raw.and_then(|r| r.get("lloc").copied()),
+                raw.and_then(|r| r.get("comments").copied()),
+                raw.and_then(|r| r.get("multi").copied()),
+                raw.and_then(|r| r.get("blank").copied()),
+                raw.and_then(|r| r.get("single_comments").copied()),
+                mean_complexity,
+                sum_halstead.map(|h| h.0),
+                sum_halstead.map(|h| h.1),
+                sum_halstead.map(|h| h.2),
+                sum_halstead.map(|h| h.3),
+                sum_halstead.map(|h| h.4),
+                sum_halstead.map(|h| h.5),
+                sum_halstead.map(|h| h.6),
+                sum_halstead.map(|h| h.7),
+                sum_halstead.map(|h| h.8),
+                mean_mi,
+                mode_rank.as_deref(),
+            );
+            state.new_rows.push(row);
+        }
 
-            // Get root LOC
-            let root_loc = dir_raw
-                .get("")
-                .and_then(|r| r.get("loc").copied())
-                .unwrap_or(0);
+        // Get root LOC
+        let root_loc = dir_raw
+            .get("")
+            .and_then(|r| r.get("loc").copied())
+            .unwrap_or(0);
 
         Ok(root_loc)
     }

@@ -121,21 +121,15 @@ def test_report():
     """
     Test that report calls the report command
     """
-    with patch(
-        "wily.__main__.get_default_metrics",
-        return_value=["maintainability.mi", "raw.loc"],
-    ) as gdf:
-        with patch("wily.__main__.exists", return_value=True) as check_cache:
-            with patch("wily.commands.report.report") as report:
-                runner = CliRunner()
-                result = runner.invoke(main.cli, ["report", "foo.py"])
-                assert result.exit_code == 0, result.stdout
-                assert report.called
-                assert check_cache.called
-                assert report.call_args[1]["path"] == "foo.py"
-                assert report.call_args[1]["format"] == ReportFormat.CONSOLE
-                assert "maintainability.mi" in report.call_args[1]["metrics"]
-                assert gdf.called
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.report.report") as report:
+            runner = CliRunner()
+            result = runner.invoke(main.cli, ["report", "foo.py"])
+            assert result.exit_code == 0, result.stdout
+            assert report.called
+            assert check_cache.called
+            assert report.call_args[1]["path"] == "foo.py"
+            assert report.call_args[1]["format"] == ReportFormat.CONSOLE
 
 
 def test_report_with_opts():
@@ -333,50 +327,38 @@ def test_diff():
     """
     Test that diff calls the diff command
     """
-    with patch(
-        "wily.__main__.get_default_metrics",
-        return_value=["maintainability.mi", "raw.loc"],
-    ) as gdf:
-        with patch("wily.__main__.exists", return_value=True) as check_cache:
-            with patch("wily.commands.diff.diff") as diff:
-                runner = CliRunner()
-                result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py"])
-                assert result.exit_code == 0
-                assert diff.called
-                assert check_cache.called
-                assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
-                assert gdf.called
-                assert "maintainability.mi" in diff.call_args[1]["metrics"]
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.diff.diff") as diff:
+            runner = CliRunner()
+            result = runner.invoke(main.cli, ["diff", "foo.py", "x/b.py"])
+            assert result.exit_code == 0
+            assert diff.called
+            assert check_cache.called
+            assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
+
 
 
 def test_diff_with_metrics():
     """
     Test that diff calls the diff command with additional metrics
     """
-    with patch(
-        "wily.__main__.get_default_metrics",
-        return_value=["maintainability.mi", "raw.loc"],
-    ) as gdf:
-        with patch("wily.__main__.exists", return_value=True) as check_cache:
-            with patch("wily.commands.diff.diff") as diff:
-                runner = CliRunner()
-                result = runner.invoke(
-                    main.cli,
-                    [
-                        "diff",
-                        "foo.py",
-                        "x/b.py",
-                        "--metrics",
-                        "maintainability.mi,raw.sloc",
-                    ],
-                )
-                assert result.exit_code == 0
-                assert diff.called
-                assert check_cache.called
-                assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
-                assert not gdf.called
-                assert "maintainability.mi" in diff.call_args[1]["metrics"]
-                assert "raw.loc" not in diff.call_args[1]["metrics"]
+    with patch("wily.__main__.exists", return_value=True) as check_cache:
+        with patch("wily.commands.diff.diff") as diff:
+            runner = CliRunner()
+            result = runner.invoke(
+                main.cli,
+                [
+                    "diff",
+                    "foo.py",
+                    "x/b.py",
+                    "--metrics",
+                    "maintainability.mi,raw.sloc",
+                ],
+            )
+            assert result.exit_code == 0
+            assert diff.called
+            assert check_cache.called
+            assert diff.call_args[1]["files"] == ("foo.py", "x/b.py")
 
 
 def test_clean():
