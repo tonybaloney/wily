@@ -327,7 +327,6 @@ def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, 
     default=True,
     help=_("Show function/class level metrics where available"),
 )
-@click.option("-r", "--revision", help=_("Compare against specific revision"), type=click.STRING)
 @click.option(
     "-w",
     "--wrap/--no-wrap",
@@ -340,7 +339,7 @@ def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, 
     help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
 )
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision, wrap, table_style):
+def diff(ctx, files, metrics, all, detail, wrap, table_style):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -361,7 +360,6 @@ def diff(ctx, files, metrics, all, detail, revision, wrap, table_style):
         metrics=metrics_list,
         changes_only=not all,
         detail=detail,
-        revision=revision,
         wrap=wrap,
         table_style=table_style,
     )

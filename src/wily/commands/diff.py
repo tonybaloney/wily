@@ -4,6 +4,7 @@ Diff command.
 Compares metrics between uncommitted files and indexed files.
 """
 
+from collections import defaultdict
 import os
 import sys
 from collections.abc import Iterable
@@ -12,8 +13,8 @@ from typing import Any
 
 from rich.text import Text
 
-from wily import format_date, format_revision, logger
-from wily.backend import WilyIndex, find_revision, iter_filenames
+from wily import logger
+from wily.backend import WilyIndex, iter_filenames
 from wily.cache import get_default_metrics_path
 from wily.commands.build import run_operators_parallel
 from wily.config import DEFAULT_PATH
@@ -40,7 +41,6 @@ def diff(  # noqa: C901
     metrics: list[str] | None,
     changes_only: bool = True,
     detail: bool = True,
-    revision: str | None = None,
     wrap: bool = False,
     table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
@@ -86,57 +86,17 @@ def diff(  # noqa: C901
         resolved_metrics = [(operator.name, metric) for operator, metric in ALL_METRICS if operator in operators]
 
     operator_names = [op.name for op in operators]
-
+    last_data: dict[str, dict[str, Any]] = defaultdict(dict)
     # Load the index and find target revision
     with WilyIndex(parquet_path, operator_names) as index:
-        # Find the target revision to compare against
-        if not revision:
-            # Get the most recent revision from the index
-            all_rows = list(index)
-            if not all_rows:
-                logger.error("No data in cache. Run 'wily build' first.")
-                sys.exit(1)
-            # Sort by date descending to get most recent
-            all_rows.sort(key=lambda r: r.get("revision_date", 0), reverse=True)
-            target_revision_key = all_rows[0]["revision"]
-            target_revision_author = all_rows[0].get("revision_author", "Unknown")
-            target_revision_date = all_rows[0].get("revision_date", 0)
-        else:
-            # Resolve revision using git
-            rev_data = find_revision(config.path, revision)
-            if not rev_data:
-                logger.error("Revision %s not found in git.", revision)
-                sys.exit(1)
-            target_revision_key = rev_data["key"]
-            target_revision_author = rev_data.get("author_name", "Unknown")
-            target_revision_date = rev_data.get("date", 0)
-            # Verify it's in the cache
-            all_rows = list(index)
-            if not any(r["revision"] == target_revision_key for r in all_rows):
-                logger.error(
-                    "Revision %s is not in the cache, make sure you have run wily build.",
-                    revision,
-                )
-                sys.exit(1)
-
-        logger.info(
-            "Comparing current with %s by %s on %s.",
-            format_revision(target_revision_key),
-            target_revision_author,
-            format_date(target_revision_date),
-        )
-
         # Build lookup of cached metrics for target revision: {path: {metric: value}}
-        cached_data: dict[str, dict[str, Any]] = {}
-        for row in index:
-            if row["revision"] == target_revision_key:
-                path = row["path"]
-                if path not in cached_data:
-                    cached_data[path] = {}
+        for file in files:
+            for row in index[file]:
                 # Copy all metric values
                 for key, value in row.items():
                     if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
-                        cached_data[path][key] = value
+                        last_data[file][key] = value
+                break
 
     # Run operators on current files
     data = run_operators_parallel(operators, targets, config)
@@ -163,7 +123,7 @@ def diff(  # noqa: C901
         for operator, metric in resolved_metrics:
             # Get cached value for this file/metric (parquet stores just metric name, not operator.metric)
             try:
-                current = cached_data.get(file, {}).get(metric.name, "-")
+                current = last_data.get(file, {}).get(metric.name, "-")
                 if current is None:
                     current = "-"
             except KeyError:
