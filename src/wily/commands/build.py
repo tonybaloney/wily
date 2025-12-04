@@ -115,6 +115,7 @@ def analyze_revision_with_index(
     revision: Revision,
     archiver_instance: FilesystemArchiver,
     config: WilyConfig,
+    is_seed: bool = False,
 ) -> int:
     """
     Analyze a revision and append results to the index.
@@ -123,11 +124,19 @@ def analyze_revision_with_index(
     :param revision: The revision to analyze
     :param archiver_instance: The archiver instance
     :param config: The wily configuration
+    :param is_seed: Whether this is the seed (first) revision - if True, analyze all tracked files
     :return: Total lines of code in the revision (root aggregate)
     """
+    # For seed revision, analyze ALL tracked files since everything is "new"
+    # For subsequent revisions, only analyze changed files
+    if is_seed:
+        files_to_analyze = revision.tracked_files
+    else:
+        files_to_analyze = revision.added_files + revision.modified_files
+
     targets = [
         str(pathlib.Path(config.path) / pathlib.Path(file))
-        for file in revision.added_files + revision.modified_files
+        for file in files_to_analyze
     ]
 
     # if none of the targets are Python source files, skip analysis
@@ -218,12 +227,16 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
         with Progress(*progress_columns) as progress:
             # Use WilyIndex context manager - all data written on exit
             with WilyIndex(parquet_path, operator_names) as index:
-                # Handle the seed revision
+                # Revisions are returned newest-first, so we reverse to process oldest-first
+                # The oldest revision (seed) should analyze ALL tracked files
+                revisions_oldest_first = list(reversed(revisions))
+
+                # Handle the seed revision - analyze ALL tracked files
                 seed_task = progress.add_task("Analyzing seed", total=1)
                 progress.start_task(seed_task)
 
                 seed_loc = analyze_revision_with_index(
-                    index, revisions[0], archiver_instance, config
+                    index, revisions_oldest_first[0], archiver_instance, config, is_seed=True
                 )
 
                 progress.stop_task(seed_task)
@@ -231,9 +244,9 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
                     logger.info(f"Seed revision has {seed_loc:,} lines of code.")
                 logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
 
-                # Handle the rest
+                # Handle the rest (oldest to newest)
                 task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
-                for revision in revisions[1:]:
+                for revision in revisions_oldest_first[1:]:
                     analyze_revision_with_index(
                         index, revision, archiver_instance, config
                     )

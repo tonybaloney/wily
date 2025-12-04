@@ -107,8 +107,16 @@ def report(
         # Use WilyIndex to query data for the path
         operator_names = [meta["operator"] for meta in metric_metas]
         with WilyIndex(str(parquet_path), operator_names) as index:
-            # Get all rows for this path (file-level entries only)
-            rows = [row for row in index[path] if row.get("path_type") == "file"]
+            # Check if this is a granular query (e.g., "file.py:function_name")
+            is_granular = ":" in path
+
+            # Get all rows for this path
+            # For granular paths (file.py:function), accept any path_type
+            # For file paths, filter to file-level entries only
+            if is_granular:
+                rows = list(index[path])
+            else:
+                rows = [row for row in index[path] if row.get("path_type") == "file"]
             # Sort by date (oldest first) and limit to n
             rows = sorted(rows, key=lambda r: r.get("revision_date", 0))[-(n or len(rows)):]
 
