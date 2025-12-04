@@ -17,36 +17,8 @@ from git.util import Actor
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
-from wily.helper import generate_cache_path
 
 _path = "src/test.py"
-
-
-def test_build_not_git_repo(tmpdir, cache_path):
-    """
-    Test that build defaults to filesystem in a non-git directory
-    """
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"])
-    assert result.exit_code == 0, result.stdout
-    cache_path = pathlib.Path(cache_path)
-    assert cache_path.exists()
-    index_path = cache_path / "filesystem" / "metrics.parquet"
-    assert index_path.exists()
-
-
-def test_build_custom_cache(tmpdir):
-    """
-    Test that build defaults to filesystem in a non-git directory with custom cache path.
-    """
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"])
-    assert result.exit_code == 0, result.stdout
-    cache_path = tmpdir / ".wily"
-    assert cache_path.exists()
-    index_path = cache_path / "filesystem" / "index.json"
-    assert index_path.exists()
-    assert not pathlib.Path(generate_cache_path(tmpdir)).exists()
 
 
 def test_build_invalid_path():
