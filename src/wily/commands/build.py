@@ -229,14 +229,13 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
             with WilyIndex(parquet_path, operator_names) as index:
                 # Revisions are returned newest-first, so we reverse to process oldest-first
                 # The oldest revision (seed) should analyze ALL tracked files
-                revisions_oldest_first = list(reversed(revisions))
 
                 # Handle the seed revision - analyze ALL tracked files
                 seed_task = progress.add_task("Analyzing seed", total=1)
                 progress.start_task(seed_task)
 
                 seed_loc = analyze_revision_with_index(
-                    index, revisions_oldest_first[0], archiver_instance, config, is_seed=True
+                    index, revisions[0], archiver_instance, config, is_seed=True
                 )
 
                 progress.stop_task(seed_task)
@@ -246,7 +245,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
 
                 # Handle the rest (oldest to newest)
                 task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
-                for revision in revisions_oldest_first[1:]:
+                for revision in revisions[1:]:
                     analyze_revision_with_index(
                         index, revision, archiver_instance, config
                     )

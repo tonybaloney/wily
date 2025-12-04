@@ -249,8 +249,6 @@ pub fn get_revisions<'py>(
         revisions.push(rev);
     }
 
-    revisions.reverse();
-
     let result = PyList::empty(py);
 
     for rev in revisions {
