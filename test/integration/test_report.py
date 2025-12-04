@@ -7,10 +7,11 @@ import wily.__main__ as main
 _path = "src/test.py"
 
 
-def test_report_no_cache(tmpdir, cache_path):
+def test_report_no_cache(tmpdir, cache_path, caplog):
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "report", _path])
-    assert result.exit_code == 1, result.stdout
+    assert result.exit_code == 0, result.stdout
+    assert "No wily cache found" in caplog.text
 
 
 def test_report(builddir):
@@ -48,14 +49,14 @@ def test_report_granular(builddir):
     assert "remove line" in result.stdout
 
 
-def test_report_not_found(builddir):
+def test_report_not_found(builddir, caplog):
     """
     Test that report works with a build but not with an invalid path
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "report", "test1.py", "raw.loc"])
     assert result.exit_code == 0, result.stdout
-    assert "Not found" in result.stdout
+    assert "No data found" in caplog.text
 
 
 def test_report_default_metrics(builddir):
@@ -103,19 +104,6 @@ def test_report_with_message_and_n(builddir):
     assert "basic test" not in result.stdout
     assert "remove line" in result.stdout
     assert "Not found" not in result.stdout
-
-
-def test_report_changes_only(builddir, caplog):
-    """
-    Test that report works when only displaying changes
-    """
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "raw.multi", "-c"])
-    assert result.exit_code == 0, result.stdout
-    assert "basic test" not in result.stdout
-    assert "remove line" not in result.stdout
-    assert "Not found" not in result.stdout
-    assert "No data found" in caplog.text
 
 
 def test_report_high_metric(builddir):

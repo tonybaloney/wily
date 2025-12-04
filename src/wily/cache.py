@@ -68,3 +68,12 @@ def list_archivers(config: WilyConfig) -> list[str]:
         if (root / name).exists():
             result.append(name)
     return result
+
+
+def has_archiver_index(config: WilyConfig, archiver: str) -> bool:
+    return (pathlib.Path(config.cache_path) / archiver / "metrics.parquet").exists()
+
+
+def get_archiver_index(config: WilyConfig, archiver: str) -> list:
+    # TODO: Remove this completely
+    return []
