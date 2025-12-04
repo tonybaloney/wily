@@ -34,7 +34,7 @@ from wily.operators import (
 )
 
 
-def diff(
+def diff(  # noqa: C901
     config: WilyConfig,
     files: list[str],
     metrics: list[str] | None,
@@ -57,7 +57,6 @@ def diff(
     :param table_style: Table box style
     """
     config.targets = files
-    files = list(files)
     archiver = config.archiver or DEFAULT_ARCHIVER
 
     # Resolve target paths when the cli has specified --path

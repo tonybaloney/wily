@@ -70,16 +70,7 @@ def list_archivers(config: WilyConfig) -> list[str]:
     return result
 
 
-
-def has_archiver_index(config: WilyConfig, archiver: str) -> bool:
-    return (pathlib.Path(config.cache_path) / archiver / "metrics.parquet").exists()
-
-
 def get_default_metrics_path(config: WilyConfig, archiver: str) -> str:
     """Get the default path to the metrics parquet file."""
     return str(pathlib.Path(config.cache_path) / archiver / "metrics.parquet")
 
-
-def get_archiver_index(config: WilyConfig, archiver: str) -> list:
-    # TODO: Remove this completely
-    return []
