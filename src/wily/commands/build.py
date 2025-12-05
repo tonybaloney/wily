@@ -23,9 +23,9 @@ from rich.table import Column
 from rich.text import Text
 
 from wily import logger
-from wily.archivers import Archiver, FilesystemArchiver
+from wily.archivers import Archiver, FilesystemArchiver, RevisionInfo
 from wily.archivers.git import GitArchiver, InvalidGitRepositoryError
-from wily.backend import RevisionInfo, WilyIndex, analyze_files_parallel, iter_filenames
+from wily.backend import WilyIndex, analyze_files_parallel, iter_filenames
 from wily.cache import create as create_cache
 from wily.config.types import WilyConfig
 from wily.operators import Operator
