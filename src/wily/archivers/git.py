@@ -5,7 +5,8 @@ Implementation of the archiver API for the git repository using Rust backend.
 """
 
 import logging
-from typing import Any, Collection
+from collections.abc import Collection
+from typing import Any
 
 import git.exc
 from git.repo import Repo

@@ -1,5 +1,6 @@
+from collections.abc import Collection
 from types import TracebackType
-from typing import Any, Collection
+from typing import Any
 
 from wily.archivers import RevisionInfo
 

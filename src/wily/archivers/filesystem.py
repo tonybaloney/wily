@@ -7,7 +7,8 @@ Implementation of the archiver API for a standard directory (no revisions)
 import hashlib
 import logging
 import os.path
-from typing import Any, Collection
+from collections.abc import Collection
+from typing import Any
 
 from wily.archivers import BaseArchiver, RevisionInfo
 from wily.config.types import WilyConfig

@@ -4,8 +4,9 @@ Archivers module.
 Specifies a standard interface for finding revisions (versions) of a path and switching to them.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Generic, Iterable, TypeVar, TypedDict
+from typing import Any, Generic, TypedDict, TypeVar
 
 from wily.config.types import WilyConfig
 
