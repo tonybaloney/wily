@@ -5,11 +5,25 @@ Specifies a standard interface for finding revisions (versions) of a path and sw
 """
 
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Iterable, TypeVar, TypedDict
 
 from wily.config.types import WilyConfig
 
 
+class RevisionInfo(TypedDict):
+    """Revision information structure."""
+
+    key: str
+    author_name: str | None
+    author_email: str | None
+    date: int
+    message: str
+    added_files: list[str]
+    modified_files: list[str]
+    deleted_files: list[str]
+
+
+# TODO: This is defunct. Remove.
 @dataclass
 class Revision:
     """Represents a revision in the archiver."""
@@ -35,7 +49,7 @@ class BaseArchiver:
         """Initialise the archiver."""
         ...
 
-    def revisions(self, path: str, max_revisions: int) -> list[Revision]:
+    def revisions(self, path: str, max_revisions: int) -> Iterable[RevisionInfo]:
         """
         Get the list of revisions.
 
@@ -46,7 +60,7 @@ class BaseArchiver:
         """
         ...
 
-    def checkout(self, revision: Revision, options: dict[Any, Any]) -> None:
+    def checkout(self, revision: RevisionInfo, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
@@ -59,7 +73,7 @@ class BaseArchiver:
         """Clean up any state if processing completed/failed."""
         pass
 
-    def find(self, search: str) -> Revision:
+    def find(self, search: str) -> RevisionInfo:
         """
         Search a string and return a single revision.
 

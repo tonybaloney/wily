@@ -7,9 +7,9 @@ Implementation of the archiver API for a standard directory (no revisions)
 import hashlib
 import logging
 import os.path
-from typing import Any
+from typing import Any, Collection
 
-from wily.archivers import BaseArchiver, Revision
+from wily.archivers import BaseArchiver, RevisionInfo
 from wily.config.types import WilyConfig
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class FilesystemArchiver(BaseArchiver):
         """
         self.config = config
 
-    def revisions(self, path: str, max_revisions: int) -> list[Revision]:
+    def revisions(self, path: str, max_revisions: int) -> Collection[RevisionInfo]:
         """
         Get the list of revisions.
 
@@ -37,23 +37,21 @@ class FilesystemArchiver(BaseArchiver):
         :return: A list of revisions.
         """
         mtime = os.path.getmtime(path)
-        key = hashlib.sha1(str(mtime).encode()).hexdigest()[:7]
+        key = hashlib.sha1(str(mtime).encode()).hexdigest()[:7]  # noqa: S324
         return [
-            Revision(
+            RevisionInfo(
                 key=key,
                 author_name="Local User",  # Don't want to leak local data
                 author_email="-",  # as above
                 date=int(mtime),
                 message="None",
-                tracked_files=[],
-                tracked_dirs=[],
                 added_files=[],
                 modified_files=[],
                 deleted_files=[],
             )
         ]
 
-    def checkout(self, revision: Revision, options: dict[Any, Any]) -> None:
+    def checkout(self, revision: RevisionInfo, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 

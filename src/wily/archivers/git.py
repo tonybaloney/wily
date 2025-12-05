@@ -5,12 +5,12 @@ Implementation of the archiver API for the git repository using Rust backend.
 """
 
 import logging
-from typing import Any
+from typing import Any, Collection
 
 import git.exc
 from git.repo import Repo
 
-from wily.archivers import BaseArchiver, Revision
+from wily.archivers import BaseArchiver, RevisionInfo
 from wily.backend import checkout_branch, checkout_revision, find_revision, get_revisions
 from wily.config.types import WilyConfig
 
@@ -63,7 +63,7 @@ class GitArchiver(BaseArchiver):
             self.current_branch = str(self.repo.active_branch)
         assert not self.repo.bare, "Not a Git repository"
 
-    def revisions(self, path: str, max_revisions: int) -> list[Revision]:
+    def revisions(self, path: str, max_revisions: int) -> Collection[RevisionInfo]:
         """
         Get the list of revisions using Rust backend.
 
@@ -75,41 +75,17 @@ class GitArchiver(BaseArchiver):
         if self.repo.is_dirty():
             raise DirtyGitRepositoryError(self.repo.untracked_files)
 
-        revisions = get_revisions(self.repo_path, max_revisions)
+        return get_revisions(self.repo_path, max_revisions)
 
-        result: list[Revision] = []
-        for rev_data in revisions:
-            logger.debug("For revision %s found:", rev_data["key"])
-            logger.debug("Tracked files: %s", rev_data["tracked_files"])
-            logger.debug("Tracked directories: %s", rev_data["tracked_dirs"])
-            logger.debug("Added files: %s", rev_data["added_files"])
-            logger.debug("Modified files: %s", rev_data["modified_files"])
-            logger.debug("Deleted files: %s", rev_data["deleted_files"])
 
-            rev = Revision(
-                key=rev_data["key"],
-                author_name=rev_data["author_name"],
-                author_email=rev_data["author_email"],
-                date=rev_data["date"],
-                message=rev_data["message"],
-                tracked_files=rev_data["tracked_files"],
-                tracked_dirs=rev_data["tracked_dirs"],
-                added_files=rev_data["added_files"],
-                modified_files=rev_data["modified_files"],
-                deleted_files=rev_data["deleted_files"],
-            )
-            result.append(rev)
-
-        return result
-
-    def checkout(self, revision: Revision, options: dict[Any, Any]) -> None:
+    def checkout(self, revision: RevisionInfo, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
         :param revision: The revision identifier.
         :param options: Any additional options.
         """
-        checkout_revision(self.repo_path, revision.key)
+        checkout_revision(self.repo_path, revision["key"])
 
     def finish(self):
         """
@@ -124,7 +100,7 @@ class GitArchiver(BaseArchiver):
             checkout_revision(self.repo_path, self.current_branch)
         self.repo.close()
 
-    def find(self, search: str) -> Revision:
+    def find(self, search: str) -> RevisionInfo:
         """
         Search a string and return a single revision.
 
@@ -136,16 +112,4 @@ class GitArchiver(BaseArchiver):
         rev_data = find_revision(self.repo_path, search)
         if rev_data is None:
             raise ValueError(f"Revision not found: {search}")
-
-        return Revision(
-            key=rev_data["key"],
-            author_name=rev_data["author_name"],
-            author_email=rev_data["author_email"],
-            date=rev_data["date"],
-            message=rev_data["message"],
-            tracked_files=list(rev_data["tracked_files"]),
-            tracked_dirs=list(rev_data["tracked_dirs"]),
-            added_files=list(rev_data["added_files"]),
-            modified_files=list(rev_data["modified_files"]),
-            deleted_files=list(rev_data["deleted_files"]),
-        )
+        return rev_data

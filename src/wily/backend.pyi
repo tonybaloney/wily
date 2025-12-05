@@ -1,5 +1,7 @@
 from types import TracebackType
-from typing import Any
+from typing import Any, Collection
+
+from wily.archivers import RevisionInfo
 
 def harvest_maintainability_metrics(sources: list[tuple[str, str]]) -> list[tuple[str, dict[str, Any]]]:
     """Harvest maintainability metrics from source files using Rust backend."""
@@ -127,8 +129,17 @@ class WilyIndex:
         """
         ...
 
+
+class RevisionIterator(Collection[RevisionInfo]):
+    """Iterator over revisions in a Git repository."""
+
+    def __iter__(self) -> RevisionIterator: ...
+    def __next__(self) -> RevisionInfo: ...
+    def __len__(self) -> int: ...
+
+
 # Git functions
-def get_revisions(path: str, max_revisions: int) -> list[dict[str, Any]]:
+def get_revisions(path: str, max_revisions: int) -> RevisionIterator:
     """Get revisions from git repository."""
     ...
 
@@ -140,7 +151,7 @@ def checkout_branch(path: str, branch: str) -> None:
     """Checkout a branch."""
     ...
 
-def find_revision(path: str, revision: str) -> dict[str, Any] | None:
+def find_revision(path: str, revision: str) -> RevisionInfo | None:
     """Find a revision by hash prefix."""
     ...
 
@@ -150,3 +161,4 @@ class WilyIndexIterator:
 
     def __iter__(self) -> WilyIndexIterator: ...
     def __next__(self) -> dict[str, Any]: ...
+

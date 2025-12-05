@@ -8,7 +8,8 @@ use git2::{
 };
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
-use std::collections::HashSet;
+
+use crate::files::{is_python_filename};
 
 /// Information about a single revision/commit
 #[derive(Debug, Clone)]
@@ -18,14 +19,34 @@ struct RevisionInfo {
     author_email: Option<String>,
     date: i64,
     message: String,
-    tracked_files: Vec<String>,
-    tracked_dirs: Vec<String>,
     added_files: Vec<String>,
     modified_files: Vec<String>,
     deleted_files: Vec<String>,
 }
 
 impl RevisionInfo {
+    fn from_commit(
+        commit: &Commit,
+        added_files: Vec<String>,
+        modified_files: Vec<String>,
+        deleted_files: Vec<String>,
+    ) -> Self {
+        let author = commit.author();
+        let author_name = author.name().map(|s| s.to_string());
+        let author_email = author.email().map(|s| s.to_string());
+
+        RevisionInfo {
+            key: commit.id().to_string(),
+            author_name,
+            author_email,
+            date: commit.time().seconds(),
+            message: commit.message().unwrap_or("").trim().to_string(),
+            added_files,
+            modified_files,
+            deleted_files,
+        }
+    }
+
     fn to_py_dict<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
         let dict = PyDict::new(py);
         dict.set_item("key", &self.key)?;
@@ -33,12 +54,6 @@ impl RevisionInfo {
         dict.set_item("author_email", &self.author_email)?;
         dict.set_item("date", self.date)?;
         dict.set_item("message", &self.message)?;
-
-        let tracked_files_list = PyList::new(py, &self.tracked_files)?;
-        dict.set_item("tracked_files", tracked_files_list)?;
-
-        let tracked_dirs_list = PyList::new(py, &self.tracked_dirs)?;
-        dict.set_item("tracked_dirs", tracked_dirs_list)?;
 
         let added_files_list = PyList::new(py, &self.added_files)?;
         dict.set_item("added_files", added_files_list)?;
@@ -54,13 +69,9 @@ impl RevisionInfo {
 }
 
 /// Get all tracked files and directories in a commit's tree
-fn get_tracked_files_dirs(commit: &Commit) -> Result<(Vec<String>, Vec<String>), git2::Error> {
+fn get_tracked_files(commit: &Commit, include_ipynb: bool) -> Result<Vec<String>, git2::Error> {
     let tree = commit.tree()?;
     let mut files = Vec::new();
-    let mut dirs = HashSet::new();
-
-    // Always include root directory
-    dirs.insert(String::new());
 
     tree.walk(TreeWalkMode::PreOrder, |root, entry| {
         let path = if root.is_empty() {
@@ -69,51 +80,28 @@ fn get_tracked_files_dirs(commit: &Commit) -> Result<(Vec<String>, Vec<String>),
             format!("{}{}", root, entry.name().unwrap_or(""))
         };
 
-        match entry.kind() {
-            Some(ObjectType::Blob) => {
-                files.push(path.clone());
-                // Add parent directories
-                let mut parent = std::path::Path::new(&path);
-                while let Some(p) = parent.parent() {
-                    let dir = p.to_string_lossy().to_string();
-                    if !dir.is_empty() {
-                        // Use forward slashes for consistency
-                        dirs.insert(dir.replace('\\', "/"));
-                    }
-                    parent = p;
-                }
+        if let Some(ObjectType::Blob) = entry.kind() {
+            if is_python_filename(&path, include_ipynb) {
+                files.push(path);
             }
-            Some(ObjectType::Tree) => {
-                // This is a directory
-                let dir_path = if root.is_empty() {
-                    entry.name().unwrap_or("").to_string()
-                } else {
-                    format!("{}{}", root, entry.name().unwrap_or(""))
-                };
-                if !dir_path.is_empty() {
-                    dirs.insert(dir_path.replace('\\', "/"));
-                }
-            }
-            _ => {}
         }
         TreeWalkResult::Ok
     })?;
 
-    let mut dirs_vec: Vec<String> = dirs.into_iter().collect();
-    dirs_vec.sort();
-    files.sort();
+    files.sort(); // TODO: Does this need to be sorted?
 
-    Ok((files, dirs_vec))
+    Ok(files)
 }
 
 /// Result type for file changes: (added, modified, deleted)
 type FileChanges = (Vec<String>, Vec<String>, Vec<String>);
 
-/// Get added, modified, and deleted files between two commits
+/// Get added, modified, and deleted Python files between two commits
 fn whatchanged(
     repo: &Repository,
     new_commit: &Commit,
     old_commit: Option<&Commit>,
+    include_ipynb: bool,
 ) -> Result<FileChanges, git2::Error> {
     let new_tree = new_commit.tree()?;
     let old_tree = old_commit.map(|c| c.tree()).transpose()?;
@@ -126,36 +114,50 @@ fn whatchanged(
     let mut modified = Vec::new();
     let mut deleted = Vec::new();
 
+    // TODO: Try and remove this \\ / normalization logic.
+
     for delta in diff.deltas() {
         match delta.status() {
             Delta::Added => {
                 if let Some(path) = delta.new_file().path() {
-                    added.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    if is_python_filename(&path.to_string_lossy(), include_ipynb) {
+                        added.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    }
                 }
             }
             Delta::Deleted => {
                 if let Some(path) = delta.old_file().path() {
-                    deleted.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    if is_python_filename(&path.to_string_lossy(), include_ipynb) {
+                        deleted.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    }
                 }
             }
             Delta::Modified => {
                 if let Some(path) = delta.new_file().path() {
-                    modified.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    if is_python_filename(&path.to_string_lossy(), include_ipynb) {
+                        modified.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    }
                 }
             }
             Delta::Renamed => {
                 // Renamed = deleted old path + added new path
                 if let Some(old_path) = delta.old_file().path() {
-                    deleted.push(old_path.to_string_lossy().to_string().replace('\\', "/"));
+                    if is_python_filename(&old_path.to_string_lossy(), include_ipynb) {
+                        deleted.push(old_path.to_string_lossy().to_string().replace('\\', "/"));
+                    }
                 }
                 if let Some(new_path) = delta.new_file().path() {
-                    added.push(new_path.to_string_lossy().to_string().replace('\\', "/"));
+                    if is_python_filename(&new_path.to_string_lossy(), include_ipynb) {
+                        added.push(new_path.to_string_lossy().to_string().replace('\\', "/"));
+                    }
                 }
             }
             Delta::Copied => {
                 // Copied = added new path (old still exists)
                 if let Some(path) = delta.new_file().path() {
-                    added.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    if is_python_filename(&path.to_string_lossy(), include_ipynb) {
+                        added.push(path.to_string_lossy().to_string().replace('\\', "/"));
+                    }
                 }
             }
             _ => {}
@@ -178,12 +180,13 @@ fn whatchanged(
 /// # Returns
 /// An iterator of revision info
 #[pyfunction]
-#[pyo3(signature = (repo_path, max_revisions, branch=None))]
-pub fn get_revisions<'py>(
-    py: Python<'py>,
+#[pyo3(signature = (repo_path, max_revisions, branch=None, include_ipynb=true))]
+pub fn get_revisions(
+    _py: Python<'_>,
     repo_path: &str,
     max_revisions: usize,
     branch: Option<&str>,
+    include_ipynb: bool,
 ) -> PyResult<RevisionIterator> {
     let repo = Repository::open(repo_path).map_err(|e| {
         pyo3::exceptions::PyValueError::new_err(format!("Failed to open repository: {}", e))
@@ -217,10 +220,9 @@ pub fn get_revisions<'py>(
     })?;
 
     // Collect commits (oldest first, then we'll reverse for output)
-    let mut revisions: Vec<RevisionInfo> = Vec::new();
 
-    // First, collect all commits in reverse order (newest to oldest from revwalk)
-    let mut commits: Vec<Commit> = Vec::new();
+    // First, collect all commit OIDs in reverse order (newest to oldest from revwalk)
+    let mut commit_oids: Vec<git2::Oid> = Vec::new();
     for (count, oid_result) in revwalk.enumerate() {
         if count >= max_revisions {
             break;
@@ -230,20 +232,17 @@ pub fn get_revisions<'py>(
             pyo3::exceptions::PyValueError::new_err(format!("Error walking revisions: {}", e))
         })?;
 
-        let commit = repo.find_commit(oid).map_err(|e| {
-            pyo3::exceptions::PyValueError::new_err(format!("Failed to find commit: {}", e))
-        })?;
-
-        commits.push(commit);
+        commit_oids.push(oid);
     }
 
-    // Reverse to get oldest first for processing (matching Python behavior)
-    commits.reverse();
+    // Reverse to get oldest first from the iterator
+    commit_oids.reverse();
 
     let iterator = RevisionIterator {
-        commits,
+        commit_oids,
         index: 0,
         repo,
+        include_ipynb,
     };
     Ok(iterator)
 }
@@ -320,10 +319,12 @@ pub fn checkout_branch(repo_path: &str, branch: &str) -> PyResult<()> {
 /// # Returns
 /// A dictionary with revision information, or None if not found.
 #[pyfunction]
+#[pyo3(signature = (repo_path, search, include_ipynb = true))]
 pub fn find_revision<'py>(
     py: Python<'py>,
     repo_path: &str,
     search: &str,
+    include_ipynb: bool,
 ) -> PyResult<Option<Bound<'py, PyDict>>> {
     let repo = Repository::open(repo_path).map_err(|e| {
         pyo3::exceptions::PyValueError::new_err(format!("Failed to open repository: {}", e))
@@ -340,56 +341,38 @@ pub fn find_revision<'py>(
         Err(_) => return Ok(None),
     };
 
-    // Get tracked files and directories
-    let (tracked_files, tracked_dirs) = get_tracked_files_dirs(&commit).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
-    })?;
-
     // Get changes from parent
     let parent = commit.parent(0).ok();
     let (added_files, modified_files, deleted_files) = if let Some(ref p) = parent {
-        whatchanged(&repo, &commit, Some(p)).map_err(|e| {
+        whatchanged(&repo, &commit, Some(p), include_ipynb).map_err(|e| {
             pyo3::exceptions::PyValueError::new_err(format!("Failed to get changes: {}", e))
         })?
     } else {
+        // Get tracked files
+        let tracked_files = get_tracked_files(&commit, include_ipynb).map_err(|e| {
+            pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
+        })?;
         // First commit: all files are "added"
         (tracked_files.clone(), Vec::new(), Vec::new())
     };
 
-    let author = commit.author();
-    let author_name = author.name().map(|s| s.to_string());
-    let author_email = author.email().map(|s| s.to_string());
-
-    let dict = PyDict::new(py);
-    dict.set_item("key", commit.id().to_string())?;
-    dict.set_item("author_name", author_name)?;
-    dict.set_item("author_email", author_email)?;
-    dict.set_item("date", commit.time().seconds())?;
-    dict.set_item("message", commit.message().unwrap_or("").trim().to_string())?;
-
-    let tracked_files_list = PyList::new(py, &tracked_files)?;
-    dict.set_item("tracked_files", tracked_files_list)?;
-
-    let tracked_dirs_list = PyList::new(py, &tracked_dirs)?;
-    dict.set_item("tracked_dirs", tracked_dirs_list)?;
-
-    let added_files_list = PyList::new(py, &added_files)?;
-    dict.set_item("added_files", added_files_list)?;
-
-    let modified_files_list = PyList::new(py, &modified_files)?;
-    dict.set_item("modified_files", modified_files_list)?;
-
-    let deleted_files_list = PyList::new(py, &deleted_files)?;
-    dict.set_item("deleted_files", deleted_files_list)?;
+    let rev = RevisionInfo::from_commit(
+        &commit,
+        added_files,
+        modified_files,
+        deleted_files,
+    );
+    let dict = rev.to_py_dict(py)?;
 
     Ok(Some(dict))
 }
 
-#[pyclass]
+#[pyclass(unsendable)]
 pub struct RevisionIterator {
-    commits: Vec<Commit>,
+    commit_oids: Vec<git2::Oid>,
     index: usize,
     repo: Repository,
+    include_ipynb: bool,
 }
 
 #[pymethods]
@@ -398,44 +381,43 @@ impl RevisionIterator {
         slf
     }
 
-    fn __next__(&mut self, py: Python<'_>) -> PyResult<Option<Py<PyDict>>> {
-        if self.index < self.commits.len() {
-            let commit = &self.commits[self.index];
+    fn __len__(&self) -> PyResult<usize> {
+        Ok(self.commit_oids.len())
+    }
 
-            // Now process commits oldest to newest
-            let (tracked_files, tracked_dirs) = get_tracked_files_dirs(commit).map_err(|e| {
-                pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
+    fn __next__(&mut self, py: Python<'_>) -> PyResult<Option<Py<PyDict>>> {
+        if self.index < self.commit_oids.len() {
+            let oid = self.commit_oids[self.index];
+            let commit = self.repo.find_commit(oid).map_err(|e| {
+                pyo3::exceptions::PyValueError::new_err(format!("Failed to find commit: {}", e))
             })?;
 
+            // Now process commits oldest to newest
             let (added_files, modified_files, deleted_files) = if self.index == 0 {
                 // First commit: all files are "added"
+                let tracked_files = get_tracked_files(&commit, self.include_ipynb).map_err(|e| {
+                    pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
+                })?;
                 (tracked_files.clone(), Vec::new(), Vec::new())
             } else {
                 // Get diff from parent commit
-                let parent = &self.commits[self.index - 1];
-                whatchanged(&self.repo, commit, Some(parent)).map_err(|e| {
+                let parent_oid = self.commit_oids[self.index - 1];
+                let parent = self.repo.find_commit(parent_oid).map_err(|e| {
+                    pyo3::exceptions::PyValueError::new_err(format!("Failed to find parent commit: {}", e))
+                })?;
+                whatchanged(&self.repo, &commit, Some(&parent), self.include_ipynb).map_err(|e| {
                     pyo3::exceptions::PyValueError::new_err(format!("Failed to get changes: {}", e))
                 })?
             };
 
-            let author = commit.author();
-            let author_name = author.name().map(|s| s.to_string());
-            let author_email = author.email().map(|s| s.to_string());
-
-            let rev = RevisionInfo {
-                key: commit.id().to_string(),
-                author_name,
-                author_email,
-                date: commit.time().seconds(),
-                message: commit.message().unwrap_or("").trim().to_string(),
-                tracked_files,
-                tracked_dirs,
+            let rev = RevisionInfo::from_commit(
+                &commit,
                 added_files,
                 modified_files,
                 deleted_files,
-            };
+            );
             self.index += 1;
-            Ok(Some(commit.to_py_dict(py)?))
+            Ok(Some(rev.to_py_dict(py)?.into()))
         } else {
             Ok(None)
         }

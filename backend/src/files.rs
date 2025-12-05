@@ -13,13 +13,16 @@ use walkdir::WalkDir;
 /// A file is considered a Python file if:
 /// - It ends with `.py`
 /// - It ends with `.ipynb` (if include_ipynb is true)
-fn is_python_file(path: &Path, include_ipynb: bool) -> bool {
+pub fn is_python_file(path: &Path, include_ipynb: bool) -> bool {
     let filename = match path.file_name() {
         Some(name) => name.to_string_lossy(),
-        None => return false,
+        _ => return false,
     };
 
-    // Check extension
+    return is_python_filename(&filename, include_ipynb);
+}
+
+pub fn is_python_filename(filename: &str, include_ipynb: bool) -> bool {
     if filename.ends_with(".py") {
         return true;
     }
@@ -27,7 +30,6 @@ fn is_python_file(path: &Path, include_ipynb: bool) -> bool {
     if include_ipynb && filename.ends_with(".ipynb") {
         return true;
     }
-
     false
 }
 
