@@ -25,6 +25,34 @@ struct RevisionInfo {
     deleted_files: Vec<String>,
 }
 
+impl RevisionInfo {
+    fn to_py_dict<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
+        let dict = PyDict::new(py);
+        dict.set_item("key", &self.key)?;
+        dict.set_item("author_name", &self.author_name)?;
+        dict.set_item("author_email", &self.author_email)?;
+        dict.set_item("date", self.date)?;
+        dict.set_item("message", &self.message)?;
+
+        let tracked_files_list = PyList::new(py, &self.tracked_files)?;
+        dict.set_item("tracked_files", tracked_files_list)?;
+
+        let tracked_dirs_list = PyList::new(py, &self.tracked_dirs)?;
+        dict.set_item("tracked_dirs", tracked_dirs_list)?;
+
+        let added_files_list = PyList::new(py, &self.added_files)?;
+        dict.set_item("added_files", added_files_list)?;
+
+        let modified_files_list = PyList::new(py, &self.modified_files)?;
+        dict.set_item("modified_files", modified_files_list)?;
+
+        let deleted_files_list = PyList::new(py, &self.deleted_files)?;
+        dict.set_item("deleted_files", deleted_files_list)?;
+
+        Ok(dict)
+    }
+}
+
 /// Get all tracked files and directories in a commit's tree
 fn get_tracked_files_dirs(commit: &Commit) -> Result<(Vec<String>, Vec<String>), git2::Error> {
     let tree = commit.tree()?;
@@ -148,7 +176,7 @@ fn whatchanged(
 /// * `branch` - Optional branch name (uses HEAD if not provided)
 ///
 /// # Returns
-/// A list of dictionaries with revision information, newest first.
+/// An iterator of revision info
 #[pyfunction]
 #[pyo3(signature = (repo_path, max_revisions, branch=None))]
 pub fn get_revisions<'py>(
@@ -156,7 +184,7 @@ pub fn get_revisions<'py>(
     repo_path: &str,
     max_revisions: usize,
     branch: Option<&str>,
-) -> PyResult<Bound<'py, PyList>> {
+) -> PyResult<RevisionIterator> {
     let repo = Repository::open(repo_path).map_err(|e| {
         pyo3::exceptions::PyValueError::new_err(format!("Failed to open repository: {}", e))
     })?;
@@ -212,72 +240,12 @@ pub fn get_revisions<'py>(
     // Reverse to get oldest first for processing (matching Python behavior)
     commits.reverse();
 
-    // Now process commits oldest to newest
-    for (idx, commit) in commits.iter().enumerate() {
-        let (tracked_files, tracked_dirs) = get_tracked_files_dirs(commit).map_err(|e| {
-            pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
-        })?;
-
-        let (added_files, modified_files, deleted_files) = if idx == 0 {
-            // First commit: all files are "added"
-            (tracked_files.clone(), Vec::new(), Vec::new())
-        } else {
-            // Get diff from parent commit
-            let parent = &commits[idx - 1];
-            whatchanged(&repo, commit, Some(parent)).map_err(|e| {
-                pyo3::exceptions::PyValueError::new_err(format!("Failed to get changes: {}", e))
-            })?
-        };
-
-        let author = commit.author();
-        let author_name = author.name().map(|s| s.to_string());
-        let author_email = author.email().map(|s| s.to_string());
-
-        let rev = RevisionInfo {
-            key: commit.id().to_string(),
-            author_name,
-            author_email,
-            date: commit.time().seconds(),
-            message: commit.message().unwrap_or("").trim().to_string(),
-            tracked_files,
-            tracked_dirs,
-            added_files,
-            modified_files,
-            deleted_files,
-        };
-
-        revisions.push(rev);
-    }
-
-    let result = PyList::empty(py);
-
-    for rev in revisions {
-        let dict = PyDict::new(py);
-        dict.set_item("key", rev.key)?;
-        dict.set_item("author_name", rev.author_name)?;
-        dict.set_item("author_email", rev.author_email)?;
-        dict.set_item("date", rev.date)?;
-        dict.set_item("message", rev.message)?;
-
-        let tracked_files_list = PyList::new(py, &rev.tracked_files)?;
-        dict.set_item("tracked_files", tracked_files_list)?;
-
-        let tracked_dirs_list = PyList::new(py, &rev.tracked_dirs)?;
-        dict.set_item("tracked_dirs", tracked_dirs_list)?;
-
-        let added_files_list = PyList::new(py, &rev.added_files)?;
-        dict.set_item("added_files", added_files_list)?;
-
-        let modified_files_list = PyList::new(py, &rev.modified_files)?;
-        dict.set_item("modified_files", modified_files_list)?;
-
-        let deleted_files_list = PyList::new(py, &rev.deleted_files)?;
-        dict.set_item("deleted_files", deleted_files_list)?;
-
-        result.append(dict)?;
-    }
-
-    Ok(result)
+    let iterator = RevisionIterator {
+        commits,
+        index: 0,
+        repo,
+    };
+    Ok(iterator)
 }
 
 #[pyfunction]
@@ -417,11 +385,69 @@ pub fn find_revision<'py>(
     Ok(Some(dict))
 }
 
+#[pyclass]
+pub struct RevisionIterator {
+    commits: Vec<Commit>,
+    index: usize,
+    repo: Repository,
+}
+
+#[pymethods]
+impl RevisionIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(&mut self, py: Python<'_>) -> PyResult<Option<Py<PyDict>>> {
+        if self.index < self.commits.len() {
+            let commit = &self.commits[self.index];
+
+            // Now process commits oldest to newest
+            let (tracked_files, tracked_dirs) = get_tracked_files_dirs(commit).map_err(|e| {
+                pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
+            })?;
+
+            let (added_files, modified_files, deleted_files) = if self.index == 0 {
+                // First commit: all files are "added"
+                (tracked_files.clone(), Vec::new(), Vec::new())
+            } else {
+                // Get diff from parent commit
+                let parent = &self.commits[self.index - 1];
+                whatchanged(&self.repo, commit, Some(parent)).map_err(|e| {
+                    pyo3::exceptions::PyValueError::new_err(format!("Failed to get changes: {}", e))
+                })?
+            };
+
+            let author = commit.author();
+            let author_name = author.name().map(|s| s.to_string());
+            let author_email = author.email().map(|s| s.to_string());
+
+            let rev = RevisionInfo {
+                key: commit.id().to_string(),
+                author_name,
+                author_email,
+                date: commit.time().seconds(),
+                message: commit.message().unwrap_or("").trim().to_string(),
+                tracked_files,
+                tracked_dirs,
+                added_files,
+                modified_files,
+                deleted_files,
+            };
+            self.index += 1;
+            Ok(Some(commit.to_py_dict(py)?))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
 /// Register the git module with the Python module.
 pub fn register(parent_module: &Bound<'_, PyModule>) -> PyResult<()> {
     parent_module.add_function(wrap_pyfunction!(get_revisions, parent_module)?)?;
     parent_module.add_function(wrap_pyfunction!(find_revision, parent_module)?)?;
     parent_module.add_function(wrap_pyfunction!(checkout_revision, parent_module)?)?;
     parent_module.add_function(wrap_pyfunction!(checkout_branch, parent_module)?)?;
+    parent_module.add_class::<RevisionIterator>()?;
     Ok(())
 }
