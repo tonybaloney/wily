@@ -8,6 +8,7 @@ import os
 import sys
 from collections import defaultdict
 from collections.abc import Iterable
+import json as json_module
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +44,7 @@ def diff(  # noqa: C901
     detail: bool = True,
     wrap: bool = False,
     table_style: str = DEFAULT_TABLE_STYLE,
+    json: bool = False,
 ) -> None:
     """
     Show the differences in metrics for each of the files.
@@ -91,12 +93,15 @@ def diff(  # noqa: C901
     with WilyIndex(parquet_path, operator_names) as index:
         # Build lookup of cached metrics for target revision: {path: {metric: value}}
         for file in files:
-            for row in index[file]:
-                # Copy all metric values
-                for key, value in row.items():
-                    if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
-                        last_data[file][key] = value
-                break
+            path_rows = index[file]
+            if not path_rows:
+                continue
+            # Get the last entry (most recent) for this path
+            data = index[file][-1]
+            # Copy all metric values
+            for key, value in data.items():
+                if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
+                    last_data[file][key] = value
 
     # Run operators on current files
     data = run_operators_parallel(operators, targets, config)
@@ -154,7 +159,16 @@ def diff(  # noqa: C901
         else:
             logger.debug(metrics_data)
 
-    descriptions = [metric.description for _, metric in resolved_metrics]
-    headers = ("File", *descriptions)
-    if len(results) > 0:
-        print_table(headers=headers, data=results, wrap=wrap, table_style=table_style)
+    if json:
+        json_results = []
+        for row in results:
+            file_result = {"file": row[0]}
+            for i, (_, metric) in enumerate(resolved_metrics):
+                file_result[metric.name] = str(row[i + 1])
+            json_results.append(file_result)
+        print(json_module.dumps(json_results, indent=2))
+    else:
+        descriptions = [metric.description for _, metric in resolved_metrics]
+        headers = ("File", *descriptions)
+        if len(results) > 0:
+            print_table(headers=headers, data=results, wrap=wrap, table_style=table_style)

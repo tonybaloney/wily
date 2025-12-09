@@ -1077,7 +1077,7 @@ impl WilyIndex {
 
         let matching_rows: Vec<_> = state
             .all_rows()
-            .filter(|row| row.path == path || row.path.starts_with(&format!("{}:", path)))
+            .filter(|row| row.path == path)
             .collect();
 
         let list = PyList::empty(py);

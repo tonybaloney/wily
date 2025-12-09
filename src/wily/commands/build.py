@@ -177,9 +177,6 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
         logger.debug("No new revisions to index, exiting.")
         return
 
-    _op_desc = ",".join([operator.name for operator in operators])
-    logger.info("Running operators - %s", _op_desc)
-
     progress_columns = (
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),

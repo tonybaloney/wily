@@ -1,3 +1,4 @@
+import json
 import pathlib
 from textwrap import dedent
 
@@ -155,10 +156,12 @@ def test_diff_output_loc(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc"],
+        ["--path", builddir, "diff", _path, "--metrics", "raw.loc", "--json"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.stderr
+    data = json.loads(result.stdout)  # Verify valid JSON output
+    assert len(data) > 0
     assert "test.py" in result.stdout
     assert "10 -> 1" in result.stdout  # Lines of code went from 10 to 1
 
@@ -218,3 +221,7 @@ def test_diff_output_rank(builddir):
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
     assert "A -> A" in result.stdout
+
+
+# TODO: Test diff with details
+# TODO: Test diff with multiple files

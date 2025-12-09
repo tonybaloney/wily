@@ -338,8 +338,13 @@ def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, 
     default=DEFAULT_TABLE_STYLE,
     help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
 )
+@click.option(
+    "--json/--no-json",
+    default=False,
+    help=_("Output results in JSON format"),
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, wrap, table_style):
+def diff(ctx, files, metrics, all, detail, wrap, table_style, json):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -349,7 +354,7 @@ def diff(ctx, files, metrics, all, detail, wrap, table_style):
     metrics_list: list[str] | None = None
     if metrics:
         metrics_list = metrics.split(",")
-        logger.info("Using specified metrics %s", metrics)
+        logger.debug("Using specified metrics %s", metrics)
 
     from wily.commands.diff import diff  # noqa: PLC0415
 
@@ -362,6 +367,7 @@ def diff(ctx, files, metrics, all, detail, wrap, table_style):
         detail=detail,
         wrap=wrap,
         table_style=table_style,
+        json=json,
     )
 
 
