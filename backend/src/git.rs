@@ -9,7 +9,7 @@ use git2::{
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
-use crate::files::{is_python_filename};
+use crate::files::is_python_filename;
 
 /// Information about a single revision/commit
 #[derive(Debug, Clone)]
@@ -356,12 +356,7 @@ pub fn find_revision<'py>(
         (tracked_files.clone(), Vec::new(), Vec::new())
     };
 
-    let rev = RevisionInfo::from_commit(
-        &commit,
-        added_files,
-        modified_files,
-        deleted_files,
-    );
+    let rev = RevisionInfo::from_commit(&commit, added_files, modified_files, deleted_files);
     let dict = rev.to_py_dict(py)?;
 
     Ok(Some(dict))
@@ -395,27 +390,35 @@ impl RevisionIterator {
             // Now process commits oldest to newest
             let (added_files, modified_files, deleted_files) = if self.index == 0 {
                 // First commit: all files are "added"
-                let tracked_files = get_tracked_files(&commit, self.include_ipynb).map_err(|e| {
-                    pyo3::exceptions::PyValueError::new_err(format!("Failed to get tracked files: {}", e))
-                })?;
+                let tracked_files =
+                    get_tracked_files(&commit, self.include_ipynb).map_err(|e| {
+                        pyo3::exceptions::PyValueError::new_err(format!(
+                            "Failed to get tracked files: {}",
+                            e
+                        ))
+                    })?;
                 (tracked_files.clone(), Vec::new(), Vec::new())
             } else {
                 // Get diff from parent commit
                 let parent_oid = self.commit_oids[self.index - 1];
                 let parent = self.repo.find_commit(parent_oid).map_err(|e| {
-                    pyo3::exceptions::PyValueError::new_err(format!("Failed to find parent commit: {}", e))
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "Failed to find parent commit: {}",
+                        e
+                    ))
                 })?;
-                whatchanged(&self.repo, &commit, Some(&parent), self.include_ipynb).map_err(|e| {
-                    pyo3::exceptions::PyValueError::new_err(format!("Failed to get changes: {}", e))
-                })?
+                whatchanged(&self.repo, &commit, Some(&parent), self.include_ipynb).map_err(
+                    |e| {
+                        pyo3::exceptions::PyValueError::new_err(format!(
+                            "Failed to get changes: {}",
+                            e
+                        ))
+                    },
+                )?
             };
 
-            let rev = RevisionInfo::from_commit(
-                &commit,
-                added_files,
-                modified_files,
-                deleted_files,
-            );
+            let rev =
+                RevisionInfo::from_commit(&commit, added_files, modified_files, deleted_files);
             self.index += 1;
             Ok(Some(rev.to_py_dict(py)?.into()))
         } else {

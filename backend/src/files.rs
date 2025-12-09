@@ -19,7 +19,7 @@ pub fn is_python_file(path: &Path, include_ipynb: bool) -> bool {
         _ => return false,
     };
 
-    return is_python_filename(&filename, include_ipynb);
+    is_python_filename(&filename, include_ipynb)
 }
 
 pub fn is_python_filename(filename: &str, include_ipynb: bool) -> bool {

@@ -13,8 +13,8 @@ use parquet::file::properties::WriterProperties;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::fs::File;
-use std::sync::{Arc, Mutex};
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
 // Type aliases for complex Halstead metric tuples to satisfy clippy
 type HalsteadTotals = (u32, u32, u32, u32, u32, u32, f64, f64, f64);
@@ -1075,10 +1075,7 @@ impl WilyIndex {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
         })?;
 
-        let matching_rows: Vec<_> = state
-            .all_rows()
-            .filter(|row| row.path == path)
-            .collect();
+        let matching_rows: Vec<_> = state.all_rows().filter(|row| row.path == path).collect();
 
         let list = PyList::empty(py);
         for row in matching_rows {
