@@ -1166,10 +1166,6 @@ impl WilyIndex {
             .flat_map(|p| get_parent_paths(p))
             .collect();
 
-        eprintln!("DEBUG: base_path = {:?}", base_path);
-        eprintln!("DEBUG: directories = {:?}", directories);
-        eprintln!("DEBUG: relative_paths = {:?}", relative_paths);
-
         let base_path_buf = PathBuf::from(base_path);
 
         // Analysis result for a single file
@@ -1190,8 +1186,6 @@ impl WilyIndex {
                 .par_iter()
                 .filter_map(|rel_path| {
                     let abs_path = base_path_buf.join(rel_path);
-                    eprintln!("DEBUG: Analyzing file {:?}", abs_path);
-
                     let content = fs::read_to_string(abs_path).ok()?;
                     let raw = if include_raw {
                         Some(raw::analyze_source_raw(&content))
