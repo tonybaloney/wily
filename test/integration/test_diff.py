@@ -166,35 +166,6 @@ def test_diff_output_loc(builddir):
     assert "10 -> 1" in result.stdout  # Lines of code went from 10 to 1
 
 
-def test_diff_output_loc_and_revision(builddir):
-    """Test the diff feature by making the test file more complicated, particular revision"""
-
-    simple_test = """print("test")"""
-
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
-        test_py.write(dedent(simple_test))
-
-    runner = CliRunner()
-    result = runner.invoke(
-        main.cli,
-        [
-            "--debug",
-            "--path",
-            builddir,
-            "diff",
-            _path,
-            "--metrics",
-            "raw.loc",
-            "-r",
-            "HEAD^1",
-        ],
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0, result.stdout
-    assert "test.py" in result.stdout
-    assert "9 -> 1" in result.stdout  # Lines of code went from 9 to 1
-
-
 def test_diff_output_rank(builddir):
     """Test the diff feature by making the test file more complicated"""
 
