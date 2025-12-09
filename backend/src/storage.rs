@@ -14,6 +14,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use std::fs::File;
 use std::sync::{Arc, Mutex};
+use std::path::PathBuf;
 
 // Type aliases for complex Halstead metric tuples to satisfy clippy
 type HalsteadTotals = (u32, u32, u32, u32, u32, u32, f64, f64, f64);
@@ -1146,19 +1147,15 @@ impl WilyIndex {
         let include_halstead = operators.iter().any(|o| o == "halstead");
         let include_maintainability = operators.iter().any(|o| o == "maintainability");
 
-        // Normalize base path
-        let base_path_normalized = base_path.replace('\\', "/");
-
         // Compute relative paths
         let relative_paths: Vec<String> = paths
             .iter()
             .map(|p| {
-                let normalized = p.replace('\\', "/");
-                if normalized.starts_with(&base_path_normalized) {
-                    let rel = normalized[base_path_normalized.len()..].trim_start_matches('/');
+                if p.starts_with(&base_path) {
+                    let rel = p[base_path.len()..].trim_start_matches('/');
                     rel.to_string()
                 } else {
-                    normalized
+                    p.to_string()
                 }
             })
             .collect();
@@ -1168,6 +1165,12 @@ impl WilyIndex {
             .iter()
             .flat_map(|p| get_parent_paths(p))
             .collect();
+
+        eprintln!("DEBUG: base_path = {:?}", base_path);
+        eprintln!("DEBUG: directories = {:?}", directories);
+        eprintln!("DEBUG: relative_paths = {:?}", relative_paths);
+
+        let base_path_buf = PathBuf::from(base_path);
 
         // Analysis result for a single file
         struct FileResult {
@@ -1185,10 +1188,11 @@ impl WilyIndex {
         let file_results: Vec<FileResult> = py.detach(|| {
             paths
                 .par_iter()
-                .zip(relative_paths.par_iter())
-                .filter_map(|(abs_path, rel_path)| {
-                    let content = fs::read_to_string(abs_path).ok()?;
+                .filter_map(|rel_path| {
+                    let abs_path = base_path_buf.join(rel_path);
+                    eprintln!("DEBUG: Analyzing file {:?}", abs_path);
 
+                    let content = fs::read_to_string(abs_path).ok()?;
                     let raw = if include_raw {
                         Some(raw::analyze_source_raw(&content))
                     } else {

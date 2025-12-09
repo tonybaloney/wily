@@ -134,7 +134,7 @@ known-local-folder = ["wily"]
 max-complexity = 24
 
 [tool.ruff.lint.per-file-ignores]
-"test/*" = ["D"]
+"test/*" = ["D", "S101"]
 
 [tool.ruff.lint.pylint]
 max-args = 10
