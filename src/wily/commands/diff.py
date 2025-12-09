@@ -4,11 +4,11 @@ Diff command.
 Compares metrics between uncommitted files and indexed files.
 """
 
+import json as json_module
 import os
 import sys
 from collections import defaultdict
 from collections.abc import Iterable
-import json as json_module
 from pathlib import Path
 from typing import Any
 
