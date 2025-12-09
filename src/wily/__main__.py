@@ -202,11 +202,6 @@ def index(ctx, message, wrap, table_style):
     default=False,
 )
 @click.option(
-    "--threshold",
-    help=_("Return a non-zero exit code under the specified threshold"),
-    type=click.INT,
-)
-@click.option(
     "-w",
     "--wrap/--no-wrap",
     default=True,
@@ -218,7 +213,7 @@ def index(ctx, message, wrap, table_style):
     help=_("Table border style (e.g., ROUNDED, ASCII, SIMPLE, MINIMAL, MARKDOWN)"),
 )
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold, wrap, table_style):
+def rank(ctx, path, metric, revision, limit, desc, wrap, table_style):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
@@ -234,7 +229,6 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap, table_style)
         metric=metric,
         revision_index=revision,
         limit=limit,
-        threshold=threshold,
         descending=desc,
         wrap=wrap,
         table_style=table_style,

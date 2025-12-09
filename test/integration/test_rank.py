@@ -125,17 +125,3 @@ def test_rank_directory_asc(builddir):
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "rank", "src/", "raw.comments", "--asc"])
     assert result.exit_code == 0, result.stdout
-
-
-def test_rank_total_above_threshold(builddir):
-    """Test the rank feature with total above threshold"""
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", builddir, "rank", "--threshold=20"])
-    assert result.exit_code == 0, result.stdout
-
-
-def test_rank_total_below_threshold(builddir):
-    """Test the rank feature with total below threshold"""
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", builddir, "rank", "--threshold=100"])
-    assert result.exit_code == 1, result.stdout

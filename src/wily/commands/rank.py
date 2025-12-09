@@ -28,7 +28,6 @@ def rank(
     metric: str,
     revision_index: str,
     limit: int,
-    threshold: int,
     descending: bool,
     wrap: bool,
     table_style: str = DEFAULT_TABLE_STYLE,
@@ -147,14 +146,7 @@ def rank(
     if not data:
         return
 
-    # Tack on the total row at the end
-    total = resolved_metric.aggregate(rev[1] for rev in data)
-    data.append(("Total", total))
-
     headers = ("File", resolved_metric.description)
     print_table(headers=headers, data=data, wrap=wrap, table_style=table_style)
 
-    if threshold and total < threshold:
-        logger.error("Total value below the specified threshold: %s < %s", total, threshold)
-        sys.exit(1)
 
