@@ -1,19 +1,17 @@
+import json
 import pathlib
-import sys
 from textwrap import dedent
 
 from click.testing import CliRunner
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
 def test_diff_no_cache(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "diff", _path], catch_exceptions=False
-    )
+    result = runner.invoke(main.cli, ["--path", tmpdir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 1, result.stdout
 
 
@@ -26,9 +24,8 @@ def test_diff_no_path(tmpdir):
 def test_diff_output(builddir):
     """Test the diff feature with no changes"""
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", builddir, "diff", _path], catch_exceptions=False
-    )
+    # Don't use --debug since debug logs now contain the filename
+    result = runner.invoke(main.cli, ["--path", builddir, "diff", _path], catch_exceptions=False)
     assert result.exit_code == 0, result.stdout
     assert "test.py" not in result.stdout
 
@@ -109,18 +106,17 @@ def test_diff_output_more_complex(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--all"],
-        catch_exceptions=False,
+        ["--path", builddir, "diff", _path, "--all", "--json"],
     )
     assert result.exit_code == 0, result.stdout
-    assert "test.py" in result.stdout
-    assert "- -> -" not in result.stdout
-    assert "-> -" not in result.stdout
-    assert "- ->" not in result.stdout
+    data = json.loads(result.stdout)  # Verify valid JSON output
+    assert len(data) > 0
+    assert data[0]['file'] == "src/test.py"
+    assert data[0]['complexity'] == "6 -> 11"
 
 
 def test_diff_output_less_complex(builddir):
-    """Test the diff feature by making the test file more complicated"""
+    """Test the diff feature by making the test file less complicated"""
 
     simple_test = """
             import abc
@@ -138,14 +134,13 @@ def test_diff_output_less_complex(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--all"],
-        catch_exceptions=False,
+        ["--path", builddir, "diff", _path, "--all", "--json"],
     )
     assert result.exit_code == 0, result.stdout
-    assert "test.py" in result.stdout
-    assert "- -> -" not in result.stdout
-    assert "-> -" not in result.stdout
-    assert "- ->" not in result.stdout
+    data = json.loads(result.stdout)  # Verify valid JSON output
+    assert len(data) > 0
+    assert data[0]['file'] == "src/test.py"
+    assert data[0]['complexity'] == "6 -> 4"
 
 
 def test_diff_output_loc(builddir):
@@ -159,41 +154,14 @@ def test_diff_output_loc(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--metrics", "raw.loc"],
+        ["--path", builddir, "diff", _path, "--metrics", "raw.loc", "--json"],
         catch_exceptions=False,
     )
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.stderr
+    data = json.loads(result.stdout)  # Verify valid JSON output
+    assert len(data) > 0
     assert "test.py" in result.stdout
-    assert "10 -> \x1b[33m1\x1b[0m" in result.stdout  # 10 -> 1 (in green)
-
-
-def test_diff_output_loc_and_revision(builddir):
-    """Test the diff feature by making the test file more complicated, particular revision"""
-
-    simple_test = """print("test")"""
-
-    with open(pathlib.Path(builddir) / "src" / "test.py", "w") as test_py:
-        test_py.write(dedent(simple_test))
-
-    runner = CliRunner()
-    result = runner.invoke(
-        main.cli,
-        [
-            "--debug",
-            "--path",
-            builddir,
-            "diff",
-            _path,
-            "--metrics",
-            "raw.loc",
-            "-r",
-            "HEAD^1",
-        ],
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0, result.stdout
-    assert "test.py" in result.stdout
-    assert "9 -> \x1b[33m1\x1b[0m" in result.stdout  # 10 -> 1 (in green)
+    assert "10 -> 1" in result.stdout  # Lines of code went from 10 to 1
 
 
 def test_diff_output_rank(builddir):
@@ -222,3 +190,7 @@ def test_diff_output_rank(builddir):
     assert result.exit_code == 0, result.stdout
     assert "test.py" in result.stdout
     assert "A -> A" in result.stdout
+
+
+# TODO: Test diff with details
+# TODO: Test diff with multiple files

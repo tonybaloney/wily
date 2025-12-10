@@ -1,23 +1,14 @@
 """Models and types for "operators" the basic measure of a module that measures code."""
 
+from collections.abc import Iterable
 from enum import Enum
 from functools import lru_cache
 from typing import (
     Any,
-    Callable,
-    Dict,
     Generic,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
 )
 
-from wily.config.types import WilyConfig
 from wily.lang import _
 
 
@@ -29,7 +20,7 @@ class MetricType(Enum):
     Informational = 3  # Doesn't matter
 
 
-TValue = TypeVar("TValue", str, int, float)
+TValue = TypeVar("TValue")
 
 
 class Metric(Generic[TValue]):
@@ -39,7 +30,6 @@ class Metric(Generic[TValue]):
     description: str
     metric_type: TValue
     measure: MetricType
-    aggregate: Callable[[Iterable[TValue]], TValue]
 
     def __init__(
         self,
@@ -47,26 +37,24 @@ class Metric(Generic[TValue]):
         description: str,
         metric_type: TValue,
         measure: MetricType,
-        aggregate: Callable[[Iterable[TValue]], TValue],
     ):
         """Initialise the metric."""
         self.name = name
         self.description = description
         self.metric_type = metric_type
         self.measure = measure
-        self.aggregate = aggregate
 
 
-GOOD_COLORS = {
-    MetricType.AimHigh: 32,
-    MetricType.AimLow: 31,
-    MetricType.Informational: 33,
+GOOD_STYLES = {
+    MetricType.AimHigh: "green",
+    MetricType.AimLow: "red",
+    MetricType.Informational: "yellow",
 }
 
-BAD_COLORS = {
-    MetricType.AimHigh: 31,
-    MetricType.AimLow: 32,
-    MetricType.Informational: 33,
+BAD_STYLES = {
+    MetricType.AimHigh: "red",
+    MetricType.AimLow: "green",
+    MetricType.Informational: "yellow",
 }
 
 
@@ -77,122 +65,107 @@ class OperatorLevel(Enum):
     Object = 2
 
 
-class BaseOperator:
-    """Abstract Operator Class."""
-
-    """Name of the operator."""
-    name: str = "abstract"
-
-    """Default settings."""
-    defaults: Dict[str, Any] = {}
-
-    """Available metrics as a list of tuple ("name"<str>, "description"<str>, "type"<type>, "metric_type"<MetricType>)."""
-    metrics: Tuple[Metric, ...] = ()
-
-    """Which metric is the default to display in the report command."""
-    default_metric_index: Optional[int] = None
-
-    """Level at which the operator goes to."""
-    level: OperatorLevel = OperatorLevel.File
-
-    def __init__(self, *args, **kwargs):
-        """Initialise the operator."""
-        ...
-
-    def run(self, module: str, options: Dict[str, Any]) -> Dict[Any, Any]:
-        """
-        Run the operator.
-
-        :param module: The target module path.
-        :param options: Any runtime options.
-        :return: The operator results.
-        """
-        raise NotImplementedError
-
-
-from wily.operators.cyclomatic import CyclomaticComplexityOperator
-from wily.operators.halstead import HalsteadOperator
-from wily.operators.maintainability import MaintainabilityIndexOperator
-from wily.operators.raw import RawMetricsOperator
-
 """Type for an operator."""
 
-T = TypeVar("T", bound=BaseOperator)
 
-
-class Operator(Generic[T]):
+class Operator:
     """Operator holder."""
 
     name: str
-    operator_cls: Type[T]
     description: str
     level: OperatorLevel
 
     def __init__(
         self,
         name: str,
-        operator_cls: Type[T],
         description: str,
         level: OperatorLevel = OperatorLevel.File,
     ):
         """Initialise the operator."""
         self.name = name
-        self.operator_cls = operator_cls
         self.description = description
         self.level = level
 
-    def __call__(self, config: "WilyConfig") -> T:
-        """Initialise the operator."""
-        return self.operator_cls(config)
 
 
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
-    operator_cls=CyclomaticComplexityOperator,
     description=_("Cyclomatic Complexity of modules"),
     level=OperatorLevel.Object,
 )
 
 OPERATOR_RAW = Operator(
     name="raw",
-    operator_cls=RawMetricsOperator,
     description=_("Raw Python statistics"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_MAINTAINABILITY = Operator(
     name="maintainability",
-    operator_cls=MaintainabilityIndexOperator,
     description=_("Maintainability index (lines of code and branching)"),
     level=OperatorLevel.File,
 )
 
 OPERATOR_HALSTEAD = Operator(
     name="halstead",
-    operator_cls=HalsteadOperator,
     description=_("Halstead metrics"),
     level=OperatorLevel.Object,
 )
 
 
-_OPERATORS: Tuple[Operator, ...] = (
+_OPERATORS: tuple[Operator, ...] = (
     OPERATOR_CYCLOMATIC,
     OPERATOR_MAINTAINABILITY,
     OPERATOR_RAW,
     OPERATOR_HALSTEAD,
 )
-"""Dictionary of all operators"""
-ALL_OPERATORS: Dict[str, Operator] = {
-    operator.name: operator for operator in _OPERATORS
+
+OPERATOR_METRICS = {
+    OPERATOR_CYCLOMATIC: (
+        Metric(
+            "complexity",
+            _("Cyclomatic Complexity"),
+            float,
+            MetricType.AimLow,
+        ),
+    ),
+    OPERATOR_RAW: (
+        Metric("loc", _("Lines of Code"), int, MetricType.Informational),
+        Metric("lloc", _("L Lines of Code"), int, MetricType.AimLow),
+        Metric("sloc", _("S Lines of Code"), int, MetricType.AimLow),
+        Metric("comments", _("Multi-line comments"), int, MetricType.AimHigh),
+        Metric("multi", _("Multi lines"), int, MetricType.Informational),
+        Metric("blank", _("blank lines"), int, MetricType.Informational),
+        Metric(
+            "single_comments",
+            _("Single comment lines"),
+            int,
+            MetricType.Informational,
+        ),
+    ),
+    OPERATOR_HALSTEAD:  (
+        Metric("h1", _("Unique Operators"), int, MetricType.AimLow),
+        Metric("h2", _("Unique Operands"), int, MetricType.AimLow),
+        Metric("N1", _("Number of Operators"), int, MetricType.AimLow),
+        Metric("N2", _("Number of Operands"), int, MetricType.AimLow),
+        Metric("vocabulary", _("Unique vocabulary (h1 + h2)"), int, MetricType.AimLow),
+        Metric("length", _("Length of application"), int, MetricType.AimLow),
+        Metric("volume", _("Code volume"), float, MetricType.AimLow),
+        Metric("difficulty", _("Difficulty"), float, MetricType.AimLow),
+        Metric("effort", _("Effort"), float, MetricType.AimLow),
+    ),
+    OPERATOR_MAINTAINABILITY:  (
+        Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational),
+        Metric("mi", _("Maintainability Index"), float, MetricType.AimHigh),
+    )
 }
+
+"""Dictionary of all operators"""
+ALL_OPERATORS: dict[str, Operator] = {operator.name: operator for operator in _OPERATORS}
 
 
 """Set of all metrics"""
-ALL_METRICS: Set[Tuple[Operator, Metric[Any]]] = {
-    (operator, metric)
-    for operator in ALL_OPERATORS.values()
-    for metric in operator.operator_cls.metrics
-}
+ALL_METRICS: set[tuple[Operator, Metric[Any]]] = {(operator, metric) for operator in ALL_OPERATORS.values() for metric in OPERATOR_METRICS[operator]}
 
 
 @lru_cache(maxsize=128)
@@ -209,7 +182,7 @@ def resolve_operator(name: str) -> Operator:
         raise ValueError(f"Operator {name} not recognised.")
 
 
-def resolve_operators(operators: Iterable[Union[Operator, str]]) -> List[Operator]:
+def resolve_operators(operators: Iterable[Operator | str]) -> list[Operator]:
     """Resolve a list of operator names to their corresponding types."""
     return [resolve_operator(operator) for operator in iter(operators)]
 
@@ -221,7 +194,7 @@ def resolve_metric(metric: str) -> Metric:
 
 
 @lru_cache(maxsize=128)
-def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
+def resolve_metric_as_tuple(metric: str) -> tuple[Operator, Metric]:
     """Resolve metric key to a given target."""
     if "." in metric:
         _, metric = metric.split(".")
@@ -233,7 +206,7 @@ def resolve_metric_as_tuple(metric: str) -> Tuple[Operator, Metric]:
         return r[0]
 
 
-def get_metric(revision: Dict[Any, Any], operator: str, path: str, key: str) -> Any:
+def get_metric(revision: dict[Any, Any], operator: str, path: str, key: str) -> Any:
     """
     Get a metric from the cache.
 

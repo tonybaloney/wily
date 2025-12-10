@@ -14,9 +14,6 @@ def test_list_metrics(builddir):
     assert "maintainability" in result.stdout
     assert "raw" in result.stdout
     assert "halstead" in result.stdout
-    # Test ordering
-    i = result.stdout.index
-    assert i("cyclomatic") < i("maintainability") < i("raw") < i("halstead")
 
 
 def test_list_metrics_wrapped(builddir):

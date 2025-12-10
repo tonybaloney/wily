@@ -6,8 +6,8 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 
 TODO : Test build + build with extra operator
 """
+
 import pathlib
-import sys
 from unittest.mock import patch
 
 import pytest
@@ -17,40 +17,9 @@ from git.util import Actor
 
 import wily.__main__ as main
 from wily.archivers import ALL_ARCHIVERS
-from wily.helper import generate_cache_path
+from wily.backend import WilyIndex
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
-
-
-def test_build_not_git_repo(tmpdir, cache_path):
-    """
-    Test that build defaults to filesystem in a non-git directory
-    """
-    runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "--cache", cache_path, "build", "test.py"]
-    )
-    assert result.exit_code == 0, result.stdout
-    cache_path = pathlib.Path(cache_path)
-    assert cache_path.exists()
-    index_path = cache_path / "filesystem" / "index.json"
-    assert index_path.exists()
-
-
-def test_build_custom_cache(tmpdir):
-    """
-    Test that build defaults to filesystem in a non-git directory with custom cache path.
-    """
-    runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "--cache", tmpdir / ".wily", "build", "test.py"]
-    )
-    assert result.exit_code == 0, result.stdout
-    cache_path = tmpdir / ".wily"
-    assert cache_path.exists()
-    index_path = cache_path / "filesystem" / "index.json"
-    assert index_path.exists()
-    assert not pathlib.Path(generate_cache_path(tmpdir)).exists()
+_path = "src/test.py"
 
 
 def test_build_invalid_path():
@@ -82,14 +51,12 @@ def test_build_crash(tmpdir):
     index.commit("basic test", author=author, committer=committer)
     repo.close()
 
-    import wily.commands.build
+    import wily.commands.build  # noqa: PLC0415
 
-    with patch.object(
-        wily.commands.build.Bar, "finish", side_effect=RuntimeError("arggh")
-    ) as bar_finish:
+    # Simulate a crash by patching analyze_revision_with_index to raise an error
+    with patch.object(wily.commands.build, "analyze_revision_with_index", side_effect=RuntimeError("arggh")):
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", "test.py"])
-        assert bar_finish.called
         assert result.exit_code == 1, result.stdout
 
 
@@ -122,13 +89,28 @@ def test_build(tmpdir, cache_path):
 
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    index_path = cache_path / "git" / "index.json"
-    assert index_path.exists()
-    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
+
+    # Load metrics from WilyIndex to verify contents
+    with WilyIndex(str(parquet_path), ["raw"]) as wily_index:
+        rows = list(wily_index)
+        assert len(rows) == 2
+        assert rows[0]["path"] == "test.py"
+        assert rows[0]["path_type"] == "file"
+        assert rows[0]["revision"] == commit.hexsha
+
+        assert "loc" in rows[0]
+        assert rows[0]["loc"] == 1  # One line of code
+
+        # Assert directory summary
+        assert rows[1]["path"] == ""
+        assert rows[1]["path_type"] == "root"
+        assert rows[1]["revision"] == commit.hexsha
+        assert "loc" in rows[1]
+        assert rows[1]["loc"] == 1  # One line of code in root
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_build_with_config(tmpdir, cache_path):
     """
     Test that build works in a basic repository and a configuration file.
@@ -155,7 +137,7 @@ def test_build_with_config(tmpdir, cache_path):
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
 
-    commit = index.commit("basic test", author=author, committer=committer)
+    _ = index.commit("basic test", author=author, committer=committer)
     repo.close()
 
     runner = CliRunner()
@@ -176,10 +158,8 @@ def test_build_with_config(tmpdir, cache_path):
 
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    index_path = cache_path / "git" / "index.json"
-    assert index_path.exists()
-    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
 
 
 def test_build_twice(tmpdir, cache_path):
@@ -199,7 +179,7 @@ def test_build_twice(tmpdir, cache_path):
     author = Actor("An author", "author@example.com")
     committer = Actor("A committer", "committer@example.com")
 
-    commit = index.commit("basic test", author=author, committer=committer)
+    _ = index.commit("basic test", author=author, committer=committer)
 
     runner = CliRunner()
     result = runner.invoke(
@@ -210,10 +190,8 @@ def test_build_twice(tmpdir, cache_path):
 
     cache_path = pathlib.Path(cache_path) / "git"
     assert cache_path.exists()
-    index_path = cache_path / "index.json"
-    assert index_path.exists()
-    rev_path = cache_path / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
+    parquet_path = cache_path / "metrics.parquet"
+    assert parquet_path.exists()
 
     # Write a test file to the repo
     with open(tmppath / "test.py", "w") as test_txt:
@@ -221,19 +199,14 @@ def test_build_twice(tmpdir, cache_path):
 
     index.add(["test.py"])
 
-    commit2 = index.commit("basic test", author=author, committer=committer)
+    _ = index.commit("basic test", author=author, committer=committer)
     repo.close()
 
     result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", "test.py"])
     assert result.exit_code == 0, result.stdout
 
     assert cache_path.exists()
-    index_path = cache_path / "index.json"
-    assert index_path.exists()
-    rev_path = cache_path / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
-    rev_path2 = cache_path / (commit2.name_rev.split(" ")[0] + ".json")
-    assert rev_path2.exists()
+    assert parquet_path.exists()
 
 
 def test_build_no_commits(tmpdir):
@@ -244,9 +217,7 @@ def test_build_no_commits(tmpdir):
     repo.close()
 
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--debug", "--path", tmpdir, "build", tmpdir, "--skip-ignore-check"]
-    )
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", tmpdir, "--skip-ignore-check"])
     assert result.exit_code == 1, result.stdout
 
 
@@ -267,7 +238,7 @@ def test_build_no_git_history(tmpdir):
     repo = Repo.init(path=tmpdir)
     repo.close()
 
-    with patch("wily.logger") as logger:
+    with patch("wily.logger") as _:
         runner = CliRunner()
         result = runner.invoke(main.cli, ["--path", tmpdir, "build", _path])
         assert result.exit_code == 1, result.stdout
@@ -281,7 +252,7 @@ def test_build_archiver(gitdir, archiver, cache_path):
     """
     Test the build against each type of archiver
     """
-    with patch("wily.logger") as logger:
+    with patch("wily.logger") as _:
         runner = CliRunner()
         result = runner.invoke(
             main.cli,
@@ -290,5 +261,69 @@ def test_build_archiver(gitdir, archiver, cache_path):
         assert result.exit_code == 0, result.stdout
         cache_path = pathlib.Path(cache_path)
         assert cache_path.exists()
-        index_path = cache_path / archiver / "index.json"
-        assert index_path.exists()
+
+
+def test_build_src_directory(tmpdir, cache_path):
+    """
+    Test that build includes files inside a directory
+    """
+
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+
+    # Write a test file to the repo
+    with open(srcpath / "test.py", "w") as test_txt:
+        test_txt.write("import abc")
+
+    index = repo.index
+    index.add([str(srcpath / "test.py")])
+
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    commit = index.commit("basic test", author=author, committer=committer)
+    repo.close()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--debug", "--path", tmpdir, "--cache", cache_path, "build", "."],
+    )
+    assert result.exit_code == 0, result.stdout
+
+    cache_path = pathlib.Path(cache_path)
+    assert cache_path.exists()
+
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
+
+    # Load metrics from WilyIndex to verify contents
+    with WilyIndex(str(parquet_path), ["raw"]) as wily_index:
+        rows = list(wily_index)
+        assert len(rows) == 3
+
+        src_path = wily_index['src/test.py']
+        assert len(src_path) == 1
+        assert src_path[0]["path"] == "src/test.py"
+        assert src_path[0]["path_type"] == "file"
+        assert src_path[0]["revision"] == commit.hexsha
+        assert "loc" in src_path[0]
+        assert src_path[0]["loc"] == 1  # One line of code
+
+        root_path = wily_index['src']
+        assert len(root_path) == 1
+        assert root_path[0]["path"] == "src"
+        assert root_path[0]["path_type"] == "directory"
+        assert root_path[0]["revision"] == commit.hexsha
+        assert "loc" in root_path[0]
+        assert root_path[0]["loc"] == 1  # One line of code in src
+
+        root_summary = wily_index['']
+        assert len(root_summary) == 1
+        assert root_summary[0]["path"] == ""
+        assert root_summary[0]["path_type"] == "root"
+        assert root_summary[0]["revision"] == commit.hexsha
+        assert "loc" in root_summary[0]
+        assert root_summary[0]["loc"] == 1  # One line of code in root

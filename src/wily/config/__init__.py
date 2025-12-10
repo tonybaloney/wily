@@ -5,6 +5,7 @@ TODO : Handle operator settings. Maybe a section for each operator and then pass
 TODO : Better utilise default values and factory in @dataclass to replace DEFAULT_CONFIG
  and replace the logic in load() to set default values.
 """
+
 import configparser
 import logging
 import pathlib
@@ -56,27 +57,17 @@ def load(config_path: str = DEFAULT_CONFIG_PATH) -> WilyConfig:
     config = configparser.ConfigParser(default_section=DEFAULT_CONFIG_SECTION)
     config.read(config_path)
 
-    operators = config.get(
-        section=DEFAULT_CONFIG_SECTION, option="operators", fallback=DEFAULT_OPERATORS
-    )
-    archiver = config.get(
-        section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER
-    )
+    operators = config.get(section=DEFAULT_CONFIG_SECTION, option="operators", fallback=DEFAULT_OPERATORS)
+    archiver = config.get(section=DEFAULT_CONFIG_SECTION, option="archiver", fallback=DEFAULT_ARCHIVER)
     path = config.get(section=DEFAULT_CONFIG_SECTION, option="path", fallback=".")
-    cache_path = config.get(
-        section=DEFAULT_CONFIG_SECTION, option="cache_path", fallback=""
-    )
+    cache_path = config.get(section=DEFAULT_CONFIG_SECTION, option="cache_path", fallback="")
     max_revisions = config.getint(
         section=DEFAULT_CONFIG_SECTION,
         option="max_revisions",
         fallback=DEFAULT_MAX_REVISIONS,
     )
-    include_ipynb = config.getboolean(
-        section=DEFAULT_CONFIG_SECTION, option="include_ipynb", fallback=True
-    )
-    ipynb_cells = config.getboolean(
-        section=DEFAULT_CONFIG_SECTION, option="ipynb_cells", fallback=True
-    )
+    include_ipynb = config.getboolean(section=DEFAULT_CONFIG_SECTION, option="include_ipynb", fallback=True)
+    ipynb_cells = config.getboolean(section=DEFAULT_CONFIG_SECTION, option="ipynb_cells", fallback=True)
 
     return WilyConfig(
         operators=operators,
