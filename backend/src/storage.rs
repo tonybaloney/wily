@@ -1070,13 +1070,22 @@ impl WilyIndex {
 
     /// Get all rows matching a path (file path or path prefix).
     /// Returns rows where the path equals or starts with the given path.
+    /// Rows are sorted by revision_date descending (newest first).
     fn __getitem__(&self, py: Python<'_>, path: String) -> PyResult<Py<PyList>> {
         let state = self.state.lock().map_err(|e| {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Lock poisoned: {}", e))
         })?;
+        // TODO: Decide if we want to filter by path_type as well
+        let mut matching_rows: Vec<_> = state
+            .all_rows()
+            .filter(|row| row.path == path)
+            .cloned()
+            .collect();
 
-        let matching_rows: Vec<_> = state.all_rows().filter(|row| row.path == path).collect();
+        // Sort by revision_date ascending (newest last)
+        matching_rows.sort_by(|a, b| a.revision_date.cmp(&b.revision_date));
 
+        // TODO: There is a more pragmatic way to do this, using PyList::new(py, enumerables)
         let list = PyList::empty(py);
         for row in matching_rows {
             list.append(row.to_py_dict(py)?)?;
