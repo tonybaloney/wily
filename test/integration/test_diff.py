@@ -106,18 +106,17 @@ def test_diff_output_more_complex(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--all"],
-        catch_exceptions=False,
+        ["--path", builddir, "diff", _path, "--all", "--json"],
     )
     assert result.exit_code == 0, result.stdout
-    assert "test.py" in result.stdout
-    assert "- -> -" not in result.stdout
-    assert "-> -" not in result.stdout
-    assert "- ->" not in result.stdout
+    data = json.loads(result.stdout)  # Verify valid JSON output
+    assert len(data) > 0
+    assert data[0]['file'] == "src/test.py"
+    assert data[0]['complexity'] == "6 -> 11"
 
 
 def test_diff_output_less_complex(builddir):
-    """Test the diff feature by making the test file more complicated"""
+    """Test the diff feature by making the test file less complicated"""
 
     simple_test = """
             import abc
@@ -135,14 +134,13 @@ def test_diff_output_less_complex(builddir):
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--debug", "--path", builddir, "diff", _path, "--all"],
-        catch_exceptions=False,
+        ["--path", builddir, "diff", _path, "--all", "--json"],
     )
     assert result.exit_code == 0, result.stdout
-    assert "test.py" in result.stdout
-    assert "- -> -" not in result.stdout
-    assert "-> -" not in result.stdout
-    assert "- ->" not in result.stdout
+    data = json.loads(result.stdout)  # Verify valid JSON output
+    assert len(data) > 0
+    assert data[0]['file'] == "src/test.py"
+    assert data[0]['complexity'] == "6 -> 4"
 
 
 def test_diff_output_loc(builddir):
