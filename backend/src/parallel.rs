@@ -704,6 +704,9 @@ pub fn analyze_files_parallel<'py>(
     // Phase 1: Parallel file analysis (GIL released)
     let (analysis_results, directories): (HashMap<String, FileAnalysisResult>, HashSet<String>) =
         py.detach(|| {
+            // Diagnostic: show thread count
+            eprintln!("Rayon using {} threads for {} files", rayon::current_num_threads(), paths.len());
+            
             // Collect all directory paths first
             let dirs = collect_all_directories(&paths);
 
