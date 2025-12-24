@@ -4,49 +4,145 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
-import multiprocessing
+
 import os
 import pathlib
-from sys import exit
-from typing import Any, Dict, List, Tuple
+import sys
+from typing import Any
 
-from progress.bar import Bar
+from rich.progress import (
+    BarColumn,
+    Progress,
+    ProgressColumn,
+    SpinnerColumn,
+    Task,
+    TextColumn,
+    TimeElapsedColumn,
+)
+from rich.table import Column
+from rich.text import Text
 
 from wily import logger
-from wily.archivers import Archiver, FilesystemArchiver, Revision
-from wily.archivers.git import InvalidGitRepositoryError
+from wily.archivers import Archiver, FilesystemArchiver, RevisionInfo
+from wily.archivers.git import GitArchiver, InvalidGitRepositoryError
+from wily.backend import WilyIndex, analyze_files_parallel, iter_filenames
+from wily.cache import create as create_cache
 from wily.config.types import WilyConfig
-from wily.operators import Operator, resolve_operator
-from wily.state import State
+from wily.operators import Operator
 
 
-def run_operator(
-    operator: Operator, revision: Revision, config: WilyConfig, targets: List[str]
-) -> Tuple[str, Dict[str, Any]]:
+class SpeedColumn(ProgressColumn):
+    """Renders completed count/total and speed, e.g. '  10/1000 (5.00/sec)'."""
+
+    def __init__(self, separator: str = "/", table_column: Column | None = None):
+        """Initialize SpeedColumn."""
+        self.separator = separator
+        super().__init__(table_column=table_column)
+
+    def render(self, task: "Task") -> Text:
+        """Show completed/total."""
+        completed = int(task.completed)
+        total = int(task.total) if task.total is not None else "?"
+        total_width = len(str(total))
+
+        speed = task.speed or 0.0
+        return Text(
+            f"{completed:{total_width}d}{self.separator}{total} ({speed:.2f}/sec)",
+            style="progress.download",
+        )
+
+
+def run_operators_parallel(
+    operators: list[Operator],
+    targets: list[str],
+    config: WilyConfig,
+) -> dict[str, dict[str, Any]]:
     """
-    Run an operator for the multiprocessing pool.
+    Run all operators in parallel using Rust/rayon.
 
-    :param operator: The operator to use
-    :param revision: The revision index
-    :param config: The runtime configuration
-    :param targets: Files/paths to scan
+    Used by diff command for comparing working directory changes.
+
+    :param operators: List of operators to run
+    :param targets: List of file paths to analyze
+    :param config: The wily configuration
+    :return: Dictionary mapping operator names to their results
     """
-    instance = operator.operator_cls(config, targets)
-    logger.debug("Running %s operator on %s", operator.name, revision)
+    operator_names = [op.name for op in operators]
 
-    data = instance.run(revision, config)
+    if not operator_names or not targets:
+        return {name: {} for name in operator_names}
 
-    # Normalize paths for non-seed passes
-    for key in list(data.keys()):
-        if os.path.isabs(key):
-            rel = os.path.relpath(key, config.path)
-            data[rel] = data[key]
-            del data[key]
+    # Discover all Python files from targets
+    file_paths = list(iter_filenames(targets, include_ipynb=True))
 
-    return operator.name, data
+    if not file_paths:
+        return {name: {} for name in operator_names}
+
+    logger.debug(
+        "Running Rust parallel analysis on %d files with operators: %s",
+        len(file_paths),
+        operator_names,
+    )
+
+    # Run all operators in parallel on all files using Rust/rayon
+    # This also computes directory-level aggregates
+    parallel_results = analyze_files_parallel(file_paths, operator_names)
+
+    # Transform results into the expected format per operator
+    results: dict[str, dict[str, Any]] = {name: {} for name in operator_names}
+
+    for file_path, file_data in parallel_results.items():
+        # Convert absolute paths to relative, but leave directory paths as-is
+        if os.path.isabs(file_path):
+            rel_path = os.path.relpath(file_path, config.path).replace("\\", "/")
+        else:
+            rel_path = file_path  # Already a relative/directory path from aggregation
+
+        if "error" in file_data:
+            for op_name in operator_names:
+                results[op_name][rel_path] = {"total": {"error": file_data["error"]}}
+            continue
+
+        for op_name in operator_names:
+            if op_name in file_data:
+                results[op_name][rel_path] = file_data[op_name]
+
+    return results
 
 
-def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> None:
+def analyze_revision_with_index(
+    index: "WilyIndex",
+    revision: RevisionInfo,
+    archiver_instance: FilesystemArchiver | GitArchiver,
+    config: WilyConfig,
+) -> int:
+    """
+    Analyze a revision and append results to the index.
+
+    :param index: The WilyIndex context manager
+    :param revision: The revision to analyze
+    :param archiver_instance: The archiver instance
+    :param config: The wily configuration
+    :return: Total lines of code in the revision (root aggregate)
+    """
+    if not revision["added_files"] and not revision["modified_files"]:
+        # Skip this version
+        return 0
+
+    archiver_instance.checkout(revision, config.checkout_options)
+
+    # Analyze and accumulate in index
+    return index.analyze_revision(
+        paths=revision["added_files"] + revision["modified_files"],
+        base_path=config.path,
+        revision_key=revision["key"],
+        revision_date=revision["date"],
+        revision_author=revision["author_name"],
+        revision_message=revision["message"],
+    )
+
+
+def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> None:
     """
     Build the history given an archiver and collection of operators.
 
@@ -59,23 +155,15 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
         archiver_instance = archiver.archiver_cls(config)
         revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except InvalidGitRepositoryError:
-        # TODO: This logic shouldn't really be here (SoC)
         logger.info("Defaulting back to the filesystem archiver, not a valid git repo")
         archiver_instance = FilesystemArchiver(config)
         revisions = archiver_instance.revisions(config.path, config.max_revisions)
     except Exception as e:
         message = getattr(e, "message", f"{type(e)} - {e}")
         logger.error("Failed to setup archiver: '%s'", message)
-        exit(1)
+        sys.exit(1)
 
-    state = State(config, archiver=archiver_instance)
-    # Check for existence of cache, else provision
-    state.ensure_exists()
-
-    index = state.index[archiver_instance.name]
-
-    # remove existing revisions from the list
-    revisions = [revision for revision in revisions if revision not in index][::-1]
+    create_cache(config)  # Ensure cache directory exists
 
     logger.info(
         "Found %s revisions from '%s' archiver in '%s'.",
@@ -84,126 +172,53 @@ def build(config: WilyConfig, archiver: Archiver, operators: List[Operator]) -> 
         config.path,
     )
 
-    _op_desc = ",".join([operator.name for operator in operators])
-    logger.info("Running operators - %s", _op_desc)
+    if not revisions:
+        archiver_instance.finish()
+        logger.debug("No new revisions to index, exiting.")
+        return
 
-    bar = Bar("Processing", max=len(revisions) * len(operators))
-    state.operators = operators
+    progress_columns = (
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        SpeedColumn(),
+        TimeElapsedColumn(),
+    )
 
-    # Index all files the first time, only scan changes afterward
-    seed = True
+    # Single parquet file for all metrics
+    cache_dir = pathlib.Path(config.cache_path) / archiver_instance.name
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    parquet_path = str(cache_dir / "metrics.parquet")
+    operator_names = [op.name for op in operators]
+
     try:
-        with multiprocessing.Pool(processes=len(operators)) as pool:
-            prev_stats: Dict[str, Dict] = {}
-            for revision in revisions:
-                # Checkout target revision
-                archiver_instance.checkout(revision, config.checkout_options)
-                stats: Dict[str, Dict] = {"operator_data": {}}
+        with Progress(*progress_columns) as progress:
+            # Use WilyIndex context manager - all data written on exit
+            with WilyIndex(parquet_path, operator_names) as index:
+                for i, revision in enumerate(revisions):
+                    if i == 0:
+                        seed_task = progress.add_task("Analyzing seed", total=1)
+                        progress.start_task(seed_task)
 
-                # TODO : Check that changed files are children of the targets
-                targets = [
-                    str(pathlib.Path(config.path) / pathlib.Path(file))
-                    for file in revision.added_files + revision.modified_files
-                    # if any([True for target in config.targets if
-                    #         target in pathlib.Path(pathlib.Path(config.path) / pathlib.Path(file)).parents])
-                ]
-
-                # Run each operator as a separate process
-                data = pool.starmap(
-                    run_operator,
-                    [(operator, revision, config, targets) for operator in operators],
-                )
-                # data is a list of tuples, where for each operator, it is a tuple of length 2,
-                operator_data_len = 2
-                # second element in the tuple, i.e data[i][1]) has the collected data
-                for i in range(0, len(operators)):
-                    if (
-                        i < len(data)
-                        and len(data[i]) >= operator_data_len
-                        and len(data[i][1]) == 0
-                    ):
-                        logger.warning(
-                            "In revision %s, for operator %s: No data collected",
-                            revision.key,
-                            operators[i].name,
+                        seed_loc = analyze_revision_with_index(
+                            index, revision, archiver_instance, config
                         )
 
-                # Map the data back into a dictionary
-                for operator_name, result in data:
-                    # find all unique directories in the results
-                    indices = set(result.keys())
+                        progress.stop_task(seed_task)
+                        if any(op.name == "raw" for op in operators):
+                            logger.info(f"Seed revision has {seed_loc:,} lines of code.")
+                        logger.info("Indexed seed revision in %f seconds.", progress.tasks[seed_task].elapsed)
+                        continue
+                    elif i == 1:
+                        task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
 
-                    # For a seed run, there is no previous change set, so use current
-                    if seed:
-                        prev_indices = indices
+                    analyze_revision_with_index(
+                        index, revision, archiver_instance, config
+                    )
+                    progress.advance(task_id) # type: ignore
 
-                    # Copy the ir from any unchanged files from the prev revision
-                    if not seed:
-                        # File names in result are platform dependent, so we convert
-                        # to Path and back to str.
-                        files = {str(pathlib.Path(f)) for f in revision.tracked_files}
-                        missing_indices = files - indices
-                        # TODO: Check existence of file path.
-                        for missing in missing_indices:
-                            # Don't copy aggregate keys as their values may have changed
-                            if missing in revision.tracked_dirs:
-                                continue
-                            # previous index may not have that operator
-                            if operator_name not in prev_stats["operator_data"]:
-                                continue
-                            # previous index may not have file either
-                            if (
-                                missing
-                                not in prev_stats["operator_data"][operator_name]
-                            ):
-                                continue
-                            result[missing] = prev_stats["operator_data"][
-                                operator_name
-                            ][missing]
-                        for deleted in revision.deleted_files:
-                            result.pop(deleted, None)
-
-                    # Add empty path for storing total aggregates
-                    dirs = [""]
-                    # Directory names in result are platform dependent, so we convert
-                    # to Path and back to str.
-                    dirs += [str(pathlib.Path(d)) for d in revision.tracked_dirs if d]
-                    # Aggregate metrics across all root paths using the aggregate function in the metric
-                    # Note assumption is that nested dirs are listed after parent, hence sorting.
-                    for root in sorted(dirs):
-                        # find all matching entries recursively
-                        aggregates = [
-                            path for path in result.keys() if path.startswith(root)
-                        ]
-
-                        result[str(root)] = {"total": {}}
-                        # aggregate values
-                        for metric in resolve_operator(
-                            operator_name
-                        ).operator_cls.metrics:
-                            func = metric.aggregate
-                            values = [
-                                result[aggregate]["total"][metric.name]
-                                for aggregate in aggregates
-                                if aggregate in result
-                                and metric.name in result[aggregate]["total"]
-                            ]
-                            if len(values) > 0:
-                                result[str(root)]["total"][metric.name] = func(values)
-
-                    prev_indices = set(result.keys())
-                    stats["operator_data"][operator_name] = result
-                    bar.next()
-
-                prev_stats = stats
-                seed = False
-                ir = index.add(revision, operators=operators)
-                ir.store(config, archiver_instance.name, stats)
-        index.save()
-        bar.finish()
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)
         raise e
     finally:
-        # Reset the archive after every run back to the head of the branch
         archiver_instance.finish()

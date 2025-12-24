@@ -8,17 +8,16 @@ import click
 
 from wily import WILY_LOG_NAME, __version__, logger
 from wily.archivers import resolve_archiver
-from wily.cache import exists, get_default_metrics
+from wily.cache import exists
 from wily.config import load as load_config
-from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_GRID_STYLE
-from wily.helper import get_style
+from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_TABLE_STYLE
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
 from wily.operators import resolve_operators
 
 version_text = _("Version: ") + __version__ + "\n\n"
 help_header = version_text + _(
-    """\U0001F98A Inspect and search through the complexity of your source code.
+    """\U0001f98a Inspect and search through the complexity of your source code.
 To get started, run setup:
 
   $ wily setup
@@ -44,7 +43,7 @@ You can also graph specific metrics in a browser with:
     __version__,
     "-V",
     "--version",
-    message="\U0001F98A %(prog)s, {version} %(version)s".format(version=_("version")),
+    message="\U0001f98a %(prog)s, {version} %(version)s".format(version=_("version")),
     help=_("Show the version and exit."),
 )
 @click.help_option(help=_("Show this message and exit."))
@@ -119,7 +118,7 @@ def build(ctx, max_revisions, targets, operators, archiver):
     """Build the wily cache."""
     config = ctx.obj["CONFIG"]
 
-    from wily.commands.build import build
+    from wily.commands.build import build  # noqa: PLC0415
 
     if max_revisions:
         logger.debug("Fixing revisions to %s", max_revisions)
@@ -142,34 +141,33 @@ def build(ctx, max_revisions, targets, operators, archiver):
         archiver=resolve_archiver(config.archiver),
         operators=resolve_operators(config.operators),
     )
-    logger.info(
-        _(
-            "Completed building wily history, run `wily report <file>` or `wily index` to see more."
-        )
-    )
+    logger.info(_("Completed building wily history, run `wily report <file>` or `wily index` to see more."))
 
 
 @cli.command(help=_("""Show the history archive in the .wily/ folder."""))
 @click.pass_context
-@click.option(
-    "-m", "--message/--no-message", default=False, help=_("Include revision message")
-)
+@click.option("-m", "--message/--no-message", default=False, help=_("Include revision message"))
 @click.option(
     "-w",
     "--wrap/--no-wrap",
     default=True,
     help=_("Wrap index text to fit in terminal"),
 )
-def index(ctx, message, wrap):
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table border style (e.g., ROUNDED, ASCII, SIMPLE, MINIMAL, MARKDOWN)"),
+)
+def index(ctx, message, wrap, table_style):
     """Show the history archive in the .wily/ folder."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
 
-    from wily.commands.index import index
+    from wily.commands.index import index  # noqa: PLC0415
 
-    index(config=config, include_message=message, wrap=wrap)
+    index(config=config, include_message=message, wrap=wrap, table_style=table_style)
 
 
 @cli.command(
@@ -196,21 +194,12 @@ def index(ctx, message, wrap):
 )
 @click.argument("path", type=click.Path(resolve_path=False), required=False)
 @click.argument("metric", required=False, default="maintainability.mi")
-@click.option(
-    "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
-)
-@click.option(
-    "-l", "--limit", help=_("Limit the number of results shown"), type=click.INT
-)
+@click.option("-r", "--revision", help=_("Compare against specific revision"), type=click.STRING)
+@click.option("-l", "--limit", help=_("Limit the number of results shown"), type=click.INT)
 @click.option(
     "--desc/--asc",
     help=_("Order to show results (ascending or descending)"),
     default=False,
-)
-@click.option(
-    "--threshold",
-    help=_("Return a non-zero exit code under the specified threshold"),
-    type=click.INT,
 )
 @click.option(
     "-w",
@@ -218,28 +207,31 @@ def index(ctx, message, wrap):
     default=True,
     help=_("Wrap rank text to fit in terminal"),
 )
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table border style (e.g., ROUNDED, ASCII, SIMPLE, MINIMAL, MARKDOWN)"),
+)
 @click.pass_context
-def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
+def rank(ctx, path, metric, revision, limit, desc, wrap, table_style):
     """Rank files, methods and functions in order of any metrics, e.g. complexity."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
 
-    from wily.commands.rank import rank
+    from wily.commands.rank import rank  # noqa: PLC0415
 
-    logger.debug(
-        "Running rank on %s for metric %s and revision %s", path, metric, revision
-    )
+    logger.debug("Running rank on %s for metric %s and revision %s", path, metric, revision)
     rank(
         config=config,
         path=path,
         metric=metric,
         revision_index=revision,
         limit=limit,
-        threshold=threshold,
         descending=desc,
         wrap=wrap,
+        table_style=table_style,
     )
 
 
@@ -247,22 +239,13 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
 @click.argument("file", type=click.Path(resolve_path=False))
 @click.argument("metrics", nargs=-1, required=False)
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
-@click.option(
-    "-m", "--message/--no-message", default=False, help=_("Include revision message")
-)
+@click.option("-m", "--message/--no-message", default=False, help=_("Include revision message"))
 @click.option(
     "-f",
     "--format",
     default=ReportFormat.CONSOLE.name,
     help=_("Specify report format (console or html)"),
     type=click.Choice(ReportFormat.get_all()),
-)
-@click.option(
-    "--console-format",
-    default=DEFAULT_GRID_STYLE,
-    help=_(
-        "Style for the console grid, see Tabulate Documentation for a list of styles."
-    ),
 )
 @click.option(
     "-o",
@@ -279,21 +262,20 @@ def rank(ctx, path, metric, revision, limit, desc, threshold, wrap):
     "-w",
     "--wrap/--no-wrap",
     default=True,
-    help=_("Wrap report text to fit in terminal"),
+    help=_("Wrap output text to fit in terminal"),
+)
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
 )
 @click.pass_context
-def report(
-    ctx, file, metrics, number, message, format, console_format, output, changes, wrap
-):
+def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, output, changes, wrap, table_style):
     """Show metrics for a given file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
-
-    if not metrics:
-        metrics = get_default_metrics(config)
-        logger.info("Using default metrics %s", metrics)
 
     new_output = Path().cwd()
     if output:
@@ -301,9 +283,7 @@ def report(
     else:
         new_output = new_output / "wily_report" / "index.html"
 
-    style = get_style(console_format)
-
-    from wily.commands.report import report
+    from wily.commands.report import report  # noqa: PLC0415
 
     logger.debug("Running report on %s for metric %s", file, metrics)
     logger.debug("Output format is %s", format)
@@ -316,9 +296,9 @@ def report(
         output=new_output,
         include_message=message,
         format=ReportFormat[format],
-        console_format=style,
         changes_only=changes,
         wrap=wrap,
+        table_style=table_style,
     )
 
 
@@ -342,40 +322,46 @@ def report(
     help=_("Show function/class level metrics where available"),
 )
 @click.option(
-    "-r", "--revision", help=_("Compare against specific revision"), type=click.STRING
-)
-@click.option(
     "-w",
     "--wrap/--no-wrap",
     default=True,
-    help=_("Wrap diff text to fit in terminal"),
+    help=_("Wrap output text to fit in terminal"),
+)
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
+)
+@click.option(
+    "--json/--no-json",
+    default=False,
+    help=_("Output results in JSON format"),
 )
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, revision, wrap):
+def diff(ctx, files, metrics, all, detail, wrap, table_style, json):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
 
-    if not metrics:
-        metrics = get_default_metrics(config)
-        logger.info("Using default metrics %s", metrics)
-    else:
-        metrics = metrics.split(",")
-        logger.info("Using specified metrics %s", metrics)
+    metrics_list: list[str] | None = None
+    if metrics:
+        metrics_list = metrics.split(",")
+        logger.debug("Using specified metrics %s", metrics)
 
-    from wily.commands.diff import diff
+    from wily.commands.diff import diff  # noqa: PLC0415
 
     logger.debug("Running diff on %s for metric %s", files, metrics)
     diff(
         config=config,
         files=files,
-        metrics=metrics,
+        metrics=metrics_list,
         changes_only=not all,
         detail=detail,
-        revision=revision,
         wrap=wrap,
+        table_style=table_style,
+        json=json,
     )
 
 
@@ -417,9 +403,7 @@ def diff(ctx, files, metrics, all, detail, revision, wrap):
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
 @click.option("-x", "--x-axis", help=_("Metric to use on x-axis, defaults to history."))
-@click.option(
-    "-a/-c", "--changes/--all", default=True, help=_("All commits or changes only")
-)
+@click.option("-a/-c", "--changes/--all", default=True, help=_("All commits or changes only"))
 @click.option(
     "-s/-i",
     "--aggregate/--individual",
@@ -454,7 +438,7 @@ def graph(ctx, path, metrics, output, x_axis, changes, aggregate, shared_js, cdn
     if cdn_js:
         plotlyjs = "cdn"
 
-    from wily.commands.graph import graph
+    from wily.commands.graph import graph  # noqa: PLC0415
 
     logger.debug("Running report on %s for metrics %s", path, metrics)
     graph(
@@ -485,7 +469,7 @@ def clean(ctx, yes):
         if p.lower() != "y":
             exit(0)
 
-    from wily.cache import clean
+    from wily.cache import clean  # noqa: PLC0415
 
     clean(config)
 
@@ -497,17 +481,22 @@ def clean(ctx, yes):
     default=True,
     help=_("Wrap metrics text to fit in terminal"),
 )
+@click.option(
+    "--table-style",
+    default=DEFAULT_TABLE_STYLE,
+    help=_("Table style (ROUNDED, SIMPLE, HEAVY, DOUBLE, MINIMAL, ASCII, etc.)"),
+)
 @click.pass_context
-def list_metrics(ctx, wrap):
+def list_metrics(ctx, wrap, table_style):
     """List the available metrics."""
     config = ctx.obj["CONFIG"]
 
     if not exists(config):
         handle_no_cache(ctx)
 
-    from wily.commands.list_metrics import list_metrics
+    from wily.commands.list_metrics import list_metrics  # noqa: PLC0415
 
-    list_metrics(wrap)
+    list_metrics(wrap=wrap, table_style=table_style)
 
 
 @cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))
@@ -519,9 +508,7 @@ def setup(ctx):
 
 def handle_no_cache(context):
     """Handle lack-of-cache error, prompt user for index process."""
-    logger.error(
-        _("Could not locate wily cache, the cache is required to provide insights.")
-    )
+    logger.error(_("Could not locate wily cache, the cache is required to provide insights."))
     p = input(_("Do you want to run setup and index your project now? [y/N]"))
     if p.lower() != "y":
         exit(1)
@@ -536,7 +523,7 @@ def handle_no_cache(context):
 if __name__ == "__main__":  # pragma: no cover
     try:
         cli()  # type: ignore
-    except Exception as runtime:
+    except Exception:
         logger.error("Oh no, Wily crashed! See %s for information.", WILY_LOG_NAME)
         logger.info(
             "If you think this crash was unexpected, please raise an issue at https://github.com/tonybaloney/wily/issues and copy the log file into the issue report along with some information on what you were doing."

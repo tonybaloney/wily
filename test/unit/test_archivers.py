@@ -57,8 +57,7 @@ class MockRepo:
 
 
 class MockGit:
-    def checkout(self, *args):
-        ...
+    def checkout(self, *args): ...
 
     def execute(self, command, *args, **kwargs):
         if command[1] == "ls-tree":
@@ -104,15 +103,3 @@ def test_git_init(repo):
         assert archiver.repo is not None
         assert archiver.config == test_config
 
-
-def test_git_revisions(repo, tmpdir):
-    with patch("wily.archivers.git.Repo", return_value=repo):
-        test_config = wily.config.DEFAULT_CONFIG
-        test_config.path = repo.path
-        archiver = git.GitArchiver(test_config)
-        revisions = archiver.revisions(tmpdir, 99)
-        assert archiver.repo is not None
-        assert archiver.config == test_config
-        assert revisions[0].key == "1234"
-        assert revisions[1].key == "1234"
-        assert revisions[0].author_name == "Mr Test"

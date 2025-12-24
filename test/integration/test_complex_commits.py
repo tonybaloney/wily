@@ -2,25 +2,26 @@
 Integration tests that will create a repository with multiple files
 and test the skipping of unchanged files does not impact the index.
 """
-import json
-import pathlib
-import sys
 
-import pytest
+import pathlib
+
 from click.testing import CliRunner
 from git.repo.base import Repo
 from git.util import Actor
 
 import wily.__main__ as main
+from wily.backend import WilyIndex
 
-_path1 = "src\\test1.py" if sys.platform == "win32" else "src/test1.py"
-_path2 = "src\\test2.py" if sys.platform == "win32" else "src/test2.py"
+_path1 = "src/test1.py"
+_path2 = "src/test2.py"
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
 def test_skip_files(tmpdir, cache_path):
     """
-    Test that files which were not changed are still added to each index
+    Test that only changed files are indexed in each commit.
+
+    With the optimized build process, each revision only contains metrics
+    for files that were added or modified in that specific commit.
     """
     repo = Repo.init(path=tmpdir)
     tmppath = pathlib.Path(tmpdir) / "src"
@@ -46,18 +47,14 @@ def test_skip_files(tmpdir, cache_path):
         test2_txt.write("import zzz\nprint(1)")
 
     repo.index.add([str(tmppath / "test2.py")])
-    commit2 = repo.index.commit(
-        "commit the second file only", author=author, committer=committer
-    )
+    commit2 = repo.index.commit("commit the second file only", author=author, committer=committer)
 
     # Change the first file and commit that
     with open(tmppath / "test1.py", "w") as test2_txt:
         test2_txt.write("import zzz\nprint(1)")
 
     repo.index.add([str(tmppath / "test1.py")])
-    commit3 = repo.index.commit(
-        "commit the first file only", author=author, committer=committer
-    )
+    commit3 = repo.index.commit("commit the first file only", author=author, committer=committer)
 
     repo.close()
 
@@ -69,49 +66,38 @@ def test_skip_files(tmpdir, cache_path):
     )
     assert result.exit_code == 0, result.stdout
 
-    # Check that the index files were created
+    # Check that the cache was created
     cache_path = pathlib.Path(cache_path)
     assert cache_path.exists()
-    index_path = cache_path / "git" / "index.json"
-    assert index_path.exists()
-    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
 
-    # Inspect the contents of the index for the existence of both files
-    with open(index_path) as index_file:
-        index = json.load(index_file)
+    # Check that the parquet file was created
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
 
-    assert len(index) == 3
+    # Get revision keys
+    rev1_key = commit.name_rev.split(" ")[0]
+    rev2_key = commit2.name_rev.split(" ")[0]
+    rev3_key = commit3.name_rev.split(" ")[0]
 
-    # Look at the first commit
-    with open(rev_path) as rev_file:
-        data = json.load(rev_file)
+    # Read the parquet file using WilyIndex
+    with WilyIndex(str(parquet_path), ["raw", "cyclomatic", "halstead", "maintainability"]) as idx:
+        # Filter to only file entries (not directories, root, functions, etc.)
+        file_rows = [row for row in idx if row["path_type"] == "file"]
 
-    assert "raw" in data["operator_data"]
-    assert _path1 in data["operator_data"]["raw"]
-    assert _path2 in data["operator_data"]["raw"]
+        # Look at the first commit - both files were added
+        rev1_files = [row["path"] for row in file_rows if row["revision"] == rev1_key]
+        assert _path1 in rev1_files, "First commit should have test1.py (was added)"
+        assert _path2 in rev1_files, "First commit should have test2.py (was added)"
 
-    # Look at the second commit
-    rev2_path = cache_path / "git" / (commit2.name_rev.split(" ")[0] + ".json")
-    assert rev2_path.exists()
+        # Look at the second commit - only test2.py was modified
+        rev2_files = [row["path"] for row in file_rows if row["revision"] == rev2_key]
+        assert _path1 not in rev2_files, "Second commit should NOT have test1.py (unchanged)"
+        assert _path2 in rev2_files, "Second commit should have test2.py (was modified)"
 
-    with open(rev2_path) as rev2_file:
-        data2 = json.load(rev2_file)
-
-    assert "raw" in data2["operator_data"]
-    assert _path1 in data2["operator_data"]["raw"]
-    assert _path2 in data2["operator_data"]["raw"]
-
-    # Look at the third commit
-    rev3_path = cache_path / "git" / (commit3.name_rev.split(" ")[0] + ".json")
-    assert rev3_path.exists()
-
-    with open(rev3_path) as rev3_file:
-        data3 = json.load(rev3_file)
-
-    assert "raw" in data3["operator_data"]
-    assert _path1 in data3["operator_data"]["raw"]
-    assert _path2 in data3["operator_data"]["raw"]
+        # Look at the third commit - only test1.py was modified
+        rev3_files = [row["path"] for row in file_rows if row["revision"] == rev3_key]
+        assert _path1 in rev3_files, "Third commit should have test1.py (was modified)"
+        assert _path2 not in rev3_files, "Third commit should NOT have test2.py (unchanged)"
 
 
 complex_test = """
@@ -155,109 +141,78 @@ def test_metric_entries(tmpdir, cache_path):
     )
     assert result.exit_code == 0, result.stdout
 
-    # Get the revision path and the revision data
+    # Read the parquet file using WilyIndex
     cache_path = pathlib.Path(cache_path)
-    rev_path = cache_path / "git" / (commit.name_rev.split(" ")[0] + ".json")
-    assert rev_path.exists()
-    with open(rev_path) as rev_file:
-        data = json.load(rev_file)
+    parquet_path = cache_path / "git" / "metrics.parquet"
+    assert parquet_path.exists()
 
-    # Check that basic data format is correct
-    assert "cyclomatic" in data["operator_data"]
-    assert _path1 in data["operator_data"]["cyclomatic"]
-    assert "detailed" in data["operator_data"]["cyclomatic"][_path1]
-    assert "total" in data["operator_data"]["cyclomatic"][_path1]
+    # Get the revision key
+    rev_key = commit.name_rev.split(" ")[0]
 
-    # Test total and detailed metrics
-    expected_cyclomatic_total = {"complexity": 11}
-    total_cyclomatic = data["operator_data"]["cyclomatic"][_path1]["total"]
-    assert total_cyclomatic == expected_cyclomatic_total
+    with WilyIndex(str(parquet_path), ["raw", "cyclomatic", "halstead", "maintainability"]) as idx:
+        # Check the file entry exists using __getitem__
+        file_rows = [row for row in idx[_path1] if row["path_type"] == "file"]
+        assert len(file_rows) == 1, f"Expected one file entry for {_path1}"
+        file_metrics = file_rows[0]
 
-    detailed_cyclomatic = data["operator_data"]["cyclomatic"][_path1]["detailed"]
-    assert "function1" in detailed_cyclomatic
-    assert "lineno" in detailed_cyclomatic["function1"]
-    assert "endline" in detailed_cyclomatic["function1"]
-    expected_cyclomatic_function1 = {
-        "name": "function1",
-        "is_method": False,
-        "classname": None,
-        "closures": [],
-        "complexity": 2,
-        "loc": 3,
-        "lineno": 4,
-        "endline": 7,
-    }
-    assert detailed_cyclomatic["function1"] == expected_cyclomatic_function1
+        # Check raw metrics on file (file-level totals)
+        assert file_metrics["loc"] == 14
+        assert file_metrics["lloc"] == 13
+        assert file_metrics["sloc"] == 13
+        assert file_metrics["comments"] == 0
+        assert file_metrics["multi"] == 0
+        assert file_metrics["blank"] == 1
+        assert file_metrics["single_comments"] == 0
 
-    expected_cyclomatic_Class1 = {
-        "name": "Class1",
-        "inner_classes": [],
-        "real_complexity": 5,
-        "complexity": 5,
-        "loc": 6,
-        "lineno": 8,
-        "endline": 14,
-    }
-    assert detailed_cyclomatic["Class1"] == expected_cyclomatic_Class1
+        # Check maintainability on file
+        assert abs(file_metrics["mi"] - 62.3299092923013) < 0.0001
+        assert file_metrics["rank"] == "A"
 
-    expected_cyclomatic_method = {
-        "name": "method",
-        "is_method": True,
-        "classname": "Class1",
-        "closures": [],
-        "complexity": 4,
-        "loc": 5,
-        "lineno": 9,
-        "endline": 14,
-    }
-    assert detailed_cyclomatic["Class1.method"] == expected_cyclomatic_method
+        # Check complexity on file (total)
+        assert file_metrics["complexity"] == 11
 
-    expected_halstead_total = {
-        "h1": 2,
-        "h2": 3,
-        "N1": 2,
-        "N2": 4,
-        "vocabulary": 5,
-        "volume": 13.931568569324174,
-        "length": 6,
-        "effort": 18.575424759098897,
-        "difficulty": 1.3333333333333333,
-        "lineno": None,
-        "endline": None,
-    }
-    total_halstead = data["operator_data"]["halstead"][_path1]["total"]
-    assert total_halstead == expected_halstead_total
+        # Check function entries using path query
+        func_path = f"{_path1}:function1"
+        func_rows = idx[func_path]
+        func_row = [row for row in func_rows if row["path_type"] == "function"]
+        assert len(func_row) == 1, "Expected function1 entry"
+        func_metrics = func_row[0]
+        assert func_metrics["complexity"] == 2
+        assert func_metrics["lineno"] == 4
+        assert func_metrics["endline"] == 7
+        assert func_metrics["is_method"] is False
+        assert func_metrics["classname"] is None
 
-    detailed_halstead = data["operator_data"]["halstead"][_path1]["detailed"]
-    assert "function1" in detailed_halstead
-    assert "lineno" in detailed_halstead["function1"]
-    assert detailed_halstead["function1"]["lineno"] is not None
-    assert "endline" in detailed_halstead["function1"]
-    if sys.version_info >= (3, 8):
-        # FuncDef is missing end_lineno in Python 3.7
-        assert detailed_halstead["function1"]["endline"] is not None
+        # Check class entries
+        class_path = f"{_path1}:Class1"
+        class_rows = idx[class_path]
+        class_row = [row for row in class_rows if row["path_type"] == "class"]
+        assert len(class_row) == 1, "Expected Class1 entry"
+        class_metrics = class_row[0]
+        assert class_metrics["complexity"] == 5
+        assert class_metrics["real_complexity"] == 5
+        assert class_metrics["lineno"] == 8
+        assert class_metrics["endline"] == 14
 
-    assert "Class1" not in detailed_halstead
+        # Check method entries
+        method_path = f"{_path1}:Class1.method"
+        method_rows = idx[method_path]
+        method_row = [row for row in method_rows if row["path_type"] == "function"]
+        assert len(method_row) == 1, "Expected Class1.method entry"
+        method_metrics = method_row[0]
+        assert method_metrics["complexity"] == 4
+        assert method_metrics["lineno"] == 9
+        assert method_metrics["endline"] == 14
+        assert method_metrics["is_method"] is True
+        assert method_metrics["classname"] == "Class1"
 
-    assert "Class1.method" in detailed_halstead
-    assert "lineno" in detailed_halstead["Class1.method"]
-    assert detailed_halstead["Class1.method"]["lineno"] is not None
-    assert "endline" in detailed_halstead["Class1.method"]
-    if sys.version_info >= (3, 8):
-        assert detailed_halstead["Class1.method"]["endline"] is not None
-
-    expected_raw_total = {
-        "loc": 14,
-        "lloc": 13,
-        "sloc": 13,
-        "comments": 0,
-        "multi": 0,
-        "blank": 1,
-        "single_comments": 0,
-    }
-    total_raw = data["operator_data"]["raw"][_path1]["total"]
-    assert total_raw == expected_raw_total
-
-    expected_maintainability = {"mi": 62.3299092923013, "rank": "A"}
-    total_maintainability = data["operator_data"]["maintainability"][_path1]["total"]
-    assert total_maintainability == expected_maintainability
+        # Check Halstead metrics on file (aggregated totals)
+        assert file_metrics["h1"] == 2
+        assert file_metrics["h2"] == 9
+        assert file_metrics["N1"] == 6
+        assert file_metrics["N2"] == 12
+        assert file_metrics["vocabulary"] == 11
+        assert file_metrics["length"] == 18
+        assert abs(file_metrics["volume"] - 62.2697691354714) < 0.0001
+        assert abs(file_metrics["difficulty"] - 1.3333333333333333) < 0.0001
+        assert abs(file_metrics["effort"] - 83.02635884729514) < 0.0001
