@@ -1305,7 +1305,7 @@ impl WilyIndex {
                     };
 
                     let mi = if include_maintainability {
-                        let (mi_val, rank) = maintainability::analyze_source_mi(&content, true);
+                        let (mi_val, rank) = maintainability::analyze_source_mi(&content);
                         Some((mi_val, rank))
                     } else {
                         None

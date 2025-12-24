@@ -28,7 +28,6 @@ def iter_filenames(targets: list[str], include_ipynb: bool = False) -> list[str]
 def analyze_files_parallel(
     paths: list[str],
     operators: list[str],
-    multi: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Analyze files in parallel using Rust/rayon."""
     ...

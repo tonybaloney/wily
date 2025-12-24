@@ -599,7 +599,6 @@ fn analyze_file(
     include_cyclomatic: bool,
     include_halstead: bool,
     include_maintainability: bool,
-    multi: bool,
 ) -> FileAnalysisResult {
     let raw = if include_raw {
         Some(RawResult {
@@ -651,7 +650,7 @@ fn analyze_file(
     };
 
     let maintainability = if include_maintainability {
-        let (mi, rank) = maintainability::analyze_source_mi(source, multi);
+        let (mi, rank) = maintainability::analyze_source_mi(source);
         Some(MaintainabilityResult {
             total: MaintainabilityTotal { mi, rank },
         })
@@ -686,18 +685,16 @@ fn analyze_file(
 /// # Arguments
 /// * `paths` - List of file paths to analyze
 /// * `operators` - List of operator names to run ("raw", "cyclomatic", "halstead", "maintainability")
-/// * `multi` - Whether to include multi-line strings in MI calculation
 ///
 /// # Returns
 /// A dictionary mapping file paths (and directory paths) to their analysis results.
 /// Directory paths contain aggregated metrics from all files within them.
 #[pyfunction]
-#[pyo3(signature = (paths, operators, multi=true))]
+#[pyo3(signature = (paths, operators))]
 pub fn analyze_files_parallel<'py>(
     py: Python<'py>,
     paths: Vec<String>,
     operators: Vec<String>,
-    multi: bool,
 ) -> PyResult<Bound<'py, PyDict>> {
     let include_raw = operators.iter().any(|o| o == "raw");
     let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
@@ -732,7 +729,6 @@ pub fn analyze_files_parallel<'py>(
                         include_cyclomatic,
                         include_halstead,
                         include_maintainability,
-                        multi,
                     );
 
                     (path.clone(), result)

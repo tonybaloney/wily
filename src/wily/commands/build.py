@@ -86,7 +86,7 @@ def run_operators_parallel(
 
     # Run all operators in parallel on all files using Rust/rayon
     # This also computes directory-level aggregates
-    parallel_results = analyze_files_parallel(file_paths, operator_names, multi=True)
+    parallel_results = analyze_files_parallel(file_paths, operator_names)
 
     # Transform results into the expected format per operator
     results: dict[str, dict[str, Any]] = {name: {} for name in operator_names}

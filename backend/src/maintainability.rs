@@ -571,14 +571,14 @@ fn mi_rank(score: f64) -> char {
 }
 
 /// Analyze source code and return MI metrics
-fn analyze_source(source: &str, multi: bool) -> Result<(f64, char), String> {
+fn analyze_source(source: &str) -> Result<(f64, char), String> {
     let parsed = parse_module(source).map_err(|e| e.to_string())?;
 
     // Calculate raw metrics
     let raw = calculate_raw_metrics(source);
 
     // Calculate comment percentage
-    let comment_lines = raw.comments + if multi { raw.multi } else { 0 };
+    let comment_lines = raw.comments + raw.multi;
     let comments_percent = if raw.sloc > 0 {
         (comment_lines as f64 / raw.sloc as f64) * 100.0
     } else {
@@ -608,26 +608,25 @@ fn analyze_source(source: &str, multi: bool) -> Result<(f64, char), String> {
 }
 
 /// Public API for parallel module - returns (MI value, rank string).
-pub fn analyze_source_mi(source: &str, multi: bool) -> (f64, String) {
-    match analyze_source(source, multi) {
+pub fn analyze_source_mi(source: &str) -> (f64, String) {
+    match analyze_source(source) {
         Ok((mi, rank)) => (mi, rank.to_string()),
         Err(_) => (0.0, "C".to_string()),
     }
 }
 
 #[pyfunction]
-#[pyo3(signature = (entries, multi=true))]
+#[pyo3(signature = (entries))]
 pub fn harvest_maintainability_metrics(
     py: Python<'_>,
     entries: Vec<(String, String)>,
-    multi: bool,
 ) -> PyResult<Vec<(String, Py<PyDict>)>> {
     let mut results = Vec::with_capacity(entries.len());
 
     for (name, source) in entries {
         let dict = PyDict::new(py);
 
-        match analyze_source(&source, multi) {
+        match analyze_source(&source) {
             Ok((mi, rank)) => {
                 dict.set_item("mi", mi)?;
                 dict.set_item("rank", rank.to_string())?;
