@@ -5,7 +5,7 @@ mod files;
 mod git;
 mod halstead;
 mod maintainability;
-mod parallel;
+pub mod parallel;
 mod raw;
 mod storage;
 
