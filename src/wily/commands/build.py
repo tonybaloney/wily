@@ -4,6 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
+from future.backports.datetime import datetime
 
 import os
 import pathlib
@@ -86,10 +87,15 @@ def run_operators_parallel(
 
     # Run all operators in parallel on all files using Rust/rayon
     # This also computes directory-level aggregates
+    time_start = datetime.now()
     parallel_results = analyze_files_parallel(file_paths, operator_names)
+    time_end = datetime.now()
+    logger.debug("Completed parallel analysis in %s seconds", (time_end - time_start).strftime("%s.%f"))
 
     # Transform results into the expected format per operator
     results: dict[str, dict[str, Any]] = {name: {} for name in operator_names}
+
+    logger.debug("Found %s results from parallel analysis", len(parallel_results))
 
     for file_path, file_data in parallel_results.items():
         # Convert absolute paths to relative, but leave directory paths as-is
