@@ -7,7 +7,7 @@ mod halstead;
 mod maintainability;
 pub mod parallel;
 mod raw;
-mod storage;
+pub mod storage;
 
 #[pymodule]
 fn backend(_py: Python<'_>, module: &Bound<'_, PyModule>) -> PyResult<()> {

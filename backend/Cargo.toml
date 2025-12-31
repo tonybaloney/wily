@@ -29,3 +29,7 @@ tempfile = "3"
 [[bench]]
 name = "parallel_analysis"
 harness = false
+
+[[bench]]
+name = "analyze_revision"
+harness = false

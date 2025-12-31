@@ -1335,15 +1335,16 @@ impl WilyIndex {
         let rev_author = revision_author.as_deref();
         let rev_message = revision_message.as_deref();
 
-        // Aggregate metrics by directory
+        // Aggregate metrics by directory - pre-allocate with known capacity
+        let dir_count = directories.len();
         let mut dir_raw: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
-            std::collections::HashMap::new();
+            std::collections::HashMap::with_capacity(dir_count);
         let mut dir_complexity: std::collections::HashMap<String, Vec<i64>> =
-            std::collections::HashMap::new();
+            std::collections::HashMap::with_capacity(dir_count);
         let mut dir_halstead: std::collections::HashMap<String, Vec<HalsteadTotals>> =
-            std::collections::HashMap::new();
+            std::collections::HashMap::with_capacity(dir_count);
         let mut dir_mi: std::collections::HashMap<String, Vec<(f64, String)>> =
-            std::collections::HashMap::new();
+            std::collections::HashMap::with_capacity(dir_count);
 
         // Add file rows and collect for aggregation
         for result in &file_results {
@@ -1378,13 +1379,20 @@ impl WilyIndex {
             );
             state.new_rows.push(row);
 
+            // Build a HashMap for O(1) Halstead function lookup instead of O(n) linear search
+            let halstead_map: std::collections::HashMap<&str, &HalsteadFunctionMetrics> = result
+                .halstead_functions
+                .iter()
+                .map(|h| (h.0.as_str(), h))
+                .collect();
+
             // Add function rows
             for (name, complexity, lineno, endline, is_method, classname) in
                 &result.cyclomatic_functions
             {
                 let func_path = format!("{}:{}", result.rel_path, name);
-                // Find matching halstead data if available
-                let hal = result.halstead_functions.iter().find(|(n, ..)| n == name);
+                // Find matching halstead data if available (O(1) lookup)
+                let hal = halstead_map.get(name.as_str());
                 let row = builder.add_function_row_tracked(
                     &revision_key,
                     revision_date,
@@ -1441,7 +1449,7 @@ impl WilyIndex {
                     dir_halstead.entry(dir.clone()).or_default().push(hal);
                 }
                 if let Some(mi) = &result.mi {
-                    dir_mi.entry(dir.clone()).or_default().push(mi.clone());
+                    dir_mi.entry(dir).or_default().push(mi.clone());
                 }
             }
         }
@@ -1539,6 +1547,45 @@ impl WilyIndex {
             .unwrap_or(0);
 
         Ok(root_loc)
+    }
+}
+
+/// Public Rust API for WilyIndex (for benchmarking and testing)
+impl WilyIndex {
+    /// Create a new WilyIndex (Rust API, no Python bindings needed)
+    pub fn new_rust(output_path: String, operators: Option<Vec<String>>) -> Self {
+        Self {
+            output_path,
+            builder: Mutex::new(MetricsBuilder::new()),
+            state: Mutex::new(IndexState::new()),
+            operators: operators.unwrap_or_default(),
+        }
+    }
+
+    /// Analyze a revision (Rust API for benchmarking)
+    ///
+    /// This is the same as `analyze_revision` but callable from Rust without Python bindings.
+    #[allow(clippy::too_many_arguments)]
+    pub fn analyze_revision_rust(
+        &self,
+        py: Python<'_>,
+        paths: Vec<String>,
+        base_path: String,
+        revision_key: String,
+        revision_date: i64,
+        revision_author: Option<String>,
+        revision_message: Option<String>,
+    ) -> Result<i64, String> {
+        self.analyze_revision(
+            py,
+            paths,
+            base_path,
+            revision_key,
+            revision_date,
+            revision_author,
+            revision_message,
+        )
+        .map_err(|e| e.to_string())
     }
 }
 
