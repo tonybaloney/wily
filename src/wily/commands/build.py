@@ -4,7 +4,7 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
-from future.backports.datetime import datetime
+from datetime import datetime
 
 import os
 import pathlib
