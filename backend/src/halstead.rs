@@ -179,13 +179,14 @@ impl<'src> HalsteadVisitor<'src> {
                     ast::Number::Complex { real, imag } => CompactString::new(format!("{}+{}j", real, imag)),
                 }
             }
-            Expr::StringLiteral(s) => CompactString::new(format!("{:?}", s.value.to_str())),
-            Expr::BytesLiteral(b) => CompactString::new(format!("{:?}", b.value)),
+            Expr::StringLiteral(s) => CompactString::new(s.value.to_str()),
+            Expr::BytesLiteral(_) => CompactString::const_new("<bytes>"),
             Expr::BooleanLiteral(b) => CompactString::const_new(if b.value { "True" } else { "False" }),
             Expr::NoneLiteral(_) => CompactString::const_new("None"),
             Expr::EllipsisLiteral(_) => CompactString::const_new("..."),
             Expr::Attribute(a) => CompactString::new(&a.attr),
-            _ => CompactString::new(format!("{:?}", expr)),
+            // Other complex expressions - their inner parts will be visited recursively
+            _ => CompactString::const_new("<expr>"),
         }
     }
 
@@ -199,7 +200,7 @@ impl<'src> HalsteadVisitor<'src> {
         if start < self.source.len() && end <= self.source.len() {
             CompactString::new(&self.source[start..end])
         } else {
-            CompactString::new(format!("{:?}", expr))
+            CompactString::const_new("<expr>")
         }
     }
 
