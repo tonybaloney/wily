@@ -825,17 +825,17 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
             .column(24)
             .as_primitive::<arrow::datatypes::Float64Type>();
         let lineno_col = batch
-            .column(26)
+            .column(25)
             .as_primitive::<arrow::datatypes::UInt32Type>();
         let endline_col = batch
-            .column(27)
+            .column(26)
             .as_primitive::<arrow::datatypes::UInt32Type>();
         let is_method_col = batch
-            .column(28)
+            .column(27)
             .as_any()
             .downcast_ref::<BooleanArray>()
             .unwrap();
-        let classname_col = batch.column(29).as_string::<i32>();
+        let classname_col = batch.column(28).as_string::<i32>();
 
         for i in 0..batch.num_rows() {
             let row = MetricRow {
