@@ -2027,6 +2027,7 @@ name = "wily_backend"
 version = "2.0.0"
 dependencies = [
  "arrow",
+ "compact_str",
  "criterion",
  "git2",
  "glob",

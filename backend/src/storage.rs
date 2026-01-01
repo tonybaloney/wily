@@ -1129,8 +1129,7 @@ impl WilyIndex {
         use crate::maintainability;
         use crate::raw;
         use rayon::prelude::*;
-        use std::collections::{HashSet};
-        use std::fs;
+        use std::collections::HashSet;
 
         let operators = &self.operators;
         let include_raw = operators.iter().any(|o| o == "raw");
@@ -1171,13 +1170,13 @@ impl WilyIndex {
             mi: Option<(f64, MIRank)>,
         }
 
-        // Phase 1: Parallel file analysis
+        // Phase 1: Parallel file I/O and analysis
         let file_results: Vec<FileResult> = py.detach(|| {
             paths
                 .par_iter()
                 .filter_map(|rel_path| {
                     let abs_path = base_path_buf.join(rel_path);
-                    let content = fs::read_to_string(abs_path).ok()?;
+                    let content = std::fs::read_to_string(&abs_path).ok()?;
 
                     let parsed = parse_module(&content).ok()?;
                     let line_index = LineIndex::from_source_text(&content);

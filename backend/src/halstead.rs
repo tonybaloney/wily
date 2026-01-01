@@ -15,19 +15,21 @@
 //! - For BoolOp, operands are the entire sub-expressions (not leaf values)
 //! - AugAssign counts as an operator with target and value as operands
 
+use compact_str::CompactString;
 use ruff_python_ast::{
     self as ast, Expr, ModModule, Stmt, visitor::{self, Visitor}
 };
-use ruff_text_size::{Ranged};
+use ruff_text_size::Ranged;
 use std::collections::HashSet;
 
 /// Halstead metrics for a code block
 #[derive(Debug, Clone, Default)]
 pub struct HalsteadMetrics {
-    /// Set of unique operators seen
-    operators_seen: HashSet<String>,
-    /// Set of unique operands seen (context, operand_repr)
-    operands_seen: HashSet<(Option<String>, String)>,
+    /// Set of unique operators seen (stored as &'static str for efficiency)
+    operators_seen: HashSet<&'static str>,
+    /// Set of unique operands seen (context index, operand repr)
+    /// Using CompactString to inline short strings (up to 24 bytes on 64-bit)
+    operands_seen: HashSet<(u32, CompactString)>,
     /// Total operator count
     operators: u32,
     /// Total operand count
@@ -90,8 +92,7 @@ impl HalsteadMetrics {
     }
 
     fn merge(&mut self, other: &HalsteadMetrics) {
-        self.operators_seen
-            .extend(other.operators_seen.iter().cloned());
+        self.operators_seen.extend(other.operators_seen.iter());
         self.operands_seen
             .extend(other.operands_seen.iter().cloned());
         self.operators += other.operators;
@@ -112,34 +113,37 @@ pub struct FunctionHalstead {
 struct HalsteadVisitor<'src> {
     /// Source code (for generating operand repr strings)
     source: &'src str,
-    /// Current function context (for tracking unique operands per context)
-    context: Option<String>,
+    /// Current function context index (0 = module level, 1+ = function index)
+    context_idx: u32,
     /// Metrics for current scope
     metrics: HalsteadMetrics,
     /// Collected function metrics
     functions: Vec<FunctionHalstead>,
+    /// Next context index to assign
+    next_context_idx: u32,
 }
 
 impl<'src> HalsteadVisitor<'src> {
-    fn new(source: &'src str, context: Option<String>) -> Self {
+    fn new(source: &'src str, context_idx: u32) -> Self {
         Self {
             source,
-            context,
+            context_idx,
             metrics: HalsteadMetrics::default(),
             functions: Vec::new(),
+            next_context_idx: context_idx + 1,
         }
     }
 
-    fn add_operator(&mut self, op_name: &str) {
+    #[inline]
+    fn add_operator(&mut self, op_name: &'static str) {
         self.metrics.operators += 1;
-        self.metrics.operators_seen.insert(op_name.to_string());
+        self.metrics.operators_seen.insert(op_name);
     }
 
-    fn add_operand(&mut self, operand: &str) {
+    #[inline]
+    fn add_operand(&mut self, operand: CompactString) {
         self.metrics.operands += 1;
-        self.metrics
-            .operands_seen
-            .insert((self.context.clone(), operand.to_string()));
+        self.metrics.operands_seen.insert((self.context_idx, operand));
     }
 
     /// Get the operator name from a binary operator
@@ -163,37 +167,39 @@ impl<'src> HalsteadVisitor<'src> {
     }
 
     /// Extract operand string from an expression - radon uses simple values
-    fn expr_to_operand(expr: &Expr) -> String {
+    #[inline]
+    fn expr_to_operand(expr: &Expr) -> CompactString {
         match expr {
-            Expr::Name(n) => n.id.to_string(),
+            Expr::Name(n) => CompactString::new(&n.id),
             Expr::NumberLiteral(n) => {
                 // Return the numeric value as a string
                 match &n.value {
-                    ast::Number::Int(i) => i.to_string(),
-                    ast::Number::Float(f) => f.to_string(),
-                    ast::Number::Complex { real, imag } => format!("{}+{}j", real, imag),
+                    ast::Number::Int(i) => CompactString::new(i.to_string()),
+                    ast::Number::Float(f) => CompactString::new(f.to_string()),
+                    ast::Number::Complex { real, imag } => CompactString::new(format!("{}+{}j", real, imag)),
                 }
             }
-            Expr::StringLiteral(s) => format!("{:?}", s.value.to_str()),
-            Expr::BytesLiteral(b) => format!("{:?}", b.value),
-            Expr::BooleanLiteral(b) => b.value.to_string(),
-            Expr::NoneLiteral(_) => "None".to_string(),
-            Expr::EllipsisLiteral(_) => "...".to_string(),
-            Expr::Attribute(a) => a.attr.to_string(),
-            _ => format!("{:?}", expr),
+            Expr::StringLiteral(s) => CompactString::new(format!("{:?}", s.value.to_str())),
+            Expr::BytesLiteral(b) => CompactString::new(format!("{:?}", b.value)),
+            Expr::BooleanLiteral(b) => CompactString::const_new(if b.value { "True" } else { "False" }),
+            Expr::NoneLiteral(_) => CompactString::const_new("None"),
+            Expr::EllipsisLiteral(_) => CompactString::const_new("..."),
+            Expr::Attribute(a) => CompactString::new(&a.attr),
+            _ => CompactString::new(format!("{:?}", expr)),
         }
     }
 
     /// Get a string representation of an expression (for BoolOp operands)
     /// Radon stores the entire AST node as the operand
-    fn expr_repr(&self, expr: &Expr) -> String {
+    #[inline]
+    fn expr_repr(&self, expr: &Expr) -> CompactString {
         // Get the source text for this expression
         let start = expr.range().start().to_usize();
         let end = expr.range().end().to_usize();
         if start < self.source.len() && end <= self.source.len() {
-            self.source[start..end].to_string()
+            CompactString::new(&self.source[start..end])
         } else {
-            format!("{:?}", expr)
+            CompactString::new(format!("{:?}", expr))
         }
     }
 
@@ -202,12 +208,20 @@ impl<'src> HalsteadVisitor<'src> {
         // Radon does NOT prefix method names with class name - just use the function name
         let func_name = node.name.to_string();
 
-        let mut func_visitor = HalsteadVisitor::new(self.source, Some(func_name.clone()));
+        // Assign a unique context index for this function
+        let func_context_idx = self.next_context_idx;
+        self.next_context_idx += 1;
+
+        let mut func_visitor = HalsteadVisitor::new(self.source, func_context_idx);
+        func_visitor.next_context_idx = self.next_context_idx;
 
         // Visit the function body
         for stmt in &node.body {
             func_visitor.visit_stmt(stmt);
         }
+
+        // Update our next_context_idx from nested functions
+        self.next_context_idx = func_visitor.next_context_idx;
 
         // Store function metrics (before merging so we keep per-function metrics separate)
         let func_metrics = func_visitor.metrics.clone();
@@ -246,8 +260,8 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
             Stmt::AugAssign(node) => {
                 // Augmented assignment: 1 operator, 2 operands (target, value)
                 self.add_operator(Self::binop_name(&node.op));
-                self.add_operand(&Self::expr_to_operand(&node.target));
-                self.add_operand(&Self::expr_to_operand(&node.value));
+                self.add_operand(Self::expr_to_operand(&node.target));
+                self.add_operand(Self::expr_to_operand(&node.value));
                 visitor::walk_stmt(self, stmt);
             }
             _ => {
@@ -261,14 +275,14 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
             Expr::BinOp(node) => {
                 // Binary operator: 1 operator, 2 operands
                 self.add_operator(Self::binop_name(&node.op));
-                self.add_operand(&Self::expr_to_operand(&node.left));
-                self.add_operand(&Self::expr_to_operand(&node.right));
+                self.add_operand(Self::expr_to_operand(&node.left));
+                self.add_operand(Self::expr_to_operand(&node.right));
                 visitor::walk_expr(self, expr);
             }
             Expr::UnaryOp(node) => {
                 // Unary operator: 1 operator, 1 operand
                 self.add_operator(Self::unaryop_name(&node.op));
-                self.add_operand(&Self::expr_to_operand(&node.operand));
+                self.add_operand(Self::expr_to_operand(&node.operand));
                 visitor::walk_expr(self, expr);
             }
             Expr::BoolOp(node) => {
@@ -276,7 +290,7 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
                 // Radon stores the entire sub-expressions as operands!
                 self.add_operator(Self::boolop_name(&node.op));
                 for value in &node.values {
-                    self.add_operand(&self.expr_repr(value));
+                    self.add_operand(self.expr_repr(value));
                 }
                 visitor::walk_expr(self, expr);
             }
@@ -285,9 +299,9 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
                 for op in &node.ops {
                     self.add_operator(Self::cmpop_name(op));
                 }
-                self.add_operand(&Self::expr_to_operand(&node.left));
+                self.add_operand(Self::expr_to_operand(&node.left));
                 for comp in &node.comparators {
-                    self.add_operand(&Self::expr_to_operand(comp));
+                    self.add_operand(Self::expr_to_operand(comp));
                 }
                 visitor::walk_expr(self, expr);
             }
@@ -303,7 +317,7 @@ pub fn analyze(
     source: &str,
     parsed: &ruff_python_parser::Parsed<ModModule>
 ) -> (HalsteadMetrics, Vec<FunctionHalstead>) {
-    let mut visitor = HalsteadVisitor::new(source, None);
+    let mut visitor = HalsteadVisitor::new(source, 0);
 
     for stmt in parsed.suite() {
         visitor.visit_stmt(stmt);
