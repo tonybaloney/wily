@@ -103,7 +103,7 @@ def diff(  # noqa: C901
                     last_data[file][key] = value
 
     # Run operators on current files
-    data = # TODO: Use storage module # run_operators_parallel(operators, targets, config)
+    data = ...# TODO: Use storage module # run_operators_parallel(operators, targets, config)
 
     # Build list of extra paths (functions/classes) from current data
     extra = []
