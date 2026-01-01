@@ -135,11 +135,12 @@ fn bench_analyze_revision_by_operator(c: &mut Criterion) {
     let (temp_dir, paths) = setup_test_files(100);
     let base_path = temp_dir.path().to_string_lossy().to_string();
 
+    // Note: maintainability requires raw metrics for MI calculation
     for (name, ops) in [
         ("raw_only", vec!["raw"]),
         ("cyclomatic_only", vec!["cyclomatic"]),
         ("halstead_only", vec!["halstead"]),
-        ("maintainability_only", vec!["maintainability"]),
+        ("maintainability_with_raw", vec!["raw", "maintainability"]),
         ("raw_cyclomatic", vec!["raw", "cyclomatic"]),
         ("all_operators", vec!["raw", "cyclomatic", "halstead", "maintainability"]),
     ] {
