@@ -5,18 +5,12 @@ mod files;
 mod git;
 mod halstead;
 mod maintainability;
-pub mod parallel;
 mod raw;
 pub mod storage;
 
 #[pymodule]
 fn backend(_py: Python<'_>, module: &Bound<'_, PyModule>) -> PyResult<()> {
-    raw::register(module)?;
-    cyclomatic::register(module)?;
-    halstead::register(module)?;
-    maintainability::register(module)?;
     files::register(module)?;
-    parallel::register(module)?;
     git::register(module)?;
     storage::register(module)?;
     Ok(())

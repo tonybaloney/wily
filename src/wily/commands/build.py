@@ -26,7 +26,7 @@ from rich.text import Text
 from wily import logger
 from wily.archivers import Archiver, FilesystemArchiver, RevisionInfo
 from wily.archivers.git import GitArchiver, InvalidGitRepositoryError
-from wily.backend import WilyIndex, analyze_files_parallel, iter_filenames
+from wily.backend import WilyIndex
 from wily.cache import create as create_cache
 from wily.config.types import WilyConfig
 from wily.operators import Operator
@@ -51,69 +51,6 @@ class SpeedColumn(ProgressColumn):
             f"{completed:{total_width}d}{self.separator}{total} ({speed:.2f}/sec)",
             style="progress.download",
         )
-
-
-def run_operators_parallel(
-    operators: list[Operator],
-    targets: list[str],
-    config: WilyConfig,
-) -> dict[str, dict[str, Any]]:
-    """
-    Run all operators in parallel using Rust/rayon.
-
-    Used by diff command for comparing working directory changes.
-
-    :param operators: List of operators to run
-    :param targets: List of file paths to analyze
-    :param config: The wily configuration
-    :return: Dictionary mapping operator names to their results
-    """
-    operator_names = [op.name for op in operators]
-
-    if not operator_names or not targets:
-        return {name: {} for name in operator_names}
-
-    # Discover all Python files from targets
-    file_paths = list(iter_filenames(targets, include_ipynb=True))
-
-    if not file_paths:
-        return {name: {} for name in operator_names}
-
-    logger.debug(
-        "Running Rust parallel analysis on %d files with operators: %s",
-        len(file_paths),
-        operator_names,
-    )
-
-    # Run all operators in parallel on all files using Rust/rayon
-    # This also computes directory-level aggregates
-    time_start = datetime.now()
-    parallel_results = analyze_files_parallel(file_paths, operator_names)
-    time_end = datetime.now()
-    logger.debug("Completed parallel analysis in %s seconds", (time_end - time_start).strftime("%s.%f"))
-
-    # Transform results into the expected format per operator
-    results: dict[str, dict[str, Any]] = {name: {} for name in operator_names}
-
-    logger.debug("Found %s results from parallel analysis", len(parallel_results))
-
-    for file_path, file_data in parallel_results.items():
-        # Convert absolute paths to relative, but leave directory paths as-is
-        if os.path.isabs(file_path):
-            rel_path = os.path.relpath(file_path, config.path).replace("\\", "/")
-        else:
-            rel_path = file_path  # Already a relative/directory path from aggregation
-
-        if "error" in file_data:
-            for op_name in operator_names:
-                results[op_name][rel_path] = {"total": {"error": file_data["error"]}}
-            continue
-
-        for op_name in operator_names:
-            if op_name in file_data:
-                results[op_name][rel_path] = file_data[op_name]
-
-    return results
 
 
 def analyze_revision_with_index(

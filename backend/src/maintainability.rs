@@ -9,24 +9,12 @@
 //! Formula (normalized 0-100):
 //! MI = max(0, min(100, (171 - 5.2*ln(V) - 0.23*CC - 16.2*ln(LLOC) + 50*sin(sqrt(2.46*radians(CM)))) * 100/171))
 
-use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyModule};
 use ruff_python_ast::{
-    self as ast,
-    visitor::{self, Visitor},
-    Stmt,
+    self as ast, ModModule, Stmt, visitor::{self, Visitor}
 };
-use ruff_python_parser::parse_module;
 use std::collections::HashSet;
 
-/// Raw metrics needed for MI calculation
-#[derive(Debug, Clone, Default)]
-struct RawMetrics {
-    lloc: u32,
-    sloc: u32,
-    comments: u32,
-    multi: u32,
-}
+use crate::raw::RawCounts;
 
 /// Halstead metrics needed for MI calculation
 /// Note: operands_seen tracks (context, operand) pairs like radon does
@@ -475,71 +463,7 @@ impl<'a> Visitor<'a> for HalsteadVisitor {
     }
 }
 
-/// Calculate raw metrics from source
-fn calculate_raw_metrics(source: &str) -> RawMetrics {
-    let mut metrics = RawMetrics::default();
-    let mut in_multiline_string = false;
-    let mut multiline_quote: Option<&str> = None;
-
-    for line in source.lines() {
-        let trimmed = line.trim();
-
-        // Skip empty lines for SLOC
-        if trimmed.is_empty() {
-            continue;
-        }
-
-        // Check for multiline string boundaries
-        if in_multiline_string {
-            metrics.multi += 1;
-            if let Some(quote) = multiline_quote {
-                if trimmed.contains(quote) {
-                    in_multiline_string = false;
-                    multiline_quote = None;
-                }
-            }
-            continue;
-        }
-
-        // Check for start of multiline string
-        if trimmed.starts_with("\"\"\"") || trimmed.starts_with("'''") {
-            let quote = if trimmed.starts_with("\"\"\"") {
-                "\"\"\""
-            } else {
-                "'''"
-            };
-            // Check if it ends on the same line
-            if trimmed.len() > 3 && trimmed[3..].contains(quote) {
-                metrics.multi += 1;
-            } else {
-                in_multiline_string = true;
-                multiline_quote = Some(quote);
-                metrics.multi += 1;
-            }
-            continue;
-        }
-
-        // Check for comments
-        if trimmed.starts_with('#') {
-            metrics.comments += 1;
-            continue;
-        }
-
-        // SLOC: non-blank, non-comment lines
-        metrics.sloc += 1;
-
-        // LLOC: lines with actual code (simplified - count lines with statements)
-        // This is a simplification; proper LLOC requires parsing
-        if !trimmed.is_empty() && !trimmed.starts_with('#') {
-            metrics.lloc += 1;
-        }
-    }
-
-    metrics
-}
-
-/// Compute the Maintainability Index
-fn mi_compute(halstead_volume: f64, complexity: u32, lloc: u32, comments_percent: f64) -> f64 {
+fn mi_compute(halstead_volume: f64, complexity: u32, lloc: usize, comments_percent: f64) -> f64 {
     if halstead_volume <= 0.0 || lloc == 0 {
         return 100.0;
     }
@@ -559,24 +483,37 @@ fn mi_compute(halstead_volume: f64, complexity: u32, lloc: u32, comments_percent
     (nn_mi * 100.0 / 171.0).clamp(0.0, 100.0)
 }
 
-/// Compute the MI rank (A, B, or C)
-fn mi_rank(score: f64) -> char {
-    if score > 19.0 {
-        'A'
-    } else if score > 9.0 {
-        'B'
-    } else {
-        'C'
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+pub enum MIRank {
+    A,
+    B,
+    C,
+}
+
+impl MIRank {
+    pub fn to_string(&self) -> &'static str {
+        match self {
+            MIRank::A => "A",
+            MIRank::B => "B",
+            MIRank::C => "C",
+        }
     }
 }
 
-/// Analyze source code and return MI metrics
-fn analyze_source(source: &str) -> Result<(f64, char), String> {
-    let parsed = parse_module(source).map_err(|e| e.to_string())?;
+/// Compute the MI rank (A, B, or C)
+pub fn mi_rank(score: f64) -> MIRank {
+    if score > 19.0 {
+        MIRank::A
+    } else if score > 9.0 {
+        MIRank::B
+    } else {
+        MIRank::C
+    }
+}
 
-    // Calculate raw metrics
-    let raw = calculate_raw_metrics(source);
-
+/// Public API for parallel module - returns (MI value, rank string).
+/// Uses &'static str for rank to avoid allocations.
+pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>, raw: RawCounts) -> (f64, MIRank) {
     // Calculate comment percentage
     let comment_lines = raw.comments + raw.multi;
     let comments_percent = if raw.sloc > 0 {
@@ -604,45 +541,5 @@ fn analyze_source(source: &str) -> Result<(f64, char), String> {
     let mi = mi_compute(volume, total_complexity, raw.lloc, comments_percent);
     let rank = mi_rank(mi);
 
-    Ok((mi, rank))
-}
-
-/// Public API for parallel module - returns (MI value, rank string).
-pub fn analyze_source_mi(source: &str) -> (f64, String) {
-    match analyze_source(source) {
-        Ok((mi, rank)) => (mi, rank.to_string()),
-        Err(_) => (0.0, "C".to_string()),
-    }
-}
-
-#[pyfunction]
-#[pyo3(signature = (entries))]
-pub fn harvest_maintainability_metrics(
-    py: Python<'_>,
-    entries: Vec<(String, String)>,
-) -> PyResult<Vec<(String, Py<PyDict>)>> {
-    let mut results = Vec::with_capacity(entries.len());
-
-    for (name, source) in entries {
-        let dict = PyDict::new(py);
-
-        match analyze_source(&source) {
-            Ok((mi, rank)) => {
-                dict.set_item("mi", mi)?;
-                dict.set_item("rank", rank.to_string())?;
-            }
-            Err(err) => {
-                dict.set_item("error", err)?;
-            }
-        }
-
-        results.push((name, dict.unbind()));
-    }
-
-    Ok(results)
-}
-
-pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_function(wrap_pyfunction!(harvest_maintainability_metrics, module)?)?;
-    Ok(())
+    (mi, rank)
 }

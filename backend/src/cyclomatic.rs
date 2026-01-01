@@ -4,16 +4,10 @@
 //! - Each function/method gets a complexity score starting at 1
 //! - Decision points (if, for, while, except, and, or, etc.) add to complexity
 
-use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList, PyModule};
 use ruff_python_ast::{
-    self as ast,
-    visitor::{self, Visitor},
-    Expr, Pattern, Stmt,
+    self as ast, Expr, ModModule, Pattern, Stmt, visitor::{self, Visitor}
 };
-use ruff_python_parser::parse_module;
-use ruff_source_file::LineIndex;
-use ruff_text_size::{Ranged, TextSize};
+use ruff_text_size::{Ranged};
 
 /// Result for a single function/method (storing byte offsets)
 #[derive(Debug, Clone)]
@@ -24,7 +18,6 @@ pub struct FunctionComplexity {
     pub is_method: bool,
     pub classname: Option<String>,
     pub complexity: u32,
-    pub closures: Vec<FunctionComplexity>,
 }
 
 impl FunctionComplexity {
@@ -33,33 +26,6 @@ impl FunctionComplexity {
             Some(cls) => format!("{}.{}", cls, self.name),
             None => self.name.clone(),
         }
-    }
-
-    fn to_pydict<'py>(
-        &self,
-        py: Python<'py>,
-        line_index: &LineIndex,
-    ) -> PyResult<Bound<'py, PyDict>> {
-        let dict = PyDict::new(py);
-        dict.set_item("name", &self.name)?;
-
-        let lineno = line_index.line_index(TextSize::new(self.start_offset));
-        let endline = line_index.line_index(TextSize::new(self.end_offset));
-        dict.set_item("lineno", lineno.to_zero_indexed() + 1)?; // 1-indexed
-        dict.set_item("col_offset", 0u32)?; // TODO: get actual column
-        dict.set_item("endline", endline.to_zero_indexed() + 1)?; // 1-indexed
-        dict.set_item("is_method", self.is_method)?;
-        dict.set_item("classname", self.classname.as_deref())?;
-        dict.set_item("complexity", self.complexity)?;
-        dict.set_item("fullname", self.fullname())?;
-
-        let closures_list = PyList::empty(py);
-        for closure in &self.closures {
-            closures_list.append(closure.to_pydict(py, line_index)?)?;
-        }
-        dict.set_item("closures", closures_list)?;
-
-        Ok(dict)
     }
 }
 
@@ -70,7 +36,6 @@ pub struct ClassComplexity {
     pub start_offset: u32, // byte offset
     pub end_offset: u32,   // byte offset
     pub methods: Vec<FunctionComplexity>,
-    pub inner_classes: Vec<ClassComplexity>,
     pub real_complexity: u32,
 }
 
@@ -84,38 +49,6 @@ impl ClassComplexity {
             let avg = self.real_complexity / methods_count;
             avg + if methods_count > 1 { 1 } else { 0 }
         }
-    }
-
-    fn to_pydict<'py>(
-        &self,
-        py: Python<'py>,
-        line_index: &LineIndex,
-    ) -> PyResult<Bound<'py, PyDict>> {
-        let dict = PyDict::new(py);
-        dict.set_item("name", &self.name)?;
-
-        let lineno = line_index.line_index(TextSize::new(self.start_offset));
-        let endline = line_index.line_index(TextSize::new(self.end_offset));
-        dict.set_item("lineno", lineno.to_zero_indexed() + 1)?; // 1-indexed
-        dict.set_item("col_offset", 0u32)?; // TODO
-        dict.set_item("endline", endline.to_zero_indexed() + 1)?; // 1-indexed
-        dict.set_item("complexity", self.complexity())?;
-        dict.set_item("real_complexity", self.real_complexity)?;
-        dict.set_item("fullname", &self.name)?;
-
-        let methods_list = PyList::empty(py);
-        for method in &self.methods {
-            methods_list.append(method.to_pydict(py, line_index)?)?;
-        }
-        dict.set_item("methods", methods_list)?;
-
-        let inner_list = PyList::empty(py);
-        for inner in &self.inner_classes {
-            inner_list.append(inner.to_pydict(py, line_index)?)?;
-        }
-        dict.set_item("inner_classes", inner_list)?;
-
-        Ok(dict)
     }
 }
 
@@ -172,7 +105,6 @@ impl ComplexityVisitor {
             is_method: self.is_method,
             classname: self.classname.clone(),
             complexity: body_complexity,
-            closures,
         };
 
         self.functions.push(func);
@@ -182,7 +114,6 @@ impl ComplexityVisitor {
     fn visit_class(&mut self, node: &ast::StmtClassDef) {
         let mut methods = Vec::new();
         let mut body_complexity = 1u32;
-        let mut inner_classes = Vec::new();
         let mut max_end_offset = node.range().end().to_u32();
         let classname = node.name.to_string();
 
@@ -205,7 +136,6 @@ impl ComplexityVisitor {
 
             // Now move the functions
             methods.extend(visitor.functions);
-            inner_classes.extend(visitor.classes);
 
             body_complexity += visitor.complexity + funcs_complexity - funcs_count + funcs_count;
         }
@@ -215,7 +145,6 @@ impl ComplexityVisitor {
             start_offset: node.range().start().to_u32(),
             end_offset: max_end_offset,
             methods,
-            inner_classes,
             real_complexity: body_complexity,
         };
 
@@ -342,13 +271,9 @@ impl<'a> Visitor<'a> for ComplexityVisitor {
     }
 }
 
-/// Analyze source code and return cyclomatic complexity results
-fn analyze_source(
-    source: &str,
-) -> Result<(Vec<FunctionComplexity>, Vec<ClassComplexity>, LineIndex), String> {
-    let parsed = parse_module(source).map_err(|e| e.to_string())?;
-    let line_index = LineIndex::from_source_text(source);
-
+pub fn analyze(
+    parsed: &ruff_python_parser::Parsed<ModModule>,
+) -> (Vec<FunctionComplexity>, Vec<ClassComplexity>) {
     let mut visitor = ComplexityVisitor::new(false, None, true); // no_assert=true by default
 
     for stmt in parsed.suite() {
@@ -364,52 +289,5 @@ fn analyze_source(
         }
     }
 
-    Ok((all_functions, visitor.classes, line_index))
-}
-
-/// Public API for parallel module - returns full analysis results.
-pub fn analyze_source_full(
-    source: &str,
-) -> Result<(Vec<FunctionComplexity>, Vec<ClassComplexity>, LineIndex), String> {
-    analyze_source(source)
-}
-
-#[pyfunction]
-pub fn harvest_cyclomatic_metrics(
-    py: Python<'_>,
-    entries: Vec<(String, String)>,
-) -> PyResult<Vec<(String, Py<PyDict>)>> {
-    let mut results = Vec::with_capacity(entries.len());
-
-    for (name, source) in entries {
-        let dict = PyDict::new(py);
-
-        match analyze_source(&source) {
-            Ok((functions, classes, line_index)) => {
-                let funcs_list = PyList::empty(py);
-                for func in &functions {
-                    funcs_list.append(func.to_pydict(py, &line_index)?)?;
-                }
-                dict.set_item("functions", funcs_list)?;
-
-                let classes_list = PyList::empty(py);
-                for cls in &classes {
-                    classes_list.append(cls.to_pydict(py, &line_index)?)?;
-                }
-                dict.set_item("classes", classes_list)?;
-            }
-            Err(err) => {
-                dict.set_item("error", err)?;
-            }
-        }
-
-        results.push((name, dict.unbind()));
-    }
-
-    Ok(results)
-}
-
-pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_function(wrap_pyfunction!(harvest_cyclomatic_metrics, module)?)?;
-    Ok(())
+    (all_functions, visitor.classes)
 }

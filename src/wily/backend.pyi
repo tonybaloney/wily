@@ -4,33 +4,11 @@ from typing import Any
 
 from wily.archivers import RevisionInfo
 
-def harvest_maintainability_metrics(sources: list[tuple[str, str]]) -> list[tuple[str, dict[str, Any]]]:
-    """Harvest maintainability metrics from source files using Rust backend."""
-    ...
-
-def harvest_cyclomatic_metrics(sources: list[tuple[str, str]]) -> list[tuple[str, dict[str, Any]]]:
-    """Harvest cyclomatic complexity metrics from source files using Rust backend."""
-    ...
-
-
-def harvest_raw_metrics(sources: list[tuple[str, str]]) -> list[tuple[str, dict[str, Any]]]:
-    """Harvest raw metrics from source files using Rust backend."""
-    ...
-
-def harvest_halstead_metrics(sources: list[tuple[str, str]]) -> list[tuple[str, dict[str, Any]]]:
-    """Harvest halstead metrics from source files using Rust backend."""
-    ...
 
 def iter_filenames(targets: list[str], include_ipynb: bool = False) -> list[str]:
     """Iterate over Python filenames in targets."""
     ...
 
-def analyze_files_parallel(
-    paths: list[str],
-    operators: list[str],
-) -> dict[str, dict[str, Any]]:
-    """Analyze files in parallel using Rust/rayon."""
-    ...
 
 def get_metrics_schema() -> list[tuple[str, str]]:
     """Get the parquet schema as a list of (name, type) tuples."""

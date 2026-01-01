@@ -10,36 +10,29 @@
 //! - single_comments: Lines containing only comments
 
 use pyo3::prelude::*;
-use pyo3::types::PyModule;
-use ruff_python_ast::PySourceType;
-use ruff_python_parser::{parse_unchecked_source, TokenKind};
+use ruff_python_ast::ModModule;
+use ruff_python_parser::{TokenKind};
 use ruff_python_trivia::CommentRanges;
 use ruff_source_file::{LineIndex, OneIndexed};
 use ruff_text_size::{Ranged, TextRange};
 
 #[derive(Debug, Default, Clone, Copy, IntoPyObject)]
-struct RawCounts {
-    loc: u32,
-    lloc: u32,
-    sloc: u32,
-    comments: u32,
-    blank: u32,
-    multi: u32,
-    single_comments: u32,
+pub struct RawCounts {
+    pub loc: usize,
+    pub lloc: usize,
+    pub sloc: usize,
+    pub comments: usize,
+    pub blank: usize,
+    pub multi: usize,
+    pub single_comments: usize,
 }
 
-fn analyze_source(source: &str) -> RawCounts {
-    if source.is_empty() {
-        return RawCounts::default();
-    }
-
-    let line_index = LineIndex::from_source_text(source);
-    let parsed = parse_unchecked_source(source, PySourceType::Python);
+pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>, line_index: &LineIndex, source: &str) -> RawCounts {
     let tokens = parsed.tokens();
     let comment_ranges: CommentRanges = tokens.into();
 
     // Count total lines
-    let loc = count_lines(source);
+    let loc = line_index.line_count();
     if loc == 0 {
         return RawCounts::default();
     }
@@ -50,7 +43,7 @@ fn analyze_source(source: &str) -> RawCounts {
     let mut single_line_docstring_lines = vec![false; loc as usize];
 
     // Track comment count
-    let comments = comment_ranges.len() as u32;
+    let comments = comment_ranges.len();
 
     // Process tokens to find strings and identify single-line docstrings
     // Group tokens by logical line (ending at Newline/EOF)
@@ -90,9 +83,9 @@ fn analyze_source(source: &str) -> RawCounts {
     }
 
     // Count blank lines, multi-line string lines, and single-comment lines
-    let mut blank = 0u32;
-    let mut multi = 0u32;
-    let mut single_comments = 0u32;
+    let mut blank = 0usize;
+    let mut multi = 0usize;
+    let mut single_comments = 0usize;
 
     for line_num in 0..loc as usize {
         let line_idx = OneIndexed::from_zero_indexed(line_num);
@@ -162,33 +155,11 @@ fn is_single_line_docstring(tokens: &[(TokenKind, usize, usize)]) -> bool {
     *kind == TokenKind::String && start_line == end_line
 }
 
-/// Count physical lines in source
-fn count_lines(source: &str) -> u32 {
-    if source.is_empty() {
-        return 0;
-    }
-    source.lines().count() as u32
-}
-
-/// Public API for parallel module - returns raw metrics as a HashMap.
-pub fn analyze_source_raw(source: &str) -> std::collections::HashMap<String, i64> {
-    let counts = analyze_source(source);
-    let mut map = std::collections::HashMap::new();
-    map.insert("loc".to_string(), counts.loc as i64);
-    map.insert("lloc".to_string(), counts.lloc as i64);
-    map.insert("sloc".to_string(), counts.sloc as i64);
-    map.insert("comments".to_string(), counts.comments as i64);
-    map.insert("blank".to_string(), counts.blank as i64);
-    map.insert("multi".to_string(), counts.multi as i64);
-    map.insert("single_comments".to_string(), counts.single_comments as i64);
-    map
-}
-
 /// Count logical lines of code using token stream.
 /// A logical line ends at Newline tokens (not NonLogicalNewline).
 /// Each logical line can contain multiple statements separated by semicolons.
-fn count_logical_lines(tokens: &ruff_python_parser::Tokens) -> u32 {
-    let mut lloc = 0u32;
+fn count_logical_lines(tokens: &ruff_python_parser::Tokens) -> usize {
+    let mut lloc = 0usize;
     let mut current_line: Vec<TokenKind> = Vec::new();
 
     for token in tokens.iter() {
@@ -207,12 +178,12 @@ fn count_logical_lines(tokens: &ruff_python_parser::Tokens) -> u32 {
 /// Count logical statements in a single logical line.
 /// Semicolons separate multiple statements on one line.
 /// Colons followed by code (like `if x: pass`) count as 2.
-fn count_logical_line(tokens: &[TokenKind]) -> u32 {
+fn count_logical_line(tokens: &[TokenKind]) -> usize {
     if tokens.is_empty() {
         return 0;
     }
 
-    let mut total = 0u32;
+    let mut total = 0usize;
     let mut start = 0usize;
 
     for (idx, &kind) in tokens.iter().enumerate() {
@@ -226,7 +197,7 @@ fn count_logical_line(tokens: &[TokenKind]) -> u32 {
 }
 
 /// Count a single segment (between semicolons) as 0, 1, or 2 logical lines.
-fn count_logical_segment(tokens: &[TokenKind]) -> u32 {
+fn count_logical_segment(tokens: &[TokenKind]) -> usize {
     // Filter out non-code tokens
     let code_tokens: Vec<TokenKind> = tokens
         .iter()
@@ -255,25 +226,4 @@ fn count_logical_segment(tokens: &[TokenKind]) -> u32 {
     }
 
     1
-}
-
-#[pyfunction]
-pub fn harvest_raw_metrics(
-    py: Python<'_>,
-    entries: Vec<(String, String)>,
-) -> PyResult<Vec<(String, Py<PyAny>)>> {
-    let mut results = Vec::with_capacity(entries.len());
-
-    for (name, source) in entries {
-        let metrics = analyze_source(&source);
-        let obj = metrics.into_pyobject(py)?.into_any().unbind();
-        results.push((name, obj));
-    }
-
-    Ok(results)
-}
-
-pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_function(wrap_pyfunction!(harvest_raw_metrics, module)?)?;
-    Ok(())
 }

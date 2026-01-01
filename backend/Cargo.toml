@@ -27,9 +27,5 @@ criterion = { version = "0.5", features = ["html_reports"] }
 tempfile = "3"
 
 [[bench]]
-name = "parallel_analysis"
-harness = false
-
-[[bench]]
 name = "analyze_revision"
 harness = false

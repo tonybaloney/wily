@@ -12,9 +12,14 @@ use parquet::basic::Compression;
 use parquet::file::properties::WriterProperties;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
+use ruff_python_parser::parse_module;
+use ruff_source_file::LineIndex;
 use std::fs::File;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+
+use crate::maintainability::{MIRank, mi_rank};
+use crate::raw::RawCounts;
 
 // Type aliases for complex Halstead metric tuples to satisfy clippy
 type HalsteadTotals = (u32, u32, u32, u32, u32, u32, f64, f64, f64);
@@ -92,7 +97,6 @@ fn metrics_schema() -> Schema {
         Field::new("effort", DataType::Float64, true),
         // Maintainability
         Field::new("mi", DataType::Float64, true),
-        Field::new("rank", DataType::Utf8, true),
         // Function/class specific
         Field::new("lineno", DataType::UInt32, true),
         Field::new("endline", DataType::UInt32, true),
@@ -129,7 +133,6 @@ pub struct MetricRow {
     pub difficulty: Option<f64>,
     pub effort: Option<f64>,
     pub mi: Option<f64>,
-    pub rank: Option<String>,
     pub lineno: Option<u32>,
     pub endline: Option<u32>,
     pub is_method: Option<bool>,
@@ -165,7 +168,7 @@ impl MetricRow {
         dict.set_item("difficulty", self.difficulty)?;
         dict.set_item("effort", self.effort)?;
         dict.set_item("mi", self.mi)?;
-        dict.set_item("rank", &self.rank)?;
+        dict.set_item("rank", mi_rank(self.mi.unwrap_or(0.0)).to_string())?;
         dict.set_item("lineno", self.lineno)?;
         dict.set_item("endline", self.endline)?;
         dict.set_item("is_method", self.is_method)?;
@@ -205,7 +208,6 @@ pub struct MetricsBuilder {
     effort: Float64Builder,
     // Maintainability
     mi: Float64Builder,
-    rank: StringBuilder,
     // Function/class
     lineno: UInt32Builder,
     endline: UInt32Builder,
@@ -243,7 +245,6 @@ impl MetricsBuilder {
             difficulty: Float64Builder::new(),
             effort: Float64Builder::new(),
             mi: Float64Builder::new(),
-            rank: StringBuilder::new(),
             lineno: UInt32Builder::new(),
             endline: UInt32Builder::new(),
             is_method: arrow::array::BooleanBuilder::new(),
@@ -284,7 +285,6 @@ impl MetricsBuilder {
         effort: Option<f64>,
         // Maintainability
         mi: Option<f64>,
-        rank: Option<&str>,
     ) {
         self.revision.append_value(revision);
         self.revision_date.append_value(revision_date);
@@ -315,7 +315,6 @@ impl MetricsBuilder {
         self.effort.append_option(effort);
 
         self.mi.append_option(mi);
-        self.rank.append_option(rank);
 
         self.lineno.append_null();
         self.endline.append_null();
@@ -380,7 +379,6 @@ impl MetricsBuilder {
         self.effort.append_option(effort);
 
         self.mi.append_null();
-        self.rank.append_null();
 
         self.lineno.append_value(lineno);
         self.endline.append_value(endline);
@@ -435,7 +433,6 @@ impl MetricsBuilder {
         self.effort.append_null();
 
         self.mi.append_null();
-        self.rank.append_null();
 
         self.lineno.append_value(lineno);
         self.endline.append_value(endline);
@@ -475,7 +472,6 @@ impl MetricsBuilder {
             Arc::new(self.difficulty.finish()),
             Arc::new(self.effort.finish()),
             Arc::new(self.mi.finish()),
-            Arc::new(self.rank.finish()),
             Arc::new(self.lineno.finish()),
             Arc::new(self.endline.finish()),
             Arc::new(self.is_method.finish()),
@@ -518,7 +514,6 @@ impl MetricsBuilder {
         difficulty: Option<f64>,
         effort: Option<f64>,
         mi: Option<f64>,
-        rank: Option<&str>,
     ) -> MetricRow {
         self.add_aggregate_row(
             revision,
@@ -545,7 +540,6 @@ impl MetricsBuilder {
             difficulty,
             effort,
             mi,
-            rank,
         );
         MetricRow {
             revision: revision.to_string(),
@@ -573,7 +567,6 @@ impl MetricsBuilder {
             difficulty,
             effort,
             mi,
-            rank: rank.map(|s| s.to_string()),
             lineno: None,
             endline: None,
             is_method: None,
@@ -652,7 +645,6 @@ impl MetricsBuilder {
             difficulty,
             effort,
             mi: None,
-            rank: None,
             lineno: Some(lineno),
             endline: Some(endline),
             is_method: Some(is_method),
@@ -711,7 +703,6 @@ impl MetricsBuilder {
             difficulty: None,
             effort: None,
             mi: None,
-            rank: None,
             lineno: Some(lineno),
             endline: Some(endline),
             is_method: None,
@@ -833,7 +824,6 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
         let mi_col = batch
             .column(24)
             .as_primitive::<arrow::datatypes::Float64Type>();
-        let rank_col = batch.column(25).as_string::<i32>();
         let lineno_col = batch
             .column(26)
             .as_primitive::<arrow::datatypes::UInt32Type>();
@@ -957,11 +947,6 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
                     None
                 } else {
                     Some(mi_col.value(i))
-                },
-                rank: if rank_col.is_null(i) {
-                    None
-                } else {
-                    Some(rank_col.value(i).to_string())
                 },
                 lineno: if lineno_col.is_null(i) {
                     None
@@ -1144,7 +1129,7 @@ impl WilyIndex {
         use crate::maintainability;
         use crate::raw;
         use rayon::prelude::*;
-        use std::collections::{HashMap, HashSet};
+        use std::collections::{HashSet};
         use std::fs;
 
         let operators = &self.operators;
@@ -1177,13 +1162,13 @@ impl WilyIndex {
         // Analysis result for a single file
         struct FileResult {
             rel_path: String,
-            raw: Option<HashMap<String, i64>>,
+            raw: Option<RawCounts>,
             cyclomatic_total: Option<i64>,
             cyclomatic_functions: Vec<(String, u32, u32, u32, bool, Option<String>)>,
             cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>,
             halstead_total: Option<HalsteadTotals>,
             halstead_functions: Vec<HalsteadFunctionMetrics>,
-            mi: Option<(f64, String)>,
+            mi: Option<(f64, MIRank)>,
         }
 
         // Phase 1: Parallel file analysis
@@ -1193,16 +1178,20 @@ impl WilyIndex {
                 .filter_map(|rel_path| {
                     let abs_path = base_path_buf.join(rel_path);
                     let content = fs::read_to_string(abs_path).ok()?;
+
+                    let parsed = parse_module(&content).ok()?;
+                    let line_index = LineIndex::from_source_text(&content);
+
                     let raw = if include_raw {
-                        Some(raw::analyze_source_raw(&content))
+                        Some(raw::analyze(&parsed, &line_index, &content))
                     } else {
                         None
                     };
 
                     let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) =
                         if include_cyclomatic {
-                            match cyclomatic::analyze_source_full(&content) {
-                                Ok((functions, classes, line_index)) => {
+                            match cyclomatic::analyze(&parsed) {
+                                (functions, classes) => {
                                     let mut total: i64 = 0;
                                     let funcs: Vec<_> = functions
                                         .iter()
@@ -1249,19 +1238,17 @@ impl WilyIndex {
                                         .collect();
                                     (Some(total), funcs, cls)
                                 }
-                                Err(_) => (Some(0), Vec::new(), Vec::new()),
                             }
                         } else {
                             (None, Vec::new(), Vec::new())
                         };
 
                     let (halstead_total, halstead_functions) = if include_halstead {
-                        match halstead::analyze_source_full(&content) {
-                            Ok((functions, total, line_index)) => {
-                                let total_metrics = (
-                                    total.h1(),
-                                    total.h2(),
-                                    total.n1(),
+                        let (total, functions) = halstead::analyze(&content, &parsed);
+                        let total_metrics = (
+                            total.h1(),
+                            total.h2(),
+                            total.n1(),
                                     total.n2(),
                                     total.vocabulary(),
                                     total.length(),
@@ -1297,15 +1284,11 @@ impl WilyIndex {
                                     })
                                     .collect();
                                 (Some(total_metrics), funcs)
-                            }
-                            Err(_) => (Some((0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0)), Vec::new()),
-                        }
-                    } else {
-                        (None, Vec::new())
-                    };
-
+                        } else {
+                            (None, Vec::new())
+                        };
                     let mi = if include_maintainability {
-                        let (mi_val, rank) = maintainability::analyze_source_mi(&content);
+                        let (mi_val, rank) = maintainability::analyze(&parsed, raw.expect("Raw metrics required for maintainability"));
                         Some((mi_val, rank))
                     } else {
                         None
@@ -1337,13 +1320,13 @@ impl WilyIndex {
 
         // Aggregate metrics by directory - pre-allocate with known capacity
         let dir_count = directories.len();
-        let mut dir_raw: std::collections::HashMap<String, std::collections::HashMap<String, i64>> =
+        let mut dir_raw: std::collections::HashMap<String, RawCounts> =
             std::collections::HashMap::with_capacity(dir_count);
         let mut dir_complexity: std::collections::HashMap<String, Vec<i64>> =
             std::collections::HashMap::with_capacity(dir_count);
         let mut dir_halstead: std::collections::HashMap<String, Vec<HalsteadTotals>> =
             std::collections::HashMap::with_capacity(dir_count);
-        let mut dir_mi: std::collections::HashMap<String, Vec<(f64, String)>> =
+        let mut dir_mi: std::collections::HashMap<String, Vec<(f64, MIRank)>> =
             std::collections::HashMap::with_capacity(dir_count);
 
         // Add file rows and collect for aggregation
@@ -1357,13 +1340,13 @@ impl WilyIndex {
                 rev_message,
                 &result.rel_path,
                 "file",
-                raw_metrics.and_then(|r| r.get("loc").copied()),
-                raw_metrics.and_then(|r| r.get("sloc").copied()),
-                raw_metrics.and_then(|r| r.get("lloc").copied()),
-                raw_metrics.and_then(|r| r.get("comments").copied()),
-                raw_metrics.and_then(|r| r.get("multi").copied()),
-                raw_metrics.and_then(|r| r.get("blank").copied()),
-                raw_metrics.and_then(|r| r.get("single_comments").copied()),
+                raw_metrics.and_then(|r| Some(r.loc as i64)),
+                raw_metrics.and_then(|r| Some(r.sloc as i64)),
+                raw_metrics.and_then(|r| Some(r.lloc as i64)),
+                raw_metrics.and_then(|r| Some(r.comments as i64)),
+                raw_metrics.and_then(|r| Some(r.multi as i64)),
+                raw_metrics.and_then(|r| Some(r.blank as i64)),
+                raw_metrics.and_then(|r| Some(r.single_comments as i64)),
                 result.cyclomatic_total.map(|c| c as f64),
                 result.halstead_total.map(|h| h.0 as i64),
                 result.halstead_total.map(|h| h.1 as i64),
@@ -1375,7 +1358,6 @@ impl WilyIndex {
                 result.halstead_total.map(|h| h.7),
                 result.halstead_total.map(|h| h.8),
                 result.mi.as_ref().map(|(mi, _)| *mi),
-                result.mi.as_ref().map(|(_, r)| r.as_str()),
             );
             state.new_rows.push(row);
 
@@ -1436,11 +1418,23 @@ impl WilyIndex {
 
             // Collect for directory aggregation
             for dir in get_parent_paths(&result.rel_path) {
-                if let Some(raw) = &result.raw {
-                    let entry = dir_raw.entry(dir.clone()).or_default();
-                    for (k, v) in raw {
-                        *entry.entry(k.clone()).or_insert(0) += v;
-                    }
+                if let Some(raw) = result.raw {
+                    let entry = dir_raw.entry(dir.clone()).or_insert(RawCounts {
+                        loc: 0,
+                        sloc: 0,
+                        lloc: 0,
+                        comments: 0,
+                        multi: 0,
+                        blank: 0,
+                        single_comments: 0,
+                    });
+                    entry.loc += raw.loc;
+                    entry.sloc += raw.sloc;
+                    entry.lloc += raw.lloc;
+                    entry.comments += raw.comments;
+                    entry.multi += raw.multi;
+                    entry.blank += raw.blank;
+                    entry.single_comments += raw.single_comments;
                 }
                 if let Some(cc) = result.cyclomatic_total {
                     dir_complexity.entry(dir.clone()).or_default().push(cc);
@@ -1449,7 +1443,7 @@ impl WilyIndex {
                     dir_halstead.entry(dir.clone()).or_default().push(hal);
                 }
                 if let Some(mi) = &result.mi {
-                    dir_mi.entry(dir).or_default().push(mi.clone());
+                    dir_mi.entry(dir).or_default().push(*mi);
                 }
             }
         }
@@ -1490,24 +1484,15 @@ impl WilyIndex {
                 )
             });
 
-            let (mean_mi, mode_rank) = if let Some(v) = mis {
+            let mean_mi = if let Some(v) = mis {
                 if v.is_empty() {
-                    (None, None)
+                    None
                 } else {
                     let mean = v.iter().map(|(mi, _)| mi).sum::<f64>() / v.len() as f64;
-                    // Mode of ranks
-                    let mut rank_counts: HashMap<&str, usize> = HashMap::new();
-                    for (_, r) in v {
-                        *rank_counts.entry(r.as_str()).or_insert(0) += 1;
-                    }
-                    let mode = rank_counts
-                        .into_iter()
-                        .max_by_key(|(_, c)| *c)
-                        .map(|(r, _)| r.to_string());
-                    (Some(mean), mode)
+                    Some(mean)
                 }
             } else {
-                (None, None)
+                None
             };
 
             let row = builder.add_aggregate_row_tracked(
@@ -1517,13 +1502,13 @@ impl WilyIndex {
                 rev_message,
                 dir,
                 path_type,
-                raw.and_then(|r| r.get("loc").copied()),
-                raw.and_then(|r| r.get("sloc").copied()),
-                raw.and_then(|r| r.get("lloc").copied()),
-                raw.and_then(|r| r.get("comments").copied()),
-                raw.and_then(|r| r.get("multi").copied()),
-                raw.and_then(|r| r.get("blank").copied()),
-                raw.and_then(|r| r.get("single_comments").copied()),
+                raw.and_then(|r| Some(r.loc as i64)),
+                raw.and_then(|r| Some(r.sloc as i64)),
+                raw.and_then(|r| Some(r.lloc as i64)),
+                raw.and_then(|r| Some(r.comments as i64)),
+                raw.and_then(|r| Some(r.multi as i64)),
+                raw.and_then(|r| Some(r.blank as i64)),
+                raw.and_then(|r| Some(r.single_comments as i64)),
                 mean_complexity,
                 sum_halstead.map(|h| h.0),
                 sum_halstead.map(|h| h.1),
@@ -1535,7 +1520,6 @@ impl WilyIndex {
                 sum_halstead.map(|h| h.7),
                 sum_halstead.map(|h| h.8),
                 mean_mi,
-                mode_rank.as_deref(),
             );
             state.new_rows.push(row);
         }
@@ -1543,10 +1527,10 @@ impl WilyIndex {
         // Get root LOC
         let root_loc = dir_raw
             .get("")
-            .and_then(|r| r.get("loc").copied())
+            .map(|r| r.loc)
             .unwrap_or(0);
 
-        Ok(root_loc)
+        Ok(root_loc as i64)
     }
 }
 

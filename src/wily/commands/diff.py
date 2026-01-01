@@ -17,7 +17,6 @@ from rich.text import Text
 from wily import logger
 from wily.backend import WilyIndex, iter_filenames
 from wily.cache import get_default_metrics_path
-from wily.commands.build import run_operators_parallel
 from wily.config import DEFAULT_PATH
 from wily.config.types import WilyConfig
 from wily.defaults import DEFAULT_ARCHIVER, DEFAULT_TABLE_STYLE
@@ -104,7 +103,7 @@ def diff(  # noqa: C901
                     last_data[file][key] = value
 
     # Run operators on current files
-    data = run_operators_parallel(operators, targets, config)
+    data = # TODO: Use storage module # run_operators_parallel(operators, targets, config)
 
     # Build list of extra paths (functions/classes) from current data
     extra = []

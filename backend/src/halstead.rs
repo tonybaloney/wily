@@ -15,16 +15,10 @@
 //! - For BoolOp, operands are the entire sub-expressions (not leaf values)
 //! - AugAssign counts as an operator with target and value as operands
 
-use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyModule};
 use ruff_python_ast::{
-    self as ast,
-    visitor::{self, Visitor},
-    Expr, Stmt,
+    self as ast, Expr, ModModule, Stmt, visitor::{self, Visitor}
 };
-use ruff_python_parser::parse_module;
-use ruff_source_file::LineIndex;
-use ruff_text_size::{Ranged, TextSize};
+use ruff_text_size::{Ranged};
 use std::collections::HashSet;
 
 /// Halstead metrics for a code block
@@ -103,20 +97,6 @@ impl HalsteadMetrics {
         self.operators += other.operators;
         self.operands += other.operands;
     }
-
-    fn to_pydict<'py>(&self, py: Python<'py>) -> PyResult<pyo3::Bound<'py, PyDict>> {
-        let dict = PyDict::new(py);
-        dict.set_item("h1", self.h1())?;
-        dict.set_item("h2", self.h2())?;
-        dict.set_item("N1", self.n1())?;
-        dict.set_item("N2", self.n2())?;
-        dict.set_item("vocabulary", self.vocabulary())?;
-        dict.set_item("length", self.length())?;
-        dict.set_item("volume", self.volume())?;
-        dict.set_item("difficulty", self.difficulty())?;
-        dict.set_item("effort", self.effort())?;
-        Ok(dict)
-    }
 }
 
 /// Result for a function/method with line info
@@ -126,23 +106,6 @@ pub struct FunctionHalstead {
     pub start_offset: u32,
     pub end_offset: u32,
     pub metrics: HalsteadMetrics,
-}
-
-impl FunctionHalstead {
-    fn to_pydict<'py>(
-        &self,
-        py: Python<'py>,
-        line_index: &LineIndex,
-    ) -> PyResult<pyo3::Bound<'py, PyDict>> {
-        let dict = self.metrics.to_pydict(py)?;
-
-        let lineno = line_index.line_index(TextSize::new(self.start_offset));
-        let endline = line_index.line_index(TextSize::new(self.end_offset));
-        dict.set_item("lineno", lineno.to_zero_indexed() + 1)?;
-        dict.set_item("endline", endline.to_zero_indexed() + 1)?;
-
-        Ok(dict)
-    }
 }
 
 /// Visitor that collects Halstead metrics
@@ -335,66 +298,16 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
     }
 }
 
-/// Analyze source code and return Halstead metrics
-fn analyze_source(
+/// Public API for parallel module - returns full analysis results.
+pub fn analyze(
     source: &str,
-) -> Result<(HalsteadMetrics, Vec<FunctionHalstead>, LineIndex), String> {
-    let parsed = parse_module(source).map_err(|e| e.to_string())?;
-    let line_index = LineIndex::from_source_text(source);
-
+    parsed: &ruff_python_parser::Parsed<ModModule>
+) -> (HalsteadMetrics, Vec<FunctionHalstead>) {
     let mut visitor = HalsteadVisitor::new(source, None);
 
     for stmt in parsed.suite() {
         visitor.visit_stmt(stmt);
     }
 
-    Ok((visitor.metrics, visitor.functions, line_index))
-}
-
-/// Public API for parallel module - returns full analysis results.
-pub fn analyze_source_full(
-    source: &str,
-) -> Result<(Vec<FunctionHalstead>, HalsteadMetrics, LineIndex), String> {
-    analyze_source(source).map(|(total, functions, line_index)| (functions, total, line_index))
-}
-
-#[pyfunction]
-pub fn harvest_halstead_metrics(
-    py: Python<'_>,
-    entries: Vec<(String, String)>,
-) -> PyResult<Vec<(String, Py<PyDict>)>> {
-    let mut results = Vec::with_capacity(entries.len());
-
-    for (name, source) in entries {
-        let dict = PyDict::new(py);
-
-        match analyze_source(&source) {
-            Ok((total_metrics, functions, line_index)) => {
-                // Total metrics (no line info for total)
-                let total_dict = total_metrics.to_pydict(py)?;
-                total_dict.set_item("lineno", py.None())?;
-                total_dict.set_item("endline", py.None())?;
-                dict.set_item("total", total_dict)?;
-
-                // Function metrics
-                let funcs_dict = PyDict::new(py);
-                for func in &functions {
-                    funcs_dict.set_item(&func.name, func.to_pydict(py, &line_index)?)?;
-                }
-                dict.set_item("functions", funcs_dict)?;
-            }
-            Err(err) => {
-                dict.set_item("error", err)?;
-            }
-        }
-
-        results.push((name, dict.unbind()));
-    }
-
-    Ok(results)
-}
-
-pub fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
-    module.add_function(wrap_pyfunction!(harvest_halstead_metrics, module)?)?;
-    Ok(())
+    (visitor.metrics, visitor.functions)
 }
