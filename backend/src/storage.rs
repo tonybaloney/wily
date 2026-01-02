@@ -168,7 +168,9 @@ impl MetricRow {
         dict.set_item("difficulty", self.difficulty)?;
         dict.set_item("effort", self.effort)?;
         dict.set_item("mi", self.mi)?;
-        dict.set_item("rank", mi_rank(self.mi.unwrap_or(0.0)).to_string())?;
+        if let Some(mi_val) = self.mi {
+            dict.set_item("rank", mi_rank(mi_val).to_string())?;
+        }
         dict.set_item("lineno", self.lineno)?;
         dict.set_item("endline", self.endline)?;
         dict.set_item("is_method", self.is_method)?;
@@ -1756,9 +1758,10 @@ impl WilyIndex {
             }
 
             // Maintainability
-            if let Some((mi, rank)) = file_result.mi {
+            if let Some((mi, _rank)) = file_result.mi {
                 file_dict.set_item("mi", mi)?;
-                file_dict.set_item("rank", rank.to_string())?;
+                // Rank is computed on-the-fly from MI when needed
+                file_dict.set_item("rank", mi_rank(mi).to_string())?;
             }
 
             // Add detailed dict for functions and classes
