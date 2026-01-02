@@ -112,7 +112,8 @@ def test_diff_output_more_complex(builddir):
     data = json.loads(result.stdout)  # Verify valid JSON output
     assert len(data) > 0
     assert data[0]['file'] == "src/test.py"
-    assert data[0]['complexity'] == "6 -> 11"
+    assert data[0]['metrics']['complexity']['before'] == 6
+    assert data[0]['metrics']['complexity']['after'] == 11
 
 
 def test_diff_output_less_complex(builddir):
@@ -140,7 +141,8 @@ def test_diff_output_less_complex(builddir):
     data = json.loads(result.stdout)  # Verify valid JSON output
     assert len(data) > 0
     assert data[0]['file'] == "src/test.py"
-    assert data[0]['complexity'] == "6 -> 4"
+    assert data[0]['metrics']['complexity']['before'] == 6
+    assert data[0]['metrics']['complexity']['after'] == 4
 
 
 def test_diff_output_loc(builddir):
@@ -160,8 +162,10 @@ def test_diff_output_loc(builddir):
     assert result.exit_code == 0, result.stderr
     data = json.loads(result.stdout)  # Verify valid JSON output
     assert len(data) > 0
-    assert "test.py" in result.stdout
-    assert "11 -> 1" in result.stdout
+    file_entry = next((e for e in data if "test.py" in e["file"]), None)
+    assert file_entry is not None, f"Expected test.py in output: {data}"
+    assert file_entry['metrics']['loc']['before'] == 11
+    assert file_entry['metrics']['loc']['after'] == 1
 
 
 def test_diff_output_rank(builddir):
@@ -660,13 +664,13 @@ def test_diff_specific_metric_filters_output(tmpdir):
     # Should have entries
     assert len(data) > 0
     
-    # Each entry should only have 'file' and 'complexity' keys
+    # Each entry should only have 'file' and 'metrics' with 'complexity' key
     for entry in data:
         assert "file" in entry
-        assert "complexity" in entry
+        assert "complexity" in entry["metrics"]
         # Should not have other metrics
-        assert "mi" not in entry
-        assert "loc" not in entry
+        assert "mi" not in entry["metrics"]
+        assert "loc" not in entry["metrics"]
     
     # No duplicates
     file_counts = {}
@@ -885,22 +889,23 @@ def test_diff_no_detail_raw_metrics_unchanged_when_mi_changes(tmpdir):
     file_entry = next((e for e in data if e["file"] == "src/test.py"), None)
     assert file_entry is not None, f"Expected src/test.py in output, got: {data}"
     
-    # loc, sloc, lloc values should be the SAME (e.g., "5 -> 5", not "5 -> 6")
+    # loc, sloc, lloc values should be the SAME (before == after)
     # The line count hasn't changed, only the content
-    if "loc" in file_entry:
-        loc_val = file_entry["loc"]
-        old, new = loc_val.split(" -> ")
-        assert old == new, f"loc values should be identical when line count unchanged: {loc_val}"
+    metrics = file_entry.get("metrics", {})
+    if "loc" in metrics:
+        loc_metric = metrics["loc"]
+        assert loc_metric["before"] == loc_metric["after"], \
+            f"loc values should be identical when line count unchanged: {loc_metric}"
     
-    if "sloc" in file_entry:
-        sloc_val = file_entry["sloc"]
-        old, new = sloc_val.split(" -> ")
-        assert old == new, f"sloc values should be identical when line count unchanged: {sloc_val}"
+    if "sloc" in metrics:
+        sloc_metric = metrics["sloc"]
+        assert sloc_metric["before"] == sloc_metric["after"], \
+            f"sloc values should be identical when line count unchanged: {sloc_metric}"
     
-    if "lloc" in file_entry:
-        lloc_val = file_entry["lloc"]
-        old, new = lloc_val.split(" -> ")
-        assert old == new, f"lloc values should be identical when line count unchanged: {lloc_val}"
+    if "lloc" in metrics:
+        lloc_metric = metrics["lloc"]
+        assert lloc_metric["before"] == lloc_metric["after"], \
+            f"lloc values should be identical when line count unchanged: {lloc_metric}"
     
     repo.close()
 
@@ -1043,8 +1048,11 @@ def test_diff_with_revision_parameter(tmpdir):
     # Should show diff from revision 1 (complexity 1) to current (complexity 3)
     file_entry = next((e for e in data if e["file"] == "src/test.py"), None)
     assert file_entry is not None, f"Expected src/test.py in output: {data}"
-    assert "complexity" in file_entry, f"Expected complexity metric: {file_entry}"
-    assert "1 ->" in file_entry["complexity"], f"Expected complexity to start from 1: {file_entry['complexity']}"
+    assert "complexity" in file_entry["metrics"], f"Expected complexity metric: {file_entry}"
+    assert file_entry["metrics"]["complexity"]["before"] == 1, \
+        f"Expected complexity before to be 1: {file_entry['metrics']['complexity']}"
+    assert file_entry["metrics"]["complexity"]["after"] == 3, \
+        f"Expected complexity after to be 3: {file_entry['metrics']['complexity']}"
     
     # Run diff against revision 2 (commit 2) - default behavior (latest)
     result = runner.invoke(
@@ -1058,8 +1066,11 @@ def test_diff_with_revision_parameter(tmpdir):
     # Should show diff from revision 2 (complexity 2) to current (complexity 3)
     file_entry = next((e for e in data if e["file"] == "src/test.py"), None)
     assert file_entry is not None, f"Expected src/test.py in output: {data}"
-    assert "complexity" in file_entry, f"Expected complexity metric: {file_entry}"
-    assert "2 ->" in file_entry["complexity"], f"Expected complexity to start from 2: {file_entry['complexity']}"
+    assert "complexity" in file_entry["metrics"], f"Expected complexity metric: {file_entry}"
+    assert file_entry["metrics"]["complexity"]["before"] == 2, \
+        f"Expected complexity before to be 2: {file_entry['metrics']['complexity']}"
+    assert file_entry["metrics"]["complexity"]["after"] == 3, \
+        f"Expected complexity after to be 3: {file_entry['metrics']['complexity']}"
     
     repo.close()
 
