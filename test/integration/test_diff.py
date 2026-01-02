@@ -1064,3 +1064,43 @@ def test_diff_with_revision_parameter(tmpdir):
     repo.close()
 
 
+def test_diff_with_revision_not_indexed_exits_error(tmpdir):
+    """
+    Test that --revision parameter exits with error if revision is not indexed.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code
+    initial_code = dedent("""
+        def my_function():
+            x = 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    commit1 = repo.index.commit("commit 1", author=author, committer=author)
+    
+    # Build wily index
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Try diff with a non-existent revision
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--revision", "nonexistent123"],
+    )
+    assert result.exit_code == 1, f"Expected exit code 1, got {result.exit_code}"
+    
+    repo.close()

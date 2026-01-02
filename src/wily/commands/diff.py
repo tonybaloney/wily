@@ -102,8 +102,8 @@ def diff(  # noqa: C901
                 if revision:
                     data = next((row for row in path_rows if row.get("revision") == revision), None)
                     if data is None:
-                        logger.warning(f"Revision {revision} not found for {file}, using latest")
-                        data = path_rows[-1]
+                        logger.error(f"Revision {revision} not found for {file}")
+                        raise SystemExit(1)
                 else:
                     data = path_rows[-1]
                 # Copy all metric values
@@ -127,7 +127,8 @@ def diff(  # noqa: C901
                         if revision:
                             obj_data = next((row for row in obj_rows if row.get("revision") == revision), None)
                             if obj_data is None:
-                                obj_data = obj_rows[-1]
+                                logger.error(f"Revision {revision} not found for {obj_path}")
+                                raise SystemExit(1)
                         else:
                             obj_data = obj_rows[-1]
                         for key, value in obj_data.items():
