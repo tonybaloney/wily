@@ -194,3 +194,627 @@ def test_diff_output_rank(builddir):
 
 # TODO: Test diff with details
 # TODO: Test diff with multiple files
+
+
+def test_diff_only_shows_changed_functions(tmpdir):
+    """
+    Test that diff only shows functions/classes that have actually changed.
+    
+    This is a regression test for a bug where all functions/classes were shown
+    as having changed even when only one was modified.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code with two distinct functions
+    initial_code = dedent("""
+        def unchanged_function():
+            '''This function will not be modified'''
+            x = 1
+            return x
+
+        def changed_function():
+            '''This function will be modified'''
+            y = 2
+            return y
+        
+        class UnchangedClass:
+            def method(self):
+                return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    # Initialize git repo
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    # Build wily index
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify ONLY changed_function - add complexity
+    modified_code = dedent("""
+        def unchanged_function():
+            '''This function will not be modified'''
+            x = 1
+            return x
+
+        def changed_function():
+            '''This function will be modified'''
+            y = 2
+            if y > 1:
+                y = y + 1
+            return y
+        
+        class UnchangedClass:
+            def method(self):
+                return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff with JSON output
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Collect which entries show changes
+    changed_entries = [entry["file"] for entry in data]
+    
+    # The file itself should show changes (file-level metrics changed)
+    assert "src/test.py" in changed_entries
+    
+    # changed_function should show in diff (complexity increased)
+    assert "src/test.py:changed_function" in changed_entries
+    
+    # unchanged_function should NOT show in diff - it wasn't modified!
+    assert "src/test.py:unchanged_function" not in changed_entries, \
+        f"unchanged_function should not appear in diff, but found entries: {changed_entries}"
+    
+    # UnchangedClass and its method should NOT show in diff
+    assert "src/test.py:UnchangedClass" not in changed_entries, \
+        f"UnchangedClass should not appear in diff, but found entries: {changed_entries}"
+    assert "src/test.py:UnchangedClass.method" not in changed_entries, \
+        f"UnchangedClass.method should not appear in diff, but found entries: {changed_entries}"
+    
+    repo.close()
+
+
+def test_diff_no_duplicate_entries(tmpdir):
+    """
+    Test that diff doesn't show duplicate entries for functions/classes.
+    
+    This is a regression test for a bug where each function/class appeared
+    multiple times in the output (once per operator).
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code
+    initial_code = dedent("""
+        def my_function():
+            x = 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    # Initialize git repo
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    # Build wily index
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify the function - add complexity
+    modified_code = dedent("""
+        def my_function():
+            x = 1
+            if x > 0:
+                x = x + 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff with JSON output
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Count occurrences of each file entry
+    file_counts = {}
+    for entry in data:
+        file_path = entry["file"]
+        file_counts[file_path] = file_counts.get(file_path, 0) + 1
+    
+    # Each file/function/class should appear at most once
+    for file_path, count in file_counts.items():
+        assert count == 1, \
+            f"{file_path} appears {count} times in diff output, expected 1. Full output: {data}"
+    
+    repo.close()
+
+
+def test_diff_with_multiple_functions_only_changed_shown(tmpdir):
+    """
+    Test that when multiple functions exist but only some change,
+    only the changed ones appear in the diff output (without --all flag).
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code with multiple functions
+    initial_code = dedent("""
+        def func_a():
+            return 1
+        
+        def func_b():
+            return 2
+        
+        def func_c():
+            return 3
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify ONLY func_b - add complexity
+    modified_code = dedent("""
+        def func_a():
+            return 1
+        
+        def func_b():
+            x = 2
+            if x > 1:
+                return x + 1
+            return 2
+        
+        def func_c():
+            return 3
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff (changes_only=True by default)
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    changed_files = [entry["file"] for entry in data]
+    
+    # File-level should show (total metrics changed)
+    assert "src/test.py" in changed_files
+    
+    # Only func_b should show as changed
+    assert "src/test.py:func_b" in changed_files
+    
+    # func_a and func_c should NOT appear (no changes)
+    assert "src/test.py:func_a" not in changed_files, \
+        f"func_a should not appear, got: {changed_files}"
+    assert "src/test.py:func_c" not in changed_files, \
+        f"func_c should not appear, got: {changed_files}"
+    
+    repo.close()
+
+
+def test_diff_with_classes_and_methods(tmpdir):
+    """
+    Test diff output with classes and methods - no duplicates, only changed items.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code with class
+    initial_code = dedent("""
+        class MyClass:
+            def method_a(self):
+                return 1
+            
+            def method_b(self):
+                return 2
+        
+        def standalone_func():
+            return 3
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify only method_b
+    modified_code = dedent("""
+        class MyClass:
+            def method_a(self):
+                return 1
+            
+            def method_b(self):
+                x = 2
+                if x > 1:
+                    return x * 2
+                return 2
+        
+        def standalone_func():
+            return 3
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Check for no duplicates
+    file_counts = {}
+    for entry in data:
+        file_path = entry["file"]
+        file_counts[file_path] = file_counts.get(file_path, 0) + 1
+    
+    for file_path, count in file_counts.items():
+        assert count == 1, f"{file_path} appears {count} times"
+    
+    changed_files = list(file_counts.keys())
+    
+    # method_b changed, so MyClass total complexity changed
+    assert "src/test.py:MyClass.method_b" in changed_files
+    assert "src/test.py:MyClass" in changed_files  # Class aggregate changed
+    
+    # These should NOT appear (unchanged)
+    assert "src/test.py:MyClass.method_a" not in changed_files
+    assert "src/test.py:standalone_func" not in changed_files
+    
+    repo.close()
+
+
+def test_diff_all_flag_shows_unchanged_items(tmpdir):
+    """
+    Test that --all flag shows items even when they haven't changed.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    initial_code = dedent("""
+        def func_a():
+            return 1
+        
+        def func_b():
+            return 2
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify only func_b
+    modified_code = dedent("""
+        def func_a():
+            return 1
+        
+        def func_b():
+            x = 2
+            if x > 1:
+                return x + 1
+            return 2
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff with --all flag
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--all", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # No duplicates even with --all
+    file_counts = {}
+    for entry in data:
+        file_path = entry["file"]
+        file_counts[file_path] = file_counts.get(file_path, 0) + 1
+    
+    for file_path, count in file_counts.items():
+        assert count == 1, f"{file_path} appears {count} times with --all flag"
+    
+    changed_files = list(file_counts.keys())
+    
+    # With --all, both functions should appear
+    assert "src/test.py" in changed_files
+    assert "src/test.py:func_a" in changed_files  # Shown because of --all
+    assert "src/test.py:func_b" in changed_files  # Shown because it changed
+    
+    repo.close()
+
+
+def test_diff_specific_metric_filters_output(tmpdir):
+    """
+    Test that specifying a metric filters the output appropriately.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    initial_code = dedent("""
+        def my_func():
+            return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    modified_code = dedent("""
+        def my_func():
+            x = 1
+            if x > 0:
+                return x + 1
+            return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff with only cyclomatic.complexity metric
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--metrics", "cyclomatic.complexity", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Should have entries
+    assert len(data) > 0
+    
+    # Each entry should only have 'file' and 'complexity' keys
+    for entry in data:
+        assert "file" in entry
+        assert "complexity" in entry
+        # Should not have other metrics
+        assert "mi" not in entry
+        assert "loc" not in entry
+    
+    # No duplicates
+    file_counts = {}
+    for entry in data:
+        file_path = entry["file"]
+        file_counts[file_path] = file_counts.get(file_path, 0) + 1
+    
+    for file_path, count in file_counts.items():
+        assert count == 1, f"{file_path} appears {count} times"
+    
+    repo.close()
+
+
+def test_diff_new_function_added(tmpdir):
+    """
+    Test diff when a new function is added to an existing file.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    initial_code = dedent("""
+        def existing_func():
+            return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Add a new function
+    modified_code = dedent("""
+        def existing_func():
+            return 1
+        
+        def new_func():
+            x = 1
+            if x > 0:
+                return x + 1
+            return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    changed_files = [entry["file"] for entry in data]
+    
+    # File-level should change (new function adds to totals)
+    assert "src/test.py" in changed_files
+    
+    # New function should appear (it's new, so metrics go from None/- to values)
+    assert "src/test.py:new_func" in changed_files
+    
+    # existing_func should NOT appear (unchanged)
+    assert "src/test.py:existing_func" not in changed_files
+    
+    # No duplicates
+    file_counts = {}
+    for entry in data:
+        file_path = entry["file"]
+        file_counts[file_path] = file_counts.get(file_path, 0) + 1
+    
+    for file_path, count in file_counts.items():
+        assert count == 1, f"{file_path} appears {count} times"
+    
+    repo.close()
+
+
+def test_diff_function_removed(tmpdir):
+    """
+    Test diff when a function is removed from an existing file.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    initial_code = dedent("""
+        def func_to_keep():
+            return 1
+        
+        def func_to_remove():
+            return 2
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Remove func_to_remove
+    modified_code = dedent("""
+        def func_to_keep():
+            return 1
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    changed_files = [entry["file"] for entry in data]
+    
+    # File-level should change
+    assert "src/test.py" in changed_files
+    
+    # func_to_keep should NOT appear (unchanged)
+    assert "src/test.py:func_to_keep" not in changed_files
+    
+    # Note: func_to_remove won't appear because it's not in current_data
+    # (it no longer exists in the file)
+    
+    repo.close()
+
+

@@ -121,16 +121,23 @@ def diff(  # noqa: C901
                                 last_data[obj_path][key] = value
 
     # Build list of extra paths (functions/classes) from current data
-    extra = []
-    for operator, metric in resolved_metrics:
-        if detail and resolve_operator(operator).level == OperatorLevel.Object:
+    # Use a set to avoid duplicates - each function/class should only appear once
+    extra_set: set[str] = set()
+    if detail:
+        # Check if any operator has Object level (functions/classes)
+        has_object_level = any(
+            resolve_operator(operator).level == OperatorLevel.Object
+            for operator, _ in resolved_metrics
+        )
+        if has_object_level:
             for file in files:
                 file_data = current_data.get(file, {})
                 detailed = file_data.get("detailed", {})
                 if detailed:
-                    extra.extend([f"{file}:{k}" for k in detailed.keys()])
+                    for obj_name in detailed.keys():
+                        extra_set.add(f"{file}:{obj_name}")
 
-    files.extend(extra)
+    files.extend(sorted(extra_set))  # Sort for consistent ordering
     logger.debug(files)
 
     def get_new_metric(file_path: str, metric_name: str) -> Any:
