@@ -183,8 +183,18 @@ def resolve_operator(name: str) -> Operator:
 
 
 def resolve_operators(operators: Iterable[Operator | str]) -> list[Operator]:
-    """Resolve a list of operator names to their corresponding types."""
-    return [resolve_operator(operator) for operator in iter(operators)]
+    """Resolve a list of operator names to their corresponding types.
+
+    Automatically includes 'raw' if 'maintainability' is requested, since
+    the maintainability index calculation depends on raw metrics.
+    """
+    resolved = [resolve_operator(operator) for operator in iter(operators)]
+    # Maintainability depends on raw metrics (LOC, SLOC, comments)
+    has_maintainability = any(op.name == "maintainability" for op in resolved)
+    has_raw = any(op.name == "raw" for op in resolved)
+    if has_maintainability and not has_raw:
+        resolved.insert(0, resolve_operator("raw"))
+    return resolved
 
 
 @lru_cache(maxsize=128)

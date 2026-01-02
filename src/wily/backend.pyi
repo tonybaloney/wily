@@ -107,6 +107,34 @@ class WilyIndex:
         """
         ...
 
+    def analyze_files(
+        self,
+        paths: list[str],
+        base_path: str,
+    ) -> dict[str, dict[str, Any]]:
+        """
+        Analyze files and return metrics without storing to the index.
+
+        This is useful for comparing uncommitted files against indexed values.
+
+        Args:
+            paths: List of absolute file paths to analyze
+            base_path: Base path for computing relative paths
+
+        Returns:
+            Dict mapping relative paths to their metric dicts.
+            Each metric dict contains:
+            - path: relative path
+            - path_type: "file"
+            - Raw metrics: loc, sloc, lloc, comments, multi, blank, single_comments
+            - Cyclomatic: complexity
+            - Halstead: h1, h2, N1, N2, vocabulary, length, volume, difficulty, effort
+            - Maintainability: mi, rank
+            - detailed: dict of functions/classes with their metrics
+
+        """
+        ...
+
 
 class RevisionIterator(Collection[RevisionInfo]):
     """Iterator over revisions in a Git repository."""

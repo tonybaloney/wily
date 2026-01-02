@@ -1193,6 +1193,9 @@ dependencies = [
 dev = [
     { name = "codespell", extra = ["toml"] },
     { name = "maturin" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "radon" },
     { name = "ruff" },
     { name = "safety" },
 ]
@@ -1220,6 +1223,9 @@ requires-dist = [
 dev = [
     { name = "codespell", extras = ["toml"] },
     { name = "maturin", specifier = ">=1.10,<2.0" },
+    { name = "pytest", specifier = ">=7.4.4" },
+    { name = "pytest-cov", specifier = ">=4.1.0" },
+    { name = "radon", specifier = ">=5.1.0" },
     { name = "ruff", specifier = "~=0.14" },
     { name = "safety", specifier = "~=2.3.4" },
 ]

@@ -1531,6 +1531,288 @@ impl WilyIndex {
 
         Ok(root_loc as i64)
     }
+
+    /// Analyze files and return metrics as a dict without storing to the index.
+    /// This is useful for comparing uncommitted files against indexed values.
+    ///
+    /// # Arguments
+    /// * `paths` - List of absolute file paths to analyze
+    /// * `base_path` - Base path for computing relative paths
+    ///
+    /// # Returns
+    /// Dict mapping relative paths to their metric dicts (including functions/classes)
+    #[pyo3(signature = (paths, base_path))]
+    fn analyze_files<'py>(
+        &self,
+        py: Python<'py>,
+        paths: Vec<String>,
+        base_path: String,
+    ) -> PyResult<Bound<'py, PyDict>> {
+        use crate::cyclomatic;
+        use crate::halstead;
+        use crate::maintainability;
+        use crate::raw;
+        use rayon::prelude::*;
+
+        let operators = &self.operators;
+        let include_raw = operators.iter().any(|o| o == "raw");
+        let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
+        let include_halstead = operators.iter().any(|o| o == "halstead");
+        let include_maintainability = operators.iter().any(|o| o == "maintainability");
+
+        // Analysis result for a single file (same structure as in analyze_revision)
+        struct FileResult {
+            rel_path: String,
+            raw: Option<RawCounts>,
+            cyclomatic_total: Option<i64>,
+            cyclomatic_functions: Vec<(String, u32, u32, u32, bool, Option<String>)>,
+            cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>,
+            halstead_total: Option<HalsteadTotals>,
+            halstead_functions: Vec<HalsteadFunctionMetrics>,
+            mi: Option<(f64, MIRank)>,
+        }
+
+        // Phase 1: Parallel file I/O and analysis (copied from analyze_revision)
+        let file_results: Vec<FileResult> = py.detach(|| {
+            paths
+                .par_iter()
+                .filter_map(|abs_path| {
+                    let content = std::fs::read_to_string(abs_path).ok()?;
+                    
+                    // Compute relative path
+                    let rel_path = if abs_path.starts_with(&base_path) {
+                        let rel = abs_path[base_path.len()..].trim_start_matches('/').trim_start_matches('\\');
+                        rel.replace('\\', "/")
+                    } else {
+                        abs_path.replace('\\', "/")
+                    };
+
+                    let parsed = parse_module(&content).ok()?;
+                    let line_index = LineIndex::from_source_text(&content);
+
+                    // Compute all metrics (same logic as analyze_revision)
+                    let raw = if include_raw || include_maintainability {
+                        Some(raw::analyze(&parsed, &line_index, &content))
+                    } else {
+                        None
+                    };
+
+                    let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) =
+                        if include_cyclomatic {
+                            match cyclomatic::analyze(&parsed) {
+                                (functions, classes) => {
+                                    let mut total: i64 = 0;
+                                    let funcs: Vec<_> = functions
+                                        .iter()
+                                        .map(|f| {
+                                            let lineno = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(f.start_offset),
+                                            );
+                                            let endline = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(f.end_offset),
+                                            );
+                                            total += f.complexity as i64;
+                                            (
+                                                f.fullname(),
+                                                f.complexity,
+                                                (lineno.to_zero_indexed() + 1) as u32,
+                                                (endline.to_zero_indexed() + 1) as u32,
+                                                f.is_method,
+                                                f.classname.clone(),
+                                            )
+                                        })
+                                        .collect();
+                                    let cls: Vec<_> = classes
+                                        .iter()
+                                        .map(|c| {
+                                            let lineno = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(c.start_offset),
+                                            );
+                                            let endline = ruff_source_file::LineIndex::line_index(
+                                                &line_index,
+                                                ruff_text_size::TextSize::new(c.end_offset),
+                                            );
+                                            total += c.complexity() as i64;
+                                            (
+                                                c.name.clone(),
+                                                c.complexity(),
+                                                c.real_complexity,
+                                                (lineno.to_zero_indexed() + 1) as u32,
+                                                (endline.to_zero_indexed() + 1) as u32,
+                                            )
+                                        })
+                                        .collect();
+                                    (Some(total), funcs, cls)
+                                }
+                            }
+                        } else {
+                            (None, Vec::new(), Vec::new())
+                        };
+
+                    let (halstead_total, halstead_functions) = if include_halstead {
+                        let (total, functions) = halstead::analyze(&content, &parsed);
+                        let total_metrics = (
+                            total.h1(),
+                            total.h2(),
+                            total.n1(),
+                            total.n2(),
+                            total.vocabulary(),
+                            total.length(),
+                            total.volume(),
+                            total.difficulty(),
+                            total.effort(),
+                        );
+                        let funcs: Vec<_> = functions
+                            .iter()
+                            .map(|f| {
+                                let lineno = ruff_source_file::LineIndex::line_index(
+                                    &line_index,
+                                    ruff_text_size::TextSize::new(f.start_offset),
+                                );
+                                let endline = ruff_source_file::LineIndex::line_index(
+                                    &line_index,
+                                    ruff_text_size::TextSize::new(f.end_offset),
+                                );
+                                (
+                                    f.name.clone(),
+                                    f.metrics.h1(),
+                                    f.metrics.h2(),
+                                    f.metrics.n1(),
+                                    f.metrics.n2(),
+                                    f.metrics.vocabulary(),
+                                    f.metrics.length(),
+                                    f.metrics.volume(),
+                                    f.metrics.difficulty(),
+                                    f.metrics.effort(),
+                                    (lineno.to_zero_indexed() + 1) as u32,
+                                    (endline.to_zero_indexed() + 1) as u32,
+                                )
+                            })
+                            .collect();
+                        (Some(total_metrics), funcs)
+                    } else {
+                        (None, Vec::new())
+                    };
+
+                    let mi = if include_maintainability {
+                        let (mi_val, rank) = maintainability::analyze(&parsed, raw.expect("Raw metrics required for maintainability"));
+                        Some((mi_val, rank))
+                    } else {
+                        None
+                    };
+
+                    Some(FileResult {
+                        rel_path,
+                        raw,
+                        cyclomatic_total,
+                        cyclomatic_functions,
+                        cyclomatic_classes,
+                        halstead_total,
+                        halstead_functions,
+                        mi,
+                    })
+                })
+                .collect()
+        });
+
+        // Phase 2: Build Python dict with results
+        let result_dict = PyDict::new(py);
+
+        for file_result in file_results {
+            let file_dict = PyDict::new(py);
+            file_dict.set_item("path", &file_result.rel_path)?;
+            file_dict.set_item("path_type", "file")?;
+
+            // Raw metrics
+            if let Some(raw) = file_result.raw {
+                file_dict.set_item("loc", raw.loc)?;
+                file_dict.set_item("sloc", raw.sloc)?;
+                file_dict.set_item("lloc", raw.lloc)?;
+                file_dict.set_item("comments", raw.comments)?;
+                file_dict.set_item("multi", raw.multi)?;
+                file_dict.set_item("blank", raw.blank)?;
+                file_dict.set_item("single_comments", raw.single_comments)?;
+            }
+
+            // Cyclomatic complexity
+            if let Some(cc) = file_result.cyclomatic_total {
+                file_dict.set_item("complexity", cc)?;
+            }
+
+            // Halstead metrics
+            if let Some(hal) = file_result.halstead_total {
+                file_dict.set_item("h1", hal.0)?;
+                file_dict.set_item("h2", hal.1)?;
+                file_dict.set_item("N1", hal.2)?;
+                file_dict.set_item("N2", hal.3)?;
+                file_dict.set_item("vocabulary", hal.4)?;
+                file_dict.set_item("length", hal.5)?;
+                file_dict.set_item("volume", hal.6)?;
+                file_dict.set_item("difficulty", hal.7)?;
+                file_dict.set_item("effort", hal.8)?;
+            }
+
+            // Maintainability
+            if let Some((mi, rank)) = file_result.mi {
+                file_dict.set_item("mi", mi)?;
+                file_dict.set_item("rank", rank.to_string())?;
+            }
+
+            // Add detailed dict for functions and classes
+            let detailed_dict = PyDict::new(py);
+
+            // Add functions
+            let halstead_map: std::collections::HashMap<&str, &HalsteadFunctionMetrics> = file_result
+                .halstead_functions
+                .iter()
+                .map(|h| (h.0.as_str(), h))
+                .collect();
+
+            for (name, complexity, lineno, endline, is_method, classname) in &file_result.cyclomatic_functions {
+                let func_dict = PyDict::new(py);
+                func_dict.set_item("complexity", *complexity)?;
+                func_dict.set_item("lineno", *lineno)?;
+                func_dict.set_item("endline", *endline)?;
+                func_dict.set_item("is_method", *is_method)?;
+                if let Some(cn) = classname {
+                    func_dict.set_item("classname", cn)?;
+                }
+
+                // Add Halstead metrics for function if available
+                if let Some(hal) = halstead_map.get(name.as_str()) {
+                    func_dict.set_item("h1", hal.1)?;
+                    func_dict.set_item("h2", hal.2)?;
+                    func_dict.set_item("N1", hal.3)?;
+                    func_dict.set_item("N2", hal.4)?;
+                    func_dict.set_item("vocabulary", hal.5)?;
+                    func_dict.set_item("length", hal.6)?;
+                    func_dict.set_item("volume", hal.7)?;
+                    func_dict.set_item("difficulty", hal.8)?;
+                    func_dict.set_item("effort", hal.9)?;
+                }
+
+                detailed_dict.set_item(name, func_dict)?;
+            }
+
+            // Add classes
+            for (name, complexity, real_complexity, lineno, endline) in &file_result.cyclomatic_classes {
+                let class_dict = PyDict::new(py);
+                class_dict.set_item("complexity", *complexity)?;
+                class_dict.set_item("real_complexity", *real_complexity)?;
+                class_dict.set_item("lineno", *lineno)?;
+                class_dict.set_item("endline", *endline)?;
+                detailed_dict.set_item(name, class_dict)?;
+            }
+
+            file_dict.set_item("detailed", detailed_dict)?;
+            result_dict.set_item(&file_result.rel_path, file_dict)?;
+        }
+
+        Ok(result_dict)
+    }
 }
 
 /// Public Rust API for WilyIndex (for benchmarking and testing)

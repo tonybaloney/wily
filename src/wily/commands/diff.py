@@ -29,7 +29,6 @@ from wily.operators import (
     Metric,
     Operator,
     OperatorLevel,
-    get_metric,
     resolve_metric,
     resolve_operator,
 )
@@ -88,37 +87,65 @@ def diff(  # noqa: C901
 
     operator_names = [op.name for op in operators]
     last_data: dict[str, dict[str, Any]] = defaultdict(dict)
+    current_data: dict[str, dict[str, Any]] = {}
+
     # Load the index and find target revision
     with WilyIndex(parquet_path, operator_names) as index:
         # Build lookup of cached metrics for target revision: {path: {metric: value}}
         for file in files:
+            # Get file-level metrics
             path_rows = index[file]
-            if not path_rows:
-                continue
-            # Get the last entry (most recent) for this path
-            data = index[file][-1]
-            # Copy all metric values
-            for key, value in data.items():
-                if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
-                    last_data[file][key] = value
+            if path_rows:
+                # Get the last entry (most recent) for this path
+                data = path_rows[-1]
+                # Copy all metric values
+                for key, value in data.items():
+                    if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
+                        last_data[file][key] = value
 
-    # Run operators on current files
-    data = ...# TODO: Use storage module # run_operators_parallel(operators, targets, config)
+        # Run operators on current uncommitted files using analyze_files
+        current_data = index.analyze_files(targets, str(config.path))
+
+        # Load function/class metrics for detail view based on what's in current_data
+        if detail:
+            for file in files:
+                file_data = current_data.get(file, {})
+                detailed = file_data.get("detailed", {})
+                for obj_name in detailed.keys():
+                    obj_path = f"{file}:{obj_name}"
+                    obj_rows = index[obj_path]
+                    if obj_rows:
+                        obj_data = obj_rows[-1]
+                        for key, value in obj_data.items():
+                            if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
+                                last_data[obj_path][key] = value
 
     # Build list of extra paths (functions/classes) from current data
     extra = []
     for operator, metric in resolved_metrics:
         if detail and resolve_operator(operator).level == OperatorLevel.Object:
             for file in files:
-                try:
-                    extra.extend([f"{file}:{k}" for k in data[operator][file]["detailed"].keys() if k != metric.name and isinstance(data[operator][file]["detailed"][k], dict)])
-                except KeyError:
-                    logger.debug("File %s not in cache", file)
-                    logger.debug("Cache follows -- ")
-                    logger.debug(data[operator])
+                file_data = current_data.get(file, {})
+                detailed = file_data.get("detailed", {})
+                if detailed:
+                    extra.extend([f"{file}:{k}" for k in detailed.keys()])
 
     files.extend(extra)
     logger.debug(files)
+
+    def get_new_metric(file_path: str, metric_name: str) -> Any:
+        """Get metric value from current_data, handling both file and function/class paths."""
+        if ":" in file_path:
+            # Function or class path like "src/foo.py:func_name"
+            base_file, obj_name = file_path.rsplit(":", 1)
+            file_data = current_data.get(base_file, {})
+            detailed = file_data.get("detailed", {})
+            obj_data = detailed.get(obj_name, {})
+            return obj_data.get(metric_name, "-")
+        else:
+            # File path
+            file_data = current_data.get(file_path, {})
+            return file_data.get(metric_name, "-")
 
     results = []
     for file in files:
@@ -133,9 +160,8 @@ def diff(  # noqa: C901
             except KeyError:
                 current = "-"
             # Get new value from current analysis
-            try:
-                new = get_metric(data, operator, file, metric.name)
-            except KeyError:
+            new = get_new_metric(file, metric.name)
+            if new is None:
                 new = "-"
             if new != current:
                 has_changes = True

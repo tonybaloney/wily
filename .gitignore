@@ -110,7 +110,7 @@ test_granular.html
 .idea/
 .vscode/
 docs/build/
-
+.vs/
 # OSX
 .DS_Store
 

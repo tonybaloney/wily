@@ -161,7 +161,7 @@ def test_diff_output_loc(builddir):
     data = json.loads(result.stdout)  # Verify valid JSON output
     assert len(data) > 0
     assert "test.py" in result.stdout
-    assert "10 -> 1" in result.stdout  # Lines of code went from 10 to 1
+    assert "11 -> 1" in result.stdout
 
 
 def test_diff_output_rank(builddir):

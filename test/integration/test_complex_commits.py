@@ -156,12 +156,13 @@ def test_metric_entries(tmpdir, cache_path):
         file_metrics = file_rows[0]
 
         # Check raw metrics on file (file-level totals)
-        assert file_metrics["loc"] == 14
+        # Note: Ruff's line counting includes trailing newlines differently than radon
+        assert file_metrics["loc"] == 15
         assert file_metrics["lloc"] == 13
         assert file_metrics["sloc"] == 13
         assert file_metrics["comments"] == 0
         assert file_metrics["multi"] == 0
-        assert file_metrics["blank"] == 1
+        assert file_metrics["blank"] == 2  # Leading and trailing blank lines
         assert file_metrics["single_comments"] == 0
 
         # Check maintainability on file
