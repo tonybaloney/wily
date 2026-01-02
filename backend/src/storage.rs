@@ -1540,15 +1540,17 @@ impl WilyIndex {
     /// # Arguments
     /// * `paths` - List of absolute file paths to analyze
     /// * `base_path` - Base path for computing relative paths
+    /// * `include_details` - Whether to include function/class level metrics
     ///
     /// # Returns
-    /// Dict mapping relative paths to their metric dicts (including functions/classes)
-    #[pyo3(signature = (paths, base_path))]
+    /// Dict mapping relative paths to their metric dicts (optionally including functions/classes)
+    #[pyo3(signature = (paths, base_path, include_details=true))]
     fn analyze_files<'py>(
         &self,
         py: Python<'py>,
         paths: Vec<String>,
         base_path: String,
+        include_details: bool,
     ) -> PyResult<Bound<'py, PyDict>> {
         use crate::cyclomatic;
         use crate::halstead;
@@ -1604,49 +1606,66 @@ impl WilyIndex {
                             match cyclomatic::analyze(&parsed) {
                                 (functions, classes) => {
                                     let mut total: i64 = 0;
-                                    let funcs: Vec<_> = functions
-                                        .iter()
-                                        .map(|f| {
-                                            let lineno = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(f.start_offset),
-                                            );
-                                            let endline = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(f.end_offset),
-                                            );
+                                    // Only collect function/class details if include_details is true
+                                    let funcs: Vec<_> = if include_details {
+                                        functions
+                                            .iter()
+                                            .map(|f| {
+                                                let lineno = ruff_source_file::LineIndex::line_index(
+                                                    &line_index,
+                                                    ruff_text_size::TextSize::new(f.start_offset),
+                                                );
+                                                let endline = ruff_source_file::LineIndex::line_index(
+                                                    &line_index,
+                                                    ruff_text_size::TextSize::new(f.end_offset),
+                                                );
+                                                total += f.complexity as i64;
+                                                (
+                                                    f.fullname(),
+                                                    f.complexity,
+                                                    (lineno.to_zero_indexed() + 1) as u32,
+                                                    (endline.to_zero_indexed() + 1) as u32,
+                                                    f.is_method,
+                                                    f.classname.clone(),
+                                                )
+                                            })
+                                            .collect()
+                                    } else {
+                                        // Just compute total without collecting details
+                                        for f in &functions {
                                             total += f.complexity as i64;
-                                            (
-                                                f.fullname(),
-                                                f.complexity,
-                                                (lineno.to_zero_indexed() + 1) as u32,
-                                                (endline.to_zero_indexed() + 1) as u32,
-                                                f.is_method,
-                                                f.classname.clone(),
-                                            )
-                                        })
-                                        .collect();
-                                    let cls: Vec<_> = classes
-                                        .iter()
-                                        .map(|c| {
-                                            let lineno = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(c.start_offset),
-                                            );
-                                            let endline = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(c.end_offset),
-                                            );
+                                        }
+                                        Vec::new()
+                                    };
+                                    let cls: Vec<_> = if include_details {
+                                        classes
+                                            .iter()
+                                            .map(|c| {
+                                                let lineno = ruff_source_file::LineIndex::line_index(
+                                                    &line_index,
+                                                    ruff_text_size::TextSize::new(c.start_offset),
+                                                );
+                                                let endline = ruff_source_file::LineIndex::line_index(
+                                                    &line_index,
+                                                    ruff_text_size::TextSize::new(c.end_offset),
+                                                );
+                                                total += c.complexity() as i64;
+                                                (
+                                                    c.name.clone(),
+                                                    c.complexity(),
+                                                    c.real_complexity,
+                                                    (lineno.to_zero_indexed() + 1) as u32,
+                                                    (endline.to_zero_indexed() + 1) as u32,
+                                                )
+                                            })
+                                            .collect()
+                                    } else {
+                                        // Just compute total without collecting details
+                                        for c in &classes {
                                             total += c.complexity() as i64;
-                                            (
-                                                c.name.clone(),
-                                                c.complexity(),
-                                                c.real_complexity,
-                                                (lineno.to_zero_indexed() + 1) as u32,
-                                                (endline.to_zero_indexed() + 1) as u32,
-                                            )
-                                        })
-                                        .collect();
+                                        }
+                                        Vec::new()
+                                    };
                                     (Some(total), funcs, cls)
                                 }
                             }
@@ -1667,33 +1686,38 @@ impl WilyIndex {
                             total.difficulty(),
                             total.effort(),
                         );
-                        let funcs: Vec<_> = functions
-                            .iter()
-                            .map(|f| {
-                                let lineno = ruff_source_file::LineIndex::line_index(
-                                    &line_index,
-                                    ruff_text_size::TextSize::new(f.start_offset),
-                                );
-                                let endline = ruff_source_file::LineIndex::line_index(
-                                    &line_index,
-                                    ruff_text_size::TextSize::new(f.end_offset),
-                                );
-                                (
-                                    f.name.clone(),
-                                    f.metrics.h1(),
-                                    f.metrics.h2(),
-                                    f.metrics.n1(),
-                                    f.metrics.n2(),
-                                    f.metrics.vocabulary(),
-                                    f.metrics.length(),
-                                    f.metrics.volume(),
-                                    f.metrics.difficulty(),
-                                    f.metrics.effort(),
-                                    (lineno.to_zero_indexed() + 1) as u32,
-                                    (endline.to_zero_indexed() + 1) as u32,
-                                )
-                            })
-                            .collect();
+                        // Only collect function details if include_details is true
+                        let funcs: Vec<_> = if include_details {
+                            functions
+                                .iter()
+                                .map(|f| {
+                                    let lineno = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(f.start_offset),
+                                    );
+                                    let endline = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(f.end_offset),
+                                    );
+                                    (
+                                        f.name.clone(),
+                                        f.metrics.h1(),
+                                        f.metrics.h2(),
+                                        f.metrics.n1(),
+                                        f.metrics.n2(),
+                                        f.metrics.vocabulary(),
+                                        f.metrics.length(),
+                                        f.metrics.volume(),
+                                        f.metrics.difficulty(),
+                                        f.metrics.effort(),
+                                        (lineno.to_zero_indexed() + 1) as u32,
+                                        (endline.to_zero_indexed() + 1) as u32,
+                                    )
+                                })
+                                .collect()
+                        } else {
+                            Vec::new()
+                        };
                         (Some(total_metrics), funcs)
                     } else {
                         (None, Vec::new())
@@ -1764,53 +1788,56 @@ impl WilyIndex {
                 file_dict.set_item("rank", mi_rank(mi).to_string())?;
             }
 
-            // Add detailed dict for functions and classes
-            let detailed_dict = PyDict::new(py);
+            // Add detailed dict for functions and classes (only if requested)
+            if include_details {
+                let detailed_dict = PyDict::new(py);
 
-            // Add functions
-            let halstead_map: std::collections::HashMap<&str, &HalsteadFunctionMetrics> = file_result
-                .halstead_functions
-                .iter()
-                .map(|h| (h.0.as_str(), h))
-                .collect();
+                // Add functions
+                let halstead_map: std::collections::HashMap<&str, &HalsteadFunctionMetrics> = file_result
+                    .halstead_functions
+                    .iter()
+                    .map(|h| (h.0.as_str(), h))
+                    .collect();
 
-            for (name, complexity, lineno, endline, is_method, classname) in &file_result.cyclomatic_functions {
-                let func_dict = PyDict::new(py);
-                func_dict.set_item("complexity", *complexity)?;
-                func_dict.set_item("lineno", *lineno)?;
-                func_dict.set_item("endline", *endline)?;
-                func_dict.set_item("is_method", *is_method)?;
-                if let Some(cn) = classname {
-                    func_dict.set_item("classname", cn)?;
+                for (name, complexity, lineno, endline, is_method, classname) in &file_result.cyclomatic_functions {
+                    let func_dict = PyDict::new(py);
+                    func_dict.set_item("complexity", *complexity)?;
+                    func_dict.set_item("lineno", *lineno)?;
+                    func_dict.set_item("endline", *endline)?;
+                    func_dict.set_item("is_method", *is_method)?;
+                    if let Some(cn) = classname {
+                        func_dict.set_item("classname", cn)?;
+                    }
+
+                    // Add Halstead metrics for function if available
+                    if let Some(hal) = halstead_map.get(name.as_str()) {
+                        func_dict.set_item("h1", hal.1)?;
+                        func_dict.set_item("h2", hal.2)?;
+                        func_dict.set_item("N1", hal.3)?;
+                        func_dict.set_item("N2", hal.4)?;
+                        func_dict.set_item("vocabulary", hal.5)?;
+                        func_dict.set_item("length", hal.6)?;
+                        func_dict.set_item("volume", hal.7)?;
+                        func_dict.set_item("difficulty", hal.8)?;
+                        func_dict.set_item("effort", hal.9)?;
+                    }
+
+                    detailed_dict.set_item(name, func_dict)?;
                 }
 
-                // Add Halstead metrics for function if available
-                if let Some(hal) = halstead_map.get(name.as_str()) {
-                    func_dict.set_item("h1", hal.1)?;
-                    func_dict.set_item("h2", hal.2)?;
-                    func_dict.set_item("N1", hal.3)?;
-                    func_dict.set_item("N2", hal.4)?;
-                    func_dict.set_item("vocabulary", hal.5)?;
-                    func_dict.set_item("length", hal.6)?;
-                    func_dict.set_item("volume", hal.7)?;
-                    func_dict.set_item("difficulty", hal.8)?;
-                    func_dict.set_item("effort", hal.9)?;
+                // Add classes
+                for (name, complexity, real_complexity, lineno, endline) in &file_result.cyclomatic_classes {
+                    let class_dict = PyDict::new(py);
+                    class_dict.set_item("complexity", *complexity)?;
+                    class_dict.set_item("real_complexity", *real_complexity)?;
+                    class_dict.set_item("lineno", *lineno)?;
+                    class_dict.set_item("endline", *endline)?;
+                    detailed_dict.set_item(name, class_dict)?;
                 }
 
-                detailed_dict.set_item(name, func_dict)?;
+                file_dict.set_item("detailed", detailed_dict)?;
             }
 
-            // Add classes
-            for (name, complexity, real_complexity, lineno, endline) in &file_result.cyclomatic_classes {
-                let class_dict = PyDict::new(py);
-                class_dict.set_item("complexity", *complexity)?;
-                class_dict.set_item("real_complexity", *real_complexity)?;
-                class_dict.set_item("lineno", *lineno)?;
-                class_dict.set_item("endline", *endline)?;
-                detailed_dict.set_item(name, class_dict)?;
-            }
-
-            file_dict.set_item("detailed", detailed_dict)?;
             result_dict.set_item(&file_result.rel_path, file_dict)?;
         }
 

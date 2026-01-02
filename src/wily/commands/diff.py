@@ -104,7 +104,7 @@ def diff(  # noqa: C901
                         last_data[file][key] = value
 
         # Run operators on current uncommitted files using analyze_files
-        current_data = index.analyze_files(targets, str(config.path))
+        current_data = index.analyze_files(targets, str(config.path), detail)
 
         # Load function/class metrics for detail view based on what's in current_data
         if detail:
