@@ -818,3 +818,249 @@ def test_diff_function_removed(tmpdir):
     repo.close()
 
 
+def test_diff_no_detail_raw_metrics_unchanged_when_mi_changes(tmpdir):
+    """
+    Test that when MI changes but line count stays the same,
+    loc/sloc/lloc values should be IDENTICAL (not showing a change).
+    
+    This is a regression test for a bug where raw metrics were showing
+    different values even when only the content of a line changed (not the count).
+    
+    Scenario: Change a constant (1) to a variable (right) - MI changes but
+    loc/sloc/lloc should have the SAME old and new values.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code with a constant
+    initial_code = dedent("""
+        def my_function():
+            x = 1
+            y = 2
+            z = x + y
+            return z
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify content: change constant to variable name
+    # This changes MI (due to Halstead metrics changing) but NOT line count
+    # x = 1 -> x = right (same number of lines, same structure)
+    modified_code = dedent("""
+        def my_function():
+            x = right
+            y = 2
+            z = x + y
+            return z
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff with --no-detail --json
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--no-detail", "--json", "--all"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Find the file entry
+    file_entry = next((e for e in data if e["file"] == "src/test.py"), None)
+    assert file_entry is not None, f"Expected src/test.py in output, got: {data}"
+    
+    # loc, sloc, lloc values should be the SAME (e.g., "5 -> 5", not "5 -> 6")
+    # The line count hasn't changed, only the content
+    if "loc" in file_entry:
+        loc_val = file_entry["loc"]
+        old, new = loc_val.split(" -> ")
+        assert old == new, f"loc values should be identical when line count unchanged: {loc_val}"
+    
+    if "sloc" in file_entry:
+        sloc_val = file_entry["sloc"]
+        old, new = sloc_val.split(" -> ")
+        assert old == new, f"sloc values should be identical when line count unchanged: {sloc_val}"
+    
+    if "lloc" in file_entry:
+        lloc_val = file_entry["lloc"]
+        old, new = lloc_val.split(" -> ")
+        assert old == new, f"lloc values should be identical when line count unchanged: {lloc_val}"
+    
+    repo.close()
+
+
+def test_diff_no_detail_shows_only_file_level_metrics(tmpdir):
+    """
+    Test that --no-detail flag only returns file-level metrics,
+    not function/class level entries.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code with a function
+    initial_code = dedent("""
+        def my_function():
+            x = 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    repo.index.commit("initial", author=author, committer=author)
+    
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath)])
+    assert result.exit_code == 0, result.stdout
+    
+    # Modify the function - add complexity (this would normally show function-level changes)
+    modified_code = dedent("""
+        def my_function():
+            x = 1
+            if x > 0:
+                x = x + 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    # Run diff with --no-detail --json
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--no-detail", "--json"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # With --no-detail, should only have file-level entries, no function entries
+    for entry in data:
+        file_path = entry["file"]
+        # File paths with ":" indicate function/class level (e.g., "src/test.py:my_function")
+        assert ":" not in file_path, \
+            f"--no-detail should not include function/class level entries, but found: {file_path}"
+    
+    repo.close()
+
+
+def test_diff_with_revision_parameter(tmpdir):
+    """
+    Test that --revision parameter allows comparing against a specific revision.
+    """
+    from git.repo.base import Repo
+    from git.util import Actor
+    
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    testpath = srcpath / "test.py"
+    
+    # Initial code - commit 1
+    initial_code = dedent("""
+        def my_function():
+            x = 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(initial_code)
+    
+    repo = Repo.init(path=tmpdir)
+    author = Actor("Test", "test@example.com")
+    repo.index.add([str(testpath)])
+    commit1 = repo.index.commit("commit 1", author=author, committer=author)
+    revision1 = commit1.hexsha
+    
+    # Modified code - commit 2 (add complexity)
+    modified_code = dedent("""
+        def my_function():
+            x = 1
+            if x > 0:
+                x = x + 1
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(modified_code)
+    
+    repo.index.add([str(testpath)])
+    commit2 = repo.index.commit("commit 2", author=author, committer=author)
+    revision2 = commit2.hexsha
+    
+    # Build wily index with both revisions
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", tmpdir, "build", str(srcpath), "-n", "2"])
+    assert result.exit_code == 0, result.stdout
+    
+    # Further modify the file (uncommitted)
+    final_code = dedent("""
+        def my_function():
+            x = 1
+            if x > 0:
+                x = x + 1
+            if x > 1:
+                x = x * 2
+            return x
+    """).strip()
+    
+    with open(testpath, "w") as f:
+        f.write(final_code)
+    
+    # Run diff against revision 1 (commit 1)
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--revision", revision1, "--json", "--all"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Should show diff from revision 1 (complexity 1) to current (complexity 3)
+    file_entry = next((e for e in data if e["file"] == "src/test.py"), None)
+    assert file_entry is not None, f"Expected src/test.py in output: {data}"
+    assert "complexity" in file_entry, f"Expected complexity metric: {file_entry}"
+    assert "1 ->" in file_entry["complexity"], f"Expected complexity to start from 1: {file_entry['complexity']}"
+    
+    # Run diff against revision 2 (commit 2) - default behavior (latest)
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "diff", "src/test.py", "--revision", revision2, "--json", "--all"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0, result.stdout
+    data = json.loads(result.stdout)
+    
+    # Should show diff from revision 2 (complexity 2) to current (complexity 3)
+    file_entry = next((e for e in data if e["file"] == "src/test.py"), None)
+    assert file_entry is not None, f"Expected src/test.py in output: {data}"
+    assert "complexity" in file_entry, f"Expected complexity metric: {file_entry}"
+    assert "2 ->" in file_entry["complexity"], f"Expected complexity to start from 2: {file_entry['complexity']}"
+    
+    repo.close()
+
+

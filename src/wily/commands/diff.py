@@ -40,6 +40,7 @@ def diff(  # noqa: C901
     metrics: list[str] | None,
     changes_only: bool = True,
     detail: bool = True,
+    revision: str | None = None,
     wrap: bool = False,
     table_style: str = DEFAULT_TABLE_STYLE,
     json: bool = False,
@@ -52,9 +53,10 @@ def diff(  # noqa: C901
     :param metrics: The metrics to measure.
     :param changes_only: Only include changes files in output.
     :param detail: Show details (function-level)
-    :param revision: Compare with specific revision
+    :param revision: Compare with specific revision (default: latest)
     :param wrap: Wrap output
     :param table_style: Table box style
+    :param json: Output as JSON
     """
     config.targets = files
     archiver = config.archiver or DEFAULT_ARCHIVER
@@ -96,8 +98,14 @@ def diff(  # noqa: C901
             # Get file-level metrics
             path_rows = index[file]
             if path_rows:
-                # Get the last entry (most recent) for this path
-                data = path_rows[-1]
+                # Find the entry matching the requested revision, or use most recent
+                if revision:
+                    data = next((row for row in path_rows if row.get("revision") == revision), None)
+                    if data is None:
+                        logger.warning(f"Revision {revision} not found for {file}, using latest")
+                        data = path_rows[-1]
+                else:
+                    data = path_rows[-1]
                 # Copy all metric values
                 for key, value in data.items():
                     if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
@@ -115,7 +123,13 @@ def diff(  # noqa: C901
                     obj_path = f"{file}:{obj_name}"
                     obj_rows = index[obj_path]
                     if obj_rows:
-                        obj_data = obj_rows[-1]
+                        # Find the entry matching the requested revision, or use most recent
+                        if revision:
+                            obj_data = next((row for row in obj_rows if row.get("revision") == revision), None)
+                            if obj_data is None:
+                                obj_data = obj_rows[-1]
+                        else:
+                            obj_data = obj_rows[-1]
                         for key, value in obj_data.items():
                             if key not in ("revision", "revision_date", "revision_author", "revision_message", "path", "path_type"):
                                 last_data[obj_path][key] = value

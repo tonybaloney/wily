@@ -337,8 +337,14 @@ def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, 
     default=False,
     help=_("Output results in JSON format"),
 )
+@click.option(
+    "-r",
+    "--revision",
+    default=None,
+    help=_("Compare against specific revision (default: latest)"),
+)
 @click.pass_context
-def diff(ctx, files, metrics, all, detail, wrap, table_style, json):
+def diff(ctx, files, metrics, all, detail, wrap, table_style, json, revision):
     """Show the differences in metrics for each file."""
     config = ctx.obj["CONFIG"]
 
@@ -359,6 +365,7 @@ def diff(ctx, files, metrics, all, detail, wrap, table_style, json):
         metrics=metrics_list,
         changes_only=not all,
         detail=detail,
+        revision=revision,
         wrap=wrap,
         table_style=table_style,
         json=json,
