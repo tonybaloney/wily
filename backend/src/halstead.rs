@@ -17,7 +17,9 @@
 
 use compact_str::CompactString;
 use ruff_python_ast::{
-    self as ast, Expr, ModModule, Stmt, visitor::{self, Visitor}
+    self as ast,
+    visitor::{self, Visitor},
+    Expr, ModModule, Stmt,
 };
 use ruff_text_size::Ranged;
 use std::collections::HashSet;
@@ -143,7 +145,9 @@ impl<'src> HalsteadVisitor<'src> {
     #[inline]
     fn add_operand(&mut self, operand: CompactString) {
         self.metrics.operands += 1;
-        self.metrics.operands_seen.insert((self.context_idx, operand));
+        self.metrics
+            .operands_seen
+            .insert((self.context_idx, operand));
     }
 
     /// Get the operator name from a binary operator
@@ -176,12 +180,16 @@ impl<'src> HalsteadVisitor<'src> {
                 match &n.value {
                     ast::Number::Int(i) => CompactString::new(i.to_string()),
                     ast::Number::Float(f) => CompactString::new(f.to_string()),
-                    ast::Number::Complex { real, imag } => CompactString::new(format!("{}+{}j", real, imag)),
+                    ast::Number::Complex { real, imag } => {
+                        CompactString::new(format!("{}+{}j", real, imag))
+                    }
                 }
             }
             Expr::StringLiteral(s) => CompactString::new(s.value.to_str()),
             Expr::BytesLiteral(_) => CompactString::const_new("<bytes>"),
-            Expr::BooleanLiteral(b) => CompactString::const_new(if b.value { "True" } else { "False" }),
+            Expr::BooleanLiteral(b) => {
+                CompactString::const_new(if b.value { "True" } else { "False" })
+            }
             Expr::NoneLiteral(_) => CompactString::const_new("None"),
             Expr::EllipsisLiteral(_) => CompactString::const_new("..."),
             Expr::Attribute(a) => CompactString::new(&a.attr),
@@ -316,7 +324,7 @@ impl<'a, 'src> Visitor<'a> for HalsteadVisitor<'src> {
 /// Public API for parallel module - returns full analysis results.
 pub fn analyze(
     source: &str,
-    parsed: &ruff_python_parser::Parsed<ModModule>
+    parsed: &ruff_python_parser::Parsed<ModModule>,
 ) -> (HalsteadMetrics, Vec<FunctionHalstead>) {
     let mut visitor = HalsteadVisitor::new(source, 0);
 

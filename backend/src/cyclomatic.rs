@@ -5,9 +5,11 @@
 //! - Decision points (if, for, while, except, and, or, etc.) add to complexity
 
 use ruff_python_ast::{
-    self as ast, Expr, ModModule, Pattern, Stmt, visitor::{self, Visitor}
+    self as ast,
+    visitor::{self, Visitor},
+    Expr, ModModule, Pattern, Stmt,
 };
-use ruff_text_size::{Ranged};
+use ruff_text_size::Ranged;
 
 /// Result for a single function/method (storing byte offsets)
 #[derive(Debug, Clone)]

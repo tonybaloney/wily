@@ -142,7 +142,10 @@ fn bench_analyze_revision_by_operator(c: &mut Criterion) {
         ("halstead_only", vec!["halstead"]),
         ("maintainability_with_raw", vec!["raw", "maintainability"]),
         ("raw_cyclomatic", vec!["raw", "cyclomatic"]),
-        ("all_operators", vec!["raw", "cyclomatic", "halstead", "maintainability"]),
+        (
+            "all_operators",
+            vec!["raw", "cyclomatic", "halstead", "maintainability"],
+        ),
     ] {
         let operators: Vec<String> = ops.iter().map(|s| s.to_string()).collect();
 
@@ -200,7 +203,12 @@ fn bench_multiple_revisions(c: &mut Criterion) {
         group.throughput(Throughput::Elements(*revision_count as u64));
         group.bench_with_input(
             BenchmarkId::new("50_files", revision_count),
-            &(paths.clone(), base_path.clone(), operators.clone(), *revision_count),
+            &(
+                paths.clone(),
+                base_path.clone(),
+                operators.clone(),
+                *revision_count,
+            ),
             |b, (paths, base_path, operators, rev_count)| {
                 b.iter(|| {
                     Python::attach(|py| {

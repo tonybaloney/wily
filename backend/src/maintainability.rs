@@ -10,7 +10,9 @@
 //! MI = max(0, min(100, (171 - 5.2*ln(V) - 0.23*CC - 16.2*ln(LLOC) + 50*sin(sqrt(2.46*radians(CM)))) * 100/171))
 
 use ruff_python_ast::{
-    self as ast, ModModule, Stmt, visitor::{self, Visitor}
+    self as ast,
+    visitor::{self, Visitor},
+    ModModule, Stmt,
 };
 use std::collections::HashSet;
 
@@ -490,12 +492,12 @@ pub enum MIRank {
     C,
 }
 
-impl MIRank {
-    pub fn to_string(&self) -> &'static str {
+impl std::fmt::Display for MIRank {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MIRank::A => "A",
-            MIRank::B => "B",
-            MIRank::C => "C",
+            MIRank::A => f.write_str("A"),
+            MIRank::B => f.write_str("B"),
+            MIRank::C => f.write_str("C"),
         }
     }
 }

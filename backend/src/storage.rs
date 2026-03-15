@@ -18,7 +18,7 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use crate::maintainability::{MIRank, mi_rank};
+use crate::maintainability::{mi_rank, MIRank};
 use crate::raw::RawCounts;
 
 // Type aliases for complex Halstead metric tuples to satisfy clippy
@@ -225,6 +225,12 @@ pub struct MetricsBuilder {
     row_count: usize,
 }
 
+impl Default for MetricsBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MetricsBuilder {
     pub fn new() -> Self {
         Self {
@@ -325,7 +331,8 @@ impl MetricsBuilder {
         self.difficulty.append_option(difficulty);
         self.effort.append_option(effort);
 
-        self.cognitive_complexity.append_option(cognitive_complexity);
+        self.cognitive_complexity
+            .append_option(cognitive_complexity);
 
         self.mi.append_option(mi);
 
@@ -393,7 +400,8 @@ impl MetricsBuilder {
         self.difficulty.append_option(difficulty);
         self.effort.append_option(effort);
 
-        self.cognitive_complexity.append_option(cognitive_complexity.map(|v| v as f64));
+        self.cognitive_complexity
+            .append_option(cognitive_complexity.map(|v| v as f64));
 
         self.mi.append_null();
 
@@ -1228,55 +1236,52 @@ impl WilyIndex {
 
                     let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) =
                         if include_cyclomatic {
-                            match cyclomatic::analyze(&parsed) {
-                                (functions, classes) => {
-                                    let mut total: i64 = 0;
-                                    let funcs: Vec<_> = functions
-                                        .iter()
-                                        .map(|f| {
-                                            let lineno = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(f.start_offset),
-                                            );
-                                            let endline = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(f.end_offset),
-                                            );
-                                            total += f.complexity as i64;
-                                            (
-                                                f.fullname(),
-                                                f.complexity,
-                                                (lineno.to_zero_indexed() + 1) as u32,
-                                                (endline.to_zero_indexed() + 1) as u32,
-                                                f.is_method,
-                                                f.classname.clone(),
-                                            )
-                                        })
-                                        .collect();
-                                    let cls: Vec<_> = classes
-                                        .iter()
-                                        .map(|c| {
-                                            let lineno = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(c.start_offset),
-                                            );
-                                            let endline = ruff_source_file::LineIndex::line_index(
-                                                &line_index,
-                                                ruff_text_size::TextSize::new(c.end_offset),
-                                            );
-                                            total += c.complexity() as i64;
-                                            (
-                                                c.name.clone(),
-                                                c.complexity(),
-                                                c.real_complexity,
-                                                (lineno.to_zero_indexed() + 1) as u32,
-                                                (endline.to_zero_indexed() + 1) as u32,
-                                            )
-                                        })
-                                        .collect();
-                                    (Some(total), funcs, cls)
-                                }
-                            }
+                            let (functions, classes) = cyclomatic::analyze(&parsed);
+                            let mut total: i64 = 0;
+                            let funcs: Vec<_> = functions
+                                .iter()
+                                .map(|f| {
+                                    let lineno = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(f.start_offset),
+                                    );
+                                    let endline = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(f.end_offset),
+                                    );
+                                    total += f.complexity as i64;
+                                    (
+                                        f.fullname(),
+                                        f.complexity,
+                                        (lineno.to_zero_indexed() + 1) as u32,
+                                        (endline.to_zero_indexed() + 1) as u32,
+                                        f.is_method,
+                                        f.classname.clone(),
+                                    )
+                                })
+                                .collect();
+                            let cls: Vec<_> = classes
+                                .iter()
+                                .map(|c| {
+                                    let lineno = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(c.start_offset),
+                                    );
+                                    let endline = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(c.end_offset),
+                                    );
+                                    total += c.complexity() as i64;
+                                    (
+                                        c.name.clone(),
+                                        c.complexity(),
+                                        c.real_complexity,
+                                        (lineno.to_zero_indexed() + 1) as u32,
+                                        (endline.to_zero_indexed() + 1) as u32,
+                                    )
+                                })
+                                .collect();
+                            (Some(total), funcs, cls)
                         } else {
                             (None, Vec::new(), Vec::new())
                         };
@@ -1287,46 +1292,49 @@ impl WilyIndex {
                             total.h1(),
                             total.h2(),
                             total.n1(),
-                                    total.n2(),
-                                    total.vocabulary(),
-                                    total.length(),
-                                    total.volume(),
-                                    total.difficulty(),
-                                    total.effort(),
+                            total.n2(),
+                            total.vocabulary(),
+                            total.length(),
+                            total.volume(),
+                            total.difficulty(),
+                            total.effort(),
+                        );
+                        let funcs: Vec<_> = functions
+                            .iter()
+                            .map(|f| {
+                                let lineno = ruff_source_file::LineIndex::line_index(
+                                    &line_index,
+                                    ruff_text_size::TextSize::new(f.start_offset),
                                 );
-                                let funcs: Vec<_> = functions
-                                    .iter()
-                                    .map(|f| {
-                                        let lineno = ruff_source_file::LineIndex::line_index(
-                                            &line_index,
-                                            ruff_text_size::TextSize::new(f.start_offset),
-                                        );
-                                        let endline = ruff_source_file::LineIndex::line_index(
-                                            &line_index,
-                                            ruff_text_size::TextSize::new(f.end_offset),
-                                        );
-                                        (
-                                            f.name.clone(),
-                                            f.metrics.h1(),
-                                            f.metrics.h2(),
-                                            f.metrics.n1(),
-                                            f.metrics.n2(),
-                                            f.metrics.vocabulary(),
-                                            f.metrics.length(),
-                                            f.metrics.volume(),
-                                            f.metrics.difficulty(),
-                                            f.metrics.effort(),
-                                            (lineno.to_zero_indexed() + 1) as u32,
-                                            (endline.to_zero_indexed() + 1) as u32,
-                                        )
-                                    })
-                                    .collect();
-                                (Some(total_metrics), funcs)
-                        } else {
-                            (None, Vec::new())
-                        };
+                                let endline = ruff_source_file::LineIndex::line_index(
+                                    &line_index,
+                                    ruff_text_size::TextSize::new(f.end_offset),
+                                );
+                                (
+                                    f.name.clone(),
+                                    f.metrics.h1(),
+                                    f.metrics.h2(),
+                                    f.metrics.n1(),
+                                    f.metrics.n2(),
+                                    f.metrics.vocabulary(),
+                                    f.metrics.length(),
+                                    f.metrics.volume(),
+                                    f.metrics.difficulty(),
+                                    f.metrics.effort(),
+                                    (lineno.to_zero_indexed() + 1) as u32,
+                                    (endline.to_zero_indexed() + 1) as u32,
+                                )
+                            })
+                            .collect();
+                        (Some(total_metrics), funcs)
+                    } else {
+                        (None, Vec::new())
+                    };
                     let mi = if include_maintainability {
-                        let (mi_val, rank) = maintainability::analyze(&parsed, raw.expect("Raw metrics required for maintainability"));
+                        let (mi_val, rank) = maintainability::analyze(
+                            &parsed,
+                            raw.expect("Raw metrics required for maintainability"),
+                        );
                         Some((mi_val, rank))
                     } else {
                         None
@@ -1412,13 +1420,13 @@ impl WilyIndex {
                 rev_message,
                 &result.rel_path,
                 "file",
-                raw_metrics.and_then(|r| Some(r.loc as i64)),
-                raw_metrics.and_then(|r| Some(r.sloc as i64)),
-                raw_metrics.and_then(|r| Some(r.lloc as i64)),
-                raw_metrics.and_then(|r| Some(r.comments as i64)),
-                raw_metrics.and_then(|r| Some(r.multi as i64)),
-                raw_metrics.and_then(|r| Some(r.blank as i64)),
-                raw_metrics.and_then(|r| Some(r.single_comments as i64)),
+                raw_metrics.map(|r| r.loc as i64),
+                raw_metrics.map(|r| r.sloc as i64),
+                raw_metrics.map(|r| r.lloc as i64),
+                raw_metrics.map(|r| r.comments as i64),
+                raw_metrics.map(|r| r.multi as i64),
+                raw_metrics.map(|r| r.blank as i64),
+                raw_metrics.map(|r| r.single_comments as i64),
                 result.cyclomatic_total.map(|c| c as f64),
                 result.halstead_total.map(|h| h.0 as i64),
                 result.halstead_total.map(|h| h.1 as i64),
@@ -1595,13 +1603,13 @@ impl WilyIndex {
                 rev_message,
                 dir,
                 path_type,
-                raw.and_then(|r| Some(r.loc as i64)),
-                raw.and_then(|r| Some(r.sloc as i64)),
-                raw.and_then(|r| Some(r.lloc as i64)),
-                raw.and_then(|r| Some(r.comments as i64)),
-                raw.and_then(|r| Some(r.multi as i64)),
-                raw.and_then(|r| Some(r.blank as i64)),
-                raw.and_then(|r| Some(r.single_comments as i64)),
+                raw.map(|r| r.loc as i64),
+                raw.map(|r| r.sloc as i64),
+                raw.map(|r| r.lloc as i64),
+                raw.map(|r| r.comments as i64),
+                raw.map(|r| r.multi as i64),
+                raw.map(|r| r.blank as i64),
+                raw.map(|r| r.single_comments as i64),
                 mean_complexity,
                 sum_halstead.map(|h| h.0),
                 sum_halstead.map(|h| h.1),
@@ -1619,10 +1627,7 @@ impl WilyIndex {
         }
 
         // Get root LOC
-        let root_loc = dir_raw
-            .get("")
-            .map(|r| r.loc)
-            .unwrap_or(0);
+        let root_loc = dir_raw.get("").map(|r| r.loc).unwrap_or(0);
 
         Ok(root_loc as i64)
     }
@@ -1679,10 +1684,12 @@ impl WilyIndex {
                 .par_iter()
                 .filter_map(|abs_path| {
                     let content = std::fs::read_to_string(abs_path).ok()?;
-                    
+
                     // Compute relative path
                     let rel_path = if abs_path.starts_with(&base_path) {
-                        let rel = abs_path[base_path.len()..].trim_start_matches('/').trim_start_matches('\\');
+                        let rel = abs_path[base_path.len()..]
+                            .trim_start_matches('/')
+                            .trim_start_matches('\\');
                         rel.replace('\\', "/")
                     } else {
                         abs_path.replace('\\', "/")
@@ -1700,72 +1707,69 @@ impl WilyIndex {
 
                     let (cyclomatic_total, cyclomatic_functions, cyclomatic_classes) =
                         if include_cyclomatic {
-                            match cyclomatic::analyze(&parsed) {
-                                (functions, classes) => {
-                                    let mut total: i64 = 0;
-                                    // Only collect function/class details if include_details is true
-                                    let funcs: Vec<_> = if include_details {
-                                        functions
-                                            .iter()
-                                            .map(|f| {
-                                                let lineno = ruff_source_file::LineIndex::line_index(
-                                                    &line_index,
-                                                    ruff_text_size::TextSize::new(f.start_offset),
-                                                );
-                                                let endline = ruff_source_file::LineIndex::line_index(
-                                                    &line_index,
-                                                    ruff_text_size::TextSize::new(f.end_offset),
-                                                );
-                                                total += f.complexity as i64;
-                                                (
-                                                    f.fullname(),
-                                                    f.complexity,
-                                                    (lineno.to_zero_indexed() + 1) as u32,
-                                                    (endline.to_zero_indexed() + 1) as u32,
-                                                    f.is_method,
-                                                    f.classname.clone(),
-                                                )
-                                            })
-                                            .collect()
-                                    } else {
-                                        // Just compute total without collecting details
-                                        for f in &functions {
-                                            total += f.complexity as i64;
-                                        }
-                                        Vec::new()
-                                    };
-                                    let cls: Vec<_> = if include_details {
-                                        classes
-                                            .iter()
-                                            .map(|c| {
-                                                let lineno = ruff_source_file::LineIndex::line_index(
-                                                    &line_index,
-                                                    ruff_text_size::TextSize::new(c.start_offset),
-                                                );
-                                                let endline = ruff_source_file::LineIndex::line_index(
-                                                    &line_index,
-                                                    ruff_text_size::TextSize::new(c.end_offset),
-                                                );
-                                                total += c.complexity() as i64;
-                                                (
-                                                    c.name.clone(),
-                                                    c.complexity(),
-                                                    c.real_complexity,
-                                                    (lineno.to_zero_indexed() + 1) as u32,
-                                                    (endline.to_zero_indexed() + 1) as u32,
-                                                )
-                                            })
-                                            .collect()
-                                    } else {
-                                        // Just compute total without collecting details
-                                        for c in &classes {
-                                            total += c.complexity() as i64;
-                                        }
-                                        Vec::new()
-                                    };
-                                    (Some(total), funcs, cls)
+                            let (functions, classes) = cyclomatic::analyze(&parsed);
+                            let mut total: i64 = 0;
+                            // Only collect function/class details if include_details is true
+                            let funcs: Vec<_> = if include_details {
+                                functions
+                                    .iter()
+                                    .map(|f| {
+                                        let lineno = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(f.start_offset),
+                                        );
+                                        let endline = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(f.end_offset),
+                                        );
+                                        total += f.complexity as i64;
+                                        (
+                                            f.fullname(),
+                                            f.complexity,
+                                            (lineno.to_zero_indexed() + 1) as u32,
+                                            (endline.to_zero_indexed() + 1) as u32,
+                                            f.is_method,
+                                            f.classname.clone(),
+                                        )
+                                    })
+                                    .collect()
+                            } else {
+                                // Just compute total without collecting details
+                                for f in &functions {
+                                    total += f.complexity as i64;
                                 }
-                            }
+                                Vec::new()
+                            };
+                            let cls: Vec<_> = if include_details {
+                                classes
+                                    .iter()
+                                    .map(|c| {
+                                        let lineno = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(c.start_offset),
+                                        );
+                                        let endline = ruff_source_file::LineIndex::line_index(
+                                            &line_index,
+                                            ruff_text_size::TextSize::new(c.end_offset),
+                                        );
+                                        total += c.complexity() as i64;
+                                        (
+                                            c.name.clone(),
+                                            c.complexity(),
+                                            c.real_complexity,
+                                            (lineno.to_zero_indexed() + 1) as u32,
+                                            (endline.to_zero_indexed() + 1) as u32,
+                                        )
+                                    })
+                                    .collect()
+                            } else {
+                                // Just compute total without collecting details
+                                for c in &classes {
+                                    total += c.complexity() as i64;
+                                }
+                                Vec::new()
+                            };
+                            (Some(total), funcs, cls)
                         } else {
                             (None, Vec::new(), Vec::new())
                         };
@@ -1821,7 +1825,10 @@ impl WilyIndex {
                     };
 
                     let mi = if include_maintainability {
-                        let (mi_val, rank) = maintainability::analyze(&parsed, raw.expect("Raw metrics required for maintainability"));
+                        let (mi_val, rank) = maintainability::analyze(
+                            &parsed,
+                            raw.expect("Raw metrics required for maintainability"),
+                        );
                         Some((mi_val, rank))
                     } else {
                         None
@@ -1934,11 +1941,12 @@ impl WilyIndex {
                 let detailed_dict = PyDict::new(py);
 
                 // Add functions
-                let halstead_map: std::collections::HashMap<&str, &HalsteadFunctionMetrics> = file_result
-                    .halstead_functions
-                    .iter()
-                    .map(|h| (h.0.as_str(), h))
-                    .collect();
+                let halstead_map: std::collections::HashMap<&str, &HalsteadFunctionMetrics> =
+                    file_result
+                        .halstead_functions
+                        .iter()
+                        .map(|h| (h.0.as_str(), h))
+                        .collect();
 
                 let cognitive_map: std::collections::HashMap<&str, u64> = file_result
                     .cognitive_functions
@@ -1946,7 +1954,9 @@ impl WilyIndex {
                     .map(|f| (f.0.as_str(), f.1))
                     .collect();
 
-                for (name, complexity, lineno, endline, is_method, classname) in &file_result.cyclomatic_functions {
+                for (name, complexity, lineno, endline, is_method, classname) in
+                    &file_result.cyclomatic_functions
+                {
                     let func_dict = PyDict::new(py);
                     func_dict.set_item("complexity", *complexity)?;
                     func_dict.set_item("lineno", *lineno)?;
@@ -1978,7 +1988,9 @@ impl WilyIndex {
                 }
 
                 // Add classes
-                for (name, complexity, real_complexity, lineno, endline) in &file_result.cyclomatic_classes {
+                for (name, complexity, real_complexity, lineno, endline) in
+                    &file_result.cyclomatic_classes
+                {
                     let class_dict = PyDict::new(py);
                     class_dict.set_item("complexity", *complexity)?;
                     class_dict.set_item("real_complexity", *real_complexity)?;

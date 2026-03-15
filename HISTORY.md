@@ -1,5 +1,22 @@
 # Release History
 
+## 2.0.0a1 (Unreleased)
+
+Complete rewrite of the analysis backend in Rust using PyO3 and Ruff's AST parser.
+
+### New Features
+
+* **Rust backend**: All metric computation (cyclomatic, halstead, raw, maintainability) now runs in Rust via a compiled native extension, replacing radon/mccabe Python dependencies
+* **Cognitive complexity**: New `cognitive` operator measuring how hard code is to *understand* (vs cyclomatic which measures structural complexity). Based on G. Ann Campbell's "Cognitive Complexity" paper (SonarSource, 2017). Reference implementation: [complexipy](https://github.com/rohaquinlop/complexipy) (MIT)
+* **Parquet storage**: Metrics stored in columnar Parquet format instead of JSON, significantly faster for large codebases
+* **Parallel analysis**: File analysis runs in parallel using Rayon
+
+### Breaking Changes
+
+* Requires rebuilding the `.wily/` cache (incompatible with v1 cache format)
+* `mccabe` operator removed (replaced by `cyclomatic` using Ruff AST)
+* Python 3.10+ required
+
 ## 1.25.0
 
 * Allow passing multiple file names to graph, to get multiple lines in HTML by @devdanzin in https://github.com/tonybaloney/wily/pull/206

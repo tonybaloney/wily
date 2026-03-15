@@ -34,9 +34,7 @@ impl FunctionCognitiveComplexity {
 }
 
 /// Analyze a parsed module and return per-function cognitive complexity.
-pub fn analyze(
-    parsed: &ruff_python_parser::Parsed<ModModule>,
-) -> Vec<FunctionCognitiveComplexity> {
+pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>) -> Vec<FunctionCognitiveComplexity> {
     let mut functions = Vec::new();
 
     for stmt in parsed.suite() {
@@ -100,12 +98,10 @@ fn statement_cognitive_complexity(statement: &Stmt, nesting_level: u64) -> u64 {
                 match node {
                     // Nested function definitions increase nesting
                     Stmt::FunctionDef(..) => {
-                        complexity +=
-                            statement_cognitive_complexity(node, nesting_level + 1);
+                        complexity += statement_cognitive_complexity(node, nesting_level + 1);
                     }
                     _ => {
-                        complexity +=
-                            statement_cognitive_complexity(node, nesting_level);
+                        complexity += statement_cognitive_complexity(node, nesting_level);
                     }
                 }
             }
@@ -304,20 +300,16 @@ fn count_bool_ops(expr: &Expr, nesting_level: u64) -> u64 {
             }
         }
         Expr::ListComp(l) => {
-            complexity +=
-                count_comprehension_complexity(&l.generators, &l.elt, nesting_level);
+            complexity += count_comprehension_complexity(&l.generators, &l.elt, nesting_level);
         }
         Expr::SetComp(s) => {
-            complexity +=
-                count_comprehension_complexity(&s.generators, &s.elt, nesting_level);
+            complexity += count_comprehension_complexity(&s.generators, &s.elt, nesting_level);
         }
         Expr::Generator(g) => {
-            complexity +=
-                count_comprehension_complexity(&g.generators, &g.elt, nesting_level);
+            complexity += count_comprehension_complexity(&g.generators, &g.elt, nesting_level);
         }
         Expr::DictComp(d) => {
-            complexity +=
-                count_comprehension_complexity(&d.generators, &d.key, nesting_level);
+            complexity += count_comprehension_complexity(&d.generators, &d.key, nesting_level);
             complexity += count_bool_ops(&d.value, nesting_level + 1);
         }
         _ => {}

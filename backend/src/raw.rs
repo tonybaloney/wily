@@ -11,7 +11,7 @@
 
 use pyo3::prelude::*;
 use ruff_python_ast::ModModule;
-use ruff_python_parser::{TokenKind};
+use ruff_python_parser::TokenKind;
 use ruff_python_trivia::CommentRanges;
 use ruff_source_file::{LineIndex, OneIndexed};
 use ruff_text_size::{Ranged, TextRange};
@@ -27,7 +27,11 @@ pub struct RawCounts {
     pub single_comments: usize,
 }
 
-pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>, line_index: &LineIndex, source: &str) -> RawCounts {
+pub fn analyze(
+    parsed: &ruff_python_parser::Parsed<ModModule>,
+    line_index: &LineIndex,
+    source: &str,
+) -> RawCounts {
     let tokens = parsed.tokens();
     let comment_ranges: CommentRanges = tokens.into();
 
@@ -38,9 +42,9 @@ pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>, line_index: &Line
     }
 
     // Track which lines are covered by multi-line strings
-    let mut multiline_string_lines = vec![false; loc as usize];
+    let mut multiline_string_lines = vec![false; loc];
     // Track single-line docstrings (string-only logical lines)
-    let mut single_line_docstring_lines = vec![false; loc as usize];
+    let mut single_line_docstring_lines = vec![false; loc];
 
     // Track comment count
     let comments = comment_ranges.len();
@@ -73,7 +77,7 @@ pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>, line_index: &Line
             if is_single_line_docstring(&current_line_tokens) {
                 // Find the line with the string
                 for &(k, start, end) in &current_line_tokens {
-                    if k == TokenKind::String && start == end && start < loc as usize {
+                    if k == TokenKind::String && start == end && start < loc {
                         single_line_docstring_lines[start] = true;
                     }
                 }
@@ -87,7 +91,7 @@ pub fn analyze(parsed: &ruff_python_parser::Parsed<ModModule>, line_index: &Line
     let mut multi = 0usize;
     let mut single_comments = 0usize;
 
-    for line_num in 0..loc as usize {
+    for line_num in 0..loc {
         let line_idx = OneIndexed::from_zero_indexed(line_num);
         let line_start = line_index.line_start(line_idx, source);
         let line_end = line_index.line_end(line_idx, source);
