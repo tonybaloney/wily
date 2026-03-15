@@ -8,6 +8,11 @@ def test_resolve_operator():
     assert op == wily.operators.OPERATOR_CYCLOMATIC
 
 
+def test_resolve_cognitive_operator():
+    op = wily.operators.resolve_operator("cognitive")
+    assert op == wily.operators.OPERATOR_COGNITIVE
+
+
 def test_resolve_bad_operator():
     with pytest.raises(ValueError):
         wily.operators.resolve_operator("banana")
@@ -27,6 +32,16 @@ def test_resolve_metric():
 def test_resolve_invalid_metric():
     with pytest.raises(ValueError):
         wily.operators.resolve_metric("raw.spanner")
+
+
+def test_resolve_cognitive_metric():
+    metric = wily.operators.resolve_metric("cognitive_complexity")
+    assert metric.name == "cognitive_complexity"
+
+
+def test_resolve_cognitive_metric_qualified():
+    metric = wily.operators.resolve_metric("cognitive.cognitive_complexity")
+    assert metric.name == "cognitive_complexity"
 
 
 def test_resolve_short_metric():

@@ -21,9 +21,11 @@ operators = (
     "cyclomatic",
     "maintainability",
     "raw",
+    "cognitive",
     "halstead,cyclomatic",
     "maintainability,raw",
-    "halstead,cyclomatic,maintainability,raw",
+    "cyclomatic,cognitive",
+    "halstead,cyclomatic,maintainability,raw,cognitive",
 )
 
 

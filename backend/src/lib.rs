@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 
+mod cognitive;
 mod cyclomatic;
 mod files;
 mod git;

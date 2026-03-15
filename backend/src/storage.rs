@@ -95,6 +95,8 @@ fn metrics_schema() -> Schema {
         Field::new("volume", DataType::Float64, true),
         Field::new("difficulty", DataType::Float64, true),
         Field::new("effort", DataType::Float64, true),
+        // Cognitive complexity
+        Field::new("cognitive_complexity", DataType::Float64, true),
         // Maintainability
         Field::new("mi", DataType::Float64, true),
         // Function/class specific
@@ -132,6 +134,7 @@ pub struct MetricRow {
     pub volume: Option<f64>,
     pub difficulty: Option<f64>,
     pub effort: Option<f64>,
+    pub cognitive_complexity: Option<f64>,
     pub mi: Option<f64>,
     pub lineno: Option<u32>,
     pub endline: Option<u32>,
@@ -167,6 +170,7 @@ impl MetricRow {
         dict.set_item("volume", self.volume)?;
         dict.set_item("difficulty", self.difficulty)?;
         dict.set_item("effort", self.effort)?;
+        dict.set_item("cognitive_complexity", self.cognitive_complexity)?;
         dict.set_item("mi", self.mi)?;
         if let Some(mi_val) = self.mi {
             dict.set_item("rank", mi_rank(mi_val).to_string())?;
@@ -208,6 +212,8 @@ pub struct MetricsBuilder {
     volume: Float64Builder,
     difficulty: Float64Builder,
     effort: Float64Builder,
+    // Cognitive complexity
+    cognitive_complexity: Float64Builder,
     // Maintainability
     mi: Float64Builder,
     // Function/class
@@ -246,6 +252,7 @@ impl MetricsBuilder {
             volume: Float64Builder::new(),
             difficulty: Float64Builder::new(),
             effort: Float64Builder::new(),
+            cognitive_complexity: Float64Builder::new(),
             mi: Float64Builder::new(),
             lineno: UInt32Builder::new(),
             endline: UInt32Builder::new(),
@@ -285,6 +292,8 @@ impl MetricsBuilder {
         volume: Option<f64>,
         difficulty: Option<f64>,
         effort: Option<f64>,
+        // Cognitive complexity
+        cognitive_complexity: Option<f64>,
         // Maintainability
         mi: Option<f64>,
     ) {
@@ -315,6 +324,8 @@ impl MetricsBuilder {
         self.volume.append_option(volume);
         self.difficulty.append_option(difficulty);
         self.effort.append_option(effort);
+
+        self.cognitive_complexity.append_option(cognitive_complexity);
 
         self.mi.append_option(mi);
 
@@ -350,6 +361,8 @@ impl MetricsBuilder {
         volume: Option<f64>,
         difficulty: Option<f64>,
         effort: Option<f64>,
+        // Cognitive complexity for function
+        cognitive_complexity: Option<u64>,
     ) {
         self.revision.append_value(revision);
         self.revision_date.append_value(revision_date);
@@ -379,6 +392,8 @@ impl MetricsBuilder {
         self.volume.append_option(volume);
         self.difficulty.append_option(difficulty);
         self.effort.append_option(effort);
+
+        self.cognitive_complexity.append_option(cognitive_complexity.map(|v| v as f64));
 
         self.mi.append_null();
 
@@ -434,6 +449,8 @@ impl MetricsBuilder {
         self.difficulty.append_null();
         self.effort.append_null();
 
+        self.cognitive_complexity.append_null();
+
         self.mi.append_null();
 
         self.lineno.append_value(lineno);
@@ -473,6 +490,7 @@ impl MetricsBuilder {
             Arc::new(self.volume.finish()),
             Arc::new(self.difficulty.finish()),
             Arc::new(self.effort.finish()),
+            Arc::new(self.cognitive_complexity.finish()),
             Arc::new(self.mi.finish()),
             Arc::new(self.lineno.finish()),
             Arc::new(self.endline.finish()),
@@ -515,6 +533,7 @@ impl MetricsBuilder {
         volume: Option<f64>,
         difficulty: Option<f64>,
         effort: Option<f64>,
+        cognitive_complexity: Option<f64>,
         mi: Option<f64>,
     ) -> MetricRow {
         self.add_aggregate_row(
@@ -541,6 +560,7 @@ impl MetricsBuilder {
             volume,
             difficulty,
             effort,
+            cognitive_complexity,
             mi,
         );
         MetricRow {
@@ -568,6 +588,7 @@ impl MetricsBuilder {
             volume,
             difficulty,
             effort,
+            cognitive_complexity,
             mi,
             lineno: None,
             endline: None,
@@ -599,6 +620,7 @@ impl MetricsBuilder {
         volume: Option<f64>,
         difficulty: Option<f64>,
         effort: Option<f64>,
+        cognitive_complexity: Option<u64>,
     ) -> MetricRow {
         self.add_function_row(
             revision,
@@ -620,6 +642,7 @@ impl MetricsBuilder {
             volume,
             difficulty,
             effort,
+            cognitive_complexity,
         );
         MetricRow {
             revision: revision.to_string(),
@@ -646,6 +669,7 @@ impl MetricsBuilder {
             volume,
             difficulty,
             effort,
+            cognitive_complexity: cognitive_complexity.map(|v| v as f64),
             mi: None,
             lineno: Some(lineno),
             endline: Some(endline),
@@ -704,6 +728,7 @@ impl MetricsBuilder {
             volume: None,
             difficulty: None,
             effort: None,
+            cognitive_complexity: None,
             mi: None,
             lineno: Some(lineno),
             endline: Some(endline),
@@ -823,21 +848,24 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
         let effort_col = batch
             .column(23)
             .as_primitive::<arrow::datatypes::Float64Type>();
-        let mi_col = batch
+        let cognitive_complexity_col = batch
             .column(24)
             .as_primitive::<arrow::datatypes::Float64Type>();
-        let lineno_col = batch
+        let mi_col = batch
             .column(25)
-            .as_primitive::<arrow::datatypes::UInt32Type>();
-        let endline_col = batch
+            .as_primitive::<arrow::datatypes::Float64Type>();
+        let lineno_col = batch
             .column(26)
             .as_primitive::<arrow::datatypes::UInt32Type>();
-        let is_method_col = batch
+        let endline_col = batch
             .column(27)
+            .as_primitive::<arrow::datatypes::UInt32Type>();
+        let is_method_col = batch
+            .column(28)
             .as_any()
             .downcast_ref::<BooleanArray>()
             .unwrap();
-        let classname_col = batch.column(28).as_string::<i32>();
+        let classname_col = batch.column(29).as_string::<i32>();
 
         for i in 0..batch.num_rows() {
             let row = MetricRow {
@@ -944,6 +972,11 @@ fn load_rows_from_parquet(path: &str) -> Result<Vec<MetricRow>, String> {
                     None
                 } else {
                     Some(effort_col.value(i))
+                },
+                cognitive_complexity: if cognitive_complexity_col.is_null(i) {
+                    None
+                } else {
+                    Some(cognitive_complexity_col.value(i))
                 },
                 mi: if mi_col.is_null(i) {
                     None
@@ -1126,6 +1159,7 @@ impl WilyIndex {
         revision_author: Option<String>,
         revision_message: Option<String>,
     ) -> PyResult<i64> {
+        use crate::cognitive;
         use crate::cyclomatic;
         use crate::halstead;
         use crate::maintainability;
@@ -1138,6 +1172,7 @@ impl WilyIndex {
         let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
         let include_halstead = operators.iter().any(|o| o == "halstead");
         let include_maintainability = operators.iter().any(|o| o == "maintainability");
+        let include_cognitive = operators.iter().any(|o| o == "cognitive");
 
         // Compute relative paths
         let relative_paths: Vec<String> = paths
@@ -1169,6 +1204,8 @@ impl WilyIndex {
             cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>,
             halstead_total: Option<HalsteadTotals>,
             halstead_functions: Vec<HalsteadFunctionMetrics>,
+            cognitive_total: Option<i64>,
+            cognitive_functions: Vec<(String, u64, u32, u32, bool, Option<String>)>,
             mi: Option<(f64, MIRank)>,
         }
 
@@ -1295,6 +1332,36 @@ impl WilyIndex {
                         None
                     };
 
+                    let (cognitive_total, cognitive_functions) = if include_cognitive {
+                        let functions = cognitive::analyze(&parsed);
+                        let mut total: i64 = 0;
+                        let funcs: Vec<_> = functions
+                            .iter()
+                            .map(|f| {
+                                let lineno = ruff_source_file::LineIndex::line_index(
+                                    &line_index,
+                                    ruff_text_size::TextSize::new(f.start_offset),
+                                );
+                                let endline = ruff_source_file::LineIndex::line_index(
+                                    &line_index,
+                                    ruff_text_size::TextSize::new(f.end_offset),
+                                );
+                                total += f.complexity as i64;
+                                (
+                                    f.fullname(),
+                                    f.complexity,
+                                    (lineno.to_zero_indexed() + 1) as u32,
+                                    (endline.to_zero_indexed() + 1) as u32,
+                                    f.is_method,
+                                    f.classname.clone(),
+                                )
+                            })
+                            .collect();
+                        (Some(total), funcs)
+                    } else {
+                        (None, Vec::new())
+                    };
+
                     Some(FileResult {
                         rel_path: rel_path.clone(),
                         raw,
@@ -1303,6 +1370,8 @@ impl WilyIndex {
                         cyclomatic_classes,
                         halstead_total,
                         halstead_functions,
+                        cognitive_total,
+                        cognitive_functions,
                         mi,
                     })
                 })
@@ -1328,6 +1397,8 @@ impl WilyIndex {
         let mut dir_halstead: std::collections::HashMap<String, Vec<HalsteadTotals>> =
             std::collections::HashMap::with_capacity(dir_count);
         let mut dir_mi: std::collections::HashMap<String, Vec<(f64, MIRank)>> =
+            std::collections::HashMap::with_capacity(dir_count);
+        let mut dir_cognitive: std::collections::HashMap<String, Vec<i64>> =
             std::collections::HashMap::with_capacity(dir_count);
 
         // Add file rows and collect for aggregation
@@ -1358,6 +1429,7 @@ impl WilyIndex {
                 result.halstead_total.map(|h| h.6),
                 result.halstead_total.map(|h| h.7),
                 result.halstead_total.map(|h| h.8),
+                result.cognitive_total.map(|c| c as f64),
                 result.mi.as_ref().map(|(mi, _)| *mi),
             );
             state.new_rows.push(row);
@@ -1367,6 +1439,13 @@ impl WilyIndex {
                 .halstead_functions
                 .iter()
                 .map(|h| (h.0.as_str(), h))
+                .collect();
+
+            // Build a HashMap for O(1) cognitive function lookup
+            let cognitive_map: std::collections::HashMap<&str, u64> = result
+                .cognitive_functions
+                .iter()
+                .map(|f| (f.0.as_str(), f.1))
                 .collect();
 
             // Add function rows
@@ -1396,6 +1475,7 @@ impl WilyIndex {
                     hal.map(|h| h.7),
                     hal.map(|h| h.8),
                     hal.map(|h| h.9),
+                    cognitive_map.get(name.as_str()).copied(),
                 );
                 state.new_rows.push(row);
             }
@@ -1444,7 +1524,10 @@ impl WilyIndex {
                     dir_halstead.entry(dir.clone()).or_default().push(hal);
                 }
                 if let Some(mi) = &result.mi {
-                    dir_mi.entry(dir).or_default().push(*mi);
+                    dir_mi.entry(dir.clone()).or_default().push(*mi);
+                }
+                if let Some(cc) = result.cognitive_total {
+                    dir_cognitive.entry(dir).or_default().push(cc);
                 }
             }
         }
@@ -1456,6 +1539,7 @@ impl WilyIndex {
             let complexities = dir_complexity.get(dir);
             let halsteads = dir_halstead.get(dir);
             let mis = dir_mi.get(dir);
+            let cognitives = dir_cognitive.get(dir);
 
             // Compute aggregates
             let mean_complexity = complexities.map(|v| {
@@ -1496,6 +1580,14 @@ impl WilyIndex {
                 None
             };
 
+            let mean_cognitive = cognitives.map(|v| {
+                if v.is_empty() {
+                    0.0
+                } else {
+                    v.iter().sum::<i64>() as f64 / v.len() as f64
+                }
+            });
+
             let row = builder.add_aggregate_row_tracked(
                 &revision_key,
                 revision_date,
@@ -1520,6 +1612,7 @@ impl WilyIndex {
                 sum_halstead.map(|h| h.6),
                 sum_halstead.map(|h| h.7),
                 sum_halstead.map(|h| h.8),
+                mean_cognitive,
                 mean_mi,
             );
             state.new_rows.push(row);
@@ -1552,6 +1645,7 @@ impl WilyIndex {
         base_path: String,
         include_details: bool,
     ) -> PyResult<Bound<'py, PyDict>> {
+        use crate::cognitive;
         use crate::cyclomatic;
         use crate::halstead;
         use crate::maintainability;
@@ -1563,6 +1657,7 @@ impl WilyIndex {
         let include_cyclomatic = operators.iter().any(|o| o == "cyclomatic");
         let include_halstead = operators.iter().any(|o| o == "halstead");
         let include_maintainability = operators.iter().any(|o| o == "maintainability");
+        let include_cognitive = operators.iter().any(|o| o == "cognitive");
 
         // Analysis result for a single file (same structure as in analyze_revision)
         struct FileResult {
@@ -1573,6 +1668,8 @@ impl WilyIndex {
             cyclomatic_classes: Vec<(String, u32, u32, u32, u32)>,
             halstead_total: Option<HalsteadTotals>,
             halstead_functions: Vec<HalsteadFunctionMetrics>,
+            cognitive_total: Option<i64>,
+            cognitive_functions: Vec<(String, u64, u32, u32, bool, Option<String>)>,
             mi: Option<(f64, MIRank)>,
         }
 
@@ -1730,6 +1827,43 @@ impl WilyIndex {
                         None
                     };
 
+                    let (cognitive_total, cognitive_functions) = if include_cognitive {
+                        let functions = cognitive::analyze(&parsed);
+                        let mut total: i64 = 0;
+                        let funcs: Vec<_> = if include_details {
+                            functions
+                                .iter()
+                                .map(|f| {
+                                    let lineno = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(f.start_offset),
+                                    );
+                                    let endline = ruff_source_file::LineIndex::line_index(
+                                        &line_index,
+                                        ruff_text_size::TextSize::new(f.end_offset),
+                                    );
+                                    total += f.complexity as i64;
+                                    (
+                                        f.fullname(),
+                                        f.complexity,
+                                        (lineno.to_zero_indexed() + 1) as u32,
+                                        (endline.to_zero_indexed() + 1) as u32,
+                                        f.is_method,
+                                        f.classname.clone(),
+                                    )
+                                })
+                                .collect()
+                        } else {
+                            for f in &functions {
+                                total += f.complexity as i64;
+                            }
+                            Vec::new()
+                        };
+                        (Some(total), funcs)
+                    } else {
+                        (None, Vec::new())
+                    };
+
                     Some(FileResult {
                         rel_path,
                         raw,
@@ -1738,6 +1872,8 @@ impl WilyIndex {
                         cyclomatic_classes,
                         halstead_total,
                         halstead_functions,
+                        cognitive_total,
+                        cognitive_functions,
                         mi,
                     })
                 })
@@ -1788,6 +1924,11 @@ impl WilyIndex {
                 file_dict.set_item("rank", mi_rank(mi).to_string())?;
             }
 
+            // Cognitive complexity
+            if let Some(cc) = file_result.cognitive_total {
+                file_dict.set_item("cognitive_complexity", cc)?;
+            }
+
             // Add detailed dict for functions and classes (only if requested)
             if include_details {
                 let detailed_dict = PyDict::new(py);
@@ -1799,6 +1940,12 @@ impl WilyIndex {
                     .map(|h| (h.0.as_str(), h))
                     .collect();
 
+                let cognitive_map: std::collections::HashMap<&str, u64> = file_result
+                    .cognitive_functions
+                    .iter()
+                    .map(|f| (f.0.as_str(), f.1))
+                    .collect();
+
                 for (name, complexity, lineno, endline, is_method, classname) in &file_result.cyclomatic_functions {
                     let func_dict = PyDict::new(py);
                     func_dict.set_item("complexity", *complexity)?;
@@ -1807,6 +1954,11 @@ impl WilyIndex {
                     func_dict.set_item("is_method", *is_method)?;
                     if let Some(cn) = classname {
                         func_dict.set_item("classname", cn)?;
+                    }
+
+                    // Add cognitive complexity for function if available
+                    if let Some(cc) = cognitive_map.get(name.as_str()) {
+                        func_dict.set_item("cognitive_complexity", *cc)?;
                     }
 
                     // Add Halstead metrics for function if available

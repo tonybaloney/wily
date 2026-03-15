@@ -31,6 +31,7 @@ DEFAULT_OPERATORS = {
     operators.OPERATOR_MAINTAINABILITY.name,
     operators.OPERATOR_CYCLOMATIC.name,
     operators.OPERATOR_HALSTEAD.name,
+    operators.OPERATOR_COGNITIVE.name,
 }
 
 

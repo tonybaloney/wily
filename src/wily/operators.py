@@ -112,12 +112,19 @@ OPERATOR_HALSTEAD = Operator(
     level=OperatorLevel.Object,
 )
 
+OPERATOR_COGNITIVE = Operator(
+    name="cognitive",
+    description=_("Cognitive Complexity of modules"),
+    level=OperatorLevel.Object,
+)
+
 
 _OPERATORS: tuple[Operator, ...] = (
     OPERATOR_CYCLOMATIC,
     OPERATOR_MAINTAINABILITY,
     OPERATOR_RAW,
     OPERATOR_HALSTEAD,
+    OPERATOR_COGNITIVE,
 )
 
 OPERATOR_METRICS = {
@@ -157,7 +164,15 @@ OPERATOR_METRICS = {
     OPERATOR_MAINTAINABILITY:  (
         Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational),
         Metric("mi", _("Maintainability Index"), float, MetricType.AimHigh),
-    )
+    ),
+    OPERATOR_COGNITIVE: (
+        Metric(
+            "cognitive_complexity",
+            _("Cognitive Complexity"),
+            float,
+            MetricType.AimLow,
+        ),
+    ),
 }
 
 """Dictionary of all operators"""

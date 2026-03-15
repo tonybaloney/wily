@@ -129,6 +129,7 @@ class WilyIndex:
             - Raw metrics: loc, sloc, lloc, comments, multi, blank, single_comments
             - Cyclomatic: complexity
             - Halstead: h1, h2, N1, N2, vocabulary, length, volume, difficulty, effort
+            - Cognitive: cognitive_complexity
             - Maintainability: mi, rank
             - detailed: dict of functions/classes with their metrics
 
