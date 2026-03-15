@@ -148,5 +148,3 @@ def rank(
 
     headers = ("File", resolved_metric.description)
     print_table(headers=headers, data=data, wrap=wrap, table_style=table_style)
-
-

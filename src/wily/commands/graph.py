@@ -120,11 +120,7 @@ def graph(
             tracked_files.add(file_path)
 
         if not aggregate:
-            paths = tuple(
-                tracked_file
-                for tracked_file in tracked_files
-                if any(path_startswith(tracked_file, p) or tracked_file.startswith(p) for p in path)
-            ) or path
+            paths = tuple(tracked_file for tracked_file in tracked_files if any(path_startswith(tracked_file, p) or tracked_file.startswith(p) for p in path)) or path
         else:
             paths = path
 
@@ -211,4 +207,3 @@ def graph(
         filename=filename,
         include_plotlyjs=plotlyjs,  # type: ignore
     )
-

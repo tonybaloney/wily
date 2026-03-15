@@ -78,7 +78,6 @@ class GitArchiver(BaseArchiver):
 
         return get_revisions(self.repo_path, max_revisions)
 
-
     def checkout(self, revision: RevisionInfo, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.

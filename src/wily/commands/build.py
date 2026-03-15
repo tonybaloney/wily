@@ -4,12 +4,9 @@ Builds a cache based on a source-control history.
 TODO : Convert .gitignore to radon ignore patterns to make the build more efficient.
 
 """
-from datetime import datetime
 
-import os
 import pathlib
 import sys
-from typing import Any
 
 from rich.progress import (
     BarColumn,
@@ -143,9 +140,7 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
                         seed_task = progress.add_task("Analyzing seed", total=1)
                         progress.start_task(seed_task)
 
-                        seed_loc = analyze_revision_with_index(
-                            index, revision, archiver_instance, config
-                        )
+                        seed_loc = analyze_revision_with_index(index, revision, archiver_instance, config)
 
                         progress.stop_task(seed_task)
                         if any(op.name == "raw" for op in operators):
@@ -155,10 +150,8 @@ def build(config: WilyConfig, archiver: Archiver, operators: list[Operator]) -> 
                     elif i == 1:
                         task_id = progress.add_task("Analyzing revisions", total=len(revisions) - 1)
 
-                    analyze_revision_with_index(
-                        index, revision, archiver_instance, config
-                    )
-                    progress.advance(task_id) # type: ignore
+                    analyze_revision_with_index(index, revision, archiver_instance, config)
+                    progress.advance(task_id)  # type: ignore
 
     except Exception as e:
         logger.error("Failed to build cache: %s: '%s'", type(e), e)

@@ -87,7 +87,6 @@ class Operator:
         self.level = level
 
 
-
 OPERATOR_CYCLOMATIC = Operator(
     name="cyclomatic",
     description=_("Cyclomatic Complexity of modules"),
@@ -150,7 +149,7 @@ OPERATOR_METRICS = {
             MetricType.Informational,
         ),
     ),
-    OPERATOR_HALSTEAD:  (
+    OPERATOR_HALSTEAD: (
         Metric("h1", _("Unique Operators"), int, MetricType.AimLow),
         Metric("h2", _("Unique Operands"), int, MetricType.AimLow),
         Metric("N1", _("Number of Operators"), int, MetricType.AimLow),
@@ -161,7 +160,7 @@ OPERATOR_METRICS = {
         Metric("difficulty", _("Difficulty"), float, MetricType.AimLow),
         Metric("effort", _("Effort"), float, MetricType.AimLow),
     ),
-    OPERATOR_MAINTAINABILITY:  (
+    OPERATOR_MAINTAINABILITY: (
         Metric("rank", _("Maintainability Ranking"), str, MetricType.Informational),
         Metric("mi", _("Maintainability Index"), float, MetricType.AimHigh),
     ),
@@ -198,7 +197,8 @@ def resolve_operator(name: str) -> Operator:
 
 
 def resolve_operators(operators: Iterable[Operator | str]) -> list[Operator]:
-    """Resolve a list of operator names to their corresponding types.
+    """
+    Resolve a list of operator names to their corresponding types.
 
     Automatically includes 'raw' if 'maintainability' is requested, since
     the maintainability index calculation depends on raw metrics.

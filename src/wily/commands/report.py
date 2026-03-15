@@ -37,7 +37,7 @@ def report(
     output: Path,
     include_message: bool = False,
     format: ReportFormat = ReportFormat.CONSOLE,
-    changes_only: bool = False, # ignore in v2
+    changes_only: bool = False,  # ignore in v2
     wrap: bool = False,
     table_style: str = DEFAULT_TABLE_STYLE,
 ) -> None:
@@ -118,7 +118,7 @@ def report(
             else:
                 rows = [row for row in index[path] if row.get("path_type") == "file"]
             # Sort by date (oldest first) and limit to n
-            rows = sorted(rows, key=lambda r: r.get("revision_date", 0))[-(n or len(rows)):]
+            rows = sorted(rows, key=lambda r: r.get("revision_date", 0))[-(n or len(rows)) :]
 
             last: dict = {}
             for row in rows:

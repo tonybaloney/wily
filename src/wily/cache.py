@@ -25,7 +25,6 @@ def exists(config: WilyConfig) -> bool:
     return pathlib.Path(config.cache_path).exists() and pathlib.Path(config.cache_path).is_dir()
 
 
-
 def create(config: WilyConfig) -> str:
     """
     Create a wily cache.
@@ -73,4 +72,3 @@ def list_archivers(config: WilyConfig) -> list[str]:
 def get_default_metrics_path(config: WilyConfig, archiver: str) -> str:
     """Get the default path to the metrics parquet file."""
     return str(pathlib.Path(config.cache_path) / archiver / "metrics.parquet")
-

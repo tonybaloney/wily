@@ -304,7 +304,7 @@ def test_build_src_directory(tmpdir, cache_path):
         rows = list(wily_index)
         assert len(rows) == 3
 
-        src_path = wily_index['src/test.py']
+        src_path = wily_index["src/test.py"]
         assert len(src_path) == 1
         assert src_path[0]["path"] == "src/test.py"
         assert src_path[0]["path_type"] == "file"
@@ -312,7 +312,7 @@ def test_build_src_directory(tmpdir, cache_path):
         assert "loc" in src_path[0]
         assert src_path[0]["loc"] == 1  # One line of code
 
-        root_path = wily_index['src']
+        root_path = wily_index["src"]
         assert len(root_path) == 1
         assert root_path[0]["path"] == "src"
         assert root_path[0]["path_type"] == "directory"
@@ -320,7 +320,7 @@ def test_build_src_directory(tmpdir, cache_path):
         assert "loc" in root_path[0]
         assert root_path[0]["loc"] == 1  # One line of code in src
 
-        root_summary = wily_index['']
+        root_summary = wily_index[""]
         assert len(root_summary) == 1
         assert root_summary[0]["path"] == ""
         assert root_summary[0]["path_type"] == "root"

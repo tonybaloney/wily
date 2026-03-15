@@ -45,6 +45,7 @@ class MetricDiff:
     changed: bool = field(init=False)
 
     def __post_init__(self) -> None:
+        """Determine if the metric has changed."""
         self.changed = self.before != self.after
 
 
@@ -57,6 +58,7 @@ class FileDiff:
 
     @property
     def has_changes(self) -> bool:
+        """Determine if any metrics have changed."""
         return any(m.changed for m in self.metrics)
 
 
@@ -69,6 +71,7 @@ def _resolve_files_and_targets(
 
     Returns:
         Tuple of (normalized file paths, absolute target paths for analysis)
+
     """
     # Resolve target paths when the cli has specified --path
     if config.path != DEFAULT_PATH:
@@ -77,10 +80,7 @@ def _resolve_files_and_targets(
         targets = files
 
     # Expand directories to paths (normalize to Unix-style paths)
-    normalized_files = [
-        os.path.relpath(fn, config.path).replace("\\", "/")
-        for fn in iter_filenames(targets)
-    ]
+    normalized_files = [os.path.relpath(fn, config.path).replace("\\", "/") for fn in iter_filenames(targets)]
     logger.debug("Targeting - %s", normalized_files)
 
     return normalized_files, targets
@@ -94,19 +94,14 @@ def _resolve_metrics_and_operators(
 
     Returns:
         Tuple of (operators list, resolved metrics as (operator_name, Metric) tuples)
+
     """
     if metrics:
         operators = [resolve_operator(metric.split(".")[0]) for metric in metrics]
-        resolved_metrics = [
-            (metric.split(".")[0], resolve_metric(metric)) for metric in metrics
-        ]
+        resolved_metrics = [(metric.split(".")[0], resolve_metric(metric)) for metric in metrics]
     else:
         operators = list(ALL_OPERATORS.values())
-        resolved_metrics = [
-            (operator.name, metric)
-            for operator, metric in ALL_METRICS
-            if operator in operators
-        ]
+        resolved_metrics = [(operator.name, metric) for operator, metric in ALL_METRICS if operator in operators]
 
     return operators, resolved_metrics
 
@@ -126,6 +121,7 @@ def _load_indexed_metrics(
 
     Returns:
         Dict mapping file path to dict of metric values
+
     """
     last_data: dict[str, dict[str, Any]] = defaultdict(dict)
 
@@ -135,9 +131,7 @@ def _load_indexed_metrics(
             continue
 
         if revision:
-            data = next(
-                (row for row in path_rows if row.get("revision") == revision), None
-            )
+            data = next((row for row in path_rows if row.get("revision") == revision), None)
             if data is None:
                 logger.error(f"Revision {revision} not found for {file}")
                 raise SystemExit(1)
@@ -176,6 +170,7 @@ def _load_detailed_metrics(
 
     Returns:
         Dict mapping object paths (file:name) to dict of metric values
+
     """
     detailed_data: dict[str, dict[str, Any]] = defaultdict(dict)
 
@@ -191,9 +186,7 @@ def _load_detailed_metrics(
                 continue
 
             if revision:
-                obj_data = next(
-                    (row for row in obj_rows if row.get("revision") == revision), None
-                )
+                obj_data = next((row for row in obj_rows if row.get("revision") == revision), None)
                 if obj_data is None:
                     logger.error(f"Revision {revision} not found for {obj_path}")
                     raise SystemExit(1)
@@ -250,10 +243,7 @@ def _collect_detailed_paths(
     extra_paths: set[str] = set()
 
     # Check if any operator has Object level (functions/classes)
-    has_object_level = any(
-        resolve_operator(operator).level == OperatorLevel.Object
-        for operator, _ in resolved_metrics
-    )
+    has_object_level = any(resolve_operator(operator).level == OperatorLevel.Object for operator, _ in resolved_metrics)
 
     if not has_object_level:
         return extra_paths
@@ -279,6 +269,7 @@ def _compute_file_diff(
 
     Returns:
         FileDiff containing all metric comparisons
+
     """
     file_diff = FileDiff(path=file_path)
 
@@ -289,9 +280,7 @@ def _compute_file_diff(
         # Get current value
         after = _get_current_metric_value(current_data, file_path, metric.name)
 
-        file_diff.metrics.append(
-            MetricDiff(name=metric.name, before=before, after=after, metric=metric)
-        )
+        file_diff.metrics.append(MetricDiff(name=metric.name, before=before, after=after, metric=metric))
 
     return file_diff
 
@@ -309,6 +298,7 @@ def _format_json_output(
 
     Returns:
         List of dicts ready for JSON serialization
+
     """
     results = []
 
@@ -346,11 +336,7 @@ def _format_table_cell(metric_diff: MetricDiff) -> str | Text:
     after_display = "-" if after is None else after
 
     # Format numeric values with styling
-    if (
-        metric.metric_type in (int, float)
-        and before is not None
-        and after is not None
-    ):
+    if metric.metric_type in (int, float) and before is not None and after is not None:
         cell = Text(f"{before_display:n} -> ")
         if before > after:
             cell.append(f"{after_display:n}", style=BAD_STYLES[metric.measure])
@@ -382,6 +368,7 @@ def _format_table_output(
         changes_only: If True, only include files with changes
         wrap: Whether to wrap table output
         table_style: Table box style
+
     """
     results = []
 
@@ -450,9 +437,7 @@ def diff(
 
         # Load function/class metrics if detail mode
         if detail:
-            detailed_indexed = _load_detailed_metrics(
-                index, current_data, files, revision
-            )
+            detailed_indexed = _load_detailed_metrics(index, current_data, files, revision)
             indexed_data.update(detailed_indexed)
 
     # Add function/class paths to file list
@@ -463,10 +448,7 @@ def diff(
     logger.debug(files)
 
     # Compute diffs for all files
-    diffs = [
-        _compute_file_diff(file, indexed_data, current_data, resolved_metrics)
-        for file in files
-    ]
+    diffs = [_compute_file_diff(file, indexed_data, current_data, resolved_metrics) for file in files]
 
     # Output results
     if json:

@@ -102,4 +102,3 @@ def test_git_init(repo):
         archiver = git.GitArchiver(test_config)
         assert archiver.repo is not None
         assert archiver.config == test_config
-

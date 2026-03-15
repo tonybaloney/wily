@@ -10,14 +10,16 @@ def create_mock_rows(num_revisions):
     """Create mock rows for WilyIndex."""
     rows = []
     for i in range(num_revisions):
-        rows.append({
-            "revision": f"abcdef{i}",
-            "revision_author": f"Author {i}",
-            "revision_message": f"Message {i}",
-            "revision_date": i * 1000,  # Unix timestamps
-            "path": "test.py",
-            "path_type": "file",
-        })
+        rows.append(
+            {
+                "revision": f"abcdef{i}",
+                "revision_author": f"Author {i}",
+                "revision_message": f"Message {i}",
+                "revision_date": i * 1000,  # Unix timestamps
+                "path": "test.py",
+                "path_type": "file",
+            }
+        )
     return rows
 
 

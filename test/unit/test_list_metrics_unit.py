@@ -1,6 +1,5 @@
 """Unit tests for the list_metrics command."""
 
-
 from wily.commands.list_metrics import list_metrics
 
 

@@ -4,11 +4,9 @@ from typing import Any
 
 from wily.archivers import RevisionInfo
 
-
 def iter_filenames(targets: list[str], include_ipynb: bool = False) -> list[str]:
     """Iterate over Python filenames in targets."""
     ...
-
 
 def get_metrics_schema() -> list[tuple[str, str]]:
     """Get the parquet schema as a list of (name, type) tuples."""
@@ -38,9 +36,7 @@ class WilyIndex:
     """
 
     def __init__(self, output_path: str, operators: list[str]) -> None: ...
-
     def __enter__(self) -> WilyIndex: ...
-
     def __getitem__(self, path: str) -> list[dict[str, Any]]:
         """
         Get all rows matching the given path.
@@ -80,7 +76,6 @@ class WilyIndex:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> bool: ...
-
     def analyze_revision(
         self,
         paths: list[str],
@@ -136,14 +131,12 @@ class WilyIndex:
         """
         ...
 
-
 class RevisionIterator(Collection[RevisionInfo]):
     """Iterator over revisions in a Git repository."""
 
     def __iter__(self) -> RevisionIterator: ...
     def __next__(self) -> RevisionInfo: ...
     def __len__(self) -> int: ...
-
 
 # Git functions
 def get_revisions(path: str, max_revisions: int) -> RevisionIterator:
@@ -162,10 +155,8 @@ def find_revision(path: str, revision: str) -> RevisionInfo | None:
     """Find a revision by hash prefix."""
     ...
 
-
 class WilyIndexIterator:
     """Iterator for WilyIndex rows."""
 
     def __iter__(self) -> WilyIndexIterator: ...
     def __next__(self) -> dict[str, Any]: ...
-

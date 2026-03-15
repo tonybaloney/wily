@@ -75,9 +75,9 @@ def test_git_revisions_all_fields(tmpdir):
     assert rev2["date"] > 0
 
     # Changes in commit3: added docs.md, deleted README.md
-    assert rev2["added_files"] == [] # Empty because no Python files added
+    assert rev2["added_files"] == []  # Empty because no Python files added
     assert rev2["modified_files"] == []
-    assert rev2["deleted_files"] == [] # Empty because no Python files deleted
+    assert rev2["deleted_files"] == []  # Empty because no Python files deleted
 
     # === Revision 1 (commit2) ===
     rev1 = revisions[1]
@@ -146,7 +146,6 @@ def test_git_end_to_end(tmpdir):
     assert revisions[1]["author_email"] == "author@example.com"
     assert revisions[1]["author_name"] == "An author"
     assert revisions[1]["key"] in commit2.name_rev and revisions[1]["key"] not in commit1.name_rev
-
 
     _ = archiver.checkout(revisions[0], {})
 
