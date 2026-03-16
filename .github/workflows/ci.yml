@@ -161,8 +161,14 @@ jobs:
           rust-toolchain: stable
           docker-options: -e CI
           before-script-linux: |
-            yum install -y openssl-devel cmake3 || apk add --no-cache openssl-dev cmake make
-            which cmake3 && ln -sf $(which cmake3) /usr/local/bin/cmake || true
+            if command -v yum &> /dev/null; then
+              yum install -y openssl-devel cmake3
+              which cmake3 && ln -sf $(which cmake3) /usr/local/bin/cmake || true
+            elif command -v apk &> /dev/null; then
+              apk add --no-cache openssl-dev cmake make
+            elif command -v apt-get &> /dev/null; then
+              apt-get update && apt-get install -y libssl-dev cmake
+            fi
 
       - name: List dist files
         run: ls -lh dist/
