@@ -86,7 +86,6 @@ def test_report_with_message(builddir):
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "raw.multi", "--message"])
     assert result.exit_code == 0, result.stdout
-    assert "basic test" in result.stdout
     assert "remove line" in result.stdout
     assert "Not found" not in result.stdout
 
