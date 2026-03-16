@@ -9,11 +9,12 @@ def test_list_metrics(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["list-metrics"])
-    assert result.stdout.count("operator") == 4
+    assert result.stdout.count("operator") >= 4
     assert "cyclomatic" in result.stdout
     assert "maintainability" in result.stdout
     assert "raw" in result.stdout
     assert "halstead" in result.stdout
+    assert "cognitive" in result.stdout
 
 
 def test_list_metrics_wrapped(builddir):
@@ -22,8 +23,9 @@ def test_list_metrics_wrapped(builddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["list-metrics", "--wrap"])
-    assert result.stdout.count("operator") == 4
+    assert result.stdout.count("operator") >= 4
     assert "cyclomatic" in result.stdout
     assert "maintainability" in result.stdout
     assert "raw" in result.stdout
     assert "halstead" in result.stdout
+    assert "cognitive" in result.stdout
