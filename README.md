@@ -181,7 +181,7 @@ You can put a `wily.cfg` file in your project directory and `wily` will override
 
 ```ini
 [wily]
-# list of operators, choose from cyclomatic, maintainability, mccabe and raw
+# list of operators, choose from cyclomatic, cognitive, maintainability, halstead and raw
 operators = cyclomatic,raw
 # archiver to use, defaults to git
 archiver = git

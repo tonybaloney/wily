@@ -65,6 +65,9 @@ docs/_build/
 # PyBuilder
 target/
 
+# Rust builds
+rust/target/
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -107,9 +110,14 @@ test_granular.html
 .idea/
 .vscode/
 docs/build/
-
+.vs/
 # OSX
 .DS_Store
 
 # tests
 .tests-reports/
+
+# test artifacts
+foo/
+plotly.min.js
+wily_report/

@@ -1,4 +1,3 @@
-import sys
 import tempfile
 from unittest.mock import patch
 
@@ -6,7 +5,7 @@ from click.testing import CliRunner
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
 PATCHED_ENV = {
@@ -39,9 +38,7 @@ def test_graph(builddir):
     """Test the graph feature"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", _path, "-m", "raw.loc"]
-        )
+        result = runner.invoke(main.cli, ["--path", builddir, "graph", _path, "-m", "raw.loc"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -79,9 +76,7 @@ def test_graph_all(builddir):
     """Test the graph feature"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", _path, "-m", "raw.loc", "--all"]
-        )
+        result = runner.invoke(main.cli, ["--path", builddir, "graph", _path, "-m", "raw.loc", "--all"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -89,9 +84,7 @@ def test_graph_all_with_shorthand_metric(builddir):
     """Test the graph feature with shorthand metric"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", _path, "-m", "loc", "--all"]
-        )
+        result = runner.invoke(main.cli, ["--path", builddir, "graph", _path, "-m", "loc", "--all"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -99,9 +92,7 @@ def test_graph_changes(builddir):
     """Test the graph feature comparing changes"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", _path, "-m", "raw.loc", "--changes"]
-        )
+        result = runner.invoke(main.cli, ["--path", builddir, "graph", _path, "-m", "raw.loc", "--changes"])
     assert result.exit_code == 0, result.stdout
 
 
@@ -142,9 +133,7 @@ def test_graph_path(builddir):
     """Test the graph feature"""
     runner = CliRunner()
     with patch.dict("os.environ", values=PATCHED_ENV, clear=True):
-        result = runner.invoke(
-            main.cli, ["--path", builddir, "graph", "src/", "-m", "raw.loc"]
-        )
+        result = runner.invoke(main.cli, ["--path", builddir, "graph", "src/", "-m", "raw.loc"])
     assert result.exit_code == 0, result.stdout
 
 
