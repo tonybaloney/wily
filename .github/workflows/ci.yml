@@ -121,10 +121,6 @@ jobs:
             target: aarch64
             runs-on: ubuntu-latest
             manylinux: auto
-          # macOS x86_64
-          - os: macos
-            target: x86_64
-            runs-on: macos-13
           # macOS aarch64 (Apple Silicon)
           - os: macos
             target: aarch64
