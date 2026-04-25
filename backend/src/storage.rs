@@ -1111,7 +1111,7 @@ impl WilyIndex {
             .collect();
 
         // Sort by revision_date ascending (newest last)
-        matching_rows.sort_by(|a, b| a.revision_date.cmp(&b.revision_date));
+        matching_rows.sort_by_key(|a| a.revision_date);
 
         // TODO: There is a more pragmatic way to do this, using PyList::new(py, enumerables)
         let list = PyList::empty(py);
