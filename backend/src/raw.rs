@@ -225,7 +225,7 @@ fn count_logical_segment(tokens: &[TokenKind]) -> usize {
 
     // Check for colon with trailing code (e.g., `if x: pass`)
     if let Some(colon_idx) = code_tokens.iter().rposition(|&k| k == TokenKind::Colon) {
-        let has_trailing_code = code_tokens[colon_idx + 1..].iter().any(|_| true);
+        let has_trailing_code = !code_tokens[colon_idx + 1..].is_empty();
         return if has_trailing_code { 2 } else { 1 };
     }
 
