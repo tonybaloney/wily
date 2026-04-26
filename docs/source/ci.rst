@@ -68,7 +68,7 @@ Wily can be called after your tests have completed.
 
 
 GitHub Workflows
-+++++++++
+++++++++++++++++
 
 When using Wily in a Github Workflows, you need to specify to the checkout step to check out the head of the branch and not the merge commit
 

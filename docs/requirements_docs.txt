@@ -1,12 +1,3 @@
-wily
-sphinx
-sphinx-click
-click
-progress
-colorlog
-plotly
-tabulate
-dataclasses
-radon
-gitpython
-urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
+sphinx>=7,<9
+sphinx-click>=5,<7
+click>=7,<9
