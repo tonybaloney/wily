@@ -64,6 +64,7 @@ manifest-path = "backend/Cargo.toml"
 module-name = "wily.backend"
 python-source = "src"
 features = ["pyo3/generate-import-lib"]
+include = ["LICENSE"]
 
 [tool.uv]
 package = true
