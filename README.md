@@ -15,7 +15,7 @@ Wily uses git to go through each revision (commit) in a branch and run complexit
 
 ## Installation
 
-Wily can be installed via pip from Python 3.6 and above:
+Wily can be installed via pip from Python 3.10 and above:
 
 ```console
  $ pip install wily
@@ -86,7 +86,7 @@ repos:
 The first step to using `wily` is to build a wily cache with the statistics of your project. 
 
 ```default
-Usage: __main__.py build [OPTIONS] [TARGETS]...
+Usage: wily build [OPTIONS] [TARGETS]...
 
   Build the wily cache
 
@@ -94,6 +94,8 @@ Options:
   -n, --max-revisions INTEGER  The maximum number of historical commits to
                                archive
   -o, --operators TEXT         List of operators, separated by commas
+  -a, --archiver TEXT          Archiver to use, defaults to git if git repo,
+                               else filesystem
   --help                       Show this message and exit.
 ```
 
@@ -143,36 +145,31 @@ List the metrics available in the Wily operators. Each one of the metrics can be
 
 ```console
  $ wily list-metrics
-mccabe operator:
-No metrics available
-raw operator:
-╒═════════════════╤══════════════════════╤═══════════════╤══════════════════════════╕
-│                 │ Name                 │ Description   │ Type                     │
-╞═════════════════╪══════════════════════╪═══════════════╪══════════════════════════╡
-│ loc             │ Lines of Code        │ <class 'int'> │ MetricType.Informational │
-├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┤
-│ lloc            │ L Lines of Code      │ <class 'int'> │ MetricType.Informational │
-├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┤
-│ sloc            │ S Lines of Code      │ <class 'int'> │ MetricType.Informational │
-├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┤
-│ comments        │ Multi-line comments  │ <class 'int'> │ MetricType.Informational │
-├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┤
-│ multi           │ Multi lines          │ <class 'int'> │ MetricType.Informational │
-├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┤
-│ blank           │ blank lines          │ <class 'int'> │ MetricType.Informational │
-├─────────────────┼──────────────────────┼───────────────┼──────────────────────────┤
-│ single_comments │ Single comment lines │ <class 'int'> │ MetricType.Informational │
-╘═════════════════╧══════════════════════╧═══════════════╧══════════════════════════╛
 cyclomatic operator:
-No metrics available
+  complexity  Cyclomatic Complexity (float, AimLow)
 maintainability operator:
-╒══════╤═════════════════════════╤═════════════════╤══════════════════════════╕
-│      │ Name                    │ Description     │ Type                     │
-╞══════╪═════════════════════════╪═════════════════╪══════════════════════════╡
-│ rank │ Maintainability Ranking │ <class 'str'>   │ MetricType.Informational │
-├──────┼─────────────────────────┼─────────────────┼──────────────────────────┤
-│ mi   │ Maintainability Index   │ <class 'float'> │ MetricType.AimLow        │
-╘══════╧═════════════════════════╧═════════════════╧══════════════════════════╛
+  rank        Maintainability Ranking (str, Informational)
+  mi          Maintainability Index (float, AimHigh)
+raw operator:
+  loc             Lines of Code (int, Informational)
+  lloc            L Lines of Code (int, AimLow)
+  sloc            S Lines of Code (int, AimLow)
+  comments        Multi-line comments (int, AimHigh)
+  multi           Multi lines (int, Informational)
+  blank           blank lines (int, Informational)
+  single_comments Single comment lines (int, Informational)
+halstead operator:
+  h1          Unique Operators (int, AimLow)
+  h2          Unique Operands (int, AimLow)
+  N1          Number of Operators (int, AimLow)
+  N2          Number of Operands (int, AimLow)
+  vocabulary  Unique vocabulary (int, AimLow)
+  length      Length of application (int, AimLow)
+  volume      Code volume (float, AimLow)
+  difficulty  Difficulty (float, AimLow)
+  effort      Effort (float, AimLow)
+cognitive operator:
+  cognitive_complexity  Cognitive Complexity (float, AimLow)
 ```
 
 ## Configuration
@@ -189,6 +186,12 @@ archiver = git
 path = /path/to/target
 # max revisions to archive, defaults to 50
 max_revisions = 20
+# override the default cache path
+cache_path = /path/to/cache
+# enable/disable scanning of Jupyter notebooks, defaults to true
+include_ipynb = true
+# enable/disable reporting on individual notebook cells, defaults to true
+ipynb_cells = true
 ```
 
 You can also override the path to the configuration with the `--config` flag on the command-line.
@@ -197,7 +200,7 @@ You can also override the path to the configuration with the `--config` flag on 
 
 Wily will detect and scan all Python code in .ipynb files automatically. 
 
-You can disable this behaviour if you require by setting `ipynb_support = false` in the configuration.
+You can disable this behaviour if you require by setting `include_ipynb = false` in the configuration.
 You can also disable the behaviour of reporting on individual cells by setting `ipynb_cells = false`.
 
 # Credits
