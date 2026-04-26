@@ -11,10 +11,58 @@ Please note we have a code of conduct, please follow it in all your interactions
    build.
 2. Update the README.md with details of changes to the interface, this includes new environment 
    variables, exposed ports, useful file locations and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you 
+3. You may merge the Pull Request in once you have the sign-off of two other developers, or if you 
    do not have permission to do that, you may request the second reviewer to merge it for you.
+
+## Development Setup
+
+```console
+$ uv sync --all-groups
+$ maturin develop
+```
+
+## Releasing a New Version
+
+The version is defined in a single place: `backend/Cargo.toml`. The Python package version is derived automatically via maturin at build time and read at runtime using `importlib.metadata`.
+
+### Prerequisites
+
+Install [cargo-release](https://github.com/crate-ci/cargo-release):
+
+```console
+$ cargo install cargo-release
+```
+
+### Cutting a release
+
+1. **Bump the version** using `cargo-release`:
+
+   ```console
+   # For a patch release (e.g., 2.0.1 -> 2.0.2):
+   $ cargo release patch --manifest-path backend/Cargo.toml --execute
+
+   # For a minor release (e.g., 2.0.x -> 2.1.0):
+   $ cargo release minor --manifest-path backend/Cargo.toml --execute
+
+   # For a major release (e.g., 2.x.x -> 3.0.0):
+   $ cargo release major --manifest-path backend/Cargo.toml --execute
+
+   # For a pre-release (e.g., 2.0.0-alpha.2 -> 2.0.0-alpha.3):
+   $ cargo release alpha --manifest-path backend/Cargo.toml --execute
+   ```
+
+   This will:
+   - Update the version in `backend/Cargo.toml`
+   - Create a commit: `chore: release v<version>`
+   - Create a git tag: `v<version>`
+
+2. **Review** the commit and tag, then **push**:
+
+   ```console
+   $ git push && git push --tags
+   ```
+
+3. **Create a GitHub Release** from the tag. The release workflow will automatically build all wheels and publish to PyPI.
 
 ## Code of Conduct
 

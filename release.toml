@@ -1,0 +1,14 @@
+# cargo-release configuration
+# Install: cargo install cargo-release
+# Usage:   cargo release patch|minor|major|alpha|rc --execute
+#
+# This bumps the version in backend/Cargo.toml, commits, and creates a git tag.
+# The Python package version is derived automatically via maturin + importlib.metadata.
+
+[workspace]
+sign-tag = false
+tag-name = "v{{version}}"
+tag-message = "Release v{{version}}"
+pre-release-commit-message = "chore: release v{{version}}"
+publish = false
+push = false

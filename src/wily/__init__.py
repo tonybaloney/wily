@@ -40,10 +40,11 @@ A Python application for tracking, reporting on timing and complexity in tests a
 import datetime
 import logging
 import tempfile
+from importlib.metadata import version
 
 from rich.logging import RichHandler
 
-__version__ = "2.0.0a2"
+__version__ = version("wily")
 
 _, WILY_LOG_NAME = tempfile.mkstemp(suffix="wily_log")
 
