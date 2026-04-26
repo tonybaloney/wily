@@ -90,28 +90,25 @@ When using Wily in a Github Workflows, you need to specify to the checkout step 
 
       steps:
         - name: Checkout repository
-          uses: actions/checkout@v2
+          uses: actions/checkout@v4
           with:
             fetch-depth: 0
             ref: ${{ github.event.pull_request.head.ref }}
         - name: Set up Python
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v4
           with:
-            python-version: 3.10.0
+            python-version: "3.12"
         - name: Install Wily
-          run: pip install wily==1.20.0
+          run: pip install wily
         - name: Build cache and diff
           id: wily
           run: |
             wily build my_package/ tests/
             DIFF=$(wily diff my_package/ tests/ --no-detail -r origin/${{ github.event.pull_request.base.ref }})
             echo "$DIFF"
-
-            # Build multine output
-            DIFF="${DIFF//'%'/'%25'}"
-            DIFF="${DIFF//$'\n'/'%0A'}"
-            DIFF="${DIFF//$'\r'/'%0D'}"
-            echo "::set-output name=diff::$DIFF"
+            echo "diff<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$DIFF" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
         - name: Find current PR
           uses: jwalton/gh-find-current-pr@v1
           id: findPr
