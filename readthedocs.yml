@@ -1,7 +1,10 @@
+version: 2
+
+# Set the OS, Python version and other tools you might need
 build:
-    image: latest
-
-requirements_file: docs/requirements_docs.txt
-
+  os: ubuntu-24.04
+  tools:
+    python: "3.12"
 python:
-    version: 3.6
+   install:
+     - requirements: docs/requirements_docs.txt
