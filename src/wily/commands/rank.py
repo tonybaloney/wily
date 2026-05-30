@@ -99,15 +99,30 @@ def rank(
             format_date(target_revision_date),
         )
 
-        # Build lookup of metrics for target revision: {path: metric_value}
+        # Build lookup of metrics for the target revision: {path: metric_value}.
+        # Storage is delta-based (a full "seed" revision plus only the files that
+        # changed in each later revision), so the target revision on its own only
+        # contains the files touched in that single commit. To rank the full state
+        # of the project we reconstruct each file's value from the most recent row
+        # at or before the target revision's date.
         revision_data: dict[str, float | int | str] = {}
+        latest_date: dict[str, int] = {}
         for row in index:
-            if row["revision"] == target_revision_key:
-                file_path = row["path"]
-                # Get the metric value using just the metric name (not operator.metric)
-                metric_value = row.get(resolved_metric.name)
-                if metric_value is not None:
-                    revision_data[file_path] = metric_value
+            # Only rank file-level rows (skip directory/root aggregates and
+            # function/class detail rows, which otherwise pollute the table).
+            if row.get("path_type") != "file":
+                continue
+            row_date = row.get("revision_date", 0)
+            if row_date > target_revision_date:
+                continue
+            # Get the metric value using just the metric name (not operator.metric)
+            metric_value = row.get(resolved_metric.name)
+            if metric_value is None:
+                continue
+            file_path = row["path"]
+            if file_path not in latest_date or row_date >= latest_date[file_path]:
+                latest_date[file_path] = row_date
+                revision_data[file_path] = metric_value
 
         # Filter to requested path if specified
         if path is not None:
