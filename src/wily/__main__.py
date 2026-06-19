@@ -496,14 +496,11 @@ def clean(ctx, yes):
 @click.pass_context
 def list_metrics(ctx, wrap, table_style):
     """List the available metrics."""
-    config = ctx.obj["CONFIG"]
-
-    if not exists(config):
-        handle_no_cache(ctx)
 
     from wily.commands.list_metrics import list_metrics  # noqa: PLC0415
 
     list_metrics(wrap=wrap, table_style=table_style)
+
 
 
 @cli.command("setup", help=_("""Run a guided setup to build the wily cache."""))
