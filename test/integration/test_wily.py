@@ -30,6 +30,8 @@ def test_clean_no_cache(tmpdir):
 
 
 def test_list_metrics_no_cache(tmpdir):
+    """list-metrics lists static metrics and does not require a cache."""
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", tmpdir, "list-metrics"])
-    assert result.exit_code == 1, result.stdout
+    assert result.exit_code == 0, result.stdout
+    assert "cyclomatic" in result.stdout
