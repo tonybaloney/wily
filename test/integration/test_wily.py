@@ -1,4 +1,7 @@
+import os
 import pathlib
+import subprocess
+import sys
 
 from click.testing import CliRunner
 
@@ -35,3 +38,13 @@ def test_list_metrics_no_cache(tmpdir):
     result = runner.invoke(main.cli, ["--path", tmpdir, "list-metrics"])
     assert result.exit_code == 0, result.stdout
     assert "cyclomatic" in result.stdout
+
+
+def test_version_on_non_utf8_stdout():
+    """--version and --help must not crash when stdout can't encode the emoji (#265)."""
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252"}
+    env.pop("PYTHONUTF8", None)
+    for arg, expected in (("--version", b"version 2"), ("--help", b"Inspect and search")):
+        result = subprocess.run([sys.executable, "-m", "wily", arg], capture_output=True, env=env, check=False)  # noqa: S603
+        assert result.returncode == 0, result.stderr.decode("cp1252", "replace")
+        assert expected in result.stdout

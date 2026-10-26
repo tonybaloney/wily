@@ -56,7 +56,7 @@ Homepage = "https://github.com/tonybaloney/wily"
 Documentation = "https://wily.readthedocs.io/en/latest/"
 
 [project.scripts]
-wily = "wily.__main__:cli"
+wily = "wily.__main__:main"
 
 [tool.maturin]
 bindings = "pyo3"
