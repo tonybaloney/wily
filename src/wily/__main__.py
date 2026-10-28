@@ -1,5 +1,6 @@
 """Main command line."""
 
+import sys
 import traceback
 from pathlib import Path
 from sys import exit
@@ -522,9 +523,22 @@ def handle_no_cache(context):
         context.invoke(build, max_revisions=revisions, targets=paths, operators=None)
 
 
+def main():
+    """Console script entry point."""
+    # The help and version text contain an emoji, which a non-UTF-8 stream
+    # (e.g. a Windows cp1252 console or a redirected stdout) cannot encode.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            "\U0001f98a".encode(stream.encoding or "utf-8")
+        except (UnicodeEncodeError, LookupError):
+            if hasattr(stream, "reconfigure"):
+                stream.reconfigure(errors="replace")
+    cli()  # type: ignore
+
+
 if __name__ == "__main__":  # pragma: no cover
     try:
-        cli()  # type: ignore
+        main()
     except Exception:
         logger.error("Oh no, Wily crashed! See %s for information.", WILY_LOG_NAME)
         logger.info(
