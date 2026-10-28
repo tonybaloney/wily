@@ -1,8 +1,74 @@
+import pathlib
+
+import pytest
 from click.testing import CliRunner
 from git.repo.base import Repo
 from git.util import Actor
 
 import wily.__main__ as main
+
+
+@pytest.fixture
+def multifile_builddir(tmpdir):
+    """
+    A wily cache for a repo where one file is only present in the seed revision.
+
+    ``src/stable.py`` is added in the first (seed) commit and never touched
+    again, while ``src/churn.py`` is modified in a later commit. This exercises
+    the delta-based storage: the latest revision only contains ``churn.py``.
+    """
+    repo = Repo.init(path=tmpdir)
+    tmppath = pathlib.Path(tmpdir)
+    (tmppath / "src").mkdir()
+    stable = tmppath / "src" / "stable.py"
+    churn = tmppath / "src" / "churn.py"
+
+    author = Actor("An author", "author@example.com")
+    committer = Actor("A committer", "committer@example.com")
+
+    stable.write_text("def stable():\n    return 1\n")
+    churn.write_text("def churn():\n    return 1\n")
+    repo.index.add([str(stable), str(churn)])
+    repo.index.commit(
+        "seed",
+        author=author,
+        committer=committer,
+        author_date="Thu, 07 Apr 2019 22:13:13 +0200",
+        commit_date="Thu, 07 Apr 2019 22:13:13 +0200",
+    )
+
+    # Only modify churn.py in the second (latest) revision.
+    churn.write_text("def churn():\n    a = 1\n    if a:\n        return a\n    return 0\n")
+    repo.index.add([str(churn)])
+    repo.index.commit(
+        "change churn",
+        author=author,
+        committer=committer,
+        author_date="Mon, 10 Apr 2019 22:13:13 +0200",
+        commit_date="Mon, 10 Apr 2019 22:13:13 +0200",
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--debug", "--path", tmpdir, "build", str(tmppath / "src")])
+    assert result.exit_code == 0, result.stdout
+
+    yield tmpdir
+
+    runner.invoke(main.cli, ["--path", tmpdir, "clean", "-y"])
+    repo.close()
+
+
+def test_rank_latest_includes_unchanged_files(multifile_builddir):
+    """Rank at the latest revision must include files unchanged since the seed (#262)."""
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli, ["--path", multifile_builddir, "rank", "src/", "raw.loc", "--no-wrap"]
+    )
+    assert result.exit_code == 0, result.stdout
+    # churn.py changed in the last commit; stable.py only exists in the seed.
+    # Both must appear when ranking the latest revision.
+    assert "churn.py" in result.stdout, result.stdout
+    assert "stable.py" in result.stdout, result.stdout
 
 
 def test_rank_no_cache(tmpdir):
