@@ -7,6 +7,7 @@ Many of the tests will depend on a "builddir" fixture which is a compiled wily c
 TODO : Test build + build with extra operator
 """
 
+import os
 import pathlib
 from unittest.mock import patch
 
@@ -261,6 +262,108 @@ def test_build_archiver(gitdir, archiver, cache_path):
         assert result.exit_code == 0, result.stdout
         cache_path = pathlib.Path(cache_path)
         assert cache_path.exists()
+
+
+@pytest.mark.parametrize("targets", [["src"], [], ["src", "src/nested"]], ids=["target", "no-target", "overlapping-targets"])
+def test_build_filesystem_archiver(tmpdir, cache_path, targets):
+    """Test that the filesystem archiver indexes Python files recursively."""
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+    (srcpath / "nested").mkdir()
+
+    with open(srcpath / "test.py", "w") as test_txt:
+        test_txt.write("import abc")
+    with open(srcpath / "nested" / "other.py", "w") as test_txt:
+        test_txt.write("foo = 1")
+    with open(srcpath / "README.md", "w") as readme:
+        readme.write("Documentation")
+
+    # Without a target, the root given by --path is indexed, not the working directory.
+    # Overlapping targets must not index a file twice.
+    runner = CliRunner()
+    result = runner.invoke(
+        main.cli,
+        ["--path", tmpdir, "--cache", cache_path, "build", *(str(tmppath / target) for target in targets), "-a", "filesystem"],
+    )
+    assert result.exit_code == 0, result.stdout
+
+    parquet_path = pathlib.Path(cache_path) / "filesystem" / "metrics.parquet"
+    assert parquet_path.exists()
+
+    with WilyIndex(str(parquet_path), ["raw"]) as wily_index:
+        rows = list(wily_index)
+        file_paths = {row["path"] for row in rows if row["path_type"] == "file"}
+        assert file_paths == {"src/test.py", "src/nested/other.py"}
+
+        root_row = wily_index[""][0]
+        assert root_row["path_type"] == "root"
+        assert root_row["loc"] == 2
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="requires os.mkfifo")
+def test_build_filesystem_archiver_skips_unsafe_files(tmpdir, tmp_path_factory, cache_path):
+    """Test that the filesystem archiver skips files it cannot safely read."""
+    tmppath = pathlib.Path(tmpdir)
+    srcpath = tmppath / "src"
+    srcpath.mkdir()
+
+    with open(srcpath / "test.py", "w") as test_txt:
+        test_txt.write("import abc")
+    with open(srcpath / "big.py", "w") as test_txt:
+        test_txt.write("foo = 1\n" * 10)
+    # A FIFO named like a source file would block the analyzer forever.
+    os.mkfifo(srcpath / "pipe.py")
+    locked = srcpath / "locked.py"
+    locked.write_text("bar = 2")
+    locked.chmod(0)
+    # A symlink to a file outside the root must not pull that file in.
+    outside = tmp_path_factory.mktemp("outside") / "outside.py"
+    outside.write_text("baz = 3")
+    os.symlink(outside, srcpath / "link.py")
+
+    runner = CliRunner()
+    with patch("wily.archivers.filesystem.MAX_FILE_SIZE", 50):
+        result = runner.invoke(
+            main.cli,
+            [
+                "--path",
+                tmpdir,
+                "--cache",
+                cache_path,
+                "build",
+                str(srcpath),
+                "-a",
+                "filesystem",
+            ],
+        )
+    assert result.exit_code == 0, result.stdout
+
+    parquet_path = pathlib.Path(cache_path) / "filesystem" / "metrics.parquet"
+    with WilyIndex(str(parquet_path), ["raw"]) as wily_index:
+        file_paths = {row["path"] for row in wily_index if row["path_type"] == "file"}
+        expected = {"src/test.py"}
+        if os.access(locked, os.R_OK):
+            # Permission bits do not apply (e.g. running as root).
+            expected.add("src/locked.py")
+        assert file_paths == expected
+
+
+def test_build_filesystem_archiver_too_many_files(tmpdir, cache_path):
+    """Test that the filesystem archiver refuses to index an oversized tree."""
+    tmppath = pathlib.Path(tmpdir)
+    for i in range(3):
+        with open(tmppath / f"test{i}.py", "w") as test_txt:
+            test_txt.write("foo = 1")
+
+    runner = CliRunner()
+    with patch("wily.archivers.filesystem.MAX_FILES", 2):
+        result = runner.invoke(
+            main.cli,
+            ["--path", tmpdir, "--cache", cache_path, "build", "-a", "filesystem"],
+        )
+    assert result.exit_code == 1, result.stdout
+    assert not (pathlib.Path(cache_path) / "filesystem" / "metrics.parquet").exists()
 
 
 def test_build_src_directory(tmpdir, cache_path):
