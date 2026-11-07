@@ -13,7 +13,7 @@ from wily.config import load as load_config
 from wily.defaults import DEFAULT_CONFIG_PATH, DEFAULT_TABLE_STYLE
 from wily.helper.custom_enums import ReportFormat
 from wily.lang import _
-from wily.operators import resolve_operators
+from wily.operators import resolve_metric, resolve_operator, resolve_operators
 
 version_text = _("Version: ") + __version__ + "\n\n"
 help_header = version_text + _(
@@ -36,6 +36,63 @@ You can also graph specific metrics in a browser with:
 
 """
 )
+
+
+def _check_metric_name(name: str, *, require_operator: bool = False) -> None:
+    """
+    Check a single metric name as given on the command line.
+
+    :param name: The metric name, either ``operator.metric`` or a bare ``metric``.
+    :param require_operator: Reject bare metric names (the ``diff`` command needs the operator prefix).
+    :raises ValueError: With a user-facing message if the name is not valid.
+    """
+    if not name:
+        raise ValueError(_("Empty metric name."))
+    if name.startswith("-"):
+        raise ValueError(_("'{name}' is not a metric name. Did you forget to give this option a value?").format(name=name))
+    if name.count(".") > 1:
+        raise ValueError(_("'{name}' is not a valid metric name; use the form operator.metric, e.g. raw.loc.").format(name=name))
+    operator_name, has_operator, _metric = name.partition(".")
+    if not has_operator and require_operator:
+        raise ValueError(_("'{name}' must be given as operator.metric, e.g. raw.loc.").format(name=name))
+    if has_operator:
+        try:
+            resolve_operator(operator_name)
+        except ValueError:
+            raise ValueError(_("Unknown operator '{operator}' in metric '{name}'.").format(operator=operator_name, name=name)) from None
+    try:
+        resolve_metric(name)
+    except ValueError:
+        raise ValueError(_("Unknown metric '{name}'.").format(name=name)) from None
+
+
+def _validate_metrics(*, comma_separated: bool = False, require_operator: bool = False):
+    """
+    Build a click callback that validates metric names before the command runs.
+
+    The callback returns the value unchanged, so commands receive exactly what they did before.
+
+    :param comma_separated: The option value is a comma-separated list of metric names.
+    :param require_operator: Reject bare metric names without an operator prefix.
+    :return: A click parameter callback.
+    """
+
+    def callback(ctx: click.Context, param: click.Parameter, value):
+        # Leave absent values alone, and an empty optional value (e.g. ``diff -m ""``) keeps its old meaning.
+        if value is None or (value == "" and not param.required):
+            return value
+        if isinstance(value, str):
+            names = value.split(",") if comma_separated else [value]
+        else:
+            names = list(value)
+        for name in names:
+            try:
+                _check_metric_name(name, require_operator=require_operator)
+            except ValueError as e:
+                raise click.BadParameter(f"{e} " + _("Run 'wily list-metrics' to see the available metrics."), ctx=ctx, param=param) from None
+        return value
+
+    return callback
 
 
 @click.group(help=help_header)
@@ -193,7 +250,7 @@ def index(ctx, message, wrap, table_style):
     )
 )
 @click.argument("path", type=click.Path(resolve_path=False), required=False)
-@click.argument("metric", required=False, default="maintainability.mi")
+@click.argument("metric", required=False, default="maintainability.mi", callback=_validate_metrics())
 @click.option("-r", "--revision", help=_("Compare against specific revision"), type=click.STRING)
 @click.option("-l", "--limit", help=_("Limit the number of results shown"), type=click.INT)
 @click.option(
@@ -237,7 +294,7 @@ def rank(ctx, path, metric, revision, limit, desc, wrap, table_style):
 
 @cli.command(help=_("""Show metrics for a given file."""))
 @click.argument("file", type=click.Path(resolve_path=False))
-@click.argument("metrics", nargs=-1, required=False)
+@click.argument("metrics", nargs=-1, required=False, callback=_validate_metrics())
 @click.option("-n", "--number", help="Number of items to show", type=click.INT)
 @click.option("-m", "--message/--no-message", default=False, help=_("Include revision message"))
 @click.option(
@@ -308,6 +365,7 @@ def report(ctx, file, metrics: tuple[str, ...] | None, number, message, format, 
     "-m",
     "--metrics",
     default=None,
+    callback=_validate_metrics(comma_separated=True, require_operator=True),
     help=_("comma-separated list of metrics, see list-metrics for choices"),
 )
 @click.option(
@@ -402,6 +460,7 @@ def diff(ctx, files, metrics, all, detail, wrap, table_style, json, revision):
     "-m",
     "--metrics",
     required=True,
+    callback=_validate_metrics(comma_separated=True),
     help=_("Comma-separated list of metrics, see list-metrics for choices"),
 )
 @click.option(
@@ -409,7 +468,7 @@ def diff(ctx, files, metrics, all, detail, wrap, table_style, json, revision):
     "--output",
     help=_("Output report to specified HTML path, e.g. reports/out.html"),
 )
-@click.option("-x", "--x-axis", help=_("Metric to use on x-axis, defaults to history."))
+@click.option("-x", "--x-axis", callback=_validate_metrics(), help=_("Metric to use on x-axis, defaults to history."))
 @click.option("-a/-c", "--changes/--all", default=True, help=_("All commits or changes only"))
 @click.option(
     "-s/-i",
