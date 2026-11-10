@@ -19,7 +19,7 @@ You can provide a second metric which will be used to control the size of the bu
 
 .. code-block:: none
 
-   $ wily graph example.py loc,complexity
+   $ wily graph example.py -m loc,complexity
 
 .. image:: ../_static/two_metric_graph.png
    :align: center
@@ -43,28 +43,28 @@ If one or more of the provided paths is a directory, you can use the ``--aggrega
 
 .. code-block:: none
 
-   $ wily tests/ -m loc --aggregate
+   $ wily graph tests/ -m loc --aggregate
 
 By default, ``wily graph`` will only plot revisions where metric values have changed. To show all revisions, use the ``--all`` option.
 
 .. code-block:: none
 
-   $ wily tests/ -m loc --all
+   $ wily graph tests/ -m loc --all
 
 By default, ``wily graph`` will create a file, ``wily-report.html`` in the current directory and open it using the browser configured in the $BROWSER environment variable (the default on the OS).
 To save the output to a specific HTML file and not open it, provide the ``-o`` flag and the name of the output file.
 
 .. code-block:: none
 
-   $ wily report example.py -m loc -o example.html
+   $ wily graph example.py -m loc -o example.html
 
 By default, ``wily graph`` will create an HTML file containing all the JS necessary to render the graph.
-To create a standalone plotly.min.js file in the same directory as the HTML file instead, pass the ``--shared-js`´ option.
-To point the HTML file to a CDN hosted plotly.min.js instead, pass the ``--cdn-js`´ option.
+To create a standalone plotly.min.js file in the same directory as the HTML file instead, pass the ``--shared-js`` option.
+To point the HTML file to a CDN hosted plotly.min.js instead, pass the ``--cdn-js`` option.
 
 .. code-block:: none
 
-   $ wily report example.py -m loc --shared=js
+   $ wily graph example.py -m loc --shared-js
 
 
 Command Line Usage

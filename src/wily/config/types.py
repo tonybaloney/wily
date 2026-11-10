@@ -1,10 +1,10 @@
 """Define a standard data class for Wily Configuration."""
 
-
 import logging
 import pathlib
+from collections.abc import Iterable
 from dataclasses import InitVar, dataclass, field
-from typing import Any, Iterable, List, Optional
+from typing import Any
 
 from wily.helper import generate_cache_path
 
@@ -25,7 +25,7 @@ class WilyConfig:
     max_revisions: int
     include_ipynb: bool = True
     ipynb_cells: bool = True
-    targets: Optional[List[str]] = None
+    targets: list[str] | None = None
     checkout_options: dict = field(default_factory=dict)
     _cache_path: InitVar[str] = ""
 

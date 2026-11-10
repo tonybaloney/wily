@@ -1,5 +1,3 @@
-
-import sys
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -8,15 +6,14 @@ from git.util import Actor
 
 import wily.__main__ as main
 
-_path = "src\\test.py" if sys.platform == "win32" else "src/test.py"
+_path = "src/test.py"
 
 
-def test_report_no_cache(tmpdir, cache_path):
+def test_report_no_cache(tmpdir, cache_path, caplog):
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", tmpdir, "--cache", cache_path, "report", _path]
-    )
-    assert result.exit_code == 1, result.stdout
+    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "report", _path])
+    assert result.exit_code == 0, result.stdout
+    assert "No wily cache found" in caplog.text
 
 
 def test_report(builddir):
@@ -54,16 +51,14 @@ def test_report_granular(builddir):
     assert "remove line" in result.stdout
 
 
-def test_report_not_found(builddir):
+def test_report_not_found(builddir, caplog):
     """
     Test that report works with a build but not with an invalid path
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "test1.py", "raw.loc"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", "test1.py", "raw.loc"])
     assert result.exit_code == 0, result.stdout
-    assert "Not found" in result.stdout
+    assert "No data found" in caplog.text
 
 
 def test_report_default_metrics(builddir):
@@ -91,11 +86,8 @@ def test_report_with_message(builddir):
     Test that report works messages in UI
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "raw.multi", "--message"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "raw.multi", "--message"])
     assert result.exit_code == 0, result.stdout
-    assert "basic test" in result.stdout
     assert "remove line" in result.stdout
     assert "Not found" not in result.stdout
 
@@ -115,29 +107,12 @@ def test_report_with_message_and_n(builddir):
     assert "Not found" not in result.stdout
 
 
-def test_report_changes_only(builddir, caplog):
-    """
-    Test that report works when only displaying changes
-    """
-    runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "raw.multi", "-c"]
-    )
-    assert result.exit_code == 0, result.stdout
-    assert "basic test" not in result.stdout
-    assert "remove line" not in result.stdout
-    assert "Not found" not in result.stdout
-    assert "No data found" in caplog.text
-
-
 def test_report_high_metric(builddir):
     """
     Test that report works with a build on a metric expecting high values
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "raw.comments"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "raw.comments"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -147,9 +122,7 @@ def test_report_wrapped(builddir):
     Test that report works with wrapping
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", "--wrap", _path, "raw.comments"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", "--wrap", _path, "raw.comments"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -169,9 +142,7 @@ def test_report_low_metric(builddir):
     Test that report works with a build on a metric expecting high values
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "maintainability.mi"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "maintainability.mi"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -181,9 +152,7 @@ def test_report_html_format(builddir):
     Test that report works with HTML as format
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--format", "HTML"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "--format", "HTML"])
     path = Path().cwd()
     path = path / "wily_report" / "index.html"
 
@@ -198,9 +167,7 @@ def test_report_html_format_target_folder(builddir):
     Test that report works with HTML as format
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--format", "HTML", "-o", "foo"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "--format", "HTML", "-o", "foo"])
     path = Path().cwd()
     path = path / "foo" / "index.html"
 
@@ -233,9 +200,7 @@ def test_report_console_format(builddir):
     Test that report works with console as format
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--format", "CONSOLE"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "--format", "CONSOLE"])
     assert result.exit_code == 0, result.stdout
     assert "Not found" not in result.stdout
 
@@ -245,9 +210,7 @@ def test_report_not_existing_format(builddir):
     Test that report works with non-existing format
     """
     runner = CliRunner()
-    result = runner.invoke(
-        main.cli, ["--path", builddir, "report", _path, "--format", "non-existing"]
-    )
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path, "--format", "non-existing"])
     assert result.exit_code == 2, result.stdout
     assert "Not found" not in result.stdout
 

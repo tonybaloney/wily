@@ -4,26 +4,41 @@ Archivers module.
 Specifies a standard interface for finding revisions (versions) of a path and switching to them.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, TypedDict, TypeVar
 
 from wily.config.types import WilyConfig
 
 
+class RevisionInfo(TypedDict):
+    """Revision information structure."""
+
+    key: str
+    author_name: str | None
+    author_email: str | None
+    date: int
+    message: str
+    added_files: list[str]
+    modified_files: list[str]
+    deleted_files: list[str]
+
+
+# TODO: This is defunct. Remove.
 @dataclass
 class Revision:
     """Represents a revision in the archiver."""
 
     key: str
-    author_name: Optional[str]
-    author_email: Optional[str]
+    author_name: str | None
+    author_email: str | None
     date: int
     message: str
-    tracked_files: List[str]
-    tracked_dirs: List[str]
-    added_files: List[str]
-    modified_files: List[str]
-    deleted_files: List[str]
+    tracked_files: list[str]
+    tracked_dirs: list[str]
+    added_files: list[str]
+    modified_files: list[str]
+    deleted_files: list[str]
 
 
 class BaseArchiver:
@@ -35,7 +50,7 @@ class BaseArchiver:
         """Initialise the archiver."""
         ...
 
-    def revisions(self, path: str, max_revisions: int) -> List[Revision]:
+    def revisions(self, path: str, max_revisions: int) -> Iterable[RevisionInfo]:
         """
         Get the list of revisions.
 
@@ -46,7 +61,7 @@ class BaseArchiver:
         """
         ...
 
-    def checkout(self, revision: Revision, options: Dict[Any, Any]) -> None:
+    def checkout(self, revision: RevisionInfo, options: dict[Any, Any]) -> None:
         """
         Checkout a specific revision.
 
@@ -59,7 +74,7 @@ class BaseArchiver:
         """Clean up any state if processing completed/failed."""
         pass
 
-    def find(self, search: str) -> Revision:
+    def find(self, search: str) -> RevisionInfo:
         """
         Search a string and return a single revision.
 
@@ -69,8 +84,8 @@ class BaseArchiver:
         ...
 
 
-from wily.archivers.filesystem import FilesystemArchiver
-from wily.archivers.git import GitArchiver
+from wily.archivers.filesystem import FilesystemArchiver  # noqa: E402
+from wily.archivers.git import GitArchiver  # noqa: E402
 
 """Type for an Archiver"""
 
@@ -81,10 +96,10 @@ class Archiver(Generic[T]):
     """Holder for archivers."""
 
     name: str
-    archiver_cls: Type[T]
+    archiver_cls: type[T]
     description: str
 
-    def __init__(self, name: str, archiver_cls: Type[T], description: str):
+    def __init__(self, name: str, archiver_cls: type[T], description: str):
         """Initialise the archiver."""
         self.name = name
         self.archiver_cls = archiver_cls
@@ -96,9 +111,7 @@ class Archiver(Generic[T]):
 
 
 """Git Archiver defined in `wily.archivers.git`"""
-ARCHIVER_GIT = Archiver(
-    name="git", archiver_cls=GitArchiver, description="Git archiver"
-)
+ARCHIVER_GIT = Archiver(name="git", archiver_cls=GitArchiver, description="Git archiver")
 
 """Filesystem archiver"""
 ARCHIVER_FILESYSTEM = Archiver(
@@ -107,7 +120,7 @@ ARCHIVER_FILESYSTEM = Archiver(
     description="Filesystem archiver",
 )
 
-_ARCHIVERS: List[Archiver] = [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]
+_ARCHIVERS: list[Archiver] = [ARCHIVER_GIT, ARCHIVER_FILESYSTEM]
 """Set of all available archivers"""
 ALL_ARCHIVERS = {a.name: a for a in _ARCHIVERS}
 

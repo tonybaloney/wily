@@ -15,9 +15,7 @@ To show a report, simply give the name or path to the file you want to report on
 
   $ wily report example.py
 
-By default, wily will show the default metrics (typically Lines-of-code, cyclomatic complexity and maintainability index).
-
-To change the metrics, provide the metric names (run ``wily list-metrics`` for a list) as arguments.
+By default, wily will show all available metrics. You can specify which metrics to display by providing metric names as arguments (run ``wily list-metrics`` for a list).
 
 .. code-block:: none
 

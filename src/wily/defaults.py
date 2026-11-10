@@ -1,7 +1,7 @@
 """Default values."""
 
-""" Default table style in console. See tabulate docs for more. """
-DEFAULT_GRID_STYLE = "fancy_grid"
+""" Default table box style. See rich.box for available styles. """
+DEFAULT_TABLE_STYLE = "ROUNDED"
 
 """ The name of the default archiver """
 DEFAULT_ARCHIVER = "git"

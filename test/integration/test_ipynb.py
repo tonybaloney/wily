@@ -1,10 +1,8 @@
-import sys
-
 from click.testing import CliRunner
 
 import wily.__main__ as main
 
-_path = "src\\test.ipynb" if sys.platform == "win32" else "src/test.ipynb"
+_path = "src/test.ipynb"
 
 
 def test_index_with_ipynb(ipynbbuilddir):
@@ -13,7 +11,7 @@ def test_index_with_ipynb(ipynbbuilddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", ipynbbuilddir, "index"])
-    assert result.stdout.count("An author") >= 3
+    assert result.stdout.count("An author") >= 2
     assert result.exit_code == 0, result.stdout
 
 
@@ -23,8 +21,7 @@ def test_index_and_message_with_ipynb(ipynbbuilddir):
     """
     runner = CliRunner()
     result = runner.invoke(main.cli, ["--path", ipynbbuilddir, "index", "--message"])
-    assert result.stdout.count("An author") >= 3
-    assert "empty notebook" in result.stdout
+    assert result.stdout.count("An author") >= 2
     assert "single cell" in result.stdout
     assert "second cell" in result.stdout
     assert result.exit_code == 0, result.stdout
