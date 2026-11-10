@@ -1,9 +1,11 @@
+
 """
 Report command.
 
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+from html import escape
 
 import pathlib
 from collections.abc import Iterable
