@@ -1,9 +1,11 @@
+
 """
 Report command.
 
 The report command gives a table of metrics for a specified list of files.
 Will compare the values between revisions and highlight changes in green/red.
 """
+from html import escape
 from pathlib import Path
 from shutil import copytree
 from string import Template
@@ -175,16 +177,43 @@ def report(
         templates_dir = (Path(__file__).parents[1] / "templates").resolve()
         report_template = Template((templates_dir / "report_template.html").read_text())
 
-        table_headers = "".join([f"<th>{header}</th>" for header in headers])
+        # Escape headers so they cannot inject HTML.
+        table_headers = "".join(
+            f"<th>{escape(str(header))}</th>" for header in headers
+        )
+
         table_content = ""
         for line in data[::-1]:
             table_content += "<tr>"
             for element in line:
-                element = element.replace("\u001b[32m", "<span class='green-color'>")
-                element = element.replace("\u001b[31m", "<span class='red-color'>")
-                element = element.replace("\u001b[33m", "<span class='orange-color'>")
-                element = element.replace("\u001b[0m", "</span>")
-                table_content += f"<td>{element}</td>"
+                # Escape untrusted text while preserving Wily's intended
+                # colour formatting for ANSI-highlighted metric deltas.
+                parts = element.split("\u001b[")
+                escaped_element = escape(parts[0])
+
+                for part in parts[1:]:
+                    code, separator, text = part.partition("m")
+
+                    if not separator:
+                        escaped_element += escape("\u001b[" + part)
+                        continue
+
+                    color_class = {
+                        "32": "green-color",
+                        "31": "red-color",
+                        "33": "orange-color",
+                    }.get(code)
+
+                    if color_class:
+                        escaped_element += (
+                            f"<span class='{color_class}'>{escape(text)}</span>"
+                        )
+                    elif code == "0":
+                        escaped_element += escape(text)
+                    else:
+                        escaped_element += escape("\u001b[" + part)
+
+                table_content += f"<td>{escaped_element}</td>"
             table_content += "</tr>"
 
         rendered_report = report_template.safe_substitute(

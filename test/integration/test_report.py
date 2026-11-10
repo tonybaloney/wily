@@ -1,7 +1,10 @@
+
 import sys
 from pathlib import Path
 
 from click.testing import CliRunner
+from git.repo.base import Repo
+from git.util import Actor
 
 import wily.__main__ as main
 
@@ -247,3 +250,62 @@ def test_report_not_existing_format(builddir):
     )
     assert result.exit_code == 2, result.stdout
     assert "Not found" not in result.stdout
+
+
+def test_report_html_escapes_commit_message(builddir):
+    """
+    Test that HTML reports escape HTML tags in commit messages.
+    """
+    repo = Repo(builddir)
+    test_file = Path(builddir) / _path
+
+    with test_file.open("a") as source_file:
+        source_file.write("\n# HTML escaping regression test\n")
+
+    repo.index.add([str(test_file)])
+
+    author = Actor("Test Author", "test@example.com")
+    repo.index.commit(
+        "<b>HTML_TEST</b>",
+        author=author,
+        committer=author,
+    )
+    repo.close()
+
+    runner = CliRunner()
+
+    build_result = runner.invoke(
+        main.cli,
+        ["--path", builddir, "build", str(Path(builddir) / "src")],
+    )
+    assert build_result.exit_code == 0, build_result.output
+
+    index_result = runner.invoke(
+        main.cli, ["--path", builddir, "index"]
+    )
+    assert index_result.exit_code == 0, index_result.output
+
+    report_path = Path(builddir) / "report.html"
+
+    result = runner.invoke(
+        main.cli,
+        [
+            "--path",
+            builddir,
+            "report",
+            _path,
+            "--message",
+            "--format",
+            "HTML",
+            "-o",
+            str(report_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert report_path.exists()
+
+    html_content = report_path.read_text()
+
+    assert "&lt;b&gt;HTML_TEST&lt;/b&gt;" in html_content
+    assert "<b>HTML_TEST</b>" not in html_content
