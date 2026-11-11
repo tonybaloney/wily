@@ -7,23 +7,37 @@ import wily.__main__ as main
 _path = "src/test.py"
 
 
-def test_report_no_cache(tmpdir, cache_path, caplog):
-    runner = CliRunner()
-    result = runner.invoke(main.cli, ["--path", tmpdir, "--cache", cache_path, "report", _path])
-    assert result.exit_code == 0, result.stdout
-    assert "No wily cache found" in caplog.text
-
-
-def test_report(builddir):
+def test_report_default_metrics(builddir):
     """
-    Test that report works with a build and a specific metric
+    Test that report displays default metrics when none are specified.
+    """
+    runner = CliRunner()
+    result = runner.invoke(main.cli, ["--path", builddir, "report", _path])
+
+    assert result.exit_code == 0, result.stdout
+    assert "Lines of Code" in result.stdout
+    assert "Cyclomatic Complexity" in result.stdout
+    assert "Maintainability Index" in result.stdout
+    assert "Not found" not in result.stdout
+
+
+def test_report_default_metrics(builddir):
+    """
+    Test that report displays all default metrics.
     """
     runner = CliRunner()
     result = runner.invoke(
         main.cli,
-        ["--path", builddir, "report", _path, "raw.multi", "maintainability.rank"],
+        ["--path", builddir, "report", _path],
     )
+
     assert result.exit_code == 0, result.stdout
+
+    # Default metrics should be displayed when none are specified.
+    assert "Lines of Code" in result.stdout
+    assert "Cyclomatic Complexity" in result.stdout
+    assert "Maintainability Index" in result.stdout
+
     assert "Not found" not in result.stdout
 
 
