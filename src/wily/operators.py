@@ -221,6 +221,8 @@ def resolve_metric(metric: str) -> Metric:
 @lru_cache(maxsize=128)
 def resolve_metric_as_tuple(metric: str) -> tuple[Operator, Metric]:
     """Resolve metric key to a given target."""
+    if metric.count(".") > 1:
+        raise ValueError(f"Metric {metric} not recognised.")
     if "." in metric:
         _, metric = metric.split(".")
 
