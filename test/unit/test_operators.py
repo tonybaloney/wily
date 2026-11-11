@@ -47,3 +47,8 @@ def test_resolve_cognitive_metric_qualified():
 def test_resolve_short_metric():
     metric = wily.operators.resolve_metric("loc")
     assert metric.name == "loc"
+
+
+def test_resolve_metric_with_extra_dots():
+    with pytest.raises(ValueError, match="not recognised"):
+        wily.operators.resolve_metric("raw.loc.extra")
