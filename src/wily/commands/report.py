@@ -55,11 +55,16 @@ def report(
     :param wrap: Wrap output
     :param table_style: Table box style
     """
-    if metrics is None:
+    if not metrics:
         resolved_metrics = ALL_METRICS
     else:
         metrics = sorted(set(metrics))
-        resolved_metrics = [resolve_metric_as_tuple(metric_name) for metric_name in metrics]
+        resolved_metrics = [
+        resolve_metric_as_tuple(metric_name)
+        for metric_name in metrics
+    ]
+
+    logger.debug("Running report command")
 
     logger.debug("Running report command")
 
